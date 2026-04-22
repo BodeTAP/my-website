@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Resend from "next-auth/providers/resend";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
@@ -9,10 +10,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/admin/login",
-    error: "/admin/login",
+    signIn: "/portal/login",
+    error: "/portal/login",
   },
   providers: [
+    Google,
     Credentials({
       name: "credentials",
       credentials: {
@@ -43,10 +45,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account }) {
+      // Auto-create Client record for first-time Google sign-ins
+      if (account?.provider === "google" && user.id) {
+        const existing = await prisma.client.findUnique({ where: { userId: user.id } });
+        if (!existing) {
+          await prisma.client.create({
+            data: {
+              userId: user.id,
+              businessName: user.name ?? "Klien Baru",
+            },
+          });
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
         token.id = user.id;
+        token.role = (user as { role?: string }).role;
+      }
+      // PrismaAdapter may not include custom fields in OAuth user object — fetch from DB on first sign-in
+      if (account && !token.role && token.id) {
+        const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } });
+        token.role = dbUser?.role;
       }
       return token;
     },
