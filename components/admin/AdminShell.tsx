@@ -5,16 +5,17 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X,
+  Receipt, MessageSquare, LogOut, Menu, X, Globe,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Artikel",   href: "/admin/articles", icon: FileText },
-  { label: "Leads",     href: "/admin/leads",    icon: Users },
-  { label: "Proyek",    href: "/admin/projects", icon: Briefcase },
-  { label: "Invoice",   href: "/admin/invoices", icon: Receipt },
-  { label: "Tiket",     href: "/admin/tickets",  icon: MessageSquare },
+  { label: "Dashboard",   href: "/admin",            icon: LayoutDashboard },
+  { label: "Artikel",     href: "/admin/articles",   icon: FileText },
+  { label: "Portofolio",  href: "/admin/portfolio",  icon: Globe },
+  { label: "Leads",       href: "/admin/leads",      icon: Users },
+  { label: "Proyek",      href: "/admin/projects",   icon: Briefcase },
+  { label: "Invoice",     href: "/admin/invoices",   icon: Receipt },
+  { label: "Tiket",       href: "/admin/tickets",    icon: MessageSquare },
 ];
 
 const Logo = () => (
