@@ -14,6 +14,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Klien, nomor invoice, dan jumlah wajib diisi." }, { status: 400 });
   }
 
+  // Only allow alphanumeric, hyphens, and dots — blocks any special chars in headers/PDF
+  if (!/^[A-Z0-9\-\.]{3,30}$/i.test(invoiceNo.trim())) {
+    return NextResponse.json({ error: "Nomor invoice hanya boleh mengandung huruf, angka, dan tanda hubung." }, { status: 400 });
+  }
+
   const existing = await prisma.invoice.findUnique({ where: { invoiceNo: invoiceNo.trim() } });
   if (existing) {
     return NextResponse.json({ error: "Nomor invoice sudah digunakan." }, { status: 409 });

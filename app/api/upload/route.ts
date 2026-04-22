@@ -13,7 +13,14 @@ export async function POST(req: Request) {
 
   if (!file) return NextResponse.json({ error: "File tidak ditemukan." }, { status: 400 });
 
-  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+  // SVG excluded: can contain embedded JavaScript, causing XSS when accessed directly
+  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const extMap: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png":  "png",
+    "image/webp": "webp",
+    "image/gif":  "gif",
+  };
   if (!allowed.includes(file.type)) {
     return NextResponse.json({ error: "Format file tidak didukung. Gunakan JPG, PNG, WebP, atau GIF." }, { status: 400 });
   }
@@ -22,7 +29,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Ukuran file maksimal 5MB." }, { status: 400 });
   }
 
-  const ext = file.name.split(".").pop() ?? "jpg";
+  // Use MIME-derived extension, never trust user-supplied filename
+  const ext = extMap[file.type];
   const filename = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   const blob = await put(filename, file, { access: "public" });
