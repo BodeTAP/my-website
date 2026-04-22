@@ -8,38 +8,24 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Query domain diperlukan" }, { status: 400 });
   }
 
-  // Normalize domain: jika tidak ada ekstensi, tambahkan .com
   const domain = q.includes(".") ? q.toLowerCase() : `${q.toLowerCase()}.com`;
 
   try {
-    const apiKey = process.env.DOMAINR_API_KEY;
+    // RDAP — protokol resmi ICANN, gratis, tanpa API key
+    const res = await fetch(`https://rdap.org/domain/${encodeURIComponent(domain)}`, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 60 },
+    });
 
-    if (!apiKey) {
-      // Fallback simulasi jika API key belum diisi (untuk development)
-      const available = !["google", "facebook", "youtube", "tokopedia"].some((d) =>
-        domain.includes(d)
-      );
-      return NextResponse.json({ domain, available });
+    if (res.status === 404) {
+      return NextResponse.json({ domain, available: true });
     }
 
-    const res = await fetch(
-      `https://domainr.p.rapidapi.com/v2/status?domain=${encodeURIComponent(domain)}`,
-      {
-        headers: {
-          "X-RapidAPI-Key": apiKey,
-          "X-RapidAPI-Host": "domainr.p.rapidapi.com",
-        },
-        next: { revalidate: 60 },
-      }
-    );
+    if (res.ok) {
+      return NextResponse.json({ domain, available: false });
+    }
 
-    if (!res.ok) throw new Error("Gagal mengecek domain dari API");
-
-    const data = await res.json();
-    const statusStr: string = data?.status?.[0]?.status ?? "";
-    const available = statusStr.includes("undelegated") || statusStr.includes("inactive") || statusStr === "";
-
-    return NextResponse.json({ domain, available });
+    throw new Error(`RDAP status ${res.status}`);
   } catch {
     return NextResponse.json({ error: "Gagal mengecek ketersediaan domain" }, { status: 502 });
   }
