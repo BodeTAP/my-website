@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 type Portfolio = {
   id: string;
@@ -117,20 +118,19 @@ export default function PortfolioModal({ mode, portfolio }: Props) {
                   className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
               </div>
 
-              {/* Client & Cover */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">Nama Klien</Label>
-                  <Input value={form.clientName} onChange={(e) => set("clientName", e.target.value)}
-                    placeholder="Toko ABC"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">URL Cover Image</Label>
-                  <Input value={form.coverImage} onChange={(e) => set("coverImage", e.target.value)}
-                    placeholder="https://..."
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
-                </div>
+              {/* Cover image */}
+              <ImageUpload
+                value={form.coverImage}
+                onChange={(url) => set("coverImage", url)}
+                label="Gambar Cover"
+              />
+
+              {/* Client */}
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Nama Klien</Label>
+                <Input value={form.clientName} onChange={(e) => set("clientName", e.target.value)}
+                  placeholder="Toko ABC"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
               </div>
 
               {/* Description */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 type Article = {
   id?: string;
@@ -52,6 +53,7 @@ export default function ArticleEditor({ article }: { article?: Article }) {
   const [loading, setLoading] = useState(false);
   const [showSeo, setShowSeo] = useState(false);
   const [error, setError] = useState("");
+  const inlineImageRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -88,9 +90,22 @@ export default function ArticleEditor({ article }: { article?: Article }) {
   }, [editor]);
 
   const addImage = useCallback(() => {
-    const url = window.prompt("Masukkan URL gambar:");
-    if (url) editor?.chain().focus().setImage({ src: url }).run();
-  }, [editor]);
+    inlineImageRef.current?.click();
+  }, []);
+
+  const handleInlineImage = async (file: File | undefined) => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      editor?.chain().focus().setImage({ src: data.url }).run();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Upload gambar gagal");
+    }
+  };
 
   const handleSave = async (status: "DRAFT" | "PUBLISHED") => {
     if (!form.title.trim() || !form.slug.trim()) {
@@ -163,26 +178,21 @@ export default function ArticleEditor({ article }: { article?: Article }) {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label className="text-blue-200 text-sm">Slug URL *</Label>
-            <Input
-              value={form.slug}
-              onChange={set("slug")}
-              placeholder="mengapa-klinik-gigi-butuh-website"
-              className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 font-mono text-sm"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-blue-200 text-sm">URL Gambar Cover</Label>
-            <Input
-              value={form.coverImage}
-              onChange={set("coverImage")}
-              placeholder="https://..."
-              className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <Label className="text-blue-200 text-sm">Slug URL *</Label>
+          <Input
+            value={form.slug}
+            onChange={set("slug")}
+            placeholder="mengapa-klinik-gigi-butuh-website"
+            className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 font-mono text-sm"
+          />
         </div>
+
+        <ImageUpload
+          value={form.coverImage}
+          onChange={(url) => setForm((f) => ({ ...f, coverImage: url }))}
+          label="Gambar Cover Artikel"
+        />
 
         <div className="space-y-1.5">
           <Label className="text-blue-200 text-sm">Ringkasan Artikel</Label>
@@ -234,6 +244,13 @@ export default function ArticleEditor({ article }: { article?: Article }) {
             <ImageIcon className="w-4 h-4" />
           </ToolbarBtn>
         </div>
+        <input
+          ref={inlineImageRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleInlineImage(e.target.files?.[0])}
+        />
 
         {/* Editor content */}
         <div className="p-6">
