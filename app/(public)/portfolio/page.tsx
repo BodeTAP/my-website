@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Kumpulan website profesional yang telah kami bangun untuk bisnis lokal di seluruh Indonesia.",
 };
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function PortfolioPage() {
   const portfolios = await prisma.portfolio.findMany({

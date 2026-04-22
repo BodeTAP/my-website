@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import slugify from "slugify";
@@ -45,5 +46,7 @@ export async function POST(req: Request) {
     },
   });
 
+  revalidatePath("/portfolio");
+  revalidatePath("/");
   return NextResponse.json(portfolio, { status: 201 });
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import slugify from "slugify";
@@ -41,6 +42,8 @@ export async function PATCH(req: Request, { params }: Params) {
   if (featured !== undefined) data.featured = Boolean(featured);
 
   const portfolio = await prisma.portfolio.update({ where: { id }, data });
+  revalidatePath("/portfolio");
+  revalidatePath("/");
   return NextResponse.json(portfolio);
 }
 
@@ -49,5 +52,7 @@ export async function DELETE(_req: Request, { params }: Params) {
 
   const { id } = await params;
   await prisma.portfolio.delete({ where: { id } });
+  revalidatePath("/portfolio");
+  revalidatePath("/");
   return NextResponse.json({ ok: true });
 }
