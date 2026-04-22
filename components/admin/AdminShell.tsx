@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe,
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, ShieldCheck,
 } from "lucide-react";
 
 const navItems = [
@@ -16,6 +16,7 @@ const navItems = [
   { label: "Proyek",      href: "/admin/projects",   icon: Briefcase },
   { label: "Invoice",     href: "/admin/invoices",   icon: Receipt },
   { label: "Tiket",       href: "/admin/tickets",    icon: MessageSquare },
+  { label: "Tim Admin",   href: "/admin/team",       icon: ShieldCheck },
 ];
 
 const Logo = () => (
