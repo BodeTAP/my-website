@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -33,6 +34,11 @@ export async function PUT(req: Request, { params }: Params) {
           status === "PUBLISHED" && !existing.publishedAt ? new Date() : existing.publishedAt,
       },
     });
+    // Revalidate both old and new slug in case slug was changed
+    revalidatePath(`/blog/${existing.slug}`);
+    revalidatePath(`/blog/${article.slug}`);
+    revalidatePath("/blog");
+    revalidatePath("/");
     return NextResponse.json(article);
   } catch {
     return NextResponse.json({ error: "Gagal memperbarui artikel" }, { status: 500 });
@@ -47,7 +53,10 @@ export async function DELETE(_req: Request, { params }: Params) {
 
   const { id } = await params;
   try {
-    await prisma.article.delete({ where: { id } });
+    const deleted = await prisma.article.delete({ where: { id } });
+    revalidatePath(`/blog/${deleted.slug}`);
+    revalidatePath("/blog");
+    revalidatePath("/");
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

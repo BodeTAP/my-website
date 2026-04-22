@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Tips dan panduan untuk pemilik bisnis lokal agar mudah ditemukan di internet.",
 };
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function BlogPage() {
   const articles = await prisma.article.findMany({

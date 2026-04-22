@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -29,6 +30,10 @@ export async function POST(req: Request) {
         publishedAt: status === "PUBLISHED" ? new Date() : null,
       },
     });
+    if (article.status === "PUBLISHED") {
+      revalidatePath("/blog");
+      revalidatePath("/");
+    }
     return NextResponse.json(article, { status: 201 });
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes("Unique constraint")) {
