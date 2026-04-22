@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
   Receipt, MessageSquare, LogOut, Menu, X, Globe, ShieldCheck,
@@ -77,12 +78,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* Logout */}
       <div className="p-4 border-t border-white/5">
-        <Link href="/api/auth/signout">
-          <button className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-200/40 hover:text-red-400 hover:bg-red-500/5 transition-all text-sm w-full">
-            <LogOut className="w-4 h-4 shrink-0" />
-            Keluar
-          </button>
-        </Link>
+        <button
+          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-200/40 hover:text-red-400 hover:bg-red-500/5 transition-all text-sm w-full"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          Keluar
+        </button>
       </div>
     </aside>
   );
