@@ -112,9 +112,9 @@ export async function GET(_req: Request, { params }: Params) {
   rect(0, 0, W_PAGE, HEADER_H, C.primary);
 
   // Company — left
-  txt("VICTORIA TECH",           ML, 36, 18, bold, C.white);
+  txt("MFWEB",                     ML, 36, 18, bold, C.white);
   txt("Solusi Website Profesional", ML, 58, 8,  regular, hexToRgb("#bfdbfe"));
-  txt("victoriatch.com  ·  info@victoriatch.com", ML, 70, 7.5, regular, hexToRgb("#93c5fd"));
+  txt("mfweb.com  ·  info@mfweb.com", ML, 70, 7.5, regular, hexToRgb("#93c5fd"));
 
   // INVOICE label — right
   txtR("INVOICE", ML + CW, 40, 26, bold, C.white);
@@ -190,7 +190,7 @@ export async function GET(_req: Request, { params }: Params) {
   const ROW_TOP = TBL_TOP + TBL_HEAD_H + 14;
   const desc    = invoice.description ?? "Jasa Pembuatan Website";
   txt(desc, ML + 10, ROW_TOP, 10, bold);
-  txt(`Victoria Tech — ${invoice.invoiceNo}`, ML + 10, ROW_TOP + 15, 8, regular, C.muted);
+  txt(`MFWEB — ${invoice.invoiceNo}`, ML + 10, ROW_TOP + 15, 8, regular, C.muted);
 
   const amtStr = formatRupiah(invoice.amount);
   txtR(amtStr, ML + CW - 10, ROW_TOP, 10, bold);
@@ -228,7 +228,7 @@ export async function GET(_req: Request, { params }: Params) {
   hline(FOOT_TOP, ML, ML + CW, 0.5, C.border);
 
   txt(
-    "Victoria Tech  ·  victoriatch.com  ·  info@victoriatch.com",
+    "MFWEB  ·  mfweb.com  ·  info@mfweb.com",
     ML, FOOT_TOP + 16, 7.5, regular, C.muted,
   );
   txtR(

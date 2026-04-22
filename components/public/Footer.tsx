@@ -17,7 +17,7 @@ export default function Footer() {
                 </svg>
               </div>
               <span className="font-bold text-white tracking-wide">
-                VICTORIA <span className="text-blue-400">TECH</span>
+                MFWEB
               </span>
             </div>
             <p className="text-blue-100/50 text-sm max-w-xs leading-relaxed">
@@ -63,7 +63,7 @@ export default function Footer() {
 
         <div className="mt-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-blue-100/30 text-xs">
-            © {year} Victoria Tech. All rights reserved.
+            © {year} MFWEB. All rights reserved.
           </p>
           <p className="text-blue-100/30 text-xs">
             Dibuat dengan ❤️ untuk bisnis lokal Indonesia

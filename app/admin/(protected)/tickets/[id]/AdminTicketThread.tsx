@@ -63,7 +63,7 @@ export default function AdminTicketThread({
             }`}
           >
             <p className={`font-medium text-xs mb-1 ${m.senderRole === "ADMIN" ? "text-blue-300" : "text-blue-200/50"}`}>
-              {m.senderRole === "ADMIN" ? "Tim Victoria Tech" : clientName}
+              {m.senderRole === "ADMIN" ? "Tim MFWEB" : clientName}
               <span className="ml-2 font-normal text-blue-200/30">
                 {new Intl.DateTimeFormat("id-ID", {
                   day: "2-digit",

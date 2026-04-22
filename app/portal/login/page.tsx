@@ -67,7 +67,7 @@ export default function PortalLoginPage() {
               <polygon points="14,6 20,6 26,6 20,20" fill="white" />
             </svg>
           </div>
-          <h1 className="text-white font-bold text-xl">VICTORIA TECH</h1>
+          <h1 className="text-white font-bold text-xl">MFWEB</h1>
           <p className="text-blue-200/50 text-sm mt-1">Portal Klien</p>
         </div>
 

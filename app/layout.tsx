@@ -10,17 +10,17 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Victoria Tech — Solusi Website Profesional untuk Bisnis Lokal",
-    template: "%s | Victoria Tech",
+    default: "MFWEB — Solusi Website Profesional untuk Bisnis Lokal",
+    template: "%s | MFWEB",
   },
   description:
     "Kami membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google.",
-  keywords: ["website profesional", "jasa web developer", "website bisnis lokal", "Victoria Tech"],
+  keywords: ["website profesional", "jasa web developer", "website bisnis lokal", "MFWEB"],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   openGraph: {
     type: "website",
     locale: "id_ID",
-    siteName: "Victoria Tech",
+    siteName: "MFWEB",
   },
   robots: { index: true, follow: true },
 };

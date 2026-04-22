@@ -43,7 +43,7 @@ export default async function PortalInvoicesPage() {
         ) : (
           invoices.map((inv) => {
             const amount = formatRupiah(inv.amount);
-            const waMsg = `Halo Victoria Tech, saya ingin konfirmasi pembayaran invoice ${inv.invoiceNo} sebesar ${amount}.`;
+            const waMsg = `Halo MFWEB, saya ingin konfirmasi pembayaran invoice ${inv.invoiceNo} sebesar ${amount}.`;
 
             return (
               <div key={inv.id} className="glass rounded-2xl p-5 flex items-center justify-between gap-4">

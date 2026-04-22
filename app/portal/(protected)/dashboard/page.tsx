@@ -140,7 +140,7 @@ export default async function PortalDashboardPage() {
             {client.invoices.map((inv) => {
               const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6281234567890";
               const amount = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(inv.amount);
-              const waMsg = `Halo Victoria Tech, saya ingin konfirmasi pembayaran invoice ${inv.invoiceNo} sebesar ${amount}.`;
+              const waMsg = `Halo MFWEB, saya ingin konfirmasi pembayaran invoice ${inv.invoiceNo} sebesar ${amount}.`;
 
               return (
                 <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-t border-white/5 first:border-0 first:pt-0">

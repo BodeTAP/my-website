@@ -57,7 +57,7 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
       ...f,
       clientId,
       whatsappMsg: client
-        ? `Halo ${client.user.name ?? client.businessName}, berikut tagihan ${f.invoiceNo} dari Victoria Tech. Mohon segera dikonfirmasi pembayarannya. Terima kasih.`
+        ? `Halo ${client.user.name ?? client.businessName}, berikut tagihan ${f.invoiceNo} dari MFWEB. Mohon segera dikonfirmasi pembayarannya. Terima kasih.`
         : f.whatsappMsg,
     }));
   };

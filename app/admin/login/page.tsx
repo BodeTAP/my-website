@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
               <polygon points="14,6 20,6 26,6 20,20" fill="white" />
             </svg>
           </div>
-          <h1 className="text-white font-bold text-xl">VICTORIA TECH</h1>
+          <h1 className="text-white font-bold text-xl">MFWEB</h1>
           <p className="text-blue-200/50 text-sm mt-1">Admin Dashboard</p>
         </div>
 
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-                  placeholder="admin@victoriatch.com"
+                  placeholder="admin@mfweb.com"
                 />
               </div>
             </div>

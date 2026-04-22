@@ -41,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
     Resend({
-      from: process.env.EMAIL_FROM ?? "noreply@victoriatch.com",
+      from: process.env.EMAIL_FROM ?? "noreply@mfweb.com",
     }),
   ],
   callbacks: {

@@ -28,7 +28,7 @@ const Logo = () => (
       </svg>
     </div>
     <div>
-      <p className="text-white text-sm font-bold leading-none">Victoria Tech</p>
+      <p className="text-white text-sm font-bold leading-none">MFWEB</p>
       <p className="text-blue-400/60 text-xs">Admin</p>
     </div>
   </div>

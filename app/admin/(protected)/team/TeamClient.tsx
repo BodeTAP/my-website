@@ -69,7 +69,7 @@ function AddAdminModal({ onDone }: { onDone: () => void }) {
               <div className="space-y-1.5">
                 <Label className="text-blue-200/70 text-xs">Email *</Label>
                 <Input type="email" required value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  placeholder="budi@victoriatch.com"
+                  placeholder="budi@mfweb.com"
                   className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30" />
               </div>
               <div className="space-y-1.5">

@@ -210,7 +210,7 @@ export default function TicketList({
                         }`}
                       >
                         <p className={`font-medium text-xs mb-1 ${m.senderRole === "CLIENT" ? "text-blue-300" : "text-blue-200/50"}`}>
-                          {m.senderRole === "CLIENT" ? "Anda" : "Tim Victoria Tech"}
+                          {m.senderRole === "CLIENT" ? "Anda" : "Tim MFWEB"}
                           <span className="ml-2 font-normal text-blue-200/30">
                             {new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(new Date(m.createdAt))}
                           </span>
