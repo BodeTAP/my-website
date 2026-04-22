@@ -17,11 +17,6 @@ function formatDate(date: Date | string) {
   }).format(new Date(date));
 }
 
-// pdf-lib Y coordinates start from bottom; helper converts top-down to bottom-up
-function y(pageHeight: number, topY: number) {
-  return pageHeight - topY;
-}
-
 function hexToRgb(hex: string) {
   const n = parseInt(hex.slice(1), 16);
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
@@ -29,25 +24,17 @@ function hexToRgb(hex: string) {
 
 export async function GET(_req: Request, { params }: Params) {
   const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
   const isAdmin = (session.user as { role?: string })?.role === "ADMIN";
 
   const invoice = await prisma.invoice.findUnique({
     where: { id },
-    include: {
-      client: {
-        include: { user: { select: { name: true, email: true } } },
-      },
-    },
+    include: { client: { include: { user: { select: { name: true, email: true } } } } },
   });
 
-  if (!invoice) {
-    return NextResponse.json({ error: "Invoice tidak ditemukan." }, { status: 404 });
-  }
+  if (!invoice) return NextResponse.json({ error: "Invoice tidak ditemukan." }, { status: 404 });
 
   if (!isAdmin) {
     const user = await prisma.user.findUnique({
@@ -59,255 +46,205 @@ export async function GET(_req: Request, { params }: Params) {
     }
   }
 
-  // ── Build PDF ──────────────────────────────────────────────────────────────
-  const pdfDoc = await PDFDocument.create();
-  const pageWidth = 595;   // A4 points
-  const pageHeight = 842;
-  const page = pdfDoc.addPage([pageWidth, pageHeight]);
-
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  // ── Document setup ─────────────────────────────────────────────────────────
+  const pdfDoc  = await PDFDocument.create();
+  const W_PAGE  = 595;
+  const H_PAGE  = 842;
+  const page    = pdfDoc.addPage([W_PAGE, H_PAGE]);
+  const bold    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  const margin = 52;
-  const W = pageWidth - margin * 2;
+  const ML = 48;               // margin left
+  const MR = 48;               // margin right
+  const CW = W_PAGE - ML - MR; // content width = 499
   const isPaid = invoice.status === "PAID";
 
+  // Colours
   const C = {
-    primary:  hexToRgb("#1d4ed8"),
-    text:     hexToRgb("#1a1a2e"),
+    primary:  hexToRgb("#1e40af"),
+    primaryDk:hexToRgb("#1e3a8a"),
+    white:    rgb(1, 1, 1),
+    text:     hexToRgb("#0f172a"),
     muted:    hexToRgb("#64748b"),
     light:    hexToRgb("#f1f5f9"),
-    border:   hexToRgb("#e2e8f0"),
-    green:    hexToRgb("#15803d"),
+    border:   hexToRgb("#cbd5e1"),
+    green:    hexToRgb("#166534"),
     greenBg:  hexToRgb("#dcfce7"),
-    red:      hexToRgb("#b91c1c"),
+    red:      hexToRgb("#991b1b"),
     redBg:    hexToRgb("#fee2e2"),
-    yellow:   hexToRgb("#92400e"),
-    yellowBg: hexToRgb("#fffbeb"),
-    white:    rgb(1, 1, 1),
+    amber:    hexToRgb("#92400e"),
+    amberBg:  hexToRgb("#fef3c7"),
   };
 
-  const drawText = (
+  // Helper: draw text (Y measured from top)
+  const txt = (
     text: string,
-    opts: {
-      x: number;
-      topY: number;
-      size: number;
-      font?: typeof bold;
-      color?: ReturnType<typeof rgb>;
-    }
+    x: number,
+    topY: number,
+    size: number,
+    font = regular,
+    color = C.text,
+  ) => page.drawText(text, { x, y: H_PAGE - topY, size, font, color });
+
+  // Helper: right-aligned text
+  const txtR = (
+    text: string,
+    rightX: number,
+    topY: number,
+    size: number,
+    font = regular,
+    color = C.text,
   ) => {
-    page.drawText(text, {
-      x: opts.x,
-      y: y(pageHeight, opts.topY),
-      size: opts.size,
-      font: opts.font ?? regular,
-      color: opts.color ?? C.text,
-    });
+    const w = font.widthOfTextAtSize(text, size);
+    page.drawText(text, { x: rightX - w, y: H_PAGE - topY, size, font, color });
   };
 
-  // ── Header ─────────────────────────────────────────────────────────────────
-  drawText("VICTORIA TECH", { x: margin, topY: 62, size: 20, font: bold, color: C.primary });
-  drawText("Solusi Website Profesional", { x: margin, topY: 86, size: 9, color: C.muted });
-  drawText("info@victoriatch.com  ·  victoriatch.com", { x: margin, topY: 98, size: 8, color: C.muted });
+  // Helper: filled rectangle (Y from top)
+  const rect = (x: number, topY: number, w: number, h: number, color: ReturnType<typeof rgb>) =>
+    page.drawRectangle({ x, y: H_PAGE - topY - h, width: w, height: h, color });
 
-  const invoiceTextWidth = bold.widthOfTextAtSize("INVOICE", 32);
-  drawText("INVOICE", {
-    x: margin + W - invoiceTextWidth,
-    topY: 68,
-    size: 32,
-    font: bold,
-    color: C.primary,
-  });
+  // Helper: horizontal line (Y from top)
+  const hline = (topY: number, x1 = ML, x2 = ML + CW, thickness = 0.5, color = C.border) =>
+    page.drawLine({ start: { x: x1, y: H_PAGE - topY }, end: { x: x2, y: H_PAGE - topY }, thickness, color });
 
-  const noText = `#${invoice.invoiceNo}`;
-  const noTextWidth = regular.widthOfTextAtSize(noText, 10);
-  drawText(noText, {
-    x: margin + W - noTextWidth,
-    topY: 104,
-    size: 10,
-    color: C.muted,
-  });
+  // ── 1. HEADER BAR ──────────────────────────────────────────────────────────
+  const HEADER_H = 108;
+  rect(0, 0, W_PAGE, HEADER_H, C.primary);
 
-  // ── Status badge ───────────────────────────────────────────────────────────
-  const badgeTopY = 116;
-  const badgeH = 20;
-  const badgeW = 110;
-  const badgeX = margin + W - badgeW;
-  const badgeBg = isPaid ? C.greenBg : C.redBg;
-  const badgeColor = isPaid ? C.green : C.red;
+  // Company — left
+  txt("VICTORIA TECH",           ML, 36, 18, bold, C.white);
+  txt("Solusi Website Profesional", ML, 58, 8,  regular, hexToRgb("#bfdbfe"));
+  txt("victoriatch.com  ·  info@victoriatch.com", ML, 70, 7.5, regular, hexToRgb("#93c5fd"));
+
+  // INVOICE label — right
+  txtR("INVOICE", ML + CW, 40, 26, bold, C.white);
+  txtR(`#${invoice.invoiceNo}`, ML + CW, 68, 9, regular, hexToRgb("#bfdbfe"));
+
+  // ── 2. STATUS BADGE ────────────────────────────────────────────────────────
+  const BADGE_TOP = HEADER_H + 16;
+  const BADGE_H   = 22;
+  const BADGE_W   = isPaid ? 72 : 110;
+  const BADGE_X   = ML + CW - BADGE_W;
   const badgeLabel = isPaid ? "LUNAS" : "BELUM DIBAYAR";
 
-  page.drawRectangle({
-    x: badgeX,
-    y: y(pageHeight, badgeTopY + badgeH),
-    width: badgeW,
-    height: badgeH,
-    color: badgeBg,
-  });
-  const labelWidth = bold.widthOfTextAtSize(badgeLabel, 8);
-  drawText(badgeLabel, {
-    x: badgeX + (badgeW - labelWidth) / 2,
-    topY: badgeTopY + 6,
-    size: 8,
-    font: bold,
-    color: badgeColor,
-  });
+  rect(BADGE_X, BADGE_TOP, BADGE_W, BADGE_H, isPaid ? C.greenBg : C.redBg);
 
-  // ── Divider ────────────────────────────────────────────────────────────────
-  const divTopY = badgeTopY + badgeH + 12;
-  page.drawLine({
-    start: { x: margin, y: y(pageHeight, divTopY) },
-    end:   { x: margin + W, y: y(pageHeight, divTopY) },
-    thickness: 1,
-    color: C.border,
-  });
+  // left accent bar on badge
+  rect(BADGE_X, BADGE_TOP, 3, BADGE_H, isPaid ? C.green : C.red);
 
-  // ── Info grid ──────────────────────────────────────────────────────────────
-  const infoTopY = divTopY + 20;
-  const col = W / 3;
+  const labelW = bold.widthOfTextAtSize(badgeLabel, 8);
+  txt(badgeLabel, BADGE_X + (BADGE_W - labelW) / 2 + 1.5, BADGE_TOP + 8, 8, bold,
+      isPaid ? C.green : C.red);
 
-  // Col 1 — Billed to
-  drawText("TAGIHAN KEPADA", { x: margin, topY: infoTopY, size: 7, font: bold, color: C.muted });
-  drawText(invoice.client.businessName, { x: margin, topY: infoTopY + 12, size: 10, font: bold });
-  let col1Y = infoTopY + 26;
+  // ── 3. INFO COLUMNS ────────────────────────────────────────────────────────
+  const INFO_TOP = HEADER_H + 20;   // align with badge top
+  const COL_W    = CW / 2;          // two columns, left half
+
+  // Col A — Tagihan Kepada
+  txt("TAGIHAN KEPADA", ML, INFO_TOP, 7, bold, C.muted);
+  txt(invoice.client.businessName, ML, INFO_TOP + 14, 11, bold);
+  let ay = INFO_TOP + 28;
   if (invoice.client.user.name) {
-    drawText(invoice.client.user.name, { x: margin, topY: col1Y, size: 8, color: C.muted });
-    col1Y += 13;
+    txt(invoice.client.user.name, ML, ay, 9, regular, C.muted);
+    ay += 13;
   }
-  drawText(invoice.client.user.email, { x: margin, topY: col1Y, size: 8, color: C.muted });
+  txt(invoice.client.user.email, ML, ay, 9, regular, C.muted);
 
-  // Col 2 — Dates
-  drawText("TANGGAL INVOICE", { x: margin + col, topY: infoTopY, size: 7, font: bold, color: C.muted });
-  drawText(formatDate(invoice.createdAt), { x: margin + col, topY: infoTopY + 12, size: 10, font: bold });
+  // Col B — Tanggal (sits left of the badge)
+  const BX = ML + COL_W;
+  txt("TANGGAL INVOICE", BX, INFO_TOP, 7, bold, C.muted);
+  txt(formatDate(invoice.createdAt), BX, INFO_TOP + 14, 10, bold);
   if (invoice.dueDate) {
-    drawText("JATUH TEMPO", { x: margin + col, topY: infoTopY + 28, size: 7, font: bold, color: C.muted });
-    drawText(formatDate(invoice.dueDate), {
-      x: margin + col,
-      topY: infoTopY + 40,
-      size: 10,
-      font: bold,
-      color: isPaid ? C.green : C.red,
-    });
+    txt("JATUH TEMPO", BX, INFO_TOP + 30, 7, bold, C.muted);
+    txt(formatDate(invoice.dueDate), BX, INFO_TOP + 44, 10, bold,
+        isPaid ? C.green : C.red);
   }
 
-  // Col 3 — From
-  drawText("DARI", { x: margin + col * 2, topY: infoTopY, size: 7, font: bold, color: C.muted });
-  drawText("Victoria Tech", { x: margin + col * 2, topY: infoTopY + 12, size: 10, font: bold });
-  drawText("info@victoriatch.com", { x: margin + col * 2, topY: infoTopY + 26, size: 8, color: C.muted });
+  // ── 4. DIVIDER ─────────────────────────────────────────────────────────────
+  const DIV1 = Math.max(
+    BADGE_TOP + BADGE_H,
+    INFO_TOP + (invoice.dueDate ? 58 : 42),
+  ) + 18;
+  hline(DIV1);
 
-  // ── Table ──────────────────────────────────────────────────────────────────
-  const tableTopY = infoTopY + 90 + 24;
+  // ── 5. TABLE ───────────────────────────────────────────────────────────────
+  const TBL_TOP    = DIV1 + 12;
+  const TBL_HEAD_H = 26;
+  const COL_AMT_W  = 140;   // amount column width (right side)
 
-  // Table header
-  page.drawRectangle({
-    x: margin,
-    y: y(pageHeight, tableTopY + 28),
-    width: W,
-    height: 28,
-    color: C.light,
-  });
-  drawText("DESKRIPSI LAYANAN", { x: margin + 12, topY: tableTopY + 10, size: 7, font: bold, color: C.muted });
-  const jumlahW = bold.widthOfTextAtSize("JUMLAH", 7);
-  drawText("JUMLAH", {
-    x: margin + W - jumlahW - 4,
-    topY: tableTopY + 10,
-    size: 7,
-    font: bold,
-    color: C.muted,
-  });
+  // Header row background
+  rect(ML, TBL_TOP, CW, TBL_HEAD_H, C.light);
 
-  // Table row
-  const rowTopY = tableTopY + 44;
-  const desc = invoice.description ?? "Jasa Pembuatan Website";
-  drawText(desc, { x: margin + 12, topY: rowTopY, size: 10, font: bold });
-  drawText(`Victoria Tech — ${invoice.invoiceNo}`, { x: margin + 12, topY: rowTopY + 14, size: 9, color: C.muted });
-
-  const amountStr = formatRupiah(invoice.amount);
-  const amountW = bold.widthOfTextAtSize(amountStr, 10);
-  drawText(amountStr, {
-    x: margin + W - amountW - 4,
-    topY: rowTopY,
-    size: 10,
-    font: bold,
-  });
-
-  // ── Total line ─────────────────────────────────────────────────────────────
-  const totalTopY = rowTopY + 48;
+  // Vertical separator inside header
   page.drawLine({
-    start: { x: margin + W - 200, y: y(pageHeight, totalTopY) },
-    end:   { x: margin + W, y: y(pageHeight, totalTopY) },
-    thickness: 2,
-    color: C.primary,
-  });
-
-  drawText("Total", { x: margin + W - 200, topY: totalTopY + 12, size: 10, color: C.muted });
-  const totalAmountStr = formatRupiah(invoice.amount);
-  const totalAmountW = bold.widthOfTextAtSize(totalAmountStr, 16);
-  drawText(totalAmountStr, {
-    x: margin + W - totalAmountW,
-    topY: totalTopY + 8,
-    size: 16,
-    font: bold,
-    color: C.primary,
-  });
-
-  // ── Due date notice ────────────────────────────────────────────────────────
-  if (invoice.dueDate && !isPaid) {
-    const noticeTopY = totalTopY + 52;
-    const noticeH = 36;
-    page.drawRectangle({
-      x: margin,
-      y: y(pageHeight, noticeTopY + noticeH),
-      width: W,
-      height: noticeH,
-      color: C.yellowBg,
-    });
-    page.drawRectangle({
-      x: margin,
-      y: y(pageHeight, noticeTopY + noticeH),
-      width: 3,
-      height: noticeH,
-      color: C.yellow,
-    });
-    const noticeLine1 = `Jatuh Tempo: Harap lakukan pembayaran sebelum ${formatDate(invoice.dueDate)}.`;
-    const noticeLine2 = "Konfirmasi via WhatsApp setelah transfer.";
-    drawText(noticeLine1, { x: margin + 10, topY: noticeTopY + 10, size: 8, font: bold, color: C.yellow });
-    drawText(noticeLine2, { x: margin + 10, topY: noticeTopY + 22, size: 8, color: C.yellow });
-  }
-
-  // ── Footer ─────────────────────────────────────────────────────────────────
-  const footerTopY = pageHeight - 60;
-  page.drawLine({
-    start: { x: margin, y: y(pageHeight, footerTopY) },
-    end:   { x: margin + W, y: y(pageHeight, footerTopY) },
+    start: { x: ML + CW - COL_AMT_W, y: H_PAGE - TBL_TOP },
+    end:   { x: ML + CW - COL_AMT_W, y: H_PAGE - TBL_TOP - TBL_HEAD_H },
     thickness: 0.5,
     color: C.border,
   });
 
-  drawText("Victoria Tech  ·  victoriatch.com  ·  info@victoriatch.com", {
-    x: margin,
-    topY: footerTopY + 14,
-    size: 8,
-    color: C.muted,
-  });
-  const autoText = "Dokumen ini dibuat secara otomatis";
-  const autoTextW = regular.widthOfTextAtSize(autoText, 8);
-  drawText(autoText, {
-    x: margin + W - autoTextW,
-    topY: footerTopY + 14,
-    size: 8,
-    color: C.muted,
-  });
+  txt("DESKRIPSI LAYANAN", ML + 10, TBL_TOP + 10, 7, bold, C.muted);
+  txtR("JUMLAH",           ML + CW - 10, TBL_TOP + 10, 7, bold, C.muted);
 
+  // Row
+  const ROW_TOP = TBL_TOP + TBL_HEAD_H + 14;
+  const desc    = invoice.description ?? "Jasa Pembuatan Website";
+  txt(desc, ML + 10, ROW_TOP, 10, bold);
+  txt(`Victoria Tech — ${invoice.invoiceNo}`, ML + 10, ROW_TOP + 15, 8, regular, C.muted);
+
+  const amtStr = formatRupiah(invoice.amount);
+  txtR(amtStr, ML + CW - 10, ROW_TOP, 10, bold);
+
+  // Row bottom separator
+  const ROW_BOTTOM = ROW_TOP + 30;
+  hline(ROW_BOTTOM);
+
+  // ── 6. TOTAL BOX ───────────────────────────────────────────────────────────
+  const TOT_TOP = ROW_BOTTOM + 16;
+  const TOT_W   = 200;
+  const TOT_H   = 44;
+  const TOT_X   = ML + CW - TOT_W;
+
+  rect(TOT_X, TOT_TOP, TOT_W, TOT_H, C.primary);
+
+  txt("TOTAL TAGIHAN", TOT_X + 12, TOT_TOP + 10, 7, bold, hexToRgb("#bfdbfe"));
+  txtR(formatRupiah(invoice.amount), ML + CW - 10, TOT_TOP + 28, 14, bold, C.white);
+
+  // ── 7. NOTICE BOX (if unpaid) ──────────────────────────────────────────────
+  if (invoice.dueDate && !isPaid) {
+    const NOT_TOP = TOT_TOP + TOT_H + 20;
+    const NOT_H   = 40;
+    rect(ML, NOT_TOP, CW, NOT_H, C.amberBg);
+    rect(ML, NOT_TOP, 3,  NOT_H, C.amber);
+    txt("Harap lakukan pembayaran sebelum:", ML + 12, NOT_TOP + 11, 8, bold, C.amber);
+    txt(
+      `${formatDate(invoice.dueDate)}  ·  Konfirmasi via WhatsApp setelah transfer.`,
+      ML + 12, NOT_TOP + 25, 8, regular, C.amber,
+    );
+  }
+
+  // ── 8. FOOTER ──────────────────────────────────────────────────────────────
+  const FOOT_TOP = H_PAGE - 48;
+  hline(FOOT_TOP, ML, ML + CW, 0.5, C.border);
+
+  txt(
+    "Victoria Tech  ·  victoriatch.com  ·  info@victoriatch.com",
+    ML, FOOT_TOP + 16, 7.5, regular, C.muted,
+  );
+  txtR(
+    "Dokumen dibuat secara otomatis",
+    ML + CW, FOOT_TOP + 16, 7.5, regular, C.muted,
+  );
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   const pdfBytes = await pdfDoc.save();
-  const buffer = Buffer.from(pdfBytes);
+  const buffer   = Buffer.from(pdfBytes);
 
   return new Response(buffer, {
     headers: {
-      "Content-Type": "application/pdf",
+      "Content-Type":        "application/pdf",
       "Content-Disposition": `attachment; filename="Invoice-${invoice.invoiceNo}.pdf"`,
-      "Content-Length": String(buffer.length),
+      "Content-Length":      String(buffer.length),
     },
   });
 }
