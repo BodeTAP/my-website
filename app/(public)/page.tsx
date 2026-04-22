@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Globe, TrendingUp, Shield, Zap, Star, CheckCircle } from "lucide-react";
+import { ArrowRight, Globe, TrendingUp, Shield, Zap, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DomainChecker from "@/components/public/DomainChecker";
 import PricingSection from "@/components/public/PricingSection";
+import TestimonialCarousel from "@/components/public/TestimonialCarousel";
 import { prisma } from "@/lib/prisma";
 
 async function getLatestArticles() {
@@ -71,6 +72,18 @@ const testimonials = [
     name: "Mba Sinta",
     business: "Butik Mode",
     text: "Sekarang customer bisa lihat koleksi dan order langsung dari website. Omset naik 40%!",
+    rating: 5,
+  },
+  {
+    name: "Pak Hendra",
+    business: "Bengkel Motor Jaya",
+    text: "Awalnya ragu, tapi setelah website jadi, banyak pelanggan baru yang datang dari pencarian Google Maps dan website. Hasilnya memuaskan!",
+    rating: 5,
+  },
+  {
+    name: "Ibu Dewi",
+    business: "Salon Kecantikan Ayu",
+    text: "Proses dari diskusi sampai website jadi sangat cepat, kurang dari seminggu sudah online. Desainnya juga cantik sesuai karakter salon kami.",
     rating: 5,
   },
 ];
@@ -278,31 +291,14 @@ export default async function HomePage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-white mb-3">
-              Apa Kata Klien Kami
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              Apa Kata <span className="text-gradient">Klien Kami</span>
             </h2>
+            <p className="text-blue-200/60 max-w-md mx-auto">
+              Lebih dari 50 bisnis lokal telah mempercayakan kehadiran digital mereka kepada kami.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.name} className="glass rounded-2xl p-6">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-blue-100/70 text-sm leading-relaxed mb-5">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-sm font-bold">
-                    {t.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-semibold">{t.name}</p>
-                    <p className="text-blue-200/50 text-xs">{t.business}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <TestimonialCarousel testimonials={testimonials} />
         </div>
       </section>
 
