@@ -1,0 +1,243 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth.js required tables ──────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(CLIENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  client   Client?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+
+model Article {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  excerpt     String?
+  content     String        @db.Text
+  coverImage  String?
+  metaTitle   String?
+  metaDesc    String?
+  status      ArticleStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("articles")
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  coverImage  String?
+  beforeImage String?
+  afterImage  String?
+  clientName  String?
+  techStack   String[]
+  liveUrl     String?
+  metrics     String?
+  order       Int      @default(0)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("portfolios")
+}
+
+// ─── Leads / CRM ──────────────────────────────────────────────────────────────
+
+model Lead {
+  id             String     @id @default(cuid())
+  name           String
+  businessName   String
+  whatsapp       String
+  domain         String?
+  currentWebsite String?
+  message        String?
+  status         LeadStatus @default(NEW)
+  notes          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@map("leads")
+}
+
+// ─── Client Portal ────────────────────────────────────────────────────────────
+
+model Client {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  businessName String
+  phone        String?
+  address      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects Project[]
+  invoices Invoice[]
+  tickets  Ticket[]
+
+  @@map("clients")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  clientId    String
+  name        String
+  description String?
+  status      ProjectStatus @default(DRAFTING)
+  startDate   DateTime?
+  deadline    DateTime?
+  liveUrl     String?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  clientId    String
+  invoiceNo   String        @unique
+  description String?
+  amount      Int
+  dueDate     DateTime?
+  status      InvoiceStatus @default(UNPAID)
+  whatsappMsg String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model Ticket {
+  id        String       @id @default(cuid())
+  clientId  String
+  subject   String
+  status    TicketStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  client   Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages TicketMessage[]
+
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id         String   @id @default(cuid())
+  ticketId   String
+  senderId   String
+  senderRole Role
+  body       String   @db.Text
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_messages")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum LeadStatus {
+  NEW
+  FOLLOWUP
+  DEAL
+  CLOSED
+}
+
+enum ProjectStatus {
+  DRAFTING
+  DEVELOPMENT
+  TESTING
+  LIVE
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
