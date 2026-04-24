@@ -5,14 +5,11 @@ import Resend from "next-auth/providers/resend";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
-  pages: {
-    signIn: "/portal/login",
-    error: "/portal/login",
-  },
   providers: [
     Google,
     Credentials({

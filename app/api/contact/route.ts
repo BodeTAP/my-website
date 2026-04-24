@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIP } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
+  const ip = getClientIP(req);
+  const { allowed, retryAfterMs } = rateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Terlalu banyak permintaan. Coba lagi dalam beberapa saat." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     const body = await req.json();
     const { name, businessName, whatsapp, domain, currentWebsite, message } = body;

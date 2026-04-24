@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIP } from "@/lib/rateLimit";
 
 export async function GET(req: Request) {
+  const ip = getClientIP(req);
+  const { allowed } = rateLimit(`domain:${ip}`, 30, 60 * 1000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q")?.trim();
 
