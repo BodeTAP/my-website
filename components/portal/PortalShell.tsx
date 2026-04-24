@@ -86,7 +86,7 @@ export default function PortalShell({
       {/* Logout */}
       <div className="p-4 border-t border-white/5">
         <button
-          onClick={() => signOut({ callbackUrl: "/portal/login" })}
+          onClick={() => signOut({ callbackUrl: "/" })}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-200/40 hover:text-red-400 hover:bg-red-500/5 transition-all text-sm w-full"
         >
           <LogOut className="w-4 h-4 shrink-0" />
