@@ -305,7 +305,7 @@ export default async function HomePage() {
                     </Button>
                   </Link>
                   <a
-                    href={`https://wa.me/${process.env.WHATSAPP_NUMBER ?? "6281234567890"}?text=Halo%20MFWEB%2C%20saya%20ingin%20konsultasi%20website`}
+                    href={`https://wa.me/${process.env.WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20ingin%20konsultasi%20website`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

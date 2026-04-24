@@ -117,7 +117,7 @@ export default function FAQSection() {
             Masih ada pertanyaan lain? Kami siap menjawab langsung.
           </p>
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6281234567890"}?text=Halo%20MFWEB%2C%20saya%20ingin%20bertanya%20sebelum%20memesan`}
+            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20ingin%20bertanya%20sebelum%20memesan`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"

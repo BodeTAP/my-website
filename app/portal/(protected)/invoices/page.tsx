@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 
-const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6281234567890";
+const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);

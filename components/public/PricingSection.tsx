@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
-const WA = process.env.WHATSAPP_NUMBER ?? "6281234567890";
+const WA = process.env.WHATSAPP_NUMBER ?? "6282221682343";
 
 const plans = [
   {

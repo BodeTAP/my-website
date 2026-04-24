@@ -138,7 +138,7 @@ export default async function PortalDashboardPage() {
           </div>
           <div className="space-y-3">
             {client.invoices.map((inv) => {
-              const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6281234567890";
+              const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
               const amount = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(inv.amount);
               const waMsg = `Halo MFWEB, saya ingin konfirmasi pembayaran invoice ${inv.invoiceNo} sebesar ${amount}.`;
 

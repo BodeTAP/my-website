@@ -64,7 +64,7 @@ function ContactForm() {
           Kami akan menghubungi Anda via WhatsApp dalam 1×24 jam. Terima kasih!
         </p>
         <a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6281234567890"}?text=Halo%20MFWEB%20Tech%2C%20saya%20baru%20mengisi%20formulir%20kontak`}
+          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%20Tech%2C%20saya%20baru%20mengisi%20formulir%20kontak`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -180,7 +180,7 @@ function ContactForm() {
 }
 
 export default function ContactPage() {
-  const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6281234567890";
+  const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">

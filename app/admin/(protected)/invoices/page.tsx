@@ -6,7 +6,7 @@ import InvoiceStatusToggle from "./InvoiceStatusToggle";
 import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 import DeleteInvoiceButton from "@/components/admin/DeleteInvoiceButton";
 
-const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6281234567890";
+const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", {
