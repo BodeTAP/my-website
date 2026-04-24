@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -10,15 +11,8 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 bg-white rounded-sm flex items-center justify-center">
-                <svg viewBox="0 0 40 40" className="w-5 h-5">
-                  <polygon points="4,6 20,6 36,6 26,34 20,20 14,34" fill="black" />
-                  <polygon points="14,6 20,6 26,6 20,20" fill="white" />
-                </svg>
-              </div>
-              <span className="font-bold text-white tracking-wide">
-                MFWEB
-              </span>
+              <Image src="/logo.png" alt="MFWEB" width={28} height={28} />
+              <span className="font-bold text-white tracking-wide">MFWEB</span>
             </div>
             <p className="text-blue-100/50 text-sm max-w-xs leading-relaxed">
               Membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan.

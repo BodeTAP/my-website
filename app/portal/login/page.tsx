@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -61,12 +62,7 @@ export default function PortalLoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg viewBox="0 0 40 40" className="w-8 h-8">
-              <polygon points="4,6 20,6 36,6 26,34 20,20 14,34" fill="black" />
-              <polygon points="14,6 20,6 26,6 20,20" fill="white" />
-            </svg>
-          </div>
+          <Image src="/logo.png" alt="MFWEB" width={48} height={48} className="mx-auto mb-4" />
           <h1 className="text-white font-bold text-xl">MFWEB</h1>
           <p className="text-blue-200/50 text-sm mt-1">Portal Klien</p>
         </div>

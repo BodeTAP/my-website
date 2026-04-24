@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -35,12 +36,7 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-white rounded-sm flex items-center justify-center">
-            <svg viewBox="0 0 40 40" className="w-6 h-6">
-              <polygon points="4,6 20,6 36,6 26,34 20,20 14,34" fill="black" />
-              <polygon points="14,6 20,6 26,6 20,20" fill="white" />
-            </svg>
-          </div>
+          <Image src="/logo.png" alt="MFWEB" width={36} height={36} className="h-9 w-auto" />
           <span className="font-bold text-white text-lg tracking-wide">
             MF<span className="text-blue-400">WEB</span>
           </span>

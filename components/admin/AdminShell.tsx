@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
@@ -22,12 +23,7 @@ const navItems = [
 
 const Logo = () => (
   <div className="flex items-center gap-2.5">
-    <div className="w-7 h-7 bg-white rounded flex items-center justify-center shrink-0">
-      <svg viewBox="0 0 40 40" className="w-5 h-5">
-        <polygon points="4,6 20,6 36,6 26,34 20,20 14,34" fill="black" />
-        <polygon points="14,6 20,6 26,6 20,20" fill="white" />
-      </svg>
-    </div>
+    <Image src="/logo.png" alt="MFWEB" width={28} height={28} className="shrink-0" />
     <div>
       <p className="text-white text-sm font-bold leading-none">MFWEB</p>
       <p className="text-blue-400/60 text-xs">Admin</p>
