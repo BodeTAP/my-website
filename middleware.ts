@@ -1,12 +1,8 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/lib/auth.config";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-const { auth } = NextAuth(authConfig);
-
-export default auth(function middleware(req) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const role = (req.auth?.user as { role?: string })?.role;
-  const isLoggedIn = !!req.auth;
 
   const isAdminProtected =
     pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
@@ -16,14 +12,26 @@ export default auth(function middleware(req) {
     !pathname.startsWith("/portal/login") &&
     !pathname.startsWith("/portal/register");
 
-  if (isAdminProtected && role !== "ADMIN") {
-    return Response.redirect(new URL("/admin/login", req.url));
+  if (!isAdminProtected && !isPortalProtected) {
+    return NextResponse.next();
   }
 
-  if (isPortalProtected && !isLoggedIn) {
-    return Response.redirect(new URL("/portal/login", req.url));
+  // Read JWT token directly — role is already embedded by lib/auth.ts jwt callback
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET,
+  });
+
+  if (isAdminProtected && token?.role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/admin/login", req.url));
   }
-});
+
+  if (isPortalProtected && !token) {
+    return NextResponse.redirect(new URL("/portal/login", req.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: ["/admin/:path*", "/portal/:path*"],
