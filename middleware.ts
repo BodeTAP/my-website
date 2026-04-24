@@ -16,10 +16,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Read JWT token directly — role is already embedded by lib/auth.ts jwt callback
+  // NextAuth v5 encrypts JWT using cookie name as salt — must match exactly
+  const secure = req.nextUrl.protocol === "https:";
+  const cookieName = secure
+    ? "__Secure-authjs.session-token"
+    : "authjs.session-token";
+
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
+    cookieName,
+    salt: cookieName,
   });
 
   if (isAdminProtected && token?.role !== "ADMIN") {
