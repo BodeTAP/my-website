@@ -5,6 +5,7 @@ import DomainChecker from "@/components/public/DomainChecker";
 import PricingSection from "@/components/public/PricingSection";
 import TestimonialCarousel from "@/components/public/TestimonialCarousel";
 import HeroStats from "@/components/public/HeroStats";
+import FAQSection from "@/components/public/FAQSection";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 
@@ -270,6 +271,9 @@ export default async function HomePage() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────────── */}
+      <FAQSection />
 
       {/* ── Final CTA ─────────────────────────────────────────────── */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
