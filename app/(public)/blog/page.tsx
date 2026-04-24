@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
+import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -27,24 +28,26 @@ export default async function BlogPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
+        <FadeUp className="text-center mb-14">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             Blog & <span className="text-gradient">Panduan</span>
           </h1>
           <p className="text-blue-200/60 max-w-xl mx-auto">
             Tips praktis agar bisnis Anda mudah ditemukan di internet dan terlihat lebih profesional.
           </p>
-        </div>
+        </FadeUp>
 
         {articles.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-blue-200/40 text-lg">Artikel akan segera hadir. Pantau terus!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((a) => (
-              <Link key={a.slug} href={`/blog/${a.slug}`}>
-                <article className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300 group h-full flex flex-col">
+              <StaggerItem key={a.slug}>
+              <HoverCard className="h-full">
+              <Link href={`/blog/${a.slug}`}>
+                <article className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex flex-col">
                   <div className="h-48 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
                     {a.coverImage ? (
                       <img
@@ -83,8 +86,10 @@ export default async function BlogPage() {
                   </div>
                 </article>
               </Link>
+              </HoverCard>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
         )}
       </div>
     </div>

@@ -105,6 +105,41 @@
   }
 }
 
+/* ── Ambient animations ─────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes float-delay {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50%       { opacity: 0.18; transform: scale(1.06); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.animate-float        { animation: float 7s ease-in-out infinite; }
+.animate-float-delay  { animation: float-delay 9s ease-in-out infinite 1.5s; }
+.animate-pulse-slow   { animation: pulse-slow 5s ease-in-out infinite; }
+
+/* Shiny CTA button */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%);
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
 /* ── TipTap editor content ───────────────────────────────────────────── */
 .ProseMirror h2 {
   font-size: 1.5em;

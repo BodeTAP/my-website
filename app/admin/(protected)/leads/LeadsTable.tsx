@@ -34,10 +34,12 @@ const STATUS_COLORS: Record<Lead["status"], string> = {
 export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const [filter, setFilter] = useState<Lead["status"] | "ALL">("ALL");
   const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
-    Object.fromEntries(leads.map((l) => [l.id, l.status]))
+    Object.fromEntries(leads.map((l) => [l.id, l.status])),
   );
 
-  const filtered = leads.filter((l) => filter === "ALL" || statusMap[l.id] === filter);
+  const filtered = leads.filter(
+    (l) => filter === "ALL" || statusMap[l.id] === filter,
+  );
 
   const updateStatus = async (id: string, status: Lead["status"]) => {
     setStatusMap((m) => ({ ...m, [id]: status }));
@@ -49,7 +51,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   };
 
   const WA = (phone: string, name: string) =>
-    `https://wa.me/${phone.replace(/\D/g, "")}?text=Halo%20${encodeURIComponent(name)}%2C%20saya%20dari%20Victoria%20Tech%20ingin%20menghubungi%20terkait%20pembuatan%20website.`;
+    `https://wa.me/${phone.replace(/\D/g, "")}?text=Halo%20${encodeURIComponent(name)}%2C%20saya%20dari%20MFWEB%20Tech%20ingin%20menghubungi%20terkait%20pembuatan%20website.`;
 
   return (
     <div className="glass rounded-2xl overflow-hidden">
@@ -80,12 +82,24 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/5">
-              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">Nama / Bisnis</th>
-              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">WhatsApp</th>
-              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">Domain</th>
-              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">Tanggal</th>
-              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">Status</th>
-              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">Aksi</th>
+              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">
+                Nama / Bisnis
+              </th>
+              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">
+                WhatsApp
+              </th>
+              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">
+                Domain
+              </th>
+              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">
+                Tanggal
+              </th>
+              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">
+                Status
+              </th>
+              <th className="text-left px-5 py-3 text-blue-200/40 font-medium text-xs">
+                Aksi
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -97,35 +111,59 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
               </tr>
             ) : (
               filtered.map((l) => (
-                <tr key={l.id} className="hover:bg-white/2 transition-colors group">
+                <tr
+                  key={l.id}
+                  className="hover:bg-white/2 transition-colors group"
+                >
                   <td className="px-5 py-4">
                     <p className="text-white font-medium">{l.name}</p>
                     <p className="text-blue-200/50 text-xs">{l.businessName}</p>
                   </td>
                   <td className="px-5 py-4 text-blue-200/70">{l.whatsapp}</td>
-                  <td className="px-5 py-4 text-blue-200/50 text-xs">{l.domain ?? "—"}</td>
                   <td className="px-5 py-4 text-blue-200/50 text-xs">
-                    {new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(l.createdAt))}
+                    {l.domain ?? "—"}
+                  </td>
+                  <td className="px-5 py-4 text-blue-200/50 text-xs">
+                    {new Intl.DateTimeFormat("id-ID", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }).format(new Date(l.createdAt))}
                   </td>
                   <td className="px-5 py-4">
                     <div className="relative inline-block">
                       <select
                         value={statusMap[l.id]}
-                        onChange={(e) => updateStatus(l.id, e.target.value as Lead["status"])}
+                        onChange={(e) =>
+                          updateStatus(l.id, e.target.value as Lead["status"])
+                        }
                         className={`appearance-none pr-7 pl-3 py-1 rounded-full text-xs font-medium cursor-pointer border-0 outline-none ${STATUS_COLORS[statusMap[l.id]]} bg-transparent`}
                       >
-                        {(Object.keys(STATUS_LABELS) as Lead["status"][]).map((s) => (
-                          <option key={s} value={s} className="bg-[#0d1b35] text-white">
-                            {STATUS_LABELS[s]}
-                          </option>
-                        ))}
+                        {(Object.keys(STATUS_LABELS) as Lead["status"][]).map(
+                          (s) => (
+                            <option
+                              key={s}
+                              value={s}
+                              className="bg-[#0d1b35] text-white"
+                            >
+                              {STATUS_LABELS[s]}
+                            </option>
+                          ),
+                        )}
                       </select>
                       <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none text-current opacity-60" />
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <a href={WA(l.whatsapp, l.name)} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs">
+                    <a
+                      href={WA(l.whatsapp, l.name)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button
+                        size="sm"
+                        className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs"
+                      >
                         <MessageCircle className="w-3.5 h-3.5 mr-1" />
                         WA
                       </Button>

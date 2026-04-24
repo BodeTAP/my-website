@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
 const WA = process.env.WHATSAPP_NUMBER ?? "6281234567890";
 
@@ -100,7 +101,7 @@ export default function PricingSection() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
+        <FadeUp className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             Paket <span className="text-gradient">Harga Transparan</span>
           </h2>
@@ -108,16 +109,17 @@ export default function PricingSection() {
             Pilih paket yang sesuai dengan kebutuhan bisnis Anda. Semua paket sudah termasuk
             domain, hosting, dan konsultasi gratis sebelum pengerjaan.
           </p>
-        </div>
+        </FadeUp>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {plans.map((plan) => {
             const waText = `Halo MFWEB, saya tertarik dengan paket ${plan.name} (Rp ${plan.price}). Boleh konsultasi lebih lanjut?`;
 
             return (
+              <StaggerItem key={plan.name}>
+              <HoverCard className="h-full">
               <div
-                key={plan.name}
-                className={`relative flex flex-col rounded-2xl p-6 transition-all duration-300 ${
+                className={`relative flex flex-col rounded-2xl p-6 h-full transition-colors duration-300 ${
                   plan.featured
                     ? "glass border border-teal-500/50 shadow-[0_0_30px_rgba(20,184,166,0.15)]"
                     : "glass hover:border-blue-500/30"
@@ -184,9 +186,11 @@ export default function PricingSection() {
                   </Button>
                 </a>
               </div>
+              </HoverCard>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerChildren>
       </div>
     </section>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Send, MessageCircle, CheckCircle } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,8 +29,10 @@ function ContactForm() {
     if (domainParam) setForm((f) => ({ ...f, domain: domainParam }));
   }, [domainParam]);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  const set =
+    (k: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +64,7 @@ function ContactForm() {
           Kami akan menghubungi Anda via WhatsApp dalam 1×24 jam. Terima kasih!
         </p>
         <a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6281234567890"}?text=Halo%20Victoria%20Tech%2C%20saya%20baru%20mengisi%20formulir%20kontak`}
+          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6281234567890"}?text=Halo%20MFWEB%20Tech%2C%20saya%20baru%20mengisi%20formulir%20kontak`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -74,7 +77,10 @@ function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 sm:p-8 space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className="glass rounded-2xl p-6 sm:p-8 space-y-5"
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="space-y-1.5">
           <Label className="text-blue-200 text-sm">Nama Lengkap *</Label>
@@ -114,7 +120,11 @@ function ContactForm() {
         <div className="space-y-1.5">
           <Label className="text-blue-200 text-sm">
             Domain yang diinginkan
-            {domainParam && <span className="ml-2 text-green-400 text-xs">(dari domain checker)</span>}
+            {domainParam && (
+              <span className="ml-2 text-green-400 text-xs">
+                (dari domain checker)
+              </span>
+            )}
           </Label>
           <Input
             value={form.domain}
@@ -124,7 +134,9 @@ function ContactForm() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-blue-200 text-sm">Website / Profil Bisnis Saat Ini</Label>
+          <Label className="text-blue-200 text-sm">
+            Website / Profil Bisnis Saat Ini
+          </Label>
           <Input
             value={form.currentWebsite}
             onChange={set("currentWebsite")}
@@ -135,7 +147,9 @@ function ContactForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-blue-200 text-sm">Ceritakan kebutuhan Anda (opsional)</Label>
+        <Label className="text-blue-200 text-sm">
+          Ceritakan kebutuhan Anda (opsional)
+        </Label>
         <Textarea
           value={form.message}
           onChange={set("message")}
@@ -152,7 +166,9 @@ function ContactForm() {
         disabled={loading}
         className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 shadow-lg shadow-blue-500/20"
       >
-        {loading ? "Mengirim..." : (
+        {loading ? (
+          "Mengirim..."
+        ) : (
           <>
             <Send className="w-4 h-4 mr-2" />
             Kirim Pesan
@@ -169,29 +185,51 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-12"
+        >
           <h1 className="text-4xl font-bold text-white mb-4">
             Mulai <span className="text-gradient">Konsultasi Gratis</span>
           </h1>
           <p className="text-blue-200/60 max-w-xl mx-auto">
-            Isi formulir di bawah dan kami akan menghubungi Anda melalui WhatsApp dalam waktu 1×24 jam.
+            Isi formulir di bawah dan kami akan menghubungi Anda melalui
+            WhatsApp dalam waktu 1×24 jam.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Form */}
-          <div className="lg:col-span-3">
-            <Suspense fallback={<div className="glass rounded-2xl p-8 animate-pulse h-96" />}>
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-3"
+          >
+            <Suspense
+              fallback={
+                <div className="glass rounded-2xl p-8 animate-pulse h-96" />
+              }
+            >
               <ContactForm />
             </Suspense>
-          </div>
+          </motion.div>
 
           {/* Info sidebar */}
-          <div className="lg:col-span-2 space-y-5">
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-2 space-y-5"
+          >
             <div className="glass rounded-2xl p-6">
-              <h3 className="text-white font-semibold mb-4">Hubungi Langsung</h3>
+              <h3 className="text-white font-semibold mb-4">
+                Hubungi Langsung
+              </h3>
               <a
-                href={`https://wa.me/${WA_NUMBER}?text=Halo%20Victoria%20Tech%2C%20saya%20ingin%20konsultasi%20website`}
+                href={`https://wa.me/${WA_NUMBER}?text=Halo%20MFWEB%20Tech%2C%20saya%20ingin%20konsultasi%20website`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -220,11 +258,11 @@ export default function ContactPage() {
 
             <div className="glass rounded-2xl p-6">
               <p className="text-blue-200/50 text-xs leading-relaxed">
-                Data Anda aman bersama kami dan hanya digunakan untuk keperluan konsultasi.
-                Tidak ada spam, tidak ada penjualan data.
+                Data Anda aman bersama kami dan hanya digunakan untuk keperluan
+                konsultasi. Tidak ada spam, tidak ada penjualan data.
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
