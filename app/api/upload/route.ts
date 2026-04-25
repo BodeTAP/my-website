@@ -33,7 +33,18 @@ export async function POST(req: Request) {
   const ext = extMap[file.type];
   const filename = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  const blob = await put(filename, file, { access: "public" });
+  try {
+    const blob = await put(filename, file, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN, // Pastikan token diambil (terutama berguna saat lokal)
+    });
 
-  return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url: blob.url });
+  } catch (err) {
+    console.error("Vercel Blob Upload Error:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Terjadi kesalahan pada server saat mengupload gambar." },
+      { status: 500 }
+    );
+  }
 }
