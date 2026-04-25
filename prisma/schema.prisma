@@ -69,6 +69,17 @@ model VerificationToken {
 
 // ─── Content ──────────────────────────────────────────────────────────────────
 
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+
+  articles Article[]
+
+  @@map("categories")
+}
+
 model Article {
   id          String        @id @default(cuid())
   title       String
@@ -80,8 +91,12 @@ model Article {
   metaDesc    String?
   status      ArticleStatus @default(DRAFT)
   publishedAt DateTime?
+  categoryId  String?
+  tags        String[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@map("articles")
 }

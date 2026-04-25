@@ -9,13 +9,15 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import {
   Bold, Italic, List, ListOrdered, Quote, Code,
-  Heading2, Heading3, Link2, Image as ImageIcon, Save, Eye, EyeOff
+  Heading2, Heading3, Link2, Image as ImageIcon, Save, Eye, EyeOff, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/admin/ImageUpload";
+
+type Category = { id: string; name: string };
 
 type Article = {
   id?: string;
@@ -27,6 +29,8 @@ type Article = {
   metaTitle?: string | null;
   metaDesc?: string | null;
   status?: "DRAFT" | "PUBLISHED";
+  categoryId?: string | null;
+  tags?: string[];
 };
 
 function slugify(str: string) {
@@ -37,7 +41,13 @@ function slugify(str: string) {
     .replace(/\s+/g, "-");
 }
 
-export default function ArticleEditor({ article }: { article?: Article }) {
+export default function ArticleEditor({
+  article,
+  categories = [],
+}: {
+  article?: Article;
+  categories?: Category[];
+}) {
   const router = useRouter();
   const isEdit = !!article?.id;
 
@@ -49,10 +59,23 @@ export default function ArticleEditor({ article }: { article?: Article }) {
     metaTitle: article?.metaTitle ?? "",
     metaDesc: article?.metaDesc ?? "",
     status: (article?.status ?? "DRAFT") as "DRAFT" | "PUBLISHED",
+    categoryId: article?.categoryId ?? "",
   });
+  const [tags, setTags] = useState<string[]>(article?.tags ?? []);
+  const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSeo, setShowSeo] = useState(false);
   const [error, setError] = useState("");
+
+  const addTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const val = tagInput.trim().toLowerCase().replace(/\s+/g, "-");
+      if (val && !tags.includes(val)) setTags((t) => [...t, val]);
+      setTagInput("");
+    }
+  };
+  const removeTag = (tag: string) => setTags((t) => t.filter((x) => x !== tag));
   const inlineImageRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
@@ -120,6 +143,8 @@ export default function ArticleEditor({ article }: { article?: Article }) {
       ...form,
       status,
       content: editor?.getHTML() ?? "",
+      categoryId: form.categoryId || null,
+      tags,
     };
 
     const url = isEdit ? `/api/admin/articles/${article.id}` : "/api/admin/articles";
@@ -186,6 +211,46 @@ export default function ArticleEditor({ article }: { article?: Article }) {
             placeholder="mengapa-klinik-gigi-butuh-website"
             className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 font-mono text-sm"
           />
+        </div>
+
+        {/* Category & Tags row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-blue-200 text-sm">Kategori</Label>
+            <select
+              value={form.categoryId}
+              onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
+              className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-sm"
+            >
+              <option value="" className="bg-[#0d1b35]">— Tanpa kategori —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id} className="bg-[#0d1b35]">{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-blue-200 text-sm">Tags <span className="text-blue-200/30 text-xs">(Enter untuk tambah)</span></Label>
+            <input
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={addTag}
+              placeholder="seo, tips, website..."
+              className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-sm placeholder:text-blue-200/30 outline-none focus:border-blue-500/50"
+            />
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {tags.map((tag) => (
+                  <span key={tag} className="flex items-center gap-1 bg-blue-600/20 text-blue-300 text-xs px-2.5 py-1 rounded-full border border-blue-500/20">
+                    #{tag}
+                    <button type="button" onClick={() => removeTag(tag)} className="text-blue-400/50 hover:text-blue-200">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <ImageUpload

@@ -9,7 +9,10 @@ type Params = { params: Promise<{ id: string }> };
 
 export default async function EditArticlePage({ params }: Params) {
   const { id } = await params;
-  const article = await prisma.article.findUnique({ where: { id } });
+  const [article, categories] = await Promise.all([
+    prisma.article.findUnique({ where: { id } }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+  ]);
   if (!article) notFound();
 
   return (
@@ -23,7 +26,7 @@ export default async function EditArticlePage({ params }: Params) {
         </Link>
         <h1 className="text-2xl font-bold text-white">Edit Artikel</h1>
       </div>
-      <ArticleEditor article={article} />
+      <ArticleEditor article={article} categories={categories} />
     </div>
   );
 }

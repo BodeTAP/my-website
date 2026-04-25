@@ -39,7 +39,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Params) {
   const { slug } = await params;
-  const article = await prisma.article.findUnique({ where: { slug, status: "PUBLISHED" } });
+  const article = await prisma.article.findUnique({
+    where: { slug, status: "PUBLISHED" },
+    include: { category: { select: { name: true, slug: true } } },
+  });
   if (!article) notFound();
 
   return (
@@ -62,16 +65,27 @@ export default async function ArticlePage({ params }: Params) {
 
         {/* Header */}
         <div className="mb-8">
-          {article.publishedAt && (
-            <div className="flex items-center gap-2 text-blue-400/60 text-sm mb-4">
-              <Calendar className="w-4 h-4" />
-              <time>
-                {new Intl.DateTimeFormat("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }).format(new Date(article.publishedAt))}
-              </time>
+          <div className="flex items-center gap-3 flex-wrap mb-4">
+            {article.category && (
+              <Link href={`/blog?category=${article.category.slug}`}
+                className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-3 py-1 rounded-full hover:bg-blue-600/30 transition-colors">
+                {article.category.name}
+              </Link>
+            )}
+            {article.publishedAt && (
+              <div className="flex items-center gap-2 text-blue-400/60 text-sm">
+                <Calendar className="w-4 h-4" />
+                <time>
+                  {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(article.publishedAt))}
+                </time>
+              </div>
+            )}
+          </div>
+          {article.tags && article.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {article.tags.map((tag) => (
+                <span key={tag} className="text-xs text-blue-200/40">#{tag}</span>
+              ))}
             </div>
           )}
 

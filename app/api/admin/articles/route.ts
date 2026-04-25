@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status } = body;
+  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status, categoryId, tags } = body;
 
   if (!title || !slug) {
     return NextResponse.json({ error: "Judul dan slug wajib diisi" }, { status: 400 });
@@ -28,6 +28,8 @@ export async function POST(req: Request) {
         metaDesc: metaDesc?.trim() || null,
         status: status ?? "DRAFT",
         publishedAt: status === "PUBLISHED" ? new Date() : null,
+        categoryId: categoryId || null,
+        tags: Array.isArray(tags) ? tags : [],
       },
     });
     if (article.status === "PUBLISHED") {

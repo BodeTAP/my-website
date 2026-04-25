@@ -13,7 +13,7 @@ export async function PUT(req: Request, { params }: Params) {
 
   const { id } = await params;
   const body = await req.json();
-  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status } = body;
+  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status, categoryId, tags } = body;
 
   try {
     const existing = await prisma.article.findUnique({ where: { id } });
@@ -30,8 +30,9 @@ export async function PUT(req: Request, { params }: Params) {
         metaTitle: metaTitle?.trim() || null,
         metaDesc: metaDesc?.trim() || null,
         status: status ?? "DRAFT",
-        publishedAt:
-          status === "PUBLISHED" && !existing.publishedAt ? new Date() : existing.publishedAt,
+        publishedAt: status === "PUBLISHED" && !existing.publishedAt ? new Date() : existing.publishedAt,
+        categoryId: categoryId || null,
+        tags: Array.isArray(tags) ? tags : [],
       },
     });
     // Revalidate both old and new slug in case slug was changed

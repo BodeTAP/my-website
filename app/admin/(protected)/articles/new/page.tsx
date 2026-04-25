@@ -2,8 +2,10 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ArticleEditor from "@/components/admin/ArticleEditor";
+import { prisma } from "@/lib/prisma";
 
-export default function NewArticlePage() {
+export default async function NewArticlePage() {
+  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
   return (
     <div>
       <div className="flex items-center gap-3 mb-8">
@@ -15,7 +17,7 @@ export default function NewArticlePage() {
         </Link>
         <h1 className="text-2xl font-bold text-white">Tulis Artikel Baru</h1>
       </div>
-      <ArticleEditor />
+      <ArticleEditor categories={categories} />
     </div>
   );
 }

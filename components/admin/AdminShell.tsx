@@ -7,12 +7,13 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe, ShieldCheck, Star, Settings,
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, ShieldCheck, Star, Settings, Tag,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard",   href: "/admin",                  icon: LayoutDashboard },
   { label: "Artikel",     href: "/admin/articles",         icon: FileText },
+  { label: "Kategori",    href: "/admin/categories",       icon: Tag },
   { label: "Portofolio",  href: "/admin/portfolio",        icon: Globe },
   { label: "Testimoni",   href: "/admin/testimonials",     icon: Star },
   { label: "Leads",       href: "/admin/leads",            icon: Users },
