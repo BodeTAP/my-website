@@ -43,3 +43,7 @@ next-env.d.ts
 /lib/generated/prisma
 
 .vercel
+
+# next-sitemap (generated at build time)
+public/robots.txt
+public/sitemap*.xml
