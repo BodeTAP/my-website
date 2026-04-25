@@ -10,7 +10,8 @@ export async function middleware(req: NextRequest) {
   const isPortalProtected =
     pathname.startsWith("/portal") &&
     !pathname.startsWith("/portal/login") &&
-    !pathname.startsWith("/portal/register");
+    !pathname.startsWith("/portal/register") &&
+    !pathname.startsWith("/portal/reset-password");
 
   if (!isAdminProtected && !isPortalProtected) {
     return NextResponse.next();
