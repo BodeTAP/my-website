@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Clock,
   MessageCircle,
+  Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
