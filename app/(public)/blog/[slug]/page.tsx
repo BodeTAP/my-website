@@ -55,6 +55,26 @@ export default async function ArticlePage({ params }: Params) {
   });
   if (!article) notFound();
 
+  let relatedArticles = await prisma.article.findMany({
+    where: { status: "PUBLISHED", id: { not: article.id }, categoryId: article.categoryId },
+    select: { id: true, title: true, slug: true, coverImage: true, publishedAt: true, category: { select: { name: true, slug: true } } },
+    orderBy: { publishedAt: "desc" },
+    take: 2,
+  });
+
+  if (relatedArticles.length < 2) {
+    const moreArticles = await prisma.article.findMany({
+      where: {
+        status: "PUBLISHED",
+        id: { notIn: [article.id, ...relatedArticles.map((a) => a.id)] },
+      },
+      select: { id: true, title: true, slug: true, coverImage: true, publishedAt: true, category: { select: { name: true, slug: true } } },
+      orderBy: { publishedAt: "desc" },
+      take: 2 - relatedArticles.length,
+    });
+    relatedArticles = [...relatedArticles, ...moreArticles];
+  }
+
   // JSON-LD: BlogPosting + BreadcrumbList
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -176,6 +196,39 @@ export default async function ArticlePage({ params }: Params) {
             prose-img:rounded-xl"
           dangerouslySetInnerHTML={{ __html: article.content }}
         />
+
+        {/* Artikel Terkait */}
+        {relatedArticles.length > 0 && (
+          <div className="mt-16 pt-10 border-t border-white/5">
+            <h3 className="text-2xl font-bold text-white mb-6">Artikel Terkait</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {relatedArticles.map((rel) => (
+                <Link key={rel.id} href={`/blog/${rel.slug}`} className="group block h-full">
+                  <div className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 h-full flex flex-col">
+                    <div className="h-40 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
+                      {rel.coverImage ? (
+                        <Image src={rel.coverImage} alt={rel.title} width={400} height={160} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-10">📰</div>
+                      )}
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h4 className="text-white font-semibold text-lg leading-snug group-hover:text-blue-300 transition-colors line-clamp-2 mb-3">
+                        {rel.title}
+                      </h4>
+                      <div className="mt-auto flex items-center justify-between text-xs">
+                        <span className="text-blue-400">{rel.category?.name ?? "Umum"}</span>
+                        <span className="text-blue-200/40">
+                          {rel.publishedAt ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(rel.publishedAt)) : ""}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* CTA */}
         <div className="mt-14 glass rounded-2xl p-8 text-center">

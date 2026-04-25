@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { label: "Beranda",    href: "/" },
-  { label: "Blog",       href: "/blog" },
+  { label: "Layanan",    href: "/layanan" },
   { label: "Portofolio", href: "/portfolio" },
+  { label: "Tentang Kami", href: "/about" },
+  { label: "Blog",       href: "/blog" },
   { label: "Kontak",     href: "/contact" },
 ];
 

@@ -22,11 +22,12 @@ export default function Footer() {
           {/* Links */}
           <div>
             <h4 className="text-white text-sm font-semibold mb-4">Layanan</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {[
-                { label: "Blog", href: "/blog" },
+                { label: "Layanan", href: "/layanan" },
                 { label: "Portofolio", href: "/portfolio" },
-                { label: "Cek Domain", href: "/#domain-checker" },
+                { label: "Tentang Kami", href: "/about" },
+                { label: "Blog", href: "/blog" },
                 { label: "Konsultasi", href: "/contact" },
               ].map((l) => (
                 <li key={l.href}>
