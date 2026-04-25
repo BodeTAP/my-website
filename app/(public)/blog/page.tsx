@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Tips dan panduan untuk pemilik bisnis lokal agar mudah ditemukan di internet.",
+  title: "Tips & Panduan Website untuk Bisnis Lokal | Blog",
+  description:
+    "Pelajari cara membuat website profesional, tips SEO, dan strategi digital marketing untuk bisnis lokal Indonesia. Panduan lengkap dari MFWEB.",
+  alternates: { canonical: "/blog" },
 };
 
 export const revalidate = 60;
@@ -95,7 +98,7 @@ export default async function BlogPage({
                 <article className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex flex-col">
                   <div className="h-48 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
                     {a.coverImage ? (
-                      <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <Image src={a.coverImage} alt={a.title} width={400} height={192} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-5xl opacity-10">📰</div>
                     )}

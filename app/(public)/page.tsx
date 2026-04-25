@@ -1,4 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
+import Script from "next/script";
+import type { Metadata } from "next";
 import { ArrowRight, Globe, TrendingUp, Shield, Zap, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DomainChecker from "@/components/public/DomainChecker";
@@ -9,6 +12,11 @@ import FAQSection from "@/components/public/FAQSection";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 const STAT_DEFAULTS = [
   { num: "50+",    label: "Proyek selesai" },
   { num: "95%",    label: "Klien puas" },
@@ -89,6 +97,142 @@ export default async function HomePage() {
     getTestimonials(),
     getHeroStats(),
   ]);
+
+  // JSON-LD: FAQ Page + LocalBusiness + Service
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "Berapa lama waktu pengerjaan website?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Rata-rata 3\u20137 hari kerja tergantung paket dan kelengkapan materi dari Anda (foto, teks, logo). Landing page biasanya selesai dalam 2\u20133 hari.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apakah saya perlu paham teknologi atau coding?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Tidak perlu sama sekali. Kami menangani semua hal teknis dari awal sampai website Anda live. Setelah selesai, kami juga memberikan panduan singkat cara memperbarui konten.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Bagaimana jika saya tidak puas dengan desainnya?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Setiap paket sudah termasuk revisi. Kami mengerjakan berdasarkan brief dan referensi yang Anda berikan, sehingga hasilnya sesuai ekspektasi.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apakah website saya bisa muncul di Google?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Ya. Semua website yang kami buat sudah dioptimasi SEO dasar: struktur halaman yang benar, meta tag, kecepatan loading, dan mobile-friendly.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apakah ada biaya bulanan setelah website jadi?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Harga paket sudah mencakup domain dan hosting selama 1 tahun. Setelah tahun pertama, biaya perpanjangan sekitar Rp 400\u2013600 ribu per tahun.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Bisakah saya memperbarui konten sendiri setelah website jadi?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Bisa. Website Anda dilengkapi dashboard admin sehingga Anda bisa mengganti teks, foto, harga, dan informasi lainnya sendiri tanpa bantuan developer.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apakah website tampil baik di HP?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "100%. Semua website kami dibangun dengan desain responsif \u2014 tampilan otomatis menyesuaikan layar HP, tablet, maupun desktop.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apa yang terjadi jika ada masalah teknis setelah website live?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Kami memberikan support teknis setelah website live. Jika ada bug atau masalah dari sisi kami, kami perbaiki tanpa biaya tambahan.",
+        },
+      },
+    ],
+  };
+
+  const localBusinessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${SITE_URL}/#business`,
+    name: "MFWEB",
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    image: `${SITE_URL}/og-image.png`,
+    description:
+      "Jasa pembuatan website profesional untuk bisnis lokal. Website cepat, menarik, dan SEO-friendly.",
+    telephone: "+62-822-2168-2343",
+    priceRange: "Rp 800K - Rp 5.4Jt",
+    areaServed: {
+      "@type": "Country",
+      name: "Indonesia",
+    },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Paket Pembuatan Website",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Landing Page",
+            description: "Desain 1 halaman, domain .com, hosting & SSL gratis 1 tahun",
+          },
+          price: "800000",
+          priceCurrency: "IDR",
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Compro Simple",
+            description: "Desain 3-4 halaman, SEO dasar, email bisnis, domain .com",
+          },
+          price: "1500000",
+          priceCurrency: "IDR",
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Compro Pro",
+            description: "Desain 5-7 halaman custom, multi bahasa, SEO dasar, email bisnis",
+          },
+          price: "3500000",
+          priceCurrency: "IDR",
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Toko Online",
+            description: "Unlimited halaman, integrasi pembayaran, multi bahasa, SEO dasar",
+          },
+          price: "5400000",
+          priceCurrency: "IDR",
+        },
+      ],
+    },
+  };
 
   return (
     <div>
@@ -217,7 +361,7 @@ export default async function HomePage() {
                       <div className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group cursor-pointer h-full">
                         <div className="h-48 bg-linear-to-br from-blue-900/50 to-blue-800/20 overflow-hidden">
                           {p.coverImage ? (
-                            <img src={p.coverImage} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <Image src={p.coverImage} alt={p.title} width={400} height={192} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <Globe className="w-16 h-16 text-blue-500/30" />
@@ -268,7 +412,7 @@ export default async function HomePage() {
                       <article className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex flex-col">
                         <div className="h-40 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
                           {a.coverImage ? (
-                            <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <Image src={a.coverImage} alt={a.title} width={400} height={160} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-5xl opacity-20">📰</div>
                           )}
@@ -367,6 +511,17 @@ export default async function HomePage() {
           </ScaleIn>
         </div>
       </section>
+      {/* JSON-LD Structured Data */}
+      <Script
+        id="json-ld-faq"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <Script
+        id="json-ld-business"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
     </div>
   );
 }

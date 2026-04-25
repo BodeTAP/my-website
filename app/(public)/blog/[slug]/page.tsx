@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import Script from "next/script";
 import { ArrowLeft, Calendar, Share2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -29,10 +33,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: article.metaTitle ?? article.title,
     description: article.metaDesc ?? article.excerpt ?? undefined,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
+      type: "article",
       title: article.metaTitle ?? article.title,
       description: article.metaDesc ?? article.excerpt ?? undefined,
       images: article.coverImage ? [article.coverImage] : [],
+      publishedTime: article.publishedAt?.toISOString(),
+      modifiedTime: article.updatedAt?.toISOString(),
     },
   };
 }
@@ -44,6 +54,59 @@ export default async function ArticlePage({ params }: Params) {
     include: { category: { select: { name: true, slug: true } } },
   });
   if (!article) notFound();
+
+  // JSON-LD: BlogPosting + BreadcrumbList
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: article.metaDesc ?? article.excerpt ?? "",
+    image: article.coverImage ?? undefined,
+    datePublished: article.publishedAt?.toISOString(),
+    dateModified: article.updatedAt?.toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "MFWEB",
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "MFWEB",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/blog/${slug}`,
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Beranda",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${SITE_URL}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: `${SITE_URL}/blog/${slug}`,
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
@@ -59,7 +122,7 @@ export default async function ArticlePage({ params }: Params) {
         {/* Cover */}
         {article.coverImage && (
           <div className="rounded-2xl overflow-hidden mb-8 h-64 sm:h-80">
-            <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
+            <Image src={article.coverImage} alt={article.title} width={768} height={320} className="w-full h-full object-cover" priority />
           </div>
         )}
 
@@ -128,6 +191,18 @@ export default async function ArticlePage({ params }: Params) {
             </Button>
           </Link>
         </div>
+
+        {/* JSON-LD Structured Data */}
+        <Script
+          id="json-ld-article"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        />
+        <Script
+          id="json-ld-breadcrumb"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -10,19 +13,90 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "MFWEB — Solusi Website Profesional untuk Bisnis Lokal",
+    default: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
     template: "%s | MFWEB",
   },
   description:
-    "Kami membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google.",
-  keywords: ["website profesional", "jasa web developer", "website bisnis lokal", "MFWEB"],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    "MFWEB membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google. Mulai dari Rp 800K.",
+  keywords: [
+    "jasa pembuatan website",
+    "website profesional",
+    "jasa web developer",
+    "website bisnis lokal",
+    "jasa bikin website",
+    "web developer Indonesia",
+    "MFWEB",
+  ],
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "id_ID",
     siteName: "MFWEB",
+    title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
+    description:
+      "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly. Mulai Rp 800K.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "MFWEB — Jasa Pembuatan Website Profesional",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
+    description:
+      "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly.",
+    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
+  verification: {
+    // Tambahkan Google Search Console verification code di sini nanti
+    // google: "your-verification-code",
+  },
+};
+
+// JSON-LD structured data for Organization + WebSite
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "MFWEB",
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/logo.png`,
+        width: 512,
+        height: 512,
+      },
+      description:
+        "MFWEB membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google.",
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+62-822-2168-2343",
+        contactType: "customer service",
+        availableLanguage: ["Indonesian", "English"],
+      },
+      sameAs: [],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "MFWEB",
+      description:
+        "Jasa Pembuatan Website Profesional untuk Bisnis Lokal",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      inLanguage: "id-ID",
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -32,7 +106,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <Script
+          id="json-ld-global"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          strategy="afterInteractive"
+        />
+        {children}
+      </body>
     </html>
   );
 }

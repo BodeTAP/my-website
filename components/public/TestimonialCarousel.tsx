@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
 
 type Testimonial = {
@@ -79,7 +80,7 @@ export default function TestimonialCarousel({ testimonials }: { testimonials: Te
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-blue-600/30 border border-blue-500/30 flex items-center justify-center shrink-0 overflow-hidden">
             {t.avatar ? (
-              <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+              <Image src={t.avatar} alt={t.name} width={48} height={48} className="w-full h-full object-cover" />
             ) : (
               <span className="text-blue-300 text-lg font-bold">{t.name.charAt(0)}</span>
             )}

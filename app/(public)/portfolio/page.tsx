@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Globe, TrendingUp, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 
 export const metadata: Metadata = {
-  title: "Portofolio",
-  description: "Kumpulan website profesional yang telah kami bangun untuk bisnis lokal di seluruh Indonesia.",
+  title: "Portfolio Website Profesional untuk Bisnis Lokal",
+  description:
+    "Lihat koleksi website profesional yang telah kami bangun untuk bisnis lokal di Indonesia. Desain modern, cepat, dan SEO-friendly.",
+  alternates: { canonical: "/portfolio" },
 };
 
 export const revalidate = 60;
@@ -50,9 +53,11 @@ export default async function PortfolioPage() {
                 {/* Cover / Before-After */}
                 <div className="relative h-52 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
                   {p.coverImage ? (
-                    <img
+                    <Image
                       src={p.coverImage}
                       alt={p.title}
+                      width={400}
+                      height={208}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
