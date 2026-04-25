@@ -1,6 +1,14 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.AUTH_RESEND_KEY);
+let _resend: Resend | null = null;
+function getResend() {
+  if (!_resend) {
+    const key = process.env.AUTH_RESEND_KEY;
+    if (!key) throw new Error("AUTH_RESEND_KEY env var is not set");
+    _resend = new Resend(key);
+  }
+  return _resend;
+}
 const FROM   = process.env.EMAIL_FROM ?? "noreply@mfweb.com";
 const SITE   = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
@@ -95,7 +103,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
       Link ini berlaku selama <strong>1 jam</strong>. Jika Anda tidak meminta reset password, abaikan email ini — akun Anda tetap aman.
     </p>`
   );
-  await resend.emails.send({ from: FROM, to: email, subject: "Reset Password — MFWEB Portal", html });
+  await getResend().emails.send({ from: FROM, to: email, subject: "Reset Password — MFWEB Portal", html });
 }
 
 /** Invoice created — sent to client when admin creates invoice */
@@ -120,7 +128,7 @@ export async function sendInvoiceCreatedEmail(
     btn("Lihat Invoice & Unduh PDF", `${SITE}/portal/invoices`) +
     p(`Setelah melakukan pembayaran, mohon konfirmasi via WhatsApp agar kami dapat segera memproses. Terima kasih.`)
   );
-  await resend.emails.send({ from: FROM, to: email, subject: `Invoice ${invoiceNo} — MFWEB`, html });
+  await getResend().emails.send({ from: FROM, to: email, subject: `Invoice ${invoiceNo} — MFWEB`, html });
 }
 
 /** Project status updated — sent to client */
@@ -142,7 +150,7 @@ export async function sendProjectStatusEmail(
       : p("Kami terus mengerjakan proyek Anda. Pantau perkembangan terbaru di dashboard portal.")) +
     btn("Lihat Dashboard", `${SITE}/portal/dashboard`)
   );
-  await resend.emails.send({ from: FROM, to: email, subject: `Update Proyek: ${projectName} — MFWEB`, html });
+  await getResend().emails.send({ from: FROM, to: email, subject: `Update Proyek: ${projectName} — MFWEB`, html });
 }
 
 /** Admin replied to ticket — sent to client */
@@ -162,7 +170,7 @@ export async function sendTicketReplyToClientEmail(
      </div>` +
     btn("Lihat & Balas Tiket", `${SITE}/portal/tickets`)
   );
-  await resend.emails.send({ from: FROM, to: email, subject: `Balasan Tiket: ${ticketSubject} — MFWEB`, html });
+  await getResend().emails.send({ from: FROM, to: email, subject: `Balasan Tiket: ${ticketSubject} — MFWEB`, html });
 }
 
 /** Client sent a ticket message — sent to admin */
@@ -182,7 +190,7 @@ export async function sendTicketReplyToAdminEmail(
      </div>` +
     btn("Balas di Dashboard Admin", `${SITE}/admin/tickets/${ticketId}`)
   );
-  await resend.emails.send({ from: FROM, to: adminEmail, subject: `[Tiket] ${clientName}: ${ticketSubject}`, html });
+  await getResend().emails.send({ from: FROM, to: adminEmail, subject: `[Tiket] ${clientName}: ${ticketSubject}`, html });
 }
 
 /** New ticket opened by client — sent to admin */
@@ -198,5 +206,5 @@ export async function sendNewTicketToAdminEmail(
     info([["Subjek", ticketSubject], ["Klien", clientName]]) +
     btn("Lihat Tiket", `${SITE}/admin/tickets/${ticketId}`)
   );
-  await resend.emails.send({ from: FROM, to: adminEmail, subject: `[Tiket Baru] ${ticketSubject}`, html });
+  await getResend().emails.send({ from: FROM, to: adminEmail, subject: `[Tiket Baru] ${ticketSubject}`, html });
 }
