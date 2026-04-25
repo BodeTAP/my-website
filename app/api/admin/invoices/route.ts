@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendInvoiceCreatedEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -34,8 +35,16 @@ export async function POST(req: Request) {
       whatsappMsg: whatsappMsg?.trim() || null,
       status: "UNPAID",
     },
-    include: { client: { include: { user: { select: { name: true } } } } },
+    include: { client: { include: { user: { select: { name: true, email: true } } } } },
   });
+
+  // Non-blocking email notification
+  const clientEmail = invoice.client.user.email;
+  const clientName  = invoice.client.user.name ?? invoice.client.businessName;
+  if (clientEmail) {
+    sendInvoiceCreatedEmail(clientEmail, clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate)
+      .catch(() => {});
+  }
 
   return NextResponse.json(invoice, { status: 201 });
 }

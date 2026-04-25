@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendProjectStatusEmail } from "@/lib/email";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -21,7 +22,17 @@ export async function PATCH(req: Request, { params }: Params) {
       ...(deadline !== undefined && { deadline: deadline ? new Date(deadline) : null }),
       ...(notes !== undefined && { notes: notes || null }),
     },
+    include: { client: { include: { user: { select: { name: true, email: true } } } } },
   });
+
+  // Notify client only when status changes
+  if (status) {
+    const clientEmail = project.client.user.email;
+    const clientName  = project.client.user.name ?? project.client.businessName;
+    if (clientEmail) {
+      sendProjectStatusEmail(clientEmail, clientName, project.name, status).catch(() => {});
+    }
+  }
 
   return NextResponse.json(project);
 }

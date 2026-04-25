@@ -118,6 +118,13 @@ export default function PortalLoginPage() {
                 </div>
               </div>
 
+              {/* Forgot password */}
+              <div className="text-right mb-1">
+                <Link href="/portal/reset-password" className="text-blue-400/60 hover:text-blue-300 text-xs transition-colors">
+                  Lupa password?
+                </Link>
+              </div>
+
               {/* Mode tabs */}
               <div className="flex gap-1 p-1 bg-white/5 rounded-xl mb-6 mt-3">
                 <button
