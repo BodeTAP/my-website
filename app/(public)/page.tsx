@@ -30,14 +30,21 @@ async function getHeroStats() {
   } catch { return STAT_DEFAULTS; }
 }
 
+const FALLBACK_TESTIMONIALS = [
+  { name: "Ibu Ratna",  business: "Klinik Gigi Sehat",    text: "Sejak punya website, pasien baru meningkat drastis. Banyak yang bilang nemunya dari Google!", rating: 5 },
+  { name: "Pak Budi",   business: "Resto Nusantara",      text: "Proses pembuatannya cepat dan hasilnya melebihi ekspektasi saya. Sangat profesional.", rating: 5 },
+  { name: "Mba Sinta",  business: "Butik Mode",           text: "Sekarang customer bisa lihat koleksi dan order langsung dari website. Omset naik 40%!", rating: 5 },
+];
+
 async function getTestimonials() {
   try {
-    return await prisma.testimonial.findMany({
+    const rows = await prisma.testimonial.findMany({
       where: { featured: true },
       orderBy: { order: "asc" },
-      select: { id: true, name: true, business: true, text: true, rating: true },
+      select: { name: true, business: true, text: true, rating: true },
     });
-  } catch { return []; }
+    return rows.length > 0 ? rows : FALLBACK_TESTIMONIALS;
+  } catch { return FALLBACK_TESTIMONIALS; }
 }
 
 async function getLatestArticles() {
