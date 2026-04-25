@@ -30,7 +30,26 @@ export default async function PortalDashboardPage() {
     },
   });
 
-  const client = user?.client;
+  let client = user?.client;
+
+  // Auto-create Client record if missing (e.g. first Google OAuth sign-in
+  // where signIn callback ran before the user row was committed)
+  if (!client && user) {
+    await prisma.client.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, businessName: user.name ?? "Klien Baru" },
+      update: {},
+    }).catch(() => {});
+
+    client = await prisma.client.findUnique({
+      where: { userId: user.id },
+      include: {
+        projects: { orderBy: { createdAt: "desc" }, take: 1 },
+        invoices: { where: { status: "UNPAID" }, orderBy: { dueDate: "asc" }, take: 3 },
+        tickets: { where: { status: { not: "CLOSED" } }, orderBy: { updatedAt: "desc" }, take: 3 },
+      },
+    });
+  }
 
   if (!client) {
     return (
