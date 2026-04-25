@@ -46,16 +46,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account }) {
-      // Auto-create Client record for first-time Google sign-ins
-      if (account?.provider === "google" && user.id) {
-        const existing = await prisma.client.findUnique({ where: { userId: user.id } });
-        if (!existing) {
-          await prisma.client.create({
-            data: {
-              userId: user.id,
-              businessName: user.name ?? "Klien Baru",
-            },
-          });
+      // Auto-create Client record for first-time Google sign-ins.
+      // Use email lookup to get the real DB user ID — user.id in OAuth callback
+      // may be the Google profile ID, not the database CUID.
+      if (account?.provider === "google" && user.email) {
+        try {
+          const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+          if (dbUser) {
+            const existing = await prisma.client.findUnique({ where: { userId: dbUser.id } });
+            if (!existing) {
+              await prisma.client.create({
+                data: {
+                  userId: dbUser.id,
+                  businessName: user.name ?? "Klien Baru",
+                },
+              });
+            }
+          }
+        } catch {
+          // Non-fatal: sign-in proceeds even if client record creation fails
         }
       }
       return true;
