@@ -37,21 +37,12 @@ export const metadata: Metadata = {
     title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
     description:
       "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly. Mulai Rp 800K.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "MFWEB — Jasa Pembuatan Website Profesional",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
     description:
       "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly.",
-    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
   verification: {
