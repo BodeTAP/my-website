@@ -7,18 +7,20 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe, ShieldCheck,
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, ShieldCheck, Star, Settings,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard",   href: "/admin",            icon: LayoutDashboard },
-  { label: "Artikel",     href: "/admin/articles",   icon: FileText },
-  { label: "Portofolio",  href: "/admin/portfolio",  icon: Globe },
-  { label: "Leads",       href: "/admin/leads",      icon: Users },
-  { label: "Proyek",      href: "/admin/projects",   icon: Briefcase },
-  { label: "Invoice",     href: "/admin/invoices",   icon: Receipt },
-  { label: "Tiket",       href: "/admin/tickets",    icon: MessageSquare },
-  { label: "Tim Admin",   href: "/admin/team",       icon: ShieldCheck },
+  { label: "Dashboard",   href: "/admin",                  icon: LayoutDashboard },
+  { label: "Artikel",     href: "/admin/articles",         icon: FileText },
+  { label: "Portofolio",  href: "/admin/portfolio",        icon: Globe },
+  { label: "Testimoni",   href: "/admin/testimonials",     icon: Star },
+  { label: "Leads",       href: "/admin/leads",            icon: Users },
+  { label: "Proyek",      href: "/admin/projects",         icon: Briefcase },
+  { label: "Invoice",     href: "/admin/invoices",         icon: Receipt },
+  { label: "Tiket",       href: "/admin/tickets",          icon: MessageSquare },
+  { label: "Tim Admin",   href: "/admin/team",             icon: ShieldCheck },
+  { label: "Pengaturan",  href: "/admin/settings",         icon: Settings },
 ];
 
 const Logo = () => (

@@ -9,6 +9,37 @@ import FAQSection from "@/components/public/FAQSection";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 
+const STAT_DEFAULTS = [
+  { num: "50+",    label: "Proyek selesai" },
+  { num: "95%",    label: "Klien puas" },
+  { num: "3 hari", label: "Rata-rata delivery" },
+];
+
+async function getHeroStats() {
+  try {
+    const rows = await prisma.siteSetting.findMany({
+      where: { key: { in: ["hero_stat_1_num","hero_stat_1_label","hero_stat_2_num","hero_stat_2_label","hero_stat_3_num","hero_stat_3_label"] } },
+    });
+    const m: Record<string, string> = {};
+    for (const r of rows) m[r.key] = r.value;
+    return [
+      { num: m.hero_stat_1_num ?? "50+",    label: m.hero_stat_1_label ?? "Proyek selesai" },
+      { num: m.hero_stat_2_num ?? "95%",    label: m.hero_stat_2_label ?? "Klien puas" },
+      { num: m.hero_stat_3_num ?? "3 hari", label: m.hero_stat_3_label ?? "Rata-rata delivery" },
+    ];
+  } catch { return STAT_DEFAULTS; }
+}
+
+async function getTestimonials() {
+  try {
+    return await prisma.testimonial.findMany({
+      where: { featured: true },
+      orderBy: { order: "asc" },
+      select: { id: true, name: true, business: true, text: true, rating: true },
+    });
+  } catch { return []; }
+}
+
 async function getLatestArticles() {
   try {
     return await prisma.article.findMany({
@@ -42,16 +73,15 @@ const benefits = [
   { icon: Zap,        title: "Loading Super Cepat",         desc: "Website yang lambat kehilangan 53% pengunjung. Kami pastikan situs Anda memuat dalam detik." },
 ];
 
-const testimonials = [
-  { name: "Ibu Ratna",  business: "Klinik Gigi Sehat",      text: "Sejak punya website, pasien baru meningkat drastis. Banyak yang bilang nemunya dari Google!", rating: 5 },
-  { name: "Pak Budi",   business: "Resto Nusantara",        text: "Proses pembuatannya cepat dan hasilnya melebihi ekspektasi saya. Sangat profesional.", rating: 5 },
-  { name: "Mba Sinta",  business: "Butik Mode",             text: "Sekarang customer bisa lihat koleksi dan order langsung dari website. Omset naik 40%!", rating: 5 },
-  { name: "Pak Hendra", business: "Bengkel Motor Jaya",     text: "Awalnya ragu, tapi setelah website jadi, banyak pelanggan baru yang datang. Hasilnya memuaskan!", rating: 5 },
-  { name: "Ibu Dewi",   business: "Salon Kecantikan Ayu",   text: "Proses dari diskusi sampai website jadi sangat cepat, kurang dari seminggu sudah online. Desainnya cantik!", rating: 5 },
-];
+// Testimonials now managed from admin — fetched dynamically
 
 export default async function HomePage() {
-  const [articles, portfolios] = await Promise.all([getLatestArticles(), getFeaturedPortfolios()]);
+  const [articles, portfolios, testimonials, heroStats] = await Promise.all([
+    getLatestArticles(),
+    getFeaturedPortfolios(),
+    getTestimonials(),
+    getHeroStats(),
+  ]);
 
   return (
     <div>
@@ -101,7 +131,7 @@ export default async function HomePage() {
             </div>
           </FadeUp>
 
-          <HeroStats />
+          <HeroStats stats={heroStats} />
         </div>
       </section>
 

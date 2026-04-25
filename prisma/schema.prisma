@@ -106,6 +106,30 @@ model Portfolio {
   @@map("portfolios")
 }
 
+// ─── Site Content ─────────────────────────────────────────────────────────────
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  business  String
+  text      String   @db.Text
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  featured  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("site_settings")
+}
+
 // ─── Leads / CRM ──────────────────────────────────────────────────────────────
 
 model Lead {
