@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -80,7 +79,7 @@ const jsonLd = {
         "MFWEB membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google.",
       contactPoint: {
         "@type": "ContactPoint",
-        telephone: "+62-822-2168-2343",
+        telephone: process.env.WHATSAPP_NUMBER ? `+${process.env.WHATSAPP_NUMBER}` : "+6282221682343",
         contactType: "customer service",
         availableLanguage: ["Indonesian", "English"],
       },
@@ -107,11 +106,9 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <Script
-          id="json-ld-global"
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          strategy="afterInteractive"
         />
         {children}
       </body>
