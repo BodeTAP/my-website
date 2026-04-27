@@ -1,4 +1,5 @@
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { Check, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
@@ -105,10 +106,16 @@ export default function PricingSection() {
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             Paket <span className="text-gradient">Harga Transparan</span>
           </h2>
-          <p className="text-blue-200/60 max-w-xl mx-auto">
+          <p className="text-blue-200/60 max-w-xl mx-auto mb-5">
             Pilih paket yang sesuai dengan kebutuhan bisnis Anda. Semua paket sudah termasuk
             domain, hosting, dan konsultasi gratis sebelum pengerjaan.
           </p>
+          <Link href="/kalkulasi-harga">
+            <span className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm text-blue-300 border border-blue-500/20 hover:border-blue-400/40 transition-colors cursor-pointer">
+              <Calculator className="w-3.5 h-3.5" />
+              Hitung estimasi harga dengan fitur tambahan →
+            </span>
+          </Link>
         </FadeUp>
 
         <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
