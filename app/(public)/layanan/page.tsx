@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import {
   ArrowRight,
   Globe,
@@ -266,6 +265,11 @@ export default function LayananPage() {
                           <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>
                       </a>
+                      <Link href={`/layanan/${service.slug}`} className="mt-2 block">
+                        <Button variant="ghost" className="w-full h-9 text-blue-400/60 hover:text-blue-300 text-xs">
+                          Lihat Detail Layanan →
+                        </Button>
+                      </Link>
                     </div>
                   </HoverCard>
                 </StaggerItem>
@@ -384,16 +388,8 @@ export default function LayananPage() {
         </div>
       </section>
 
-      <Script
-        id="json-ld-breadcrumb-layanan"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-      <Script
-        id="json-ld-service"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
     </div>
   );
 }
