@@ -3,9 +3,16 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
-import { ArrowLeft, Calendar, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
+import ReadingProgress from "@/components/public/ReadingProgress";
+
+function estimateReadTime(html: string): number {
+  const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const words = text.split(/\s+/).filter((w) => w.length > 1).length;
+  return Math.max(1, Math.round(words / 200));
+}
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
@@ -128,8 +135,11 @@ export default async function ArticlePage({ params }: Params) {
     ],
   };
 
+  const readTime = estimateReadTime(article.content);
+
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <ReadingProgress />
       <div className="max-w-3xl mx-auto">
         {/* Back */}
         <Link href="/blog">
@@ -163,6 +173,10 @@ export default async function ArticlePage({ params }: Params) {
                 </time>
               </div>
             )}
+            <div className="flex items-center gap-1.5 text-blue-400/50 text-sm">
+              <Clock className="w-4 h-4" />
+              <span>{readTime} menit baca</span>
+            </div>
           </div>
           {article.tags && article.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
