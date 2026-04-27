@@ -2,15 +2,15 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Briefcase, Receipt, MessageSquare, CheckCircle, ArrowRight, Wrench } from "lucide-react";
+import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PROJECT_STEPS = ["DRAFTING", "DEVELOPMENT", "TESTING", "LIVE"] as const;
 const PROJECT_LABELS: Record<string, string> = {
-  DRAFTING: "Desain",
-  DEVELOPMENT: "Development",
-  TESTING: "Testing",
-  LIVE: "Live",
+  DRAFTING:    "Perancangan",
+  DEVELOPMENT: "Pengembangan",
+  TESTING:     "Testing",
+  LIVE:        "Live 🚀",
 };
 
 export default async function PortalDashboardPage() {
@@ -90,50 +90,64 @@ export default async function PortalDashboardPage() {
             Status Proyek: <span className="text-blue-300">{activeProject.name}</span>
           </h2>
 
-          {/* Progress stepper */}
-          <div className="flex items-center">
+          {/* Progress stepper — compact horizontal */}
+          <div className="flex items-center gap-0">
             {PROJECT_STEPS.map((step, i) => {
-              const isCompleted = PROJECT_STEPS.indexOf(activeProject.status as typeof PROJECT_STEPS[number]) > i;
-              const isCurrent = activeProject.status === step;
+              const currentIdx = PROJECT_STEPS.indexOf(activeProject.status as typeof PROJECT_STEPS[number]);
+              const isCompleted = currentIdx > i;
+              const isCurrent   = currentIdx === i;
+              const isLast      = i === PROJECT_STEPS.length - 1;
 
               return (
                 <div key={step} className="flex items-center flex-1 last:flex-none">
-                  <div className="flex flex-col items-center gap-1.5">
-                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border-2 transition-all ${
+                  <div className="flex flex-col items-center gap-2 min-w-0">
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border-2 shrink-0 transition-all ${
                       isCompleted
                         ? "bg-green-500 border-green-500"
                         : isCurrent
-                        ? "bg-blue-600 border-blue-500 ring-4 ring-blue-500/20"
-                        : "bg-transparent border-white/10"
+                        ? "bg-blue-600 border-blue-400 ring-4 ring-blue-500/20 shadow-lg shadow-blue-500/20"
+                        : "bg-[#0a1628] border-white/10"
                     }`}>
                       {isCompleted ? (
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      ) : isCurrent ? (
+                        <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
                       ) : (
-                        <span className={`text-xs font-bold ${isCurrent ? "text-white" : "text-blue-200/30"}`}>
-                          {i + 1}
-                        </span>
+                        <span className="text-[10px] font-bold text-blue-200/20">{i + 1}</span>
                       )}
                     </div>
-                    <span className={`text-[10px] sm:text-xs text-center leading-tight ${
-                      isCurrent ? "text-white font-semibold" : isCompleted ? "text-green-400" : "text-blue-200/30"
+                    <span className={`text-[10px] sm:text-xs text-center leading-tight px-0.5 ${
+                      isCurrent ? "text-white font-semibold" : isCompleted ? "text-green-400" : "text-blue-200/25"
                     }`}>
                       {PROJECT_LABELS[step]}
                     </span>
                   </div>
-                  {i < PROJECT_STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-1 sm:mx-2 mb-5 ${isCompleted ? "bg-green-500" : "bg-white/5"}`} />
+                  {!isLast && (
+                    <div className={`flex-1 h-0.5 mx-1.5 mb-5 rounded-full ${
+                      isCompleted ? "bg-green-500/60" : "bg-white/5"
+                    }`} />
                   )}
                 </div>
               );
             })}
           </div>
 
-          {activeProject.deadline && (
-            <p className="text-blue-200/40 text-xs mt-4">
-              Deadline:{" "}
-              {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(activeProject.deadline))}
-            </p>
-          )}
+          {/* Deadline + link */}
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
+            {activeProject.deadline ? (
+              <p className="text-blue-200/40 text-xs">
+                Target selesai:{" "}
+                <span className="text-blue-200/70 font-medium">
+                  {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(activeProject.deadline))}
+                </span>
+              </p>
+            ) : <span />}
+            <Link href="/portal/projects">
+              <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-white/5 text-xs h-7 px-2">
+                Detail <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
         </div>
       )}
 
@@ -157,7 +171,7 @@ export default async function PortalDashboardPage() {
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
                 {sub.package.features.slice(0, 4).map((f) => (
                   <span key={f} className="flex items-center gap-1.5 text-blue-200/50 text-xs">
-                    <CheckCircle className="w-3 h-3 text-green-400 shrink-0" />{f}
+                    <Check className="w-3 h-3 text-green-400 shrink-0" />{f}
                   </span>
                 ))}
               </div>
