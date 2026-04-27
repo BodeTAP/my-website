@@ -60,9 +60,14 @@ export default function Footer() {
           <p className="text-blue-100/30 text-xs">
             © {year} MFWEB. All rights reserved.
           </p>
-          <p className="text-blue-100/30 text-xs">
-            Dibuat dengan ❤️ untuk bisnis lokal Indonesia
-          </p>
+          <div className="flex items-center gap-4">
+            <Link href="/kebijakan-privasi" className="text-blue-100/30 hover:text-blue-300 text-xs transition-colors">
+              Kebijakan Privasi
+            </Link>
+            <Link href="/ketentuan-layanan" className="text-blue-100/30 hover:text-blue-300 text-xs transition-colors">
+              Ketentuan Layanan
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
