@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X } from "lucide-react";
+import NotificationBell from "@/components/portal/NotificationBell";
 
 const navItems = [
   { label: "Dashboard",   href: "/portal/dashboard", icon: LayoutDashboard },
@@ -52,10 +53,13 @@ export default function PortalShell({
         <Logo />
       </div>
 
-      {/* User info */}
+      {/* User info + Bell */}
       <div className="px-5 py-4 border-b border-white/5">
-        <div className="w-9 h-9 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-sm font-bold mb-2">
-          {userName.charAt(0).toUpperCase()}
+        <div className="flex items-center justify-between mb-2">
+          <div className="w-9 h-9 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-sm font-bold">
+            {userName.charAt(0).toUpperCase()}
+          </div>
+          <NotificationBell />
         </div>
         <p className="text-white text-sm font-medium line-clamp-1">{userName}</p>
         <p className="text-blue-200/40 text-xs line-clamp-1">{userEmail}</p>
@@ -136,9 +140,11 @@ export default function PortalShell({
             <Menu className="w-5 h-5" />
           </button>
           <Logo />
-          {/* Avatar singkat */}
-          <div className="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-xs font-bold">
-            {userName.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <div className="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-xs font-bold">
+              {userName.charAt(0).toUpperCase()}
+            </div>
           </div>
         </header>
 

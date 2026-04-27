@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -41,12 +42,20 @@ export async function POST(req: Request, { params }: Params) {
     }),
   ]);
 
-  // Notify client about admin reply
+  // Notify client about admin reply (email + in-app)
   const clientEmail = ticket.client.user.email;
   const clientName  = ticket.client.user.name ?? ticket.client.businessName;
+  const preview     = body.trim().slice(0, 80) + (body.trim().length > 80 ? "…" : "");
   if (clientEmail) {
     sendTicketReplyToClientEmail(clientEmail, clientName, ticket.subject, body.trim()).catch(() => {});
   }
+  createNotification(
+    ticket.clientId,
+    "TICKET_REPLY",
+    "Balasan Tiket Baru",
+    `Tim MFWEB membalas tiket "${ticket.subject}": ${preview}`,
+    "/portal/tickets",
+  ).catch(() => {});
 
   return NextResponse.json(message, { status: 201 });
 }

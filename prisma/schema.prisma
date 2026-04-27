@@ -283,6 +283,7 @@ model Client {
   tickets       Ticket[]
   subscriptions Subscription[]
   onboardings   OnboardingForm[]
+  notifications Notification[]
 
   @@map("clients")
 }
@@ -404,4 +405,29 @@ enum ProposalStatus {
   SENT
   ACCEPTED
   DECLINED
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  clientId  String
+  type      NotificationType
+  title     String
+  body      String
+  read      Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, read])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  INVOICE_NEW
+  TICKET_REPLY
+  PROJECT_STATUS
+  GENERAL
 }

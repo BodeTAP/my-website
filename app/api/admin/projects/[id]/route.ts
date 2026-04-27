@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendProjectStatusEmail } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
+
+const STATUS_LABELS: Record<string, string> = {
+  DRAFTING:    "Perancangan & Briefing",
+  DEVELOPMENT: "Pengembangan Website",
+  TESTING:     "Testing & Review",
+  LIVE:        "Live! 🚀",
+};
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -29,9 +37,17 @@ export async function PATCH(req: Request, { params }: Params) {
   if (status) {
     const clientEmail = project.client.user.email;
     const clientName  = project.client.user.name ?? project.client.businessName;
+    const statusLabel = STATUS_LABELS[status] ?? status;
     if (clientEmail) {
       sendProjectStatusEmail(clientEmail, clientName, project.name, status).catch(() => {});
     }
+    createNotification(
+      project.clientId,
+      "PROJECT_STATUS",
+      "Status Proyek Diperbarui",
+      `${project.name} telah memasuki tahap ${statusLabel}.`,
+      "/portal/projects",
+    ).catch(() => {});
   }
 
   return NextResponse.json(project);

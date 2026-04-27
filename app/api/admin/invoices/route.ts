@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -39,13 +40,21 @@ export async function POST(req: Request) {
     include: { client: { include: { user: { select: { name: true, email: true } } } } },
   });
 
-  // Non-blocking email notification
+  // Non-blocking email + in-app notification
   const clientEmail = invoice.client.user.email;
   const clientName  = invoice.client.user.name ?? invoice.client.businessName;
+  const rpAmount    = `Rp ${invoice.amount.toLocaleString("id-ID")}`;
   if (clientEmail) {
     sendInvoiceCreatedEmail(clientEmail, clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate)
       .catch(() => {});
   }
+  createNotification(
+    invoice.clientId,
+    "INVOICE_NEW",
+    "Invoice Baru Diterbitkan",
+    `Invoice ${invoice.invoiceNo} sebesar ${rpAmount} telah diterbitkan. Silakan cek halaman invoice.`,
+    "/portal/invoices",
+  ).catch(() => {});
 
   return NextResponse.json(invoice, { status: 201 });
 }
