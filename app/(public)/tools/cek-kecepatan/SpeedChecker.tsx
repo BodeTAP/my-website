@@ -16,6 +16,12 @@ type Result = {
   strategy: Strategy;
   metrics: Record<string, Metric>;
   opportunities: { title: string; description: string; displayValue?: string }[];
+  cached?: boolean;
+};
+type ErrorState = {
+  message: string;
+  quotaExceeded?: boolean;
+  directUrl?: string;
 };
 
 const SCORE_COLOR = (s: number) =>
@@ -76,7 +82,7 @@ export default function SpeedChecker() {
   const [strategy, setStrategy] = useState<Strategy>("mobile");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorState | null>(null);
 
   async function handleCheck() {
     if (!url.trim()) return;
@@ -86,10 +92,17 @@ export default function SpeedChecker() {
     try {
       const res = await fetch(`/api/tools/pagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}`);
       const data = await res.json();
-      if (!res.ok) setError(data.error ?? "Terjadi kesalahan");
-      else setResult(data as Result);
+      if (!res.ok) {
+        setError({
+          message: data.error ?? "Terjadi kesalahan",
+          quotaExceeded: data.quotaExceeded ?? false,
+          directUrl: data.directUrl,
+        });
+      } else {
+        setResult(data as Result);
+      }
     } catch {
-      setError("Tidak dapat terhubung ke server. Coba lagi.");
+      setError({ message: "Tidak dapat terhubung ke server. Coba lagi." });
     } finally {
       setLoading(false);
     }
@@ -157,10 +170,27 @@ export default function SpeedChecker() {
         {error && (
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="glass rounded-xl p-4 border border-red-500/20 flex items-start gap-3"
+            className={`glass rounded-xl p-4 border flex flex-col gap-3 ${
+              error.quotaExceeded ? "border-amber-500/25" : "border-red-500/20"
+            }`}
           >
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-            <p className="text-red-300 text-sm">{error}</p>
+            <div className="flex items-start gap-3">
+              <AlertCircle className={`w-5 h-5 shrink-0 mt-0.5 ${error.quotaExceeded ? "text-amber-400" : "text-red-400"}`} />
+              <p className={`text-sm ${error.quotaExceeded ? "text-amber-300" : "text-red-300"}`}>
+                {error.message}
+              </p>
+            </div>
+            {error.quotaExceeded && error.directUrl && (
+              <a
+                href={error.directUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-medium text-blue-300 hover:text-blue-200 transition-colors bg-blue-500/10 border border-blue-500/20 rounded-lg px-4 py-2.5 w-fit"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Cek langsung di Google PageSpeed Insights →
+              </a>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -179,9 +209,16 @@ export default function SpeedChecker() {
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <ScoreGauge score={result.score} />
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="text-blue-200/40 text-xs mb-1">
-                    Performance Score ({result.strategy === "mobile" ? "Mobile" : "Desktop"})
-                  </p>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <p className="text-blue-200/40 text-xs">
+                      Performance Score ({result.strategy === "mobile" ? "Mobile" : "Desktop"})
+                    </p>
+                    {result.cached && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        cached
+                      </span>
+                    )}
+                  </div>
                   <h3 className="text-white font-bold text-base mb-2 break-all">{result.url}</h3>
                   <p className="text-blue-200/50 text-sm">
                     {result.score >= 90
