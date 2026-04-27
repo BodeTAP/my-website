@@ -70,11 +70,14 @@ export async function GET(req: NextRequest) {
     `?url=${encodeURIComponent(targetUrl)}&strategy=${strategy}&category=performance` +
     (apiKey ? `&key=${apiKey}` : "");
 
+  const directUrl = `https://pagespeed.web.dev/analysis?url=${encodeURIComponent(targetUrl)}&form_factor=${strategy}`;
+
   try {
     const res = await fetch(apiUrl, { signal: AbortSignal.timeout(35_000) });
     const data = await res.json() as {
       error?: { message: string; code?: number; status?: string };
       lighthouseResult?: {
+        runtimeError?: { code: string; message: string };
         categories: Record<string, { score: number }>;
         audits: Record<string, LighthouseAudit>;
       };
@@ -89,10 +92,27 @@ export async function GET(req: NextRequest) {
             ? "Kuota API hari ini habis. Coba lagi besok, atau cek langsung di Google PageSpeed Insights."
             : errMsg || "Gagal mengambil data dari PageSpeed API",
           quotaExceeded: isQuota,
-          directUrl: `https://pagespeed.web.dev/analysis?url=${encodeURIComponent(targetUrl)}&form_factor=${strategy}`,
+          directUrl,
         },
         { status: 400 }
       );
+    }
+
+    // Lighthouse runtime errors (HTTP 200 but page couldn't be audited)
+    const runtimeError = data.lighthouseResult?.runtimeError;
+    if (runtimeError?.code) {
+      const RUNTIME_MESSAGES: Record<string, string> = {
+        NO_FCP:                    "Halaman tidak me-render konten apapun. Website mungkin memblokir crawler, memerlukan login, atau sangat lambat saat diakses Google.",
+        FAILED_DOCUMENT_REQUEST:   "Google tidak bisa mengakses halaman ini. Pastikan URL benar dan website online.",
+        ERRORED_DOCUMENT_REQUEST:  "Terjadi error saat mengambil halaman. Website mungkin mengembalikan error (4xx/5xx).",
+        CHROME_CRASH:              "Browser Lighthouse crash saat mengaudit halaman ini. Coba beberapa saat lagi.",
+        PROTOCOL_TIMEOUT:          "Halaman terlalu lama merespons dan timeout saat diaudit.",
+        DNS_FAILURE:               "Nama domain tidak ditemukan. Pastikan URL sudah benar.",
+        INSECURE_DOCUMENT_REQUEST: "Halaman menggunakan konten tidak aman (mixed content) yang menghalangi audit.",
+      };
+      const friendlyMsg = RUNTIME_MESSAGES[runtimeError.code]
+        ?? `Lighthouse tidak bisa mengaudit halaman ini (${runtimeError.code}).`;
+      return NextResponse.json({ error: friendlyMsg, directUrl }, { status: 400 });
     }
 
     const cats = data.lighthouseResult?.categories ?? {};
