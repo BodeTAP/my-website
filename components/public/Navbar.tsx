@@ -13,6 +13,7 @@ const navLinks = [
   { label: "Portofolio", href: "/portfolio" },
   { label: "Tentang Kami", href: "/about" },
   { label: "Blog",       href: "/blog" },
+  { label: "Tools",      href: "/tools" },
   { label: "Kontak",     href: "/contact" },
 ];
 

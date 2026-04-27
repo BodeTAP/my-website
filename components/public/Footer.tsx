@@ -28,6 +28,7 @@ export default function Footer() {
                 { label: "Portofolio", href: "/portfolio" },
                 { label: "Tentang Kami", href: "/about" },
                 { label: "Blog", href: "/blog" },
+                { label: "Tools Gratis", href: "/tools" },
                 { label: "Konsultasi", href: "/contact" },
               ].map((l) => (
                 <li key={l.href}>
