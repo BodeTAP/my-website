@@ -41,13 +41,15 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  // Source maps upload (optional — requires SENTRY_AUTH_TOKEN env var)
-  silent: !process.env.CI,
+  // Suppress build-time output (auth token warning, source map upload logs)
+  silent: true,
   widenClientFileUpload: true,
 
   // Route errors through /monitoring tunnel to avoid ad blockers
   tunnelRoute: "/monitoring",
 
-  // Remove Sentry SDK logger in production
-  disableLogger: true,
+  // Remove Sentry debug logger from bundle (replaces deprecated disableLogger)
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+  },
 });
