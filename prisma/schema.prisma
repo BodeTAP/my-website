@@ -312,6 +312,7 @@ model Invoice {
   invoiceNo   String        @unique
   description String?
   amount      Int
+  lineItems   Json          @default("[]")
   dueDate     DateTime?
   status      InvoiceStatus @default(UNPAID)
   whatsappMsg String?

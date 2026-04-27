@@ -186,17 +186,27 @@ export async function GET(_req: Request, { params }: Params) {
   txt("DESKRIPSI LAYANAN", ML + 10, TBL_TOP + 10, 7, bold, C.muted);
   txtR("JUMLAH",           ML + CW - 10, TBL_TOP + 10, 7, bold, C.muted);
 
-  // Row
-  const ROW_TOP = TBL_TOP + TBL_HEAD_H + 14;
-  const desc    = invoice.description ?? "Jasa Pembuatan Website";
-  txt(desc, ML + 10, ROW_TOP, 10, bold);
-  txt(`MFWEB — ${invoice.invoiceNo}`, ML + 10, ROW_TOP + 15, 8, regular, C.muted);
+  // Rows — dynamic line items if available, else single row
+  type InvItem = { label: string; amount: number };
+  const rawItems = (invoice as { lineItems?: unknown }).lineItems;
+  const lineItems: InvItem[] = Array.isArray(rawItems) && rawItems.length > 0
+    ? (rawItems as InvItem[])
+    : [{ label: invoice.description ?? "Jasa Pembuatan Website", amount: invoice.amount }];
 
-  const amtStr = formatRupiah(invoice.amount);
-  txtR(amtStr, ML + CW - 10, ROW_TOP, 10, bold);
+  let rowCursor = TBL_TOP + TBL_HEAD_H;
+  for (let i = 0; i < lineItems.length; i++) {
+    const item = lineItems[i];
+    const isFirst = i === 0;
+    const rowH = isFirst ? 36 : 22;
+    rowCursor += isFirst ? 14 : 6;
+    txt(item.label, ML + 10, rowCursor, isFirst ? 10 : 9, isFirst ? bold : regular, C.text);
+    if (isFirst) txt(`MFWEB — ${invoice.invoiceNo}`, ML + 10, rowCursor + 14, 7.5, regular, C.muted);
+    txtR(formatRupiah(item.amount), ML + CW - 10, rowCursor, isFirst ? 10 : 9, isFirst ? bold : regular,
+         isFirst ? C.text : C.muted);
+    rowCursor += rowH;
+  }
 
-  // Row bottom separator
-  const ROW_BOTTOM = ROW_TOP + 30;
+  const ROW_BOTTOM = rowCursor + 8;
   hline(ROW_BOTTOM);
 
   // ── 6. TOTAL BOX ───────────────────────────────────────────────────────────

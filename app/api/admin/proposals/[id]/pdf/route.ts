@@ -121,14 +121,14 @@ export async function GET(_req: Request, { params }: Params) {
   ];
 
   let rowY = TBL_Y + 26;
-  const ROW_H = 20;
 
   for (let i = 0; i < allItems.length; i++) {
     const item = allItems[i];
     const isBase = i === 0;
-    txt(item.label, ML + 8, rowY + 13, isBase ? 9 : 8.5, isBase ? bold : reg, isBase ? C.text : C.muted);
-    txtR(rp(item.price), ML + CW - 8, rowY + 13, isBase ? 9 : 8.5, isBase ? bold : reg, isBase ? C.text : C.muted);
-    rowY += ROW_H;
+    const rowH = isBase ? 22 : 17;          // base row slightly taller
+    txt(item.label, ML + 8, rowY + (isBase ? 14 : 11), isBase ? 9 : 8, isBase ? bold : reg, isBase ? C.text : C.muted);
+    txtR(rp(item.price), ML + CW - 8, rowY + (isBase ? 14 : 11), isBase ? 9 : 8, isBase ? bold : reg, isBase ? C.text : C.muted);
+    rowY += rowH;
   }
 
   // Total box
@@ -177,9 +177,10 @@ export async function GET(_req: Request, { params }: Params) {
   }
 
   // ── 6. NEXT STEPS ───────────────────────────────────────────────────────────
-  const NS_Y = afterMeta + 4;
-  rect(ML, NS_Y, CW, 82, hex("#f8fafc"));
-  rect(ML, NS_Y, 4,  82, C.accent);
+  const NS_H   = 116;
+  const NS_Y   = afterMeta + 4;
+  rect(ML, NS_Y, CW, NS_H, hex("#f8fafc"));
+  rect(ML, NS_Y, 4,  NS_H, C.accent);
 
   txt("LANGKAH SELANJUTNYA", ML + 14, NS_Y + 14, 8, bold, C.accent);
 
@@ -189,14 +190,16 @@ export async function GET(_req: Request, { params }: Params) {
     "Isi formulir onboarding untuk detail konten & aset bisnis",
     "Tim kami memulai pengerjaan sesuai timeline yang disepakati",
   ];
+  // step spacing 16px — clear of 8pt text which takes ~10px
   steps.forEach((s, i) => {
-    txt(`${i + 1}.  ${s}`, ML + 14, NS_Y + 28 + i * 14, 8, reg, C.muted);
+    txt(`${i + 1}.  ${s}`, ML + 14, NS_Y + 30 + i * 16, 8, reg, C.muted);
   });
 
   const WA_NUM = process.env.WHATSAPP_NUMBER ?? "6282221682343";
   const WA_MSG = `Halo MFWEB, saya ingin konfirmasi proposal ${proposal.proposalNo} untuk ${proposal.businessName}.`;
-  txt(`Hubungi kami: wa.me/${WA_NUM}  (ketik: "${WA_MSG.slice(0, 55)}…")`,
-      ML + 14, NS_Y + 82 - 8, 7, reg, C.muted);
+  txt(`Hubungi kami: wa.me/${WA_NUM}`,  ML + 14, NS_Y + NS_H - 22, 7.5, bold,  C.accent);
+  txt(`Ketik: "${WA_MSG.slice(0, 72)}${WA_MSG.length > 72 ? "…" : ""}"`,
+      ML + 14, NS_Y + NS_H - 9,  6.5, reg,  C.muted);
 
   // ── 7. FOOTER ───────────────────────────────────────────────────────────────
   hline(H - 44);

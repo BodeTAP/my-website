@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { clientId, invoiceNo, description, amount, dueDate, whatsappMsg } = await req.json();
+  const { clientId, invoiceNo, description, amount, lineItems, dueDate, whatsappMsg } = await req.json();
 
   if (!clientId || !invoiceNo?.trim() || !amount) {
     return NextResponse.json({ error: "Klien, nomor invoice, dan jumlah wajib diisi." }, { status: 400 });
@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       invoiceNo: invoiceNo.trim(),
       description: description?.trim() || null,
       amount: Math.round(Number(amount)),
+      lineItems: Array.isArray(lineItems) ? lineItems : [],
       dueDate: dueDate ? new Date(dueDate) : null,
       whatsappMsg: whatsappMsg?.trim() || null,
       status: "UNPAID",
