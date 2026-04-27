@@ -13,6 +13,11 @@ export async function middleware(req: NextRequest) {
     !pathname.startsWith("/portal/register") &&
     !pathname.startsWith("/portal/reset-password");
 
+  // Onboarding forms are public (accessed via token)
+  if (pathname.startsWith("/onboarding")) {
+    return NextResponse.next();
+  }
+
   if (!isAdminProtected && !isPortalProtected) {
     return NextResponse.next();
   }
@@ -42,5 +47,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/portal/:path*"],
+  matcher: ["/admin/:path*", "/portal/:path*", "/onboarding/:path*"],
 };

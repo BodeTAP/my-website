@@ -121,6 +121,47 @@ model Portfolio {
   @@map("portfolios")
 }
 
+// ─── Onboarding ───────────────────────────────────────────────────────────────
+
+model OnboardingForm {
+  id        String           @id @default(cuid())
+  clientId  String?
+  token     String           @unique @default(cuid())
+  status    OnboardingStatus @default(PENDING)
+
+  // Step 1 — Bisnis
+  businessName    String?
+  industryType    String?
+  businessDesc    String?  @db.Text
+  targetAudience  String?
+
+  // Step 2 — Website
+  websiteType     String?
+  referenceUrls   String[]
+  featuresWanted  String[]
+  colorStyle      String?
+
+  // Step 3 — Aset
+  logoUrl         String?
+  driveLink       String?
+  instagram       String?
+  facebook        String?
+  tiktok          String?
+  hasDomain       Boolean  @default(false)
+  domainName      String?
+
+  // Step 4 — Timeline
+  deadline        DateTime?
+  notes           String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@map("onboarding_forms")
+}
+
 // ─── Maintenance & Retainer ───────────────────────────────────────────────────
 
 model MaintenancePackage {
@@ -208,11 +249,12 @@ model Client {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects      Project[]
   invoices      Invoice[]
   tickets       Ticket[]
   subscriptions Subscription[]
+  onboardings   OnboardingForm[]
 
   @@map("clients")
 }
@@ -314,6 +356,12 @@ enum TicketStatus {
   OPEN
   IN_PROGRESS
   CLOSED
+}
+
+enum OnboardingStatus {
+  PENDING
+  REVIEWED
+  COMPLETED
 }
 
 enum SubscriptionStatus {
