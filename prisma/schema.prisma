@@ -121,6 +121,40 @@ model Portfolio {
   @@map("portfolios")
 }
 
+// ─── Maintenance & Retainer ───────────────────────────────────────────────────
+
+model MaintenancePackage {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  features    String[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("maintenance_packages")
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  clientId        String
+  packageId       String
+  status          SubscriptionStatus @default(ACTIVE)
+  startDate       DateTime           @default(now())
+  nextBillingDate DateTime
+  notes           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  client  Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  package MaintenancePackage @relation(fields: [packageId], references: [id])
+
+  @@map("subscriptions")
+}
+
 // ─── Site Content ─────────────────────────────────────────────────────────────
 
 model Testimonial {
@@ -174,10 +208,11 @@ model Client {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projects Project[]
-  invoices Invoice[]
-  tickets  Ticket[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects      Project[]
+  invoices      Invoice[]
+  tickets       Ticket[]
+  subscriptions Subscription[]
 
   @@map("clients")
 }
@@ -279,4 +314,10 @@ enum TicketStatus {
   OPEN
   IN_PROGRESS
   CLOSED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
 }

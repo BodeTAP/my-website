@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Briefcase, Receipt, MessageSquare, CheckCircle, ArrowRight } from "lucide-react";
+import { Briefcase, Receipt, MessageSquare, CheckCircle, ArrowRight, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PROJECT_STEPS = ["DRAFTING", "DEVELOPMENT", "TESTING", "LIVE"] as const;
@@ -25,6 +25,12 @@ export default async function PortalDashboardPage() {
           projects: { orderBy: { createdAt: "desc" }, take: 1 },
           invoices: { where: { status: "UNPAID" }, orderBy: { dueDate: "asc" }, take: 3 },
           tickets: { where: { status: { not: "CLOSED" } }, orderBy: { updatedAt: "desc" }, take: 3 },
+          subscriptions: {
+            where: { status: "ACTIVE" },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            include: { package: { select: { name: true, price: true, features: true } } },
+          },
         },
       },
     },
@@ -47,6 +53,12 @@ export default async function PortalDashboardPage() {
         projects: { orderBy: { createdAt: "desc" }, take: 1 },
         invoices: { where: { status: "UNPAID" }, orderBy: { dueDate: "asc" }, take: 3 },
         tickets: { where: { status: { not: "CLOSED" } }, orderBy: { updatedAt: "desc" }, take: 3 },
+        subscriptions: {
+          where: { status: "ACTIVE" },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          include: { package: { select: { name: true, price: true, features: true } } },
+        },
       },
     });
   }
@@ -124,6 +136,35 @@ export default async function PortalDashboardPage() {
           )}
         </div>
       )}
+
+      {/* Active maintenance subscription */}
+      {client.subscriptions[0] && (() => {
+        const sub = client.subscriptions[0];
+        return (
+          <div className="glass rounded-2xl p-4 sm:p-5 mb-5 border border-blue-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Wrench className="w-4 h-4 text-blue-400" />
+              <span className="text-white text-sm font-semibold">Paket Maintenance Aktif</span>
+              <span className="ml-auto text-xs text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">Aktif</span>
+            </div>
+            <p className="text-blue-300 font-bold text-lg mb-1">
+              {sub.package.name}
+              <span className="text-blue-200/40 text-sm font-normal ml-2">
+                Rp {sub.package.price.toLocaleString("id-ID")}/bln
+              </span>
+            </p>
+            {sub.package.features.length > 0 && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                {sub.package.features.slice(0, 4).map((f) => (
+                  <span key={f} className="flex items-center gap-1.5 text-blue-200/50 text-xs">
+                    <CheckCircle className="w-3 h-3 text-green-400 shrink-0" />{f}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Quick stats */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
