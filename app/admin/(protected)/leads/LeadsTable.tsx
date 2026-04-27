@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { MessageCircle, ChevronDown, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Lead = {
@@ -155,19 +156,18 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <a
-                      href={WA(l.whatsapp, l.name)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button
-                        size="sm"
-                        className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5 mr-1" />
-                        WA
-                      </Button>
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <a href={WA(l.whatsapp, l.name)} target="_blank" rel="noopener noreferrer">
+                        <Button size="sm" className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs">
+                          <MessageCircle className="w-3.5 h-3.5 mr-1" /> WA
+                        </Button>
+                      </a>
+                      <Link href={`/admin/proposals/new?leadId=${l.id}`}>
+                        <Button size="sm" variant="outline" className="border-white/10 text-blue-300 hover:bg-white/5 h-8 px-3 text-xs">
+                          <ScrollText className="w-3.5 h-3.5 mr-1" /> Proposal
+                        </Button>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))
