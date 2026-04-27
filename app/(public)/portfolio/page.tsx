@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Globe, TrendingUp, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import Breadcrumb from "@/components/public/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
@@ -24,6 +25,7 @@ export default async function PortfolioPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        <Breadcrumb items={[{ label: "Portfolio" }]} />
         {/* Header */}
         <FadeUp className="text-center mb-14">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">

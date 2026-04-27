@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PriceCalculator from "./PriceCalculator";
+import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Kalkulator Estimasi Harga Website",
@@ -11,6 +12,7 @@ export default function KalkulasiPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        <Breadcrumb items={[{ label: "Kalkulator Harga" }]} />
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-blue-300 mb-6 border border-blue-500/20">
             🧮 Kalkulator Harga

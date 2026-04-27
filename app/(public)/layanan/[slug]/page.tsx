@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowRight, CheckCircle, Clock, Smartphone, ArrowLeft,
+  ArrowRight, CheckCircle, Clock, Smartphone,
   Megaphone, Building2, ShoppingCart, Search, Star,
   Zap, Shield, Globe, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
+import Breadcrumb from "@/components/public/Breadcrumb";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
@@ -295,16 +296,7 @@ export default async function ServiceDetailPage({ params }: Params) {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-600/8 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
 
         <div className="max-w-4xl mx-auto relative">
-          {/* Breadcrumb */}
-          <FadeUp>
-            <div className="flex items-center gap-2 text-blue-200/40 text-sm mb-8">
-              <Link href="/layanan" className="hover:text-blue-300 transition-colors flex items-center gap-1">
-                <ArrowLeft className="w-3.5 h-3.5" /> Semua Layanan
-              </Link>
-              <span>/</span>
-              <span className="text-blue-200/60">{service.title}</span>
-            </div>
-          </FadeUp>
+          <Breadcrumb items={[{ label: "Layanan", href: "/layanan" }, { label: service.title }]} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>

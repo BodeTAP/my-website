@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight } from "lucide-react";
+import Breadcrumb from "@/components/public/Breadcrumb";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
 export const metadata: Metadata = {
@@ -45,6 +46,7 @@ export default async function BlogPage({
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        <Breadcrumb items={[{ label: "Blog" }]} />
         <FadeUp className="text-center mb-10">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             Blog & <span className="text-gradient">Panduan</span>

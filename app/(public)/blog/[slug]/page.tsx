@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import ReadingProgress from "@/components/public/ReadingProgress";
+import Breadcrumb from "@/components/public/Breadcrumb";
 
 function estimateReadTime(html: string): number {
   const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -141,13 +142,10 @@ export default async function ArticlePage({ params }: Params) {
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <ReadingProgress />
       <div className="max-w-3xl mx-auto">
-        {/* Back */}
-        <Link href="/blog">
-          <Button variant="ghost" size="sm" className="mb-8 text-blue-400 hover:text-blue-300 hover:bg-white/5 -ml-2">
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Kembali ke Blog
-          </Button>
-        </Link>
+        <Breadcrumb items={[
+          { label: "Blog", href: "/blog" },
+          { label: article.title },
+        ]} />
 
         {/* Cover */}
         {article.coverImage && (
