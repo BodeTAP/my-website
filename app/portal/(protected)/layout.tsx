@@ -10,6 +10,7 @@ export default async function PortalLayout({ children }: { children: React.React
     <PortalShell
       userName={session.user?.name ?? "Klien"}
       userEmail={session.user?.email ?? ""}
+      userImage={session.user?.image ?? null}
     >
       {children}
     </PortalShell>

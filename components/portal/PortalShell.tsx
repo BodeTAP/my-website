@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle } from "lucide-react";
 import NotificationBell from "@/components/portal/NotificationBell";
 
 const navItems = [
@@ -13,6 +13,7 @@ const navItems = [
   { label: "Proyek Saya", href: "/portal/projects",  icon: Briefcase },
   { label: "Invoice",     href: "/portal/invoices",  icon: Receipt },
   { label: "Bantuan",     href: "/portal/tickets",   icon: MessageSquare },
+  { label: "Profil",      href: "/portal/profile",   icon: UserCircle },
 ];
 
 const Logo = () => (
@@ -29,10 +30,12 @@ export default function PortalShell({
   children,
   userName,
   userEmail,
+  userImage,
 }: {
   children: React.ReactNode;
   userName: string;
   userEmail: string;
+  userImage?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -56,9 +59,21 @@ export default function PortalShell({
       {/* User info + Bell */}
       <div className="px-5 py-4 border-b border-white/5">
         <div className="flex items-center justify-between mb-2">
-          <div className="w-9 h-9 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-sm font-bold">
-            {userName.charAt(0).toUpperCase()}
-          </div>
+          <Link href="/portal/profile">
+            {userImage ? (
+              <Image
+                src={userImage}
+                alt={userName}
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-blue-500/20 hover:ring-blue-400/40 transition-all"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-sm font-bold hover:bg-blue-600/50 transition-colors">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </Link>
           <NotificationBell />
         </div>
         <p className="text-white text-sm font-medium line-clamp-1">{userName}</p>
@@ -140,11 +155,23 @@ export default function PortalShell({
             <Menu className="w-5 h-5" />
           </button>
           <Logo />
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <NotificationBell />
-            <div className="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-xs font-bold">
-              {userName.charAt(0).toUpperCase()}
-            </div>
+            <Link href="/portal/profile">
+              {userImage ? (
+                <Image
+                  src={userImage}
+                  alt={userName}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/20"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-xs font-bold">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </Link>
           </div>
         </header>
 
