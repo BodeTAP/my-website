@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
+import { sendWA, waMsg } from "@/lib/whatsapp";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -55,6 +56,12 @@ export async function POST(req: Request) {
     `Invoice ${invoice.invoiceNo} sebesar ${rpAmount} telah diterbitkan. Silakan cek halaman invoice.`,
     "/portal/invoices",
   ).catch(() => {});
+  if (invoice.client.phone) {
+    sendWA(
+      invoice.client.phone,
+      waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate),
+    ).catch(() => {});
+  }
 
   return NextResponse.json(invoice, { status: 201 });
 }

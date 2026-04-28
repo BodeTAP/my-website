@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendProjectStatusEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
+import { sendWA, waMsg } from "@/lib/whatsapp";
 
 const STATUS_LABELS: Record<string, string> = {
   DRAFTING:    "Perancangan & Briefing",
@@ -48,6 +49,12 @@ export async function PATCH(req: Request, { params }: Params) {
       `${project.name} telah memasuki tahap ${statusLabel}.`,
       "/portal/projects",
     ).catch(() => {});
+    if (project.client.phone) {
+      sendWA(
+        project.client.phone,
+        waMsg.projectStatus(clientName, project.name, status),
+      ).catch(() => {});
+    }
   }
 
   return NextResponse.json(project);

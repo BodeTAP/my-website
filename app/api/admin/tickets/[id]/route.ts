@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
+import { sendWA, waMsg } from "@/lib/whatsapp";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -56,6 +57,12 @@ export async function POST(req: Request, { params }: Params) {
     `Tim MFWEB membalas tiket "${ticket.subject}": ${preview}`,
     "/portal/tickets",
   ).catch(() => {});
+  if (ticket.client.phone) {
+    sendWA(
+      ticket.client.phone,
+      waMsg.ticketReply(clientName, ticket.subject, preview),
+    ).catch(() => {});
+  }
 
   return NextResponse.json(message, { status: 201 });
 }
