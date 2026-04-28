@@ -61,6 +61,8 @@ export async function POST(req: Request) {
       invoice.client.phone,
       waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate),
     ).catch(() => {});
+  } else {
+    console.warn(`[WA] Invoice ${invoice.invoiceNo}: client.phone kosong untuk clientId=${invoice.clientId} — WA dilewati`);
   }
 
   return NextResponse.json(invoice, { status: 201 });

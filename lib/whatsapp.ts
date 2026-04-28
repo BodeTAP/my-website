@@ -1,7 +1,7 @@
 const FONNTE_URL = "https://api.fonnte.com/send";
 
 /** Normalize Indonesian phone to 628xxx format (no +, no spaces) */
-function normalizePhone(raw: string): string {
+export function normalizePhone(raw: string): string {
   let n = raw.replace(/\D/g, "");
   if (n.startsWith("0"))  n = "62" + n.slice(1);
   if (n.startsWith("8") && n.length <= 13) n = "62" + n;
@@ -11,19 +11,42 @@ function normalizePhone(raw: string): string {
 /** Send a WhatsApp message via Fonnte. Returns true on success. */
 export async function sendWA(to: string, message: string): Promise<boolean> {
   const key = process.env.FONNTE_API_KEY;
-  if (!key || !to) return false;
+
+  if (!key) {
+    console.error("[WA] FONNTE_API_KEY belum dikonfigurasi");
+    return false;
+  }
+  if (!to?.trim()) {
+    console.warn("[WA] Nomor tujuan kosong — pesan tidak dikirim");
+    return false;
+  }
 
   const phone = normalizePhone(to);
-  if (phone.length < 10) return false;
+  if (phone.length < 10) {
+    console.error("[WA] Nomor tidak valid setelah normalisasi:", phone);
+    return false;
+  }
+
+  // Fonnte lebih stabil dengan URLSearchParams daripada JSON
+  const body = new URLSearchParams({ target: phone, message, countryCode: "62" });
 
   try {
     const res = await fetch(FONNTE_URL, {
       method: "POST",
-      headers: { Authorization: key, "Content-Type": "application/json" },
-      body: JSON.stringify({ target: phone, message, countryCode: "62" }),
+      headers: { Authorization: key },
+      body,
     });
-    return res.ok;
-  } catch {
+    const data = await res.json().catch(() => null) as Record<string, unknown> | null;
+
+    if (!res.ok || data?.status === false) {
+      console.error("[WA] Fonnte error:", res.status, JSON.stringify(data));
+      return false;
+    }
+
+    console.log("[WA] Terkirim ke", phone, "→", data?.status ?? "ok");
+    return true;
+  } catch (err) {
+    console.error("[WA] Fetch error:", err);
     return false;
   }
 }
@@ -40,9 +63,8 @@ const PROJECT_STAGE: Record<string, { label: string; desc: string }> = {
 };
 
 export const waMsg = {
-  /** Sent to client when a new invoice is issued */
   invoiceNew(name: string, invoiceNo: string, amount: number, dueDate?: Date | null) {
-    const rp = `Rp ${amount.toLocaleString("id-ID")}`;
+    const rp  = `Rp ${amount.toLocaleString("id-ID")}`;
     const due = dueDate
       ? `\n📅 Jatuh tempo: ${new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(dueDate)}`
       : "";
@@ -56,7 +78,6 @@ export const waMsg = {
     );
   },
 
-  /** Sent to client when project status changes */
   projectStatus(name: string, projectName: string, status: string) {
     const stage = PROJECT_STAGE[status] ?? { label: status, desc: "" };
     return (
@@ -69,7 +90,6 @@ export const waMsg = {
     );
   },
 
-  /** Sent to client when admin replies to a ticket */
   ticketReply(name: string, subject: string, preview: string) {
     return (
       `Halo ${name}! 👋\n\n` +
@@ -81,7 +101,6 @@ export const waMsg = {
     );
   },
 
-  /** Sent to admin when a new lead submits the contact form */
   newLead(name: string, businessName: string, whatsapp: string, domain?: string | null, message?: string | null) {
     const lines = [
       `🔔 *Lead Baru Masuk!*\n`,
@@ -89,7 +108,7 @@ export const waMsg = {
       `🏢 Bisnis: ${businessName}`,
       `📱 WA: ${whatsapp}`,
     ];
-    if (domain) lines.push(`🌐 Domain: ${domain}`);
+    if (domain)  lines.push(`🌐 Domain: ${domain}`);
     if (message) lines.push(`\n💬 Pesan:\n${message}`);
     lines.push(`\nBuka admin panel untuk follow-up.`);
     return lines.join("\n");
