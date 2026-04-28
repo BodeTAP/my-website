@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Gauge, SearchCheck, Wand2, ArrowRight } from "lucide-react";
+import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, ArrowRight } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
 export const metadata: Metadata = {
@@ -35,12 +35,37 @@ const tools = [
     desc: "Generate ratusan ide nama bisnis dan slogan dalam hitungan detik. Pilih industri dan gaya, langsung dapat inspirasi.",
     tags: ["10 Industri", "5 Gaya Nama", "Lengkap dengan Slogan"],
   },
+  {
+    href: "/tools/qr-code",
+    icon: QrCode,
+    color: "green" as const,
+    label: "Generator QR Code",
+    desc: "Buat QR Code untuk URL website, nomor WhatsApp, atau teks bebas. Download PNG langsung, gratis tanpa daftar.",
+    tags: ["URL / Link", "WhatsApp", "Download PNG"],
+  },
+  {
+    href: "/tools/roi-website",
+    icon: TrendingUp,
+    color: "teal" as const,
+    label: "Kalkulator ROI Website",
+    desc: "Hitung estimasi keuntungan jika bisnis Anda punya website. Input pengunjung & conversion rate, lihat potensi revenue dan ROI.",
+    tags: ["8 Jenis Industri", "Estimasi Revenue", "Payback Period"],
+  },
+  {
+    href: "/tools/cek-meta-tags",
+    icon: Tags,
+    color: "purple" as const,
+    label: "Cek Meta Tags",
+    desc: "Lihat preview website Anda di Google Search, Facebook, dan WhatsApp. Cek title, description, og:image sekaligus.",
+    tags: ["Google Preview", "OG Card Preview", "12 Meta Tags"],
+  },
 ];
 
 const COLOR = {
   blue:   { bg: "bg-blue-600/10",   border: "border-blue-500/25",   text: "text-blue-400",   badge: "bg-blue-500/10 text-blue-300 border-blue-500/20" },
   teal:   { bg: "bg-teal-600/10",   border: "border-teal-500/25",   text: "text-teal-400",   badge: "bg-teal-500/10 text-teal-300 border-teal-500/20" },
   purple: { bg: "bg-purple-600/10", border: "border-purple-500/25", text: "text-purple-400", badge: "bg-purple-500/10 text-purple-300 border-purple-500/20" },
+  green:  { bg: "bg-green-600/10",  border: "border-green-500/25",  text: "text-green-400",  badge: "bg-green-500/10 text-green-300 border-green-500/20" },
 };
 
 export default function ToolsPage() {
@@ -60,7 +85,7 @@ export default function ToolsPage() {
           </p>
         </FadeUp>
 
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool) => {
             const c = COLOR[tool.color];
             return (
