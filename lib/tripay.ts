@@ -107,7 +107,14 @@ export async function createTransaction(payload: CreateTxPayload) {
   const data = await res.json() as {
     success: boolean;
     message?: string;
-    data?: { reference: string; checkout_url: string; status: string; expired_time: number };
+    data?: {
+      reference: string;
+      checkout_url: string;
+      status: string;
+      expired_time: number;
+      pay_code?: string;   // VA number or convenience store code
+      pay_url?: string;    // redirect URL for e-wallets
+    };
   };
 
   if (!data.success) throw new Error(data.message ?? "Tripay error");
