@@ -8,7 +8,6 @@ type Params = { params: Promise<{ invoiceNo: string }> };
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
 
 export async function POST(req: NextRequest, { params }: Params) {
-  // Rate limit: 5 requests per minute per IP
   const ip = getClientIP(req);
   const rl = rateLimit(`pay:${ip}`, 5, 60_000);
   if (!rl.allowed) {
@@ -17,6 +16,13 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const { invoiceNo } = await params;
   const decoded = decodeURIComponent(invoiceNo);
+
+  // Payment method is required
+  let method = "QRIS2";
+  try {
+    const body = await req.json() as { method?: string };
+    if (body.method) method = body.method;
+  } catch { /* no body = use default */ }
 
   const invoice = await prisma.invoice.findUnique({
     where:   { invoiceNo: decoded },
@@ -43,6 +49,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const tx = await createTransaction({
+      method,
       merchantRef:   invoice.invoiceNo,
       amount:        invoice.amount,
       customerName:  clientName,

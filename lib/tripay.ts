@@ -1,72 +1,96 @@
 import { createHmac } from "crypto";
 
-// Jika TRIPAY_PROXY_URL diset, semua request dirutekan ke Cloudflare Worker proxy
-// agar IP yang muncul di Tripay adalah IP Cloudflare (bisa di-whitelist)
-const BASE_URL  = process.env.TRIPAY_PROXY_URL ?? "https://tripay.co.id/api";
-const API_KEY    = () => process.env.TRIPAY_API_KEY      ?? "";
-const PRIV_KEY   = () => process.env.TRIPAY_PRIVATE_KEY  ?? "";
+const BASE_URL   = process.env.TRIPAY_PROXY_URL ?? "https://tripay.co.id/api";
+const API_KEY    = () => process.env.TRIPAY_API_KEY       ?? "";
+const PRIV_KEY   = () => process.env.TRIPAY_PRIVATE_KEY   ?? "";
 const MERCH_CODE = () => process.env.TRIPAY_MERCHANT_CODE ?? "";
 const PROXY_SEC  = () => process.env.TRIPAY_PROXY_SECRET  ?? "";
 
-/** Extra headers for requests — adds x-proxy-secret when using Cloudflare proxy */
 function extraHeaders(): Record<string, string> {
   const s = PROXY_SEC();
   return s ? { "x-proxy-secret": s } : {};
 }
 
+// ── Types ────────────────────────────────────────────────────────────────────
+
 export type TripayItem = { name: string; price: number; quantity: number };
 
+export type PaymentChannel = {
+  group:    string;
+  code:     string;
+  name:     string;
+  type:     string;
+  fee_merchant: { flat: number; percent: string };
+  total_fee:    { flat: number; percent: string };
+  icon_url: string;
+  active:   boolean;
+};
+
 export interface CreateTxPayload {
-  merchantRef:   string;   // unique ref (invoice number)
+  method:        string;   // payment channel code, e.g. "BRIVA", "QRIS2"
+  merchantRef:   string;
   amount:        number;
   customerName:  string;
   customerEmail: string;
   customerPhone?: string;
   orderItems:    TripayItem[];
-  returnUrl:     string;   // redirect after payment
-  callbackUrl:   string;   // webhook URL
-  expiredTime?:  number;   // unix timestamp, default 24h
+  returnUrl:     string;
+  callbackUrl:   string;
+  expiredTime?:  number;
 }
 
-/** HMAC-SHA256 signature for transaction creation */
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function sign(merchantRef: string, amount: number): string {
   return createHmac("sha256", PRIV_KEY())
     .update(MERCH_CODE() + merchantRef + amount)
     .digest("hex");
 }
 
-/** Verify webhook signature from Tripay */
-export function verifyWebhookSignature(body: string, incomingSignature: string): boolean {
-  const expected = createHmac("sha256", PRIV_KEY())
-    .update(body)
-    .digest("hex");
-  return expected === incomingSignature;
+export function verifyWebhookSignature(body: string, sig: string): boolean {
+  const expected = createHmac("sha256", PRIV_KEY()).update(body).digest("hex");
+  return expected === sig;
 }
 
-/** Create a closed payment transaction */
+// ── API calls ─────────────────────────────────────────────────────────────────
+
+/** Fetch available payment channels for this merchant */
+export async function fetchPaymentChannels(): Promise<PaymentChannel[]> {
+  try {
+    const res = await fetch(`${BASE_URL}/merchant/payment-channel`, {
+      headers: { Authorization: `Bearer ${API_KEY()}`, ...extraHeaders() },
+      next: { revalidate: 300 }, // cache 5 minutes
+    });
+    const data = await res.json() as { success: boolean; data?: PaymentChannel[] };
+    if (!data.success || !data.data) return [];
+    return data.data.filter(c => c.active);
+  } catch {
+    return [];
+  }
+}
+
+/** Create a closed payment transaction with a specific payment method */
 export async function createTransaction(payload: CreateTxPayload) {
-  const expiredTime = payload.expiredTime ?? Math.floor(Date.now() / 1000) + 86_400; // 24h
+  const expiredTime = payload.expiredTime ?? Math.floor(Date.now() / 1000) + 86_400;
 
   const body = {
-    method:          "AUTO",               // show all available payment methods
-    merchant_ref:    payload.merchantRef,
-    amount:          payload.amount,
-    customer_name:   payload.customerName,
-    customer_email:  payload.customerEmail,
-    customer_phone:  payload.customerPhone ?? "",
-    order_items:     payload.orderItems.map(i => ({
-      name:     i.name,
-      price:    i.price,
-      quantity: i.quantity,
+    method:        payload.method,
+    merchant_ref:  payload.merchantRef,
+    amount:        payload.amount,
+    customer_name: payload.customerName,
+    customer_email:payload.customerEmail,
+    customer_phone:payload.customerPhone ?? "",
+    order_items:   payload.orderItems.map(i => ({
+      name: i.name, price: i.price, quantity: i.quantity,
     })),
-    return_url:      payload.returnUrl,
-    callback_url:    payload.callbackUrl,
-    expired_time:    expiredTime,
-    signature:       sign(payload.merchantRef, payload.amount),
+    return_url:    payload.returnUrl,
+    callback_url:  payload.callbackUrl,
+    expired_time:  expiredTime,
+    signature:     sign(payload.merchantRef, payload.amount),
   };
 
   const res = await fetch(`${BASE_URL}/transaction/create`, {
-    method:  "POST",
+    method: "POST",
     headers: {
       Authorization:  `Bearer ${API_KEY()}`,
       "Content-Type": "application/json",
@@ -78,12 +102,7 @@ export async function createTransaction(payload: CreateTxPayload) {
   const data = await res.json() as {
     success: boolean;
     message?: string;
-    data?: {
-      reference:    string;
-      checkout_url: string;
-      status:       string;
-      expired_time: number;
-    };
+    data?: { reference: string; checkout_url: string; status: string; expired_time: number };
   };
 
   if (!data.success) throw new Error(data.message ?? "Tripay error");

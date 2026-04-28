@@ -45,6 +45,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
   try {
     const tx = await createTransaction({
+      method:        "QRIS2",
       merchantRef:   invoice.invoiceNo,
       amount:        invoice.amount,
       customerName:  clientName,

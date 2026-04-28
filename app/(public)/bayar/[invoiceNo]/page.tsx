@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { CheckCircle2, Clock, FileText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import PayNowButton from "./PayNowButton";
+import { fetchPaymentChannels } from "@/lib/tripay";
+import PaymentSelector from "./PaymentSelector";
 
 type Params = { params: Promise<{ invoiceNo: string }> };
 type LineItem = { label: string; amount: number };
@@ -28,10 +29,13 @@ export default async function PublicPayPage({ params }: Params) {
   const { invoiceNo } = await params;
   const decoded = decodeURIComponent(invoiceNo);
 
-  const invoice = await prisma.invoice.findUnique({
-    where:   { invoiceNo: decoded },
-    include: { client: { include: { user: { select: { name: true } } } } },
-  });
+  const [invoice, channels] = await Promise.all([
+    prisma.invoice.findUnique({
+      where:   { invoiceNo: decoded },
+      include: { client: { include: { user: { select: { name: true } } } } },
+    }),
+    fetchPaymentChannels(),
+  ]);
 
   if (!invoice) notFound();
 
@@ -120,7 +124,7 @@ export default async function PublicPayPage({ params }: Params) {
                 </div>
               </div>
             ) : (
-              <PayNowButton invoiceNo={invoice.invoiceNo} />
+              <PaymentSelector invoiceNo={invoice.invoiceNo} channels={channels} />
             )}
           </div>
         </div>
