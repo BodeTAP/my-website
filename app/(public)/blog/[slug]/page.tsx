@@ -63,25 +63,32 @@ export default async function ArticlePage({ params }: Params) {
   });
   if (!article) notFound();
 
-  let relatedArticles = await prisma.article.findMany({
-    where: { status: "PUBLISHED", id: { not: article.id }, categoryId: article.categoryId },
-    select: { id: true, title: true, slug: true, coverImage: true, publishedAt: true, category: { select: { name: true, slug: true } } },
-    orderBy: { publishedAt: "desc" },
-    take: 2,
-  });
+  // Run both related-article queries in parallel instead of sequentially
+  const relatedSelect = {
+    id: true, title: true, slug: true, coverImage: true, publishedAt: true,
+    category: { select: { name: true, slug: true } },
+  } as const;
 
-  if (relatedArticles.length < 2) {
-    const moreArticles = await prisma.article.findMany({
-      where: {
-        status: "PUBLISHED",
-        id: { notIn: [article.id, ...relatedArticles.map((a) => a.id)] },
-      },
-      select: { id: true, title: true, slug: true, coverImage: true, publishedAt: true, category: { select: { name: true, slug: true } } },
+  const [sameCat, otherCat] = await Promise.all([
+    prisma.article.findMany({
+      where: { status: "PUBLISHED", id: { not: article.id }, categoryId: article.categoryId },
+      select: relatedSelect,
       orderBy: { publishedAt: "desc" },
-      take: 2 - relatedArticles.length,
-    });
-    relatedArticles = [...relatedArticles, ...moreArticles];
-  }
+      take: 2,
+    }),
+    prisma.article.findMany({
+      where: { status: "PUBLISHED", id: { not: article.id } },
+      select: relatedSelect,
+      orderBy: { publishedAt: "desc" },
+      take: 2,
+    }),
+  ]);
+
+  const seen = new Set(sameCat.map((a) => a.id));
+  const relatedArticles = [
+    ...sameCat,
+    ...otherCat.filter((a) => !seen.has(a.id)),
+  ].slice(0, 2);
 
   // JSON-LD: BlogPosting + BreadcrumbList
   const articleJsonLd = {
