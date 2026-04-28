@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewInvoiceModal from "@/components/admin/NewInvoiceModal";
 import InvoiceStatusToggle from "./InvoiceStatusToggle";
 import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 import DeleteInvoiceButton from "@/components/admin/DeleteInvoiceButton";
+import CopyPayLinkButton from "./CopyPayLinkButton";
 
 const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
+const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -63,9 +65,10 @@ export default async function InvoicesPage() {
                 </tr>
               ) : (
                 invoices.map((inv) => {
+                  const payLink = `${SITE}/bayar/${encodeURIComponent(inv.invoiceNo)}`;
                   const waMsg =
                     inv.whatsappMsg ??
-                    `Halo ${inv.client.user.name ?? inv.client.businessName}, berikut tagihan ${inv.invoiceNo} sebesar ${formatRupiah(inv.amount)}. Mohon segera dikonfirmasi pembayarannya.`;
+                    `Halo ${inv.client.user.name ?? inv.client.businessName}, berikut tagihan ${inv.invoiceNo} sebesar ${formatRupiah(inv.amount)}. Silakan bayar melalui link berikut: ${payLink}`;
                   const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`;
 
                   return (
@@ -93,12 +96,15 @@ export default async function InvoicesPage() {
                       </td>
                       <td className="px-4 sm:px-5 py-4">
                         {inv.status === "UNPAID" && (
-                          <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                            <Button size="sm" className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs whitespace-nowrap">
-                              <MessageCircle className="w-3.5 h-3.5 mr-1" />
-                              Tagih WA
-                            </Button>
-                          </a>
+                          <div className="flex items-center gap-1.5">
+                            <a href={waUrl} target="_blank" rel="noopener noreferrer">
+                              <Button size="sm" className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs whitespace-nowrap">
+                                <MessageCircle className="w-3.5 h-3.5 mr-1" />
+                                Tagih WA
+                              </Button>
+                            </a>
+                            <CopyPayLinkButton link={payLink} />
+                          </div>
                         )}
                       </td>
                       <td className="px-4 sm:px-5 py-4">
