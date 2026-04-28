@@ -201,10 +201,7 @@ export default async function PortalDashboardPage() {
           </div>
           <div className="space-y-3">
             {client.invoices.map((inv) => {
-              const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
               const amount = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(inv.amount);
-              const waMsg = `Halo MFWEB, saya ingin konfirmasi pembayaran invoice ${inv.invoiceNo} sebesar ${amount}.`;
-
               return (
                 <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-t border-white/5 first:border-0 first:pt-0">
                   <div className="min-w-0">
@@ -213,15 +210,11 @@ export default async function PortalDashboardPage() {
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                     <span className="text-white font-semibold text-sm">{amount}</span>
-                    <a
-                      href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button size="sm" className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs whitespace-nowrap">
-                        Konfirmasi Bayar
+                    <Link href="/portal/invoices">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white h-8 px-3 text-xs whitespace-nowrap">
+                        Bayar Sekarang
                       </Button>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               );
