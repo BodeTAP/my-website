@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendProjectStatusEmail } from "@/lib/email";
@@ -49,12 +49,11 @@ export async function PATCH(req: Request, { params }: Params) {
       `${project.name} telah memasuki tahap ${statusLabel}.`,
       "/portal/projects",
     ).catch(() => {});
-    if (project.client.phone) {
-      sendWA(
-        project.client.phone,
-        waMsg.projectStatus(clientName, project.name, status),
-      ).catch(() => {});
-    }
+    after(async () => {
+      if (project.client.phone) {
+        await sendWA(project.client.phone, waMsg.projectStatus(clientName, project.name, status));
+      }
+    });
   }
 
   return NextResponse.json(project);

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail } from "@/lib/email";
@@ -56,14 +56,17 @@ export async function POST(req: Request) {
     `Invoice ${invoice.invoiceNo} sebesar ${rpAmount} telah diterbitkan. Silakan cek halaman invoice.`,
     "/portal/invoices",
   ).catch(() => {});
-  if (invoice.client.phone) {
-    sendWA(
-      invoice.client.phone,
-      waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate),
-    ).catch(() => {});
-  } else {
-    console.warn(`[WA] Invoice ${invoice.invoiceNo}: client.phone kosong untuk clientId=${invoice.clientId} — WA dilewati`);
-  }
+  // after() menjamin WA terkirim setelah response — tidak terpotong oleh serverless cleanup
+  after(async () => {
+    if (invoice.client.phone) {
+      await sendWA(
+        invoice.client.phone,
+        waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate),
+      );
+    } else {
+      console.warn(`[WA] Invoice ${invoice.invoiceNo}: client.phone kosong — WA dilewati`);
+    }
+  });
 
   return NextResponse.json(invoice, { status: 201 });
 }

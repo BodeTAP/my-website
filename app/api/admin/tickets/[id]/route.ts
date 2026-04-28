@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
@@ -57,12 +57,11 @@ export async function POST(req: Request, { params }: Params) {
     `Tim MFWEB membalas tiket "${ticket.subject}": ${preview}`,
     "/portal/tickets",
   ).catch(() => {});
-  if (ticket.client.phone) {
-    sendWA(
-      ticket.client.phone,
-      waMsg.ticketReply(clientName, ticket.subject, preview),
-    ).catch(() => {});
-  }
+  after(async () => {
+    if (ticket.client.phone) {
+      await sendWA(ticket.client.phone, waMsg.ticketReply(clientName, ticket.subject, preview));
+    }
+  });
 
   return NextResponse.json(message, { status: 201 });
 }

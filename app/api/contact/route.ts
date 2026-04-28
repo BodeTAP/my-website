@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
 import { sendWA, waMsg } from "@/lib/whatsapp";
@@ -32,14 +32,15 @@ export async function POST(req: Request) {
       },
     });
 
-    // Notify admin via WhatsApp — non-blocking
-    const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER ?? process.env.WHATSAPP_NUMBER;
-    if (adminPhone) {
-      sendWA(
-        adminPhone,
-        waMsg.newLead(lead.name, lead.businessName, lead.whatsapp, lead.domain, lead.message),
-      ).catch(() => {});
-    }
+    after(async () => {
+      const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER ?? process.env.WHATSAPP_NUMBER;
+      if (adminPhone) {
+        await sendWA(
+          adminPhone,
+          waMsg.newLead(lead.name, lead.businessName, lead.whatsapp, lead.domain, lead.message),
+        );
+      }
+    });
 
     return NextResponse.json({ success: true, id: lead.id }, { status: 201 });
   } catch {
