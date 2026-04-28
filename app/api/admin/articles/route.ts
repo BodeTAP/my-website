@@ -10,11 +10,14 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status, categoryId, tags } = body;
+  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status, scheduledAt, categoryId, tags } = body;
 
   if (!title || !slug) {
     return NextResponse.json({ error: "Judul dan slug wajib diisi" }, { status: 400 });
   }
+
+  // Scheduled: save as DRAFT with scheduledAt set
+  const isScheduled = !!scheduledAt && status !== "PUBLISHED";
 
   try {
     const article = await prisma.article.create({
@@ -28,6 +31,7 @@ export async function POST(req: Request) {
         metaDesc: metaDesc?.trim() || null,
         status: status ?? "DRAFT",
         publishedAt: status === "PUBLISHED" ? new Date() : null,
+        scheduledAt: isScheduled ? new Date(scheduledAt) : null,
         categoryId: categoryId || null,
         tags: Array.isArray(tags) ? tags : [],
       },

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Edit, Eye, Calendar } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,14 +52,28 @@ export default async function ArticlesPage() {
                     </td>
                     <td className="px-5 py-4 text-blue-200/50 text-xs font-mono">{a.slug}</td>
                     <td className="px-5 py-4">
-                      <Badge
-                        variant="outline"
-                        className={a.status === "PUBLISHED"
-                          ? "text-green-300 border-green-500/20 bg-green-500/5"
-                          : "text-amber-300 border-amber-500/20 bg-amber-500/5"}
-                      >
-                        {a.status === "PUBLISHED" ? "Tayang" : "Draft"}
-                      </Badge>
+                      {a.status === "PUBLISHED" ? (
+                        <Badge variant="outline" className="text-green-300 border-green-500/20 bg-green-500/5">
+                          Tayang
+                        </Badge>
+                      ) : a.scheduledAt ? (
+                        <div className="flex flex-col gap-0.5">
+                          <Badge variant="outline" className="text-blue-300 border-blue-500/20 bg-blue-500/5 w-fit">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            Dijadwalkan
+                          </Badge>
+                          <span className="text-blue-200/40 text-[11px]">
+                            {new Intl.DateTimeFormat("id-ID", {
+                              day: "numeric", month: "short", year: "numeric",
+                              hour: "2-digit", minute: "2-digit",
+                            }).format(new Date(a.scheduledAt))}
+                          </span>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="text-amber-300 border-amber-500/20 bg-amber-500/5">
+                          Draft
+                        </Badge>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-blue-200/50 text-xs">
                       {new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.updatedAt))}

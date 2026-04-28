@@ -13,7 +13,9 @@ export async function PUT(req: Request, { params }: Params) {
 
   const { id } = await params;
   const body = await req.json();
-  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status, categoryId, tags } = body;
+  const { title, slug, excerpt, content, coverImage, metaTitle, metaDesc, status, scheduledAt, categoryId, tags } = body;
+
+  const isScheduled = !!scheduledAt && status !== "PUBLISHED";
 
   try {
     const existing = await prisma.article.findUnique({ where: { id } });
@@ -31,6 +33,7 @@ export async function PUT(req: Request, { params }: Params) {
         metaDesc: metaDesc?.trim() || null,
         status: status ?? "DRAFT",
         publishedAt: status === "PUBLISHED" && !existing.publishedAt ? new Date() : existing.publishedAt,
+        scheduledAt: isScheduled ? new Date(scheduledAt) : null,
         categoryId: categoryId || null,
         tags: Array.isArray(tags) ? tags : [],
       },

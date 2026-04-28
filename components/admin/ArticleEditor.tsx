@@ -9,7 +9,7 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import {
   Bold, Italic, List, ListOrdered, Quote, Code,
-  Heading2, Heading3, Link2, Image as ImageIcon, Save, Eye, EyeOff, X
+  Heading2, Heading3, Link2, Image as ImageIcon, Save, Eye, EyeOff, X, Calendar, Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ type Article = {
   metaTitle?: string | null;
   metaDesc?: string | null;
   status?: "DRAFT" | "PUBLISHED";
+  scheduledAt?: string | Date | null;
   categoryId?: string | null;
   tags?: string[];
 };
@@ -65,6 +66,13 @@ export default function ArticleEditor({
   const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSeo, setShowSeo] = useState(false);
+
+  // Scheduling state
+  const existingSchedule = article?.scheduledAt
+    ? new Date(article.scheduledAt as string).toISOString().slice(0, 16)
+    : "";
+  const [schedMode, setSchedMode]   = useState(!!existingSchedule);
+  const [schedDate, setSchedDate]   = useState(existingSchedule);
   const [error, setError] = useState("");
 
   const addTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -130,9 +138,13 @@ export default function ArticleEditor({
     }
   };
 
-  const handleSave = async (status: "DRAFT" | "PUBLISHED") => {
+  const handleSave = async (status: "DRAFT" | "PUBLISHED", scheduledAt?: string) => {
     if (!form.title.trim() || !form.slug.trim()) {
       setError("Judul dan slug wajib diisi");
+      return;
+    }
+    if (scheduledAt && new Date(scheduledAt) <= new Date()) {
+      setError("Waktu jadwal harus di masa depan.");
       return;
     }
 
@@ -145,6 +157,7 @@ export default function ArticleEditor({
       content: editor?.getHTML() ?? "",
       categoryId: form.categoryId || null,
       tags,
+      scheduledAt: scheduledAt ?? null,
     };
 
     const url = isEdit ? `/api/admin/articles/${article.id}` : "/api/admin/articles";
@@ -370,25 +383,70 @@ export default function ArticleEditor({
       {error && <p className="text-red-400 text-sm">{error}</p>}
 
       {/* Action buttons */}
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={loading}
-          onClick={() => handleSave("DRAFT")}
-          className="border-white/10 text-white hover:bg-white/5"
-        >
-          <Save className="w-4 h-4 mr-2" />
-          Simpan Draft
-        </Button>
-        <Button
-          type="button"
-          disabled={loading}
-          onClick={() => handleSave("PUBLISHED")}
-          className="bg-blue-600 hover:bg-blue-500 text-white"
-        >
-          {loading ? "Menyimpan..." : "Tayangkan Artikel"}
-        </Button>
+      <div className="flex flex-col gap-3">
+        {/* Schedule row */}
+        {schedMode && (
+          <div className="flex items-center gap-2 p-3 glass rounded-xl border border-blue-500/20 flex-wrap">
+            <Clock className="w-4 h-4 text-blue-400 shrink-0" />
+            <span className="text-blue-200/70 text-sm whitespace-nowrap">Jadwalkan publish:</span>
+            <input
+              type="datetime-local"
+              value={schedDate}
+              onChange={e => setSchedDate(e.target.value)}
+              min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+              className="flex-1 min-w-40 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500/50 scheme-dark"
+            />
+            <Button
+              type="button"
+              size="sm"
+              disabled={loading || !schedDate}
+              onClick={() => handleSave("DRAFT", schedDate)}
+              className="bg-blue-600 hover:bg-blue-500 text-white whitespace-nowrap"
+            >
+              {loading ? "Menyimpan..." : "Simpan Jadwal"}
+            </Button>
+            <button
+              type="button"
+              onClick={() => { setSchedMode(false); setSchedDate(""); }}
+              className="text-blue-200/40 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center justify-end gap-3 flex-wrap">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading}
+            onClick={() => handleSave("DRAFT")}
+            className="border-white/10 text-white hover:bg-white/5"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Simpan Draft
+          </Button>
+          {!schedMode && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={() => setSchedMode(true)}
+              className="border-blue-500/30 text-blue-300 hover:bg-blue-600/10"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Jadwalkan
+            </Button>
+          )}
+          <Button
+            type="button"
+            disabled={loading}
+            onClick={() => handleSave("PUBLISHED")}
+            className="bg-blue-600 hover:bg-blue-500 text-white"
+          >
+            {loading ? "Menyimpan..." : "Tayangkan Artikel"}
+          </Button>
+        </div>
       </div>
     </div>
   );
