@@ -128,12 +128,11 @@ export default function PaymentSelector({ invoiceNo, channels }: Props) {
                           <div className="w-10 h-6 bg-white/10 rounded shrink-0" />
                         )}
 
-                        {/* Name + fee */}
+                        {/* Name */}
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-medium ${isSelected ? "text-white" : "text-blue-200/80"}`}>
                             {ch.name}
                           </p>
-                          <p className="text-blue-200/40 text-xs">{formatFee(ch)}</p>
                         </div>
                       </button>
                     );
