@@ -32,11 +32,14 @@ function timeAgo(iso: string) {
 }
 
 export default function NotificationBell() {
-  const [open, setOpen]           = useState(false);
-  const [notifs, setNotifs]       = useState<Notif[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const panelRef                  = useRef<HTMLDivElement>(null);
-  const router                    = useRouter();
+  const [open, setOpen]       = useState(false);
+  const [notifs, setNotifs]   = useState<Notif[]>([]);
+  const [loading, setLoading] = useState(true);
+  // Position of the fixed dropdown (viewport-relative)
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
+  const btnRef                = useRef<HTMLButtonElement>(null);
+  const panelRef              = useRef<HTMLDivElement>(null);
+  const router                = useRouter();
 
   const fetchNotifs = useCallback(async () => {
     try {
@@ -47,21 +50,43 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Initial fetch + polling every 60 s
   useEffect(() => {
     void fetchNotifs();
     const t = setInterval(fetchNotifs, 60_000);
     return () => clearInterval(t);
   }, [fetchNotifs]);
 
-  // Close panel on outside click
+  // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
+      if (
+        panelRef.current && !panelRef.current.contains(e.target as Node) &&
+        btnRef.current   && !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Close on resize to avoid stale positions
+  useEffect(() => {
+    const handler = () => setOpen(false);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  function handleToggle() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      const panelW = 320; // w-80
+      // Try to align right edge with button right edge; clamp to viewport left
+      const left = Math.max(8, rect.right - panelW);
+      setDropPos({ top: rect.bottom + 8, left });
+    }
+    setOpen(v => !v);
+  }
 
   const unread = notifs.filter(n => !n.read).length;
 
@@ -82,10 +107,11 @@ export default function NotificationBell() {
   }
 
   return (
-    <div ref={panelRef} className="relative">
+    <>
       {/* Bell button */}
       <button
-        onClick={() => setOpen(v => !v)}
+        ref={btnRef}
+        onClick={handleToggle}
         aria-label="Notifikasi"
         className="relative p-2 rounded-lg text-blue-200/50 hover:text-white hover:bg-white/5 transition-colors"
       >
@@ -97,11 +123,19 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
+      {/* Fixed dropdown — renders above all overflow containers */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden z-50"
-          style={{ background: "rgba(8,18,36,0.97)", backdropFilter: "blur(24px)" }}>
-
+        <div
+          ref={panelRef}
+          className="fixed w-80 rounded-2xl border border-white/10 shadow-2xl shadow-black/60 overflow-hidden"
+          style={{
+            top:       dropPos.top,
+            left:      dropPos.left,
+            zIndex:    9999,
+            background:"rgba(8,18,36,0.97)",
+            backdropFilter: "blur(24px)",
+          }}
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
             <div className="flex items-center gap-2">
@@ -167,6 +201,6 @@ export default function NotificationBell() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
