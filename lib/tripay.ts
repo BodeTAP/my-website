@@ -1,6 +1,11 @@
 import { createHmac } from "crypto";
 
-const BASE_URL   = process.env.TRIPAY_PROXY_URL ?? "https://tripay.co.id/api";
+const SANDBOX    = process.env.TRIPAY_SANDBOX === "true";
+const DIRECT_URL = SANDBOX ? "https://tripay.co.id/api-sandbox" : "https://tripay.co.id/api";
+// Sandbox bypasses the Cloudflare proxy (no IP whitelist restriction in sandbox)
+const BASE_URL   = (!SANDBOX && process.env.TRIPAY_PROXY_URL)
+  ? process.env.TRIPAY_PROXY_URL
+  : DIRECT_URL;
 const API_KEY    = () => process.env.TRIPAY_API_KEY       ?? "";
 const PRIV_KEY   = () => process.env.TRIPAY_PRIVATE_KEY   ?? "";
 const MERCH_CODE = () => process.env.TRIPAY_MERCHANT_CODE ?? "";
