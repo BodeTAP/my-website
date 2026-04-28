@@ -78,7 +78,7 @@ export default async function PortalInvoicesPage() {
                   <div className="flex items-center gap-2">
                     <DownloadInvoiceButton invoiceId={inv.id} invoiceNo={inv.invoiceNo} variant="outline" />
                     {inv.status === "UNPAID" && (
-                      <PayInvoiceButton invoiceId={inv.id} existingPaymentUrl={inv.paymentUrl} />
+                      <PayInvoiceButton invoiceId={inv.id} existingPaymentUrl={inv.paymentUrl} invoiceNo={inv.invoiceNo} />
                     )}
                   </div>
                 </div>
