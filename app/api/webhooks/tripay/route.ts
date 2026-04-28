@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/tripay";
+import { sendWA, waMsg } from "@/lib/whatsapp";
 
 /**
  * POST /api/webhooks/tripay
@@ -19,10 +20,11 @@ export async function POST(req: NextRequest) {
   }
 
   let payload: {
-    reference:   string;
-    merchant_ref:string;
-    status:      string;
-    paid_at?:    number;
+    reference:      string;
+    merchant_ref:   string;
+    status:         string;
+    paid_at?:       number;
+    payment_method?: string;
   };
 
   try {
@@ -32,20 +34,60 @@ export async function POST(req: NextRequest) {
   }
 
   const { reference, status, paid_at } = payload;
+  const paymentMethod = payload.payment_method ?? "–";
 
   console.log(`[Tripay Webhook] ref=${reference} status=${status}`);
 
   if (status === "PAID") {
+    // Fetch invoice + client before update so we have phone + name
+    const invoice = await prisma.invoice.findFirst({
+      where:   { tripayRef: reference },
+      include: {
+        client: {
+          include: { user: { select: { name: true, email: true } } },
+        },
+      },
+    });
+
     await prisma.invoice.updateMany({
       where: { tripayRef: reference },
       data:  {
-        status:  "PAID",
-        paidAt:  paid_at ? new Date(paid_at * 1000) : new Date(),
+        status: "PAID",
+        paidAt: paid_at ? new Date(paid_at * 1000) : new Date(),
       },
     });
+
     console.log(`[Tripay Webhook] Invoice ${reference} ditandai LUNAS`);
+
+    // Send WA notifications after response via after()
+    if (invoice) {
+      const clientName  = invoice.client.user.name ?? invoice.client.businessName;
+      const adminPhone  = process.env.ADMIN_WHATSAPP_NUMBER ?? process.env.WHATSAPP_NUMBER;
+
+      after(async () => {
+        // WA ke klien (jika ada nomor)
+        if (invoice.client.phone) {
+          await sendWA(
+            invoice.client.phone,
+            waMsg.paymentPaid(clientName, invoice.invoiceNo, invoice.amount, paymentMethod),
+          );
+        }
+        // WA ke admin
+        if (adminPhone) {
+          await sendWA(
+            adminPhone,
+            waMsg.paymentReceivedAdmin(
+              clientName,
+              invoice.client.businessName,
+              invoice.invoiceNo,
+              invoice.amount,
+              paymentMethod,
+            ),
+          );
+        }
+      });
+    }
   }
 
-  // Tripay expects a 200 response with JSON
   return NextResponse.json({ success: true });
 }
