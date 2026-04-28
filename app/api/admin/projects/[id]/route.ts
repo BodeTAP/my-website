@@ -39,17 +39,19 @@ export async function PATCH(req: Request, { params }: Params) {
     const clientEmail = project.client.user.email;
     const clientName  = project.client.user.name ?? project.client.businessName;
     const statusLabel = STATUS_LABELS[status] ?? status;
-    if (clientEmail) {
-      sendProjectStatusEmail(clientEmail, clientName, project.name, status).catch(() => {});
-    }
     createNotification(
       project.clientId,
       "PROJECT_STATUS",
       "Status Proyek Diperbarui",
       `${project.name} telah memasuki tahap ${statusLabel}.`,
       "/portal/projects",
-    ).catch(() => {});
+    ).catch((e) => console.error("[Notif] project status:", e));
+
     after(async () => {
+      if (clientEmail) {
+        await sendProjectStatusEmail(clientEmail, clientName, project.name, status)
+          .catch((e) => console.error("[Email] project status:", e));
+      }
       if (project.client.phone) {
         await sendWA(project.client.phone, waMsg.projectStatus(clientName, project.name, status));
       }

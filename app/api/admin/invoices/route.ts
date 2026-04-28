@@ -45,19 +45,20 @@ export async function POST(req: Request) {
   const clientEmail = invoice.client.user.email;
   const clientName  = invoice.client.user.name ?? invoice.client.businessName;
   const rpAmount    = `Rp ${invoice.amount.toLocaleString("id-ID")}`;
-  if (clientEmail) {
-    sendInvoiceCreatedEmail(clientEmail, clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate)
-      .catch(() => {});
-  }
+  // after() menjamin semua notifikasi (email + WA + in-app) selesai sebelum fungsi dimatikan
   createNotification(
     invoice.clientId,
     "INVOICE_NEW",
     "Invoice Baru Diterbitkan",
     `Invoice ${invoice.invoiceNo} sebesar ${rpAmount} telah diterbitkan. Silakan cek halaman invoice.`,
     "/portal/invoices",
-  ).catch(() => {});
-  // after() menjamin WA terkirim setelah response — tidak terpotong oleh serverless cleanup
+  ).catch((e) => console.error("[Notif] invoice create:", e));
+
   after(async () => {
+    if (clientEmail) {
+      await sendInvoiceCreatedEmail(clientEmail, clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate)
+        .catch((e) => console.error("[Email] invoice created:", e));
+    }
     if (invoice.client.phone) {
       await sendWA(
         invoice.client.phone,

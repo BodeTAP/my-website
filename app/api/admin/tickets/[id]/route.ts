@@ -47,17 +47,19 @@ export async function POST(req: Request, { params }: Params) {
   const clientEmail = ticket.client.user.email;
   const clientName  = ticket.client.user.name ?? ticket.client.businessName;
   const preview     = body.trim().slice(0, 80) + (body.trim().length > 80 ? "…" : "");
-  if (clientEmail) {
-    sendTicketReplyToClientEmail(clientEmail, clientName, ticket.subject, body.trim()).catch(() => {});
-  }
   createNotification(
     ticket.clientId,
     "TICKET_REPLY",
     "Balasan Tiket Baru",
     `Tim MFWEB membalas tiket "${ticket.subject}": ${preview}`,
     "/portal/tickets",
-  ).catch(() => {});
+  ).catch((e) => console.error("[Notif] ticket reply:", e));
+
   after(async () => {
+    if (clientEmail) {
+      await sendTicketReplyToClientEmail(clientEmail, clientName, ticket.subject, body.trim())
+        .catch((e) => console.error("[Email] ticket reply:", e));
+    }
     if (ticket.client.phone) {
       await sendWA(ticket.client.phone, waMsg.ticketReply(clientName, ticket.subject, preview));
     }
