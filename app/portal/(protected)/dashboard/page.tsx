@@ -38,29 +38,18 @@ export default async function PortalDashboardPage() {
 
   let client = user?.client;
 
-  // Auto-create Client record if missing (e.g. first Google OAuth sign-in
-  // where signIn callback ran before the user row was committed)
+  // Auto-create Client record if missing (e.g. first Google OAuth sign-in)
+  // Construct empty relations directly — no second DB round-trip needed.
   if (!client && user) {
-    await prisma.client.upsert({
-      where: { userId: user.id },
+    const created = await prisma.client.upsert({
+      where:  { userId: user.id },
       create: { userId: user.id, businessName: user.name ?? "Klien Baru" },
       update: {},
-    }).catch(() => {});
+    }).catch(() => null);
 
-    client = await prisma.client.findUnique({
-      where: { userId: user.id },
-      include: {
-        projects: { orderBy: { createdAt: "desc" }, take: 1 },
-        invoices: { where: { status: "UNPAID" }, orderBy: { dueDate: "asc" }, take: 3 },
-        tickets: { where: { status: { not: "CLOSED" } }, orderBy: { updatedAt: "desc" }, take: 3 },
-        subscriptions: {
-          where: { status: "ACTIVE" },
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          include: { package: { select: { name: true, price: true, features: true } } },
-        },
-      },
-    });
+    if (created) {
+      client = { ...created, projects: [], invoices: [], tickets: [], subscriptions: [] };
+    }
   }
 
   if (!client) {
