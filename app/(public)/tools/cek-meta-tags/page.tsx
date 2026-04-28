@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import MetaChecker from "./MetaChecker";
+import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Cek Meta Tags Website — Preview Google & Sosmed Gratis | MFWEB",
@@ -13,9 +12,7 @@ export default function CekMetaTagsPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <Link href="/tools" className="inline-flex items-center gap-1.5 text-blue-400/70 hover:text-blue-300 text-sm mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Semua Tools
-        </Link>
+        <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Cek Meta Tags" }]} />
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-purple-300 mb-6 border border-purple-500/20">
             🔍 Gratis Selamanya
