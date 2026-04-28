@@ -1,9 +1,18 @@
 import { createHmac } from "crypto";
 
-const BASE_URL  = "https://tripay.co.id/api";
-const API_KEY   = () => process.env.TRIPAY_API_KEY   ?? "";
-const PRIV_KEY  = () => process.env.TRIPAY_PRIVATE_KEY ?? "";
+// Jika TRIPAY_PROXY_URL diset, semua request dirutekan ke Cloudflare Worker proxy
+// agar IP yang muncul di Tripay adalah IP Cloudflare (bisa di-whitelist)
+const BASE_URL  = process.env.TRIPAY_PROXY_URL ?? "https://tripay.co.id/api";
+const API_KEY    = () => process.env.TRIPAY_API_KEY      ?? "";
+const PRIV_KEY   = () => process.env.TRIPAY_PRIVATE_KEY  ?? "";
 const MERCH_CODE = () => process.env.TRIPAY_MERCHANT_CODE ?? "";
+const PROXY_SEC  = () => process.env.TRIPAY_PROXY_SECRET  ?? "";
+
+/** Extra headers for requests — adds x-proxy-secret when using Cloudflare proxy */
+function extraHeaders(): Record<string, string> {
+  const s = PROXY_SEC();
+  return s ? { "x-proxy-secret": s } : {};
+}
 
 export type TripayItem = { name: string; price: number; quantity: number };
 
@@ -61,6 +70,7 @@ export async function createTransaction(payload: CreateTxPayload) {
     headers: {
       Authorization:  `Bearer ${API_KEY()}`,
       "Content-Type": "application/json",
+      ...extraHeaders(),
     },
     body: JSON.stringify(body),
   });
@@ -83,7 +93,7 @@ export async function createTransaction(payload: CreateTxPayload) {
 /** Get transaction detail by reference */
 export async function getTransaction(reference: string) {
   const res = await fetch(`${BASE_URL}/transaction/detail?reference=${reference}`, {
-    headers: { Authorization: `Bearer ${API_KEY()}` },
+    headers: { Authorization: `Bearer ${API_KEY()}`, ...extraHeaders() },
   });
   const data = await res.json() as {
     success: boolean;
