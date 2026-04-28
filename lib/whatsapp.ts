@@ -101,6 +101,31 @@ export const waMsg = {
     );
   },
 
+  paymentInitiated(
+    name: string,
+    invoiceNo: string,
+    amount: number,
+    methodName: string,
+    paymentUrl: string,
+    payCode?: string | null,
+  ) {
+    const rp = `Rp ${amount.toLocaleString("id-ID")}`;
+    // Only show pay_code when it's a plain code (VA number / alfamart code), not a URL
+    const codeLine = payCode && !payCode.startsWith("http")
+      ? `🔢 Nomor Pembayaran: *${payCode}*\n`
+      : "";
+    return (
+      `Halo ${name}! 👋\n\n` +
+      `Transaksi pembayaran untuk invoice *${invoiceNo}* telah dibuat.\n\n` +
+      `💰 Total: *${rp}*\n` +
+      `💳 Metode: *${methodName}*\n` +
+      `${codeLine}` +
+      `🔗 Link Pembayaran:\n${paymentUrl}\n\n` +
+      `⏰ Berlaku 24 jam. Segera selesaikan pembayaran Anda.` +
+      FOOTER
+    );
+  },
+
   newLead(name: string, businessName: string, whatsapp: string, domain?: string | null, message?: string | null) {
     const lines = [
       `🔔 *Lead Baru Masuk!*\n`,

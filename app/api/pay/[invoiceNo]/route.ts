@@ -1,7 +1,9 @@
+import { after } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createTransaction, TripayItem } from "@/lib/tripay";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
+import { sendWA, waMsg, normalizePhone } from "@/lib/whatsapp";
 
 type Params = { params: Promise<{ invoiceNo: string }> };
 
@@ -19,9 +21,11 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   // Payment method is required
   let method = "QRIS2";
+  let methodName = "QRIS";
   try {
-    const body = await req.json() as { method?: string };
+    const body = await req.json() as { method?: string; methodName?: string };
     if (body.method) method = body.method;
+    if (body.methodName) methodName = body.methodName;
   } catch { /* no body = use default */ }
 
   const invoice = await prisma.invoice.findUnique({
@@ -32,8 +36,18 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!invoice) return NextResponse.json({ error: "Invoice tidak ditemukan" }, { status: 404 });
   if (invoice.status === "PAID") return NextResponse.json({ error: "Invoice sudah lunas" }, { status: 400 });
 
-  // Return existing payment URL if available
+  // Return existing payment URL if available — still re-send WA so client has the link handy
   if (invoice.paymentUrl && invoice.tripayRef) {
+    const phone = invoice.client.phone;
+    const name  = invoice.client.user.name ?? invoice.client.businessName;
+    if (phone) {
+      after(async () => {
+        await sendWA(
+          normalizePhone(phone),
+          waMsg.paymentInitiated(name, invoice.invoiceNo, invoice.amount, methodName, invoice.paymentUrl!),
+        );
+      });
+    }
     return NextResponse.json({ paymentUrl: invoice.paymentUrl });
   }
 
@@ -64,6 +78,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       where: { id: invoice.id },
       data:  { tripayRef: tx.reference, paymentUrl: tx.checkout_url },
     });
+
+    const phone = invoice.client.phone;
+    const name  = invoice.client.user.name ?? invoice.client.businessName;
+    if (phone) {
+      after(async () => {
+        await sendWA(
+          normalizePhone(phone),
+          waMsg.paymentInitiated(name, invoice.invoiceNo, invoice.amount, methodName, tx.checkout_url, tx.pay_code),
+        );
+      });
+    }
 
     return NextResponse.json({ paymentUrl: tx.checkout_url });
   } catch (err) {

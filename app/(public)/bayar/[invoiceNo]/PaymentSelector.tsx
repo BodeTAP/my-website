@@ -47,10 +47,11 @@ export default function PaymentSelector({ invoiceNo, channels }: Props) {
     setLoading(true);
     setError("");
     try {
+      const selectedChannel = channels.find(ch => ch.code === selected);
       const res  = await fetch(`/api/pay/${encodeURIComponent(invoiceNo)}`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ method: selected }),
+        body:    JSON.stringify({ method: selected, methodName: selectedChannel?.name }),
       });
       const data = await res.json() as { paymentUrl?: string; error?: string };
       if (!res.ok || !data.paymentUrl) {
