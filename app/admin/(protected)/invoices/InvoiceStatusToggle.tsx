@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 const STATUS_CONFIG = {
-  UNPAID:  { label: "Belum Bayar", cls: "bg-amber-500/10 border-amber-500/20 text-amber-300" },
-  PAID:    { label: "Lunas",       cls: "bg-green-500/10 border-green-500/20 text-green-300" },
-  EXPIRED: { label: "Kadaluarsa", cls: "bg-gray-500/10 border-gray-500/20 text-gray-400"    },
-  FAILED:  { label: "Gagal",       cls: "bg-red-500/10 border-red-500/20 text-red-400"       },
+  UNPAID:  { label: "Belum Bayar", cls: "text-amber-300 border-amber-500/20 bg-amber-500/10" },
+  PAID:    { label: "Lunas",       cls: "text-green-300 border-green-500/20 bg-green-500/10" },
+  EXPIRED: { label: "Kadaluarsa", cls: "text-gray-400  border-gray-500/20  bg-gray-500/10"  },
+  FAILED:  { label: "Gagal",       cls: "text-red-400   border-red-500/20   bg-red-500/10"   },
 } as const;
 
 type InvoiceStatus = keyof typeof STATUS_CONFIG;
+
+type DropdownPos = { top: number; left: number; minWidth: number };
 
 export default function InvoiceStatusToggle({
   invoiceId,
@@ -20,16 +22,41 @@ export default function InvoiceStatusToggle({
   invoiceId: string;
   currentStatus: string;
 }) {
-  const router = useRouter();
-  const [status, setStatus]   = useState<InvoiceStatus>((currentStatus as InvoiceStatus) ?? "UNPAID");
-  const [open, setOpen]       = useState(false);
-  const [saving, setSaving]   = useState(false);
+  const router  = useRouter();
+  const btnRef  = useRef<HTMLButtonElement>(null);
+  const [status,  setStatus]  = useState<InvoiceStatus>((currentStatus as InvoiceStatus) ?? "UNPAID");
+  const [open,    setOpen]    = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [pos,     setPos]     = useState<DropdownPos | null>(null);
 
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.UNPAID;
 
+  const handleOpen = () => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setPos({
+      top:      rect.bottom + window.scrollY + 4,
+      left:     rect.left   + window.scrollX,
+      minWidth: rect.width,
+    });
+    setOpen(true);
+  };
+
+  // Close on scroll/resize
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [open]);
+
   const handleSelect = async (next: InvoiceStatus) => {
-    if (next === status) { setOpen(false); return; }
     setOpen(false);
+    if (next === status) return;
     setSaving(true);
     setStatus(next);
     await fetch(`/api/admin/invoices/${invoiceId}`, {
@@ -42,9 +69,10 @@ export default function InvoiceStatusToggle({
   };
 
   return (
-    <div className="relative">
+    <>
       <button
-        onClick={() => setOpen((v) => !v)}
+        ref={btnRef}
+        onClick={handleOpen}
         disabled={saving}
         className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all disabled:opacity-50 cursor-pointer ${cfg.cls}`}
       >
@@ -55,24 +83,36 @@ export default function InvoiceStatusToggle({
         </svg>
       </button>
 
-      {open && (
+      {open && pos && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full mt-1 z-20 glass border border-white/10 rounded-xl shadow-xl overflow-hidden min-w-[140px]">
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-9998" onClick={() => setOpen(false)} />
+
+          {/* Dropdown — fixed so it escapes overflow:hidden */}
+          <div
+            className="fixed z-9999 rounded-xl border border-white/10 shadow-2xl overflow-hidden"
+            style={{
+              top:      pos.top,
+              left:     pos.left,
+              minWidth: pos.minWidth,
+              background: "rgba(8,18,36,0.85)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
+          >
             {(Object.entries(STATUS_CONFIG) as [InvoiceStatus, typeof STATUS_CONFIG[InvoiceStatus]][]).map(([key, val]) => (
               <button
                 key={key}
                 onClick={() => handleSelect(key)}
-                className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors hover:bg-white/5 flex items-center gap-2 ${val.cls.split(" ").find(c => c.startsWith("text-")) ?? ""} ${key === status ? "bg-white/5" : ""}`}
+                className={`w-full text-left px-3 py-2.5 text-xs font-medium transition-colors hover:bg-white/8 flex items-center gap-2 whitespace-nowrap ${val.cls.split(" ").find(c => c.startsWith("text-")) ?? ""}`}
               >
-                {key === status && <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />}
-                {key !== status && <span className="w-1.5 h-1.5 shrink-0" />}
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${key === status ? "bg-current" : "opacity-0"}`} />
                 {val.label}
               </button>
             ))}
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }
