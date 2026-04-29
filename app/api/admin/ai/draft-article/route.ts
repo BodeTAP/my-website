@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
     const system = `You are an expert SEO content writer for Indonesian local businesses.
 Write in Bahasa Indonesia.
 Produce HTML compatible with Tiptap editor (use <h2>, <h3>, <p>, <ul>, <li>, <strong> tags).
-Return a JSON object with: title, content (HTML string), metaTitle, metaDescription, and suggestedTags (array).
-The tone should be ${tone || "informative"}. 
+Return a JSON object with: title, content (HTML string), excerpt (1-2 sentences plain text summary for article listing), metaTitle, metaDescription, and suggestedTags (array).
+The tone should be ${tone || "informative"}.
 The length should be ${length || "medium"}.`;
 
     const prompt = `Write a high-quality blog article about: ${topic}. 

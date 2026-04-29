@@ -130,10 +130,11 @@ export default function ArticleEditor({
     if (!aiDraftResult) return;
     setForm(f => ({
       ...f,
-      title: aiDraftResult.title,
-      slug: slugify(aiDraftResult.title),
+      title:     aiDraftResult.title,
+      slug:      slugify(aiDraftResult.title),
+      excerpt:   (aiDraftResult as { excerpt?: string }).excerpt ?? aiDraftResult.metaDescription,
       metaTitle: aiDraftResult.metaTitle,
-      metaDesc: aiDraftResult.metaDescription,
+      metaDesc:  aiDraftResult.metaDescription,
     }));
     editor?.commands.setContent(aiDraftResult.content);
     setTags(aiDraftResult.suggestedTags);
