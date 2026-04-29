@@ -4,18 +4,49 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DeleteArticleButton from "./DeleteArticleButton";
+import ArticleSearch from "./ArticleSearch";
+import ArticleFilter from "./ArticleFilter";
+import ArticlePagination from "./ArticlePagination";
 
-export default async function ArticlesPage() {
-  const articles = await prisma.article.findMany({
-    orderBy: { updatedAt: "desc" },
-  });
+const PER_PAGE = 10;
+
+export default async function ArticlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
+}) {
+  const params = await searchParams;
+  const q = params.q || "";
+  const status = params.status || "";
+  const page = Number(params.page || "1");
+
+  const where = {
+    ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
+    ...(status === "PUBLISHED" ? { status: "PUBLISHED" as const, scheduledAt: null } : {}),
+    ...(status === "SCHEDULED" ? { scheduledAt: { not: null } } : {}),
+    ...(status === "DRAFT" ? { status: "DRAFT" as const, scheduledAt: null } : {}),
+  };
+
+  const [articles, total] = await Promise.all([
+    prisma.article.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+    }),
+    prisma.article.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / PER_PAGE);
+  const startIdx = (page - 1) * PER_PAGE + 1;
+  const endIdx = Math.min(page * PER_PAGE, total);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white">Artikel</h1>
-          <p className="text-blue-200/50 text-sm mt-1">{articles.length} artikel</p>
+          <p className="text-blue-200/50 text-sm mt-1">{total} artikel ditemukan</p>
         </div>
         <Link href="/admin/articles/new">
           <Button className="bg-blue-600 hover:bg-blue-500 text-white">
@@ -25,7 +56,12 @@ export default async function ArticlesPage() {
         </Link>
       </div>
 
-      <div className="glass rounded-2xl overflow-hidden">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center justify-between">
+        <ArticleSearch />
+        <ArticleFilter />
+      </div>
+
+      <div className="glass rounded-2xl overflow-hidden mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -41,7 +77,7 @@ export default async function ArticlesPage() {
               {articles.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-12 text-blue-200/30">
-                    Belum ada artikel. Buat yang pertama!
+                    {q || status ? "Tidak ada artikel yang cocok dengan filter." : "Belum ada artikel. Buat yang pertama!"}
                   </td>
                 </tr>
               ) : (
@@ -102,6 +138,15 @@ export default async function ArticlesPage() {
           </table>
         </div>
       </div>
+
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 rounded-2xl">
+          <p className="text-xs text-blue-200/40">
+            Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> artikel
+          </p>
+          <ArticlePagination totalPages={totalPages} />
+        </div>
+      )}
     </div>
   );
 }
