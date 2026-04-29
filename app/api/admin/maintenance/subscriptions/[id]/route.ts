@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendWA, waMsg } from "@/lib/whatsapp";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -67,6 +68,17 @@ export async function POST(req: Request, { params }: Params) {
   const next = new Date(sub.nextBillingDate);
   next.setMonth(next.getMonth() + 1);
   await prisma.subscription.update({ where: { id }, data: { nextBillingDate: next } });
+
+  // WA notification to client (fire-and-forget after response)
+  after(async () => {
+    const phone = sub.client.phone;
+    const clientName = sub.client.user.name ?? sub.client.businessName;
+    if (phone) {
+      await sendWA(phone, waMsg.invoiceNew(clientName, invoiceNo, sub.package.price, dueDate)).catch((e) =>
+        console.error("[WA] maintenance invoice:", e),
+      );
+    }
+  });
 
   return NextResponse.json({ invoice, nextBillingDate: next }, { status: 201 });
 }
