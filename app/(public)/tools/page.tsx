@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, ArrowRight } from "lucide-react";
-import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 
 export const metadata: Metadata = {
   title: "Tools Gratis untuk Website & Bisnis — MFWEB",
@@ -90,19 +90,20 @@ export default function ToolsPage() {
             const c = COLOR[tool.color];
             return (
               <StaggerItem key={tool.href}>
-                <Link href={tool.href} className="group block h-full">
-                  <div
-                    className={`relative h-full glass rounded-2xl p-6 border ${c.border} hover:border-opacity-60 transition-all duration-300 flex flex-col`}
-                  >
-                    <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center mb-5`}>
-                      <tool.icon className={`w-6 h-6 ${c.text}`} />
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                        GRATIS
-                      </span>
-                    </div>
-                    <h2 className="text-white font-bold text-lg mb-2">{tool.label}</h2>
+                <HoverCard className="h-full">
+                  <Link href={tool.href} className="group block h-full">
+                    <div
+                      className={`relative h-full glass rounded-2xl p-6 border ${c.border} hover:border-opacity-60 transition-all duration-300 flex flex-col`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center mb-5`}>
+                        <tool.icon className={`w-6 h-6 ${c.text}`} />
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <span className="text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full animate-pulse-slow">
+                          GRATIS
+                        </span>
+                      </div>
+                      <h2 className="text-white font-bold text-lg mb-2">{tool.label}</h2>
                     <p className="text-blue-200/60 text-sm leading-relaxed mb-5 flex-1">{tool.desc}</p>
                     <div className="flex flex-wrap gap-1.5 mb-5">
                       {tool.tags.map((tag) => (
@@ -118,6 +119,7 @@ export default function ToolsPage() {
                     </div>
                   </div>
                 </Link>
+                </HoverCard>
               </StaggerItem>
             );
           })}

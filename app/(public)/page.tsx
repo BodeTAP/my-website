@@ -9,7 +9,7 @@ import PricingSection from "@/components/public/PricingSection";
 import TestimonialCarousel from "@/components/public/TestimonialCarousel";
 import HeroStats from "@/components/public/HeroStats";
 import FAQSection from "@/components/public/FAQSection";
-import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
+import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard, StaggerWords } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
@@ -252,21 +252,20 @@ export default async function HomePage() {
           </FadeUp>
 
           <FadeUp delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              Tingkatkan Kredibilitas{" "}
-              <span className="text-gradient">Bisnis Lokal Anda</span>{" "}
-              dengan Website Profesional
-            </h1>
+            <StaggerWords
+              text="Tingkatkan Kredibilitas Bisnis Lokal Anda dengan Website Profesional"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
+            />
           </FadeUp>
 
-          <FadeUp delay={0.2}>
+          <FadeUp delay={0.3}>
             <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
               Bisnis Anda sudah ada di Google Maps — tapi itu belum cukup. Website profesional
               memberi Anda kontrol penuh, tampil lebih kredibel, dan mudah ditemukan calon pelanggan.
             </p>
           </FadeUp>
 
-          <FadeUp delay={0.3}>
+          <FadeUp delay={0.4}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/contact">
                 <Button size="lg" className="btn-shine bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 shadow-lg shadow-blue-500/25 text-base">
@@ -289,7 +288,7 @@ export default async function HomePage() {
       {/* ── Domain Checker ───────────────────────────────────────── */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <FadeUp className="text-center mb-10">
+          <FadeUp className="text-center mb-10" delay={0.2}>
             <h2 className="text-3xl font-bold text-white mb-3">
               Domain Bisnis Anda Masih Tersedia?
             </h2>
@@ -297,7 +296,7 @@ export default async function HomePage() {
               Cek sekarang sebelum didaftar orang lain. Domain yang bagus adalah aset bisnis Anda.
             </p>
           </FadeUp>
-          <FadeIn delay={0.15}>
+          <FadeIn delay={0.4}>
             <DomainChecker />
           </FadeIn>
         </div>

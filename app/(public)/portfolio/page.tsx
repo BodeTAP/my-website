@@ -60,20 +60,27 @@ export default async function PortfolioPage() {
                       alt={p.title}
                       width={400}
                       height={208}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Globe className="w-16 h-16 text-blue-500/20" />
                     </div>
                   )}
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px] flex items-center justify-center">
+                     <div className="px-4 py-2 glass rounded-full text-white text-xs font-medium translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                       Lihat Detail
+                     </div>
+                  </div>
 
                   {p.liveUrl && (
                     <a
                       href={p.liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute top-3 right-3 glass rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-3 right-3 glass rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                     >
                       <ExternalLink className="w-4 h-4 text-white" />
                     </a>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { StaggerChildren, StaggerItem, FadeUp, ScaleIn } from "@/components/public/motion";
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -79,102 +80,106 @@ function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="glass rounded-2xl p-6 sm:p-8 space-y-5"
+      className="glass rounded-2xl p-6 sm:p-8"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="space-y-1.5">
-          <Label className="text-blue-200 text-sm">Nama Lengkap *</Label>
+      <StaggerChildren stagger={0.05} className="space-y-5">
+        <StaggerItem className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-1.5">
+            <Label className="text-blue-200 text-sm">Nama Lengkap *</Label>
+            <Input
+              required
+              value={form.name}
+              onChange={set("name")}
+              placeholder="Budi Santoso"
+              className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-blue-200 text-sm">Nama Bisnis *</Label>
+            <Input
+              required
+              value={form.businessName}
+              onChange={set("businessName")}
+              placeholder="Toko Maju Jaya"
+              className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+            />
+          </div>
+        </StaggerItem>
+
+        <StaggerItem className="space-y-1.5">
+          <Label className="text-blue-200 text-sm">Nomor WhatsApp *</Label>
           <Input
             required
-            value={form.name}
-            onChange={set("name")}
-            placeholder="Budi Santoso"
+            type="tel"
+            value={form.whatsapp}
+            onChange={set("whatsapp")}
+            placeholder="08123456789"
             className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
           />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-blue-200 text-sm">Nama Bisnis *</Label>
-          <Input
-            required
-            value={form.businessName}
-            onChange={set("businessName")}
-            placeholder="Toko Maju Jaya"
-            className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-          />
-        </div>
-      </div>
+        </StaggerItem>
 
-      <div className="space-y-1.5">
-        <Label className="text-blue-200 text-sm">Nomor WhatsApp *</Label>
-        <Input
-          required
-          type="tel"
-          value={form.whatsapp}
-          onChange={set("whatsapp")}
-          placeholder="08123456789"
-          className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-        />
-      </div>
+        <StaggerItem className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-1.5">
+            <Label className="text-blue-200 text-sm">
+              Domain yang diinginkan
+              {domainParam && (
+                <span className="ml-2 text-green-400 text-xs">
+                  (dari domain checker)
+                </span>
+              )}
+            </Label>
+            <Input
+              value={form.domain}
+              onChange={set("domain")}
+              placeholder="namabisnisanda.com"
+              className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-blue-200 text-sm">
+              Website / Profil Bisnis Saat Ini
+            </Label>
+            <Input
+              value={form.currentWebsite}
+              onChange={set("currentWebsite")}
+              placeholder="https://goo.gl/maps/..."
+              className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+            />
+          </div>
+        </StaggerItem>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="space-y-1.5">
+        <StaggerItem className="space-y-1.5">
           <Label className="text-blue-200 text-sm">
-            Domain yang diinginkan
-            {domainParam && (
-              <span className="ml-2 text-green-400 text-xs">
-                (dari domain checker)
-              </span>
+            Ceritakan kebutuhan Anda (opsional)
+          </Label>
+          <Textarea
+            value={form.message}
+            onChange={set("message")}
+            rows={4}
+            placeholder="Saya punya klinik gigi dan ingin website yang bisa menerima booking online..."
+            className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 resize-none"
+          />
+        </StaggerItem>
+
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+
+        <StaggerItem>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 shadow-lg shadow-blue-500/20"
+          >
+            {loading ? (
+              "Mengirim..."
+            ) : (
+              <>
+                <Send className="w-4 h-4 mr-2" />
+                Kirim Pesan
+              </>
             )}
-          </Label>
-          <Input
-            value={form.domain}
-            onChange={set("domain")}
-            placeholder="namabisnisanda.com"
-            className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-blue-200 text-sm">
-            Website / Profil Bisnis Saat Ini
-          </Label>
-          <Input
-            value={form.currentWebsite}
-            onChange={set("currentWebsite")}
-            placeholder="https://goo.gl/maps/..."
-            className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-blue-200 text-sm">
-          Ceritakan kebutuhan Anda (opsional)
-        </Label>
-        <Textarea
-          value={form.message}
-          onChange={set("message")}
-          rows={4}
-          placeholder="Saya punya klinik gigi dan ingin website yang bisa menerima booking online..."
-          className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 resize-none"
-        />
-      </div>
-
-      {error && <p className="text-red-400 text-sm">{error}</p>}
-
-      <Button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 shadow-lg shadow-blue-500/20"
-      >
-        {loading ? (
-          "Mengirim..."
-        ) : (
-          <>
-            <Send className="w-4 h-4 mr-2" />
-            Kirim Pesan
-          </>
-        )}
-      </Button>
+          </Button>
+        </StaggerItem>
+      </StaggerChildren>
     </form>
   );
 }
@@ -218,51 +223,52 @@ export default function ContactPage() {
           </motion.div>
 
           {/* Info sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-2 space-y-5"
-          >
-            <div className="glass rounded-2xl p-6">
-              <h3 className="text-white font-semibold mb-4">
-                Hubungi Langsung
-              </h3>
-              <a
-                href={`https://wa.me/${WA_NUMBER}?text=Halo%20MFWEB%20Tech%2C%20saya%20ingin%20konsultasi%20website`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button className="w-full bg-green-600 hover:bg-green-500 text-white">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Chat via WhatsApp
-                </Button>
-              </a>
-            </div>
+          <div className="lg:col-span-2 space-y-5">
+            <ScaleIn delay={0.1}>
+              <div className="glass rounded-2xl p-6">
+                <h3 className="text-white font-semibold mb-4">
+                  Hubungi Langsung
+                </h3>
+                <a
+                  href={`https://wa.me/${WA_NUMBER}?text=Halo%20MFWEB%20Tech%2C%20saya%20ingin%20konsultasi%20website`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button className="w-full bg-green-600 hover:bg-green-500 text-white">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Chat via WhatsApp
+                  </Button>
+                </a>
+              </div>
+            </ScaleIn>
 
-            <div className="glass rounded-2xl p-6 space-y-4">
-              <h3 className="text-white font-semibold">Yang Anda Dapatkan</h3>
-              {[
-                "Konsultasi kebutuhan bisnis gratis",
-                "Rekomendasi paket yang sesuai budget",
-                "Estimasi waktu pengerjaan",
-                "Garansi revisi sampai puas",
-                "Support teknis setelah launch",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
-                  <span className="text-blue-200/70 text-sm">{item}</span>
-                </div>
-              ))}
-            </div>
+            <ScaleIn delay={0.2}>
+              <div className="glass rounded-2xl p-6 space-y-4">
+                <h3 className="text-white font-semibold">Yang Anda Dapatkan</h3>
+                {[
+                  "Konsultasi kebutuhan bisnis gratis",
+                  "Rekomendasi paket yang sesuai budget",
+                  "Estimasi waktu pengerjaan",
+                  "Garansi revisi sampai puas",
+                  "Support teknis setelah launch",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                    <span className="text-blue-200/70 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </ScaleIn>
 
-            <div className="glass rounded-2xl p-6">
-              <p className="text-blue-200/50 text-xs leading-relaxed">
-                Data Anda aman bersama kami dan hanya digunakan untuk keperluan
-                konsultasi. Tidak ada spam, tidak ada penjualan data.
-              </p>
-            </div>
-          </motion.div>
+            <ScaleIn delay={0.3}>
+              <div className="glass rounded-2xl p-6">
+                <p className="text-blue-200/50 text-xs leading-relaxed">
+                  Data Anda aman bersama kami dan hanya digunakan untuk keperluan
+                  konsultasi. Tidak ada spam, tidak ada penjualan data.
+                </p>
+              </div>
+            </ScaleIn>
+          </div>
         </div>
       </div>
     </div>

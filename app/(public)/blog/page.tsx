@@ -49,43 +49,52 @@ export default async function BlogPage({
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <Breadcrumb items={[{ label: "Blog" }]} />
-        <FadeUp className="text-center mb-10">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            Blog & <span className="text-gradient">Panduan</span>
-          </h1>
-          <p className="text-blue-200/60 max-w-xl mx-auto mb-10">
-            Tips praktis agar bisnis Anda mudah ditemukan di internet dan terlihat lebih profesional.
-          </p>
-          <BlogSearch initialQuery={q ?? ""} />
-        </FadeUp>
+        <div className="text-center mb-10">
+          <FadeUp>
+            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+              Blog & <span className="text-gradient">Panduan</span>
+            </h1>
+          </FadeUp>
+          <FadeUp delay={0.05}>
+            <p className="text-blue-200/60 max-w-xl mx-auto mb-10">
+              Tips praktis agar bisnis Anda mudah ditemukan di internet dan terlihat lebih profesional.
+            </p>
+          </FadeUp>
+          <FadeUp delay={0.1}>
+            <BlogSearch initialQuery={q ?? ""} />
+          </FadeUp>
+        </div>
 
         {/* Category filter */}
         {categories.length > 0 && (
-          <FadeUp delay={0.1} className="flex flex-wrap justify-center gap-2 mb-10">
-            <Link
-              href={`/blog${q ? `?q=${q}` : ""}`}
-              className={`px-4 py-1.5 rounded-full text-sm transition-colors border ${
-                !category
-                  ? "bg-blue-600 border-blue-500 text-white"
-                  : "glass border-white/10 text-blue-200/60 hover:text-white hover:border-blue-500/30"
-              }`}
-            >
-              Semua
-            </Link>
-            {categories.map((c) => (
+          <StaggerChildren stagger={0.03} className="flex flex-wrap justify-center gap-2 mb-10">
+            <StaggerItem>
               <Link
-                key={c.slug}
-                href={`/blog?category=${c.slug}${q ? `&q=${q}` : ""}`}
+                href={`/blog${q ? `?q=${q}` : ""}`}
                 className={`px-4 py-1.5 rounded-full text-sm transition-colors border ${
-                  category === c.slug
+                  !category
                     ? "bg-blue-600 border-blue-500 text-white"
                     : "glass border-white/10 text-blue-200/60 hover:text-white hover:border-blue-500/30"
                 }`}
               >
-                {c.name}
+                Semua
               </Link>
+            </StaggerItem>
+            {categories.map((c) => (
+              <StaggerItem key={c.slug}>
+                <Link
+                  href={`/blog?category=${c.slug}${q ? `&q=${q}` : ""}`}
+                  className={`px-4 py-1.5 rounded-full text-sm transition-colors border ${
+                    category === c.slug
+                      ? "bg-blue-600 border-blue-500 text-white"
+                      : "glass border-white/10 text-blue-200/60 hover:text-white hover:border-blue-500/30"
+                  }`}
+                >
+                  {c.name}
+                </Link>
+              </StaggerItem>
             ))}
-          </FadeUp>
+          </StaggerChildren>
         )}
 
         {articles.length === 0 ? (

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import ReadingProgress from "@/components/public/ReadingProgress";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { FadeUp, FadeIn, ScaleIn } from "@/components/public/motion";
 
 function estimateReadTime(html: string): number {
   const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -156,65 +157,71 @@ export default async function ArticlePage({ params }: Params) {
 
         {/* Cover */}
         {article.coverImage && (
-          <div className="rounded-2xl overflow-hidden mb-8 h-64 sm:h-80">
-            <Image src={article.coverImage} alt={article.title} width={768} height={320} className="w-full h-full object-cover" priority />
-          </div>
+          <ScaleIn delay={0.1}>
+            <div className="rounded-2xl overflow-hidden mb-8 h-64 sm:h-80">
+              <Image src={article.coverImage} alt={article.title} width={768} height={320} className="w-full h-full object-cover" priority />
+            </div>
+          </ScaleIn>
         )}
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 flex-wrap mb-4">
-            {article.category && (
-              <Link href={`/blog?category=${article.category.slug}`}
-                className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-3 py-1 rounded-full hover:bg-blue-600/30 transition-colors">
-                {article.category.name}
-              </Link>
-            )}
-            {article.publishedAt && (
-              <div className="flex items-center gap-2 text-blue-400/60 text-sm">
-                <Calendar className="w-4 h-4" />
-                <time>
-                  {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(article.publishedAt))}
-                </time>
+        <FadeUp>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 flex-wrap mb-4">
+              {article.category && (
+                <Link href={`/blog?category=${article.category.slug}`}
+                  className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-3 py-1 rounded-full hover:bg-blue-600/30 transition-colors">
+                  {article.category.name}
+                </Link>
+              )}
+              {article.publishedAt && (
+                <div className="flex items-center gap-2 text-blue-400/60 text-sm">
+                  <Calendar className="w-4 h-4" />
+                  <time>
+                    {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(article.publishedAt))}
+                  </time>
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 text-blue-400/50 text-sm">
+                <Clock className="w-4 h-4" />
+                <span>{readTime} menit baca</span>
+              </div>
+            </div>
+            {article.tags && article.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {article.tags.map((tag) => (
+                  <span key={tag} className="text-xs text-blue-200/40">#{tag}</span>
+                ))}
               </div>
             )}
-            <div className="flex items-center gap-1.5 text-blue-400/50 text-sm">
-              <Clock className="w-4 h-4" />
-              <span>{readTime} menit baca</span>
-            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+              {article.title}
+            </h1>
+
+            {article.excerpt && (
+              <p className="text-blue-200/60 text-lg leading-relaxed border-l-2 border-blue-500/50 pl-4">
+                {article.excerpt}
+              </p>
+            )}
           </div>
-          {article.tags && article.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {article.tags.map((tag) => (
-                <span key={tag} className="text-xs text-blue-200/40">#{tag}</span>
-              ))}
-            </div>
-          )}
-
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
-            {article.title}
-          </h1>
-
-          {article.excerpt && (
-            <p className="text-blue-200/60 text-lg leading-relaxed border-l-2 border-blue-500/50 pl-4">
-              {article.excerpt}
-            </p>
-          )}
-        </div>
+        </FadeUp>
 
         {/* Content */}
-        <div
-          className="prose prose-invert prose-blue max-w-none
-            prose-headings:text-white prose-headings:font-bold
-            prose-p:text-blue-100/70 prose-p:leading-relaxed
-            prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-            prose-strong:text-white
-            prose-code:text-blue-300 prose-code:bg-blue-900/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-            prose-blockquote:border-blue-500/50 prose-blockquote:text-blue-200/60
-            prose-ul:text-blue-100/70 prose-ol:text-blue-100/70
-            prose-img:rounded-xl"
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
+        <FadeIn delay={0.3}>
+          <div
+            className="prose prose-invert prose-blue max-w-none
+              prose-headings:text-white prose-headings:font-bold
+              prose-p:text-blue-100/70 prose-p:leading-relaxed
+              prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-white
+              prose-code:text-blue-300 prose-code:bg-blue-900/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+              prose-blockquote:border-blue-500/50 prose-blockquote:text-blue-200/60
+              prose-ul:text-blue-100/70 prose-ol:text-blue-100/70
+              prose-img:rounded-xl"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
+        </FadeIn>
 
         {/* Artikel Terkait */}
         {relatedArticles.length > 0 && (

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Script from "next/script";
 import { ArrowRight, CheckCircle, Users, Zap, Shield, Heart, Globe, Code, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
+import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard, SlideIn, SlideInRight } from "@/components/public/motion";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
@@ -161,18 +161,30 @@ export default function AboutPage() {
           </FadeUp>
 
           <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((v) => (
-              <StaggerItem key={v.title}>
-                <HoverCard className="h-full">
-                  <div className="glass rounded-2xl p-6 hover:border-blue-500/40 transition-colors duration-300 group h-full">
-                    <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center mb-5 group-hover:bg-blue-600/35 transition-colors">
-                      <v.icon className="w-6 h-6 text-blue-400" />
-                    </div>
-                    <h3 className="text-white font-semibold mb-2">{v.title}</h3>
-                    <p className="text-blue-200/50 text-sm leading-relaxed">{v.desc}</p>
-                  </div>
-                </HoverCard>
-              </StaggerItem>
+            {values.map((v, i) => (
+              i % 2 === 0
+                ? <SlideIn key={v.title} delay={i * 0.05}>
+                    <HoverCard className="h-full">
+                      <div className="glass rounded-2xl p-6 hover:border-blue-500/40 transition-colors duration-300 group h-full">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center mb-5 group-hover:bg-blue-600/35 transition-colors">
+                          <v.icon className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <h3 className="text-white font-semibold mb-2">{v.title}</h3>
+                        <p className="text-blue-200/50 text-sm leading-relaxed">{v.desc}</p>
+                      </div>
+                    </HoverCard>
+                  </SlideIn>
+                : <SlideInRight key={v.title} delay={i * 0.05}>
+                    <HoverCard className="h-full">
+                      <div className="glass rounded-2xl p-6 hover:border-blue-500/40 transition-colors duration-300 group h-full">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center mb-5 group-hover:bg-blue-600/35 transition-colors">
+                          <v.icon className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <h3 className="text-white font-semibold mb-2">{v.title}</h3>
+                        <p className="text-blue-200/50 text-sm leading-relaxed">{v.desc}</p>
+                      </div>
+                    </HoverCard>
+                  </SlideInRight>
             ))}
           </StaggerChildren>
         </div>
