@@ -38,6 +38,18 @@ export async function POST(req: NextRequest) {
 
   console.log(`[Tripay Webhook] ref=${reference} status=${status}`);
 
+  const STATUS_MAP: Record<string, string> = {
+    PAID:    "PAID",
+    UNPAID:  "UNPAID",
+    EXPIRED: "EXPIRED",
+    FAILED:  "FAILED",
+  };
+  const mappedStatus = STATUS_MAP[status];
+  if (!mappedStatus) {
+    console.warn(`[Tripay Webhook] Status tidak dikenal: ${status}`);
+    return NextResponse.json({ success: true });
+  }
+
   if (status === "PAID") {
     // Fetch invoice + client before update so we have phone + name
     const invoice = await prisma.invoice.findFirst({
@@ -87,6 +99,13 @@ export async function POST(req: NextRequest) {
         }
       });
     }
+  } else {
+    // EXPIRED or FAILED — just update status, no WA needed
+    await prisma.invoice.updateMany({
+      where: { tripayRef: reference },
+      data:  { status: mappedStatus as "EXPIRED" | "FAILED" },
+    });
+    console.log(`[Tripay Webhook] Invoice ${reference} → ${mappedStatus}`);
   }
 
   return NextResponse.json({ success: true });

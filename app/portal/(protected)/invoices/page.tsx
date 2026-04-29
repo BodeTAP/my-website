@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 import PayInvoiceButton from "./PayInvoiceButton";
 
@@ -49,13 +49,24 @@ export default async function PortalInvoicesPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1 flex-wrap">
                     <span className="text-white font-semibold font-mono text-sm">{inv.invoiceNo}</span>
-                    {inv.status === "PAID" ? (
+                    {inv.status === "PAID" && (
                       <Badge variant="outline" className="text-green-300 border-green-500/20 bg-green-500/5">
                         <CheckCircle2 className="w-3 h-3 mr-1" /> Lunas
                       </Badge>
-                    ) : (
+                    )}
+                    {inv.status === "UNPAID" && (
                       <Badge variant="outline" className="text-amber-300 border-amber-500/20 bg-amber-500/5">
                         Belum Dibayar
+                      </Badge>
+                    )}
+                    {inv.status === "EXPIRED" && (
+                      <Badge variant="outline" className="text-gray-400 border-gray-500/20 bg-gray-500/5">
+                        <Clock className="w-3 h-3 mr-1" /> Kadaluarsa
+                      </Badge>
+                    )}
+                    {inv.status === "FAILED" && (
+                      <Badge variant="outline" className="text-red-400 border-red-500/20 bg-red-500/5">
+                        <XCircle className="w-3 h-3 mr-1" /> Gagal
                       </Badge>
                     )}
                   </div>
@@ -77,7 +88,7 @@ export default async function PortalInvoicesPage() {
                   <span className="text-white font-bold text-xl">{formatRupiah(inv.amount)}</span>
                   <div className="flex items-center gap-2">
                     <DownloadInvoiceButton invoiceId={inv.id} invoiceNo={inv.invoiceNo} variant="outline" />
-                    {inv.status === "UNPAID" && (
+                    {(inv.status === "UNPAID") && (
                       <PayInvoiceButton invoiceId={inv.id} existingPaymentUrl={inv.paymentUrl} invoiceNo={inv.invoiceNo} />
                     )}
                   </div>
@@ -85,7 +96,7 @@ export default async function PortalInvoicesPage() {
               </div>
 
               {/* Tripay reference */}
-              {inv.tripayRef && inv.status === "UNPAID" && (
+              {inv.tripayRef && (inv.status === "UNPAID" || inv.status === "EXPIRED" || inv.status === "FAILED") && (
                 <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between flex-wrap gap-2">
                   <p className="text-blue-200/40 text-xs">Ref. Pembayaran: <span className="font-mono">{inv.tripayRef}</span></p>
                   <p className="text-blue-200/30 text-xs">Pembayaran diproses oleh Tripay</p>

@@ -384,6 +384,8 @@ enum ProjectStatus {
 enum InvoiceStatus {
   UNPAID
   PAID
+  EXPIRED
+  FAILED
 }
 
 enum TicketStatus {

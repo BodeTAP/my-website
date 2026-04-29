@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { CheckCircle2, Clock, FileText } from "lucide-react";
+import { CheckCircle2, Clock, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { fetchPaymentChannels } from "@/lib/tripay";
 import PaymentSelector from "./PaymentSelector";
@@ -39,7 +39,9 @@ export default async function PublicPayPage({ params }: Params) {
 
   if (!invoice) notFound();
 
-  const isPaid   = invoice.status === "PAID";
+  const isPaid    = invoice.status === "PAID";
+  const isExpired = invoice.status === "EXPIRED";
+  const isFailed  = invoice.status === "FAILED";
   const items    = (invoice.lineItems as LineItem[]) ?? [];
   const hasItems = items.length > 0 && items.some(i => i.label);
 
@@ -121,6 +123,22 @@ export default async function PublicPayPage({ params }: Params) {
                   {invoice.paidAt && (
                     <p className="text-green-400/60 text-xs">Dibayar pada {fmtDate(invoice.paidAt)}</p>
                   )}
+                </div>
+              </div>
+            ) : isExpired ? (
+              <div className="flex items-center gap-3 bg-gray-500/10 border border-gray-500/20 rounded-xl px-4 py-3">
+                <XCircle className="w-5 h-5 text-gray-400 shrink-0" />
+                <div>
+                  <p className="text-gray-300 font-semibold text-sm">Sesi Pembayaran Kadaluarsa</p>
+                  <p className="text-gray-400/70 text-xs">Hubungi admin untuk memperbarui invoice ini.</p>
+                </div>
+              </div>
+            ) : isFailed ? (
+              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+                <div>
+                  <p className="text-red-300 font-semibold text-sm">Pembayaran Gagal</p>
+                  <p className="text-red-400/70 text-xs">Hubungi admin untuk bantuan lebih lanjut.</p>
                 </div>
               </div>
             ) : (

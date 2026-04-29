@@ -95,7 +95,7 @@ export default async function InvoicesPage() {
                         <InvoiceStatusToggle invoiceId={inv.id} currentStatus={inv.status} />
                       </td>
                       <td className="px-4 sm:px-5 py-4">
-                        {inv.status === "UNPAID" && (
+                        {(inv.status === "UNPAID" || inv.status === "EXPIRED" || inv.status === "FAILED") && (
                           <div className="flex items-center gap-1.5">
                             <a href={waUrl} target="_blank" rel="noopener noreferrer">
                               <Button size="sm" className="bg-green-600/80 hover:bg-green-600 text-white h-8 px-3 text-xs whitespace-nowrap">
