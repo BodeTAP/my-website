@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ProfileForm from "./ProfileForm";
+import { FadeUp } from "@/components/public/motion";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -24,13 +25,15 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <FadeUp className="mb-8">
         <h1 className="text-2xl font-bold text-white">Profil Saya</h1>
         <p className="text-blue-200/50 text-sm mt-1">
           Kelola informasi akun dan foto profil Anda.
         </p>
-      </div>
-      <ProfileForm profile={profile} />
+      </FadeUp>
+      <FadeUp delay={0.15}>
+        <ProfileForm profile={profile} />
+      </FadeUp>
     </div>
   );
 }

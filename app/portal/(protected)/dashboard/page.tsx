@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FadeUp, StaggerChildren, StaggerItem, ScaleIn, CountUp } from "@/components/public/motion";
 
 const PROJECT_STEPS = ["DRAFTING", "DEVELOPMENT", "TESTING", "LIVE"] as const;
 const PROJECT_LABELS: Record<string, string> = {
@@ -65,19 +66,20 @@ export default async function PortalDashboardPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <FadeUp className="mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-white">
           Selamat datang, {session.user.name ?? client.businessName}!
         </h1>
         <p className="text-blue-200/50 text-sm mt-1">{client.businessName}</p>
-      </div>
+      </FadeUp>
 
       {/* Active project status */}
       {activeProject && (
-        <div className="glass rounded-2xl p-4 sm:p-6 mb-5 glow-blue">
-          <h2 className="text-white font-semibold mb-4 text-sm sm:text-base">
-            Status Proyek: <span className="text-blue-300">{activeProject.name}</span>
-          </h2>
+        <FadeUp delay={0.1}>
+          <div className="glass rounded-2xl p-4 sm:p-6 mb-5 glow-blue">
+            <h2 className="text-white font-semibold mb-4 text-sm sm:text-base">
+              Status Proyek: <span className="text-blue-300">{activeProject.name}</span>
+            </h2>
 
           {/* Progress stepper — compact horizontal */}
           <div className="flex items-center gap-0">
@@ -138,6 +140,7 @@ export default async function PortalDashboardPage() {
             </Link>
           </div>
         </div>
+        </FadeUp>
       )}
 
       {/* Active maintenance subscription */}
@@ -170,27 +173,39 @@ export default async function PortalDashboardPage() {
       })()}
 
       {/* Quick stats */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
-        <div className="glass rounded-2xl p-3 sm:p-5">
-          <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mb-2" />
-          <div className="text-2xl sm:text-3xl font-bold text-white">{client.invoices.length}</div>
-          <div className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Invoice Tertunda</div>
-        </div>
-        <div className="glass rounded-2xl p-3 sm:p-5">
-          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 mb-2" />
-          <div className="text-2xl sm:text-3xl font-bold text-white">{client.tickets.length}</div>
-          <div className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Tiket Aktif</div>
-        </div>
-        <div className="glass rounded-2xl p-3 sm:p-5">
-          <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mb-2" />
-          <div className="text-2xl sm:text-3xl font-bold text-white">{client.projects.length}</div>
-          <div className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Total Proyek</div>
-        </div>
-      </div>
+      <StaggerChildren stagger={0.08} className="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
+        <StaggerItem>
+          <ScaleIn className="glass rounded-2xl p-3 sm:p-5">
+            <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mb-2" />
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+              <CountUp from={0} to={client.invoices.length} />
+            </div>
+            <div className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Invoice Tertunda</div>
+          </ScaleIn>
+        </StaggerItem>
+        <StaggerItem>
+          <ScaleIn className="glass rounded-2xl p-3 sm:p-5">
+            <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 mb-2" />
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+              <CountUp from={0} to={client.tickets.length} />
+            </div>
+            <div className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Tiket Aktif</div>
+          </ScaleIn>
+        </StaggerItem>
+        <StaggerItem>
+          <ScaleIn className="glass rounded-2xl p-3 sm:p-5">
+            <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mb-2" />
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+              <CountUp from={0} to={client.projects.length} />
+            </div>
+            <div className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Total Proyek</div>
+          </ScaleIn>
+        </StaggerItem>
+      </StaggerChildren>
 
       {/* Unpaid invoices */}
       {client.invoices.length > 0 && (
-        <div className="glass rounded-2xl p-4 sm:p-6">
+        <FadeUp className="glass rounded-2xl p-4 sm:p-6" delay={0.2}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-semibold text-sm sm:text-base">Invoice Belum Dibayar</h2>
             <Link href="/portal/invoices">
@@ -199,28 +214,30 @@ export default async function PortalDashboardPage() {
               </Button>
             </Link>
           </div>
-          <div className="space-y-3">
+          <StaggerChildren className="space-y-3">
             {client.invoices.map((inv) => {
               const amount = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(inv.amount);
               return (
-                <div key={inv.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-t border-white/5 first:border-0 first:pt-0">
-                  <div className="min-w-0">
-                    <p className="text-white text-sm font-medium">{inv.invoiceNo}</p>
-                    <p className="text-blue-200/50 text-xs truncate">{inv.description ?? "—"}</p>
+                <StaggerItem key={inv.id}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-t border-white/5 first:border-0 first:pt-0">
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-medium">{inv.invoiceNo}</p>
+                      <p className="text-blue-200/50 text-xs truncate">{inv.description ?? "—"}</p>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                      <span className="text-white font-semibold text-sm">{amount}</span>
+                      <Link href="/portal/invoices">
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white h-8 px-3 text-xs whitespace-nowrap">
+                          Bayar Sekarang
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                    <span className="text-white font-semibold text-sm">{amount}</span>
-                    <Link href="/portal/invoices">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white h-8 px-3 text-xs whitespace-nowrap">
-                        Bayar Sekarang
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+                </StaggerItem>
               );
             })}
-          </div>
-        </div>
+          </StaggerChildren>
+        </FadeUp>
       )}
     </div>
   );

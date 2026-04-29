@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 import PayInvoiceButton from "./PayInvoiceButton";
+import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
@@ -31,19 +32,21 @@ export default async function PortalInvoicesPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <FadeUp className="mb-8">
         <h1 className="text-2xl font-bold text-white">Riwayat Invoice</h1>
         <p className="text-blue-200/50 text-sm mt-1">{invoices.length} invoice</p>
-      </div>
+      </FadeUp>
 
       <div className="space-y-3">
         {invoices.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center text-blue-200/30">
+          <FadeUp delay={0.1} className="glass rounded-2xl p-10 text-center text-blue-200/30">
             Belum ada invoice
-          </div>
+          </FadeUp>
         ) : (
-          invoices.map((inv) => (
-            <div key={inv.id} className="glass rounded-2xl p-5">
+          <StaggerChildren stagger={0.05} className="space-y-3">
+            {invoices.map((inv) => (
+              <StaggerItem key={inv.id}>
+                <div className="glass rounded-2xl p-5">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -103,7 +106,9 @@ export default async function PortalInvoicesPage() {
                 </div>
               )}
             </div>
-          ))
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
         )}
       </div>
 

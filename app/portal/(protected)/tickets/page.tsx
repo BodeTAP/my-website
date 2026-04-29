@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import TicketList from "./TicketList";
+import { FadeUp } from "@/components/public/motion";
 
 export default async function PortalTicketsPage() {
   const session = await auth();
@@ -34,10 +35,10 @@ export default async function PortalTicketsPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <FadeUp className="mb-8">
         <h1 className="text-2xl font-bold text-white">Bantuan & Revisi</h1>
         <p className="text-blue-200/50 text-sm mt-1">Kirim permintaan revisi atau pertanyaan teknis</p>
-      </div>
+      </FadeUp>
       <TicketList tickets={serialized} clientId={user.client.id} userId={user.id} />
     </div>
   );

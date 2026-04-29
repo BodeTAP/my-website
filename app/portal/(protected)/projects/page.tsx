@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ExternalLink, CheckCircle2, Loader2, Rocket, Clock } from "lucide-react";
+import { FadeUp, StaggerChildren, StaggerItem, ProgressBar } from "@/components/public/motion";
 
 type ProjectStatus = "DRAFTING" | "DEVELOPMENT" | "TESTING" | "LIVE";
 
@@ -75,24 +76,26 @@ export default async function PortalProjectsPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <FadeUp className="mb-8">
         <h1 className="text-2xl font-bold text-white">Proyek Saya</h1>
         <p className="text-blue-200/50 text-sm mt-1">{projects.length} proyek</p>
-      </div>
+      </FadeUp>
 
       <div className="space-y-8">
         {projects.length === 0 ? (
-          <div className="glass rounded-2xl p-12 text-center">
+          <FadeUp delay={0.1} className="glass rounded-2xl p-12 text-center">
             <Rocket className="w-10 h-10 text-blue-200/20 mx-auto mb-3" />
             <p className="text-blue-200/40">Belum ada proyek aktif.</p>
             <p className="text-blue-200/25 text-sm mt-1">Hubungi tim kami untuk memulai proyek Anda.</p>
-          </div>
+          </FadeUp>
         ) : (
-          projects.map((project) => {
-            const currentIdx = STATUS_ORDER[project.status as ProjectStatus] ?? 0;
+          <StaggerChildren className="space-y-8">
+            {projects.map((project) => {
+              const currentIdx = STATUS_ORDER[project.status as ProjectStatus] ?? 0;
 
-            return (
-              <div key={project.id} className="glass rounded-2xl overflow-hidden">
+              return (
+                <StaggerItem key={project.id}>
+                  <FadeUp className="glass rounded-2xl overflow-hidden">
                 {/* Header */}
                 <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-white/5">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -232,9 +235,11 @@ export default async function PortalProjectsPage() {
                     </div>
                   )}
                 </div>
-              </div>
-            );
-          })
+                  </FadeUp>
+                </StaggerItem>
+              );
+            })}
+          </StaggerChildren>
         )}
       </div>
     </div>
