@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import { motion, useInView, useMotionValue, useSpring, useTransform, animate, AnimatePresence } from "framer-motion";
+import { useRef, useEffect, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -66,6 +67,22 @@ export function SlideIn({ children, delay = 0, className }: Props) {
     <motion.div
       ref={ref}
       initial={{ opacity: 0, x: -24 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.65, delay, ease }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function SlideInRight({ children, delay = 0, className }: Props) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: 40 }}
       animate={inView ? { opacity: 1, x: 0 } : {}}
       transition={{ duration: 0.65, delay, ease }}
       className={className}
@@ -141,5 +158,95 @@ export function MotionSection({
     >
       {children}
     </motion.section>
+  );
+}
+
+export function CountUp({
+  from,
+  to,
+  duration = 2,
+  suffix = "",
+  className,
+}: {
+  from: number;
+  to: number;
+  duration?: number;
+  suffix?: string;
+  className?: string;
+}) {
+  const nodeRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const controls = animate(from, to, {
+      duration,
+      ease: "easeOut",
+      onUpdate(value) {
+        if (nodeRef.current) {
+          nodeRef.current.textContent = Math.round(value).toLocaleString("id-ID") + suffix;
+        }
+      },
+    });
+
+    return () => controls.stop();
+  }, [from, to, duration, suffix]);
+
+  return <span ref={nodeRef} className={className}>{from}{suffix}</span>;
+}
+
+export function AnimatePresenceFade({ children, keyProp }: { children: ReactNode; keyProp: any }) {
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={keyProp}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+export function ProgressBar({ value, className }: { value: number; className?: string }) {
+  return (
+    <div className={cn("h-2 bg-white/5 rounded-full overflow-hidden", className)}>
+      <motion.div
+        initial={{ width: 0 }}
+        whileInView={{ width: `${value}%` }}
+        viewport={{ once: true }}
+        transition={{ type: "spring", stiffness: 60, damping: 15 }}
+        className="h-full bg-blue-600 rounded-full"
+      />
+    </div>
+  );
+}
+
+export function StaggerWords({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
+  const words = text.split(" ");
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        visible: { transition: { staggerChildren: 0.05, delayChildren: delay } },
+      }}
+      className={className}
+    >
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
+          }}
+          className="inline-block mr-[0.25em] last:mr-0"
+        >
+          {word}
+        </motion.span>
+      ))}
+    </motion.div>
   );
 }
