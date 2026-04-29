@@ -1,47 +1,71 @@
-// Shown inside AdminShell (sidebar already visible) while any admin page loads.
-export default function AdminLoading() {
+import { Skeleton, SkeletonCard, SkeletonTitle, SkeletonText } from "@/components/ui/skeleton";
+
+export default function AdminDashboardLoading() {
   return (
-    <div className="animate-pulse">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="space-y-2">
-          <div className="h-7 w-48 bg-white/5 rounded-xl" />
-          <div className="h-4 w-28 bg-white/5 rounded-lg" />
-        </div>
-        <div className="h-10 w-32 bg-white/5 rounded-xl" />
+    <div className="p-6 sm:p-8 animate-pulse">
+      <div className="mb-8 space-y-2">
+        <SkeletonTitle className="w-48" />
+        <SkeletonText className="w-64" />
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="glass rounded-2xl p-4 sm:p-5 space-y-3">
-            <div className="w-9 h-9 rounded-xl bg-white/5" />
-            <div className="h-8 w-12 bg-white/5 rounded-lg" />
-            <div className="h-3 w-24 bg-white/5 rounded" />
-          </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonCard key={i} className="p-4 sm:p-5 h-32">
+            <Skeleton className="w-9 h-9 rounded-xl" />
+            <SkeletonText className="w-12 h-6" />
+            <SkeletonText className="w-24" />
+          </SkeletonCard>
         ))}
       </div>
 
-      {/* Table / content area */}
-      <div className="glass rounded-2xl overflow-hidden">
-        <div className="border-b border-white/5 px-5 py-4 flex gap-2">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-7 w-20 bg-white/5 rounded-lg" />
-          ))}
-        </div>
-        <div className="divide-y divide-white/5">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="flex items-center gap-4 px-5 py-4">
-              <div className="flex-1 space-y-1.5">
-                <div className="h-4 w-40 bg-white/5 rounded" />
-                <div className="h-3 w-56 bg-white/5 rounded" />
-              </div>
-              <div className="h-4 w-20 bg-white/5 rounded" />
-              <div className="h-6 w-16 bg-white/5 rounded-full" />
-              <div className="h-8 w-20 bg-white/5 rounded-lg" />
+      {/* Revenue Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonCard key={i} className="p-4 sm:p-5 h-28">
+            <div className="flex gap-2">
+              <Skeleton className="w-8 h-8 rounded-xl" />
+              <SkeletonText className="w-24 mt-2" />
             </div>
-          ))}
-        </div>
+            <SkeletonText className="w-20 h-6 mt-2" />
+          </SkeletonCard>
+        ))}
+      </div>
+
+      {/* Leads & Pipeline */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <SkeletonCard className="lg:col-span-3 p-4 sm:p-6 h-[400px]">
+          <div className="flex justify-between mb-4">
+            <SkeletonTitle className="w-32" />
+            <SkeletonText className="w-20" />
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex justify-between py-3 border-b border-white/5">
+                <div className="space-y-2">
+                  <SkeletonText className="w-32" />
+                  <SkeletonText className="w-48" />
+                </div>
+                <Skeleton className="w-16 h-5 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </SkeletonCard>
+
+        <SkeletonCard className="lg:col-span-2 p-4 sm:p-6 h-[400px]">
+          <SkeletonTitle className="w-32 mb-6" />
+          <div className="space-y-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="flex justify-between">
+                  <SkeletonText className="w-16" />
+                  <SkeletonText className="w-8" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-full" />
+              </div>
+            ))}
+          </div>
+        </SkeletonCard>
       </div>
     </div>
   );
