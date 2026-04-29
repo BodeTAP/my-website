@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useConfirm } from "@/hooks/useConfirm";
 
 type Pkg = { id: string; name: string; description: string | null; price: number; features: string[]; isActive: boolean };
 type Sub = {
@@ -214,9 +215,10 @@ export default function MaintenanceClient({
   const [subModal, setSubModal] = useState(false);
   const [generating, setGenerating] = useState<string | null>(null);
   const [changing, setChanging] = useState<string | null>(null);
+  const { confirm, node } = useConfirm();
 
   const handleGenerateInvoice = async (subId: string) => {
-    if (!confirm("Generate invoice bulan ini untuk langganan ini?")) return;
+    if (!await confirm("Generate invoice bulan ini?", { description: "Invoice baru akan dibuat untuk langganan ini.", confirmLabel: "Generate", variant: "warning" })) return;
     setGenerating(subId);
     const res = await fetch(`/api/admin/maintenance/subscriptions/${subId}`, { method: "POST" });
     const data = await res.json();
@@ -238,7 +240,7 @@ export default function MaintenanceClient({
   };
 
   const handleDeletePkg = async (id: string) => {
-    if (!confirm("Hapus paket ini?")) return;
+    if (!await confirm("Hapus paket ini?", { description: "Paket yang dihapus tidak bisa dikembalikan." })) return;
     await fetch(`/api/admin/maintenance/packages/${id}`, { method: "DELETE" });
     setPackages((prev) => prev.filter((p) => p.id !== id));
   };
@@ -388,6 +390,7 @@ export default function MaintenanceClient({
           onSave={(saved) => { setSubs((prev) => [saved, ...prev]); setSubModal(false); }}
         />
       )}
+      {node}
     </div>
   );
 }

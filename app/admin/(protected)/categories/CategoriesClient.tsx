@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Tag, Plus, Pencil, Trash2, X, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useConfirm } from "@/hooks/useConfirm";
 
 type Category = { id: string; name: string; slug: string; _count: { articles: number } };
 
@@ -14,6 +15,7 @@ export default function CategoriesClient({ initial }: { initial: Category[] }) {
   const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { confirm, node } = useConfirm();
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +49,8 @@ export default function CategoriesClient({ initial }: { initial: Category[] }) {
   };
 
   const handleDelete = async (id: string, articleCount: number) => {
-    if (articleCount > 0 && !confirm(`Kategori ini digunakan oleh ${articleCount} artikel. Artikel akan kehilangan kategorinya. Lanjutkan?`)) return;
-    if (articleCount === 0 && !confirm("Hapus kategori ini?")) return;
+    if (articleCount > 0 && !await confirm(`Hapus kategori ini?`, { description: `Kategori digunakan oleh ${articleCount} artikel. Artikel akan kehilangan kategorinya.`, confirmLabel: "Hapus", variant: "warning" })) return;
+    if (articleCount === 0 && !await confirm("Hapus kategori ini?")) return;
     setLoading(true);
     await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
     setItems((prev) => prev.filter((c) => c.id !== id));
@@ -56,6 +58,8 @@ export default function CategoriesClient({ initial }: { initial: Category[] }) {
   };
 
   return (
+    <>
+    {node}
     <div className="p-6 sm:p-8 max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Kategori Artikel</h1>
@@ -125,5 +129,6 @@ export default function CategoriesClient({ initial }: { initial: Category[] }) {
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useConfirm } from "@/hooks/useConfirm";
 
 type Form = {
   id: string; token: string; status: string; createdAt: string;
@@ -122,6 +123,7 @@ export default function OnboardingAdmin({ forms: initial, clients }: { forms: Fo
   const [clientId, setClientId] = useState("");
   const [generating, setGenerating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const { confirm, node } = useConfirm();
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -135,7 +137,7 @@ export default function OnboardingAdmin({ forms: initial, clients }: { forms: Fo
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Hapus form ini?")) return;
+    if (!await confirm("Hapus form onboarding ini?")) return;
     setDeleting(id);
     await fetch(`/api/admin/onboarding/${id}`, { method: "DELETE" });
     setForms((prev) => prev.filter((f) => f.id !== id));
@@ -229,6 +231,7 @@ export default function OnboardingAdmin({ forms: initial, clients }: { forms: Fo
       )}
 
       {detail && <DetailModal form={detail} onClose={() => setDetail(null)} onStatusChange={handleStatusChange} />}
+      {node}
     </div>
   );
 }

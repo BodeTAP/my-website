@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useConfirm } from "@/hooks/useConfirm";
 
 type Testimonial = {
   id: string; name: string; business: string; text: string;
@@ -119,6 +120,7 @@ export default function TestimonialsClient({ initial }: { initial: Testimonial[]
   const [items, setItems] = useState(initial);
   const [modal, setModal] = useState<Partial<Testimonial> | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const { confirm, node } = useConfirm();
 
   const handleSave = (saved: Testimonial) => {
     setItems((prev) => {
@@ -130,7 +132,7 @@ export default function TestimonialsClient({ initial }: { initial: Testimonial[]
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Hapus testimoni ini?")) return;
+    if (!await confirm("Hapus testimoni ini?", { description: "Testimoni yang dihapus tidak bisa dikembalikan." })) return;
     setDeleting(id);
     await fetch(`/api/admin/testimonials/${id}`, { method: "DELETE" });
     setItems((prev) => prev.filter((t) => t.id !== id));
@@ -189,6 +191,7 @@ export default function TestimonialsClient({ initial }: { initial: Testimonial[]
       {modal !== null && (
         <Modal t={modal} onClose={() => setModal(null)} onSave={handleSave} />
       )}
+      {node}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useConfirm } from "@/hooks/useConfirm";
 
 type Admin = { id: string; name: string | null; email: string; createdAt: string };
 
@@ -175,10 +176,11 @@ function ResetPasswordModal({ admin, onDone }: { admin: Admin; onDone: () => voi
 function DeleteAdminButton({ admin, currentId, onDone }: { admin: Admin; currentId: string; onDone: () => void }) {
   const [loading, setLoading] = useState(false);
   const isSelf = admin.id === currentId;
+  const { confirm, node } = useConfirm();
 
   const handleDelete = async () => {
     if (isSelf) return;
-    if (!confirm(`Hapus akses admin untuk ${admin.name ?? admin.email}?`)) return;
+    if (!await confirm(`Hapus akses admin untuk ${admin.name ?? admin.email}?`, { description: "Admin ini tidak akan bisa login lagi." })) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/team/${admin.id}`, { method: "DELETE" });
@@ -191,11 +193,14 @@ function DeleteAdminButton({ admin, currentId, onDone }: { admin: Admin; current
   };
 
   return (
-    <Button size="sm" variant="ghost" disabled={loading || isSelf} onClick={handleDelete}
-      title={isSelf ? "Tidak bisa menghapus akun sendiri" : "Hapus admin"}
-      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2 disabled:opacity-30">
-      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-    </Button>
+    <>
+      <Button size="sm" variant="ghost" disabled={loading || isSelf} onClick={handleDelete}
+        title={isSelf ? "Tidak bisa menghapus akun sendiri" : "Hapus admin"}
+        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2 disabled:opacity-30">
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+      </Button>
+      {node}
+    </>
   );
 }
 

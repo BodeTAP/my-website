@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/hooks/useConfirm";
 
 export default function DeleteInvoiceButton({ invoiceId, invoiceNo }: { invoiceId: string; invoiceNo: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { confirm, node } = useConfirm();
 
   const handleDelete = async () => {
-    if (!confirm(`Hapus invoice ${invoiceNo}? Tindakan ini tidak dapat dibatalkan.`)) return;
+    if (!await confirm(`Hapus invoice ${invoiceNo}?`, { description: "Tindakan ini tidak dapat dibatalkan." })) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/invoices/${invoiceId}`, { method: "DELETE" });
@@ -24,14 +26,17 @@ export default function DeleteInvoiceButton({ invoiceId, invoiceNo }: { invoiceI
   };
 
   return (
-    <Button
-      size="sm"
-      variant="ghost"
-      disabled={loading}
-      onClick={handleDelete}
-      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
-    >
-      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-    </Button>
+    <>
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={loading}
+        onClick={handleDelete}
+        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
+      >
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+      </Button>
+      {node}
+    </>
   );
 }

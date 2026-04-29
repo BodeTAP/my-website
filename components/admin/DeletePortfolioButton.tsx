@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/hooks/useConfirm";
 
 export default function DeletePortfolioButton({ id, title }: { id: string; title: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { confirm, node } = useConfirm();
 
   const handleDelete = async () => {
-    if (!confirm(`Hapus portofolio "${title}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    if (!await confirm(`Hapus portofolio "${title}"?`, { description: "Tindakan ini tidak dapat dibatalkan." })) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/portfolio/${id}`, { method: "DELETE" });
@@ -24,9 +26,12 @@ export default function DeletePortfolioButton({ id, title }: { id: string; title
   };
 
   return (
-    <Button size="sm" variant="ghost" disabled={loading} onClick={handleDelete}
-      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2">
-      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-    </Button>
+    <>
+      <Button size="sm" variant="ghost" disabled={loading} onClick={handleDelete}
+        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2">
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+      </Button>
+      {node}
+    </>
   );
 }
