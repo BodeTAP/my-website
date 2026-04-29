@@ -66,10 +66,21 @@ export async function fetchPaymentChannels(): Promise<PaymentChannel[]> {
       headers: { Authorization: `Bearer ${API_KEY()}`, ...extraHeaders() },
       next: { revalidate: 300 }, // cache 5 minutes
     });
-    const data = await res.json() as { success: boolean; data?: PaymentChannel[] };
-    if (!data.success || !data.data) return [];
+    const text = await res.text();
+    let data: { success: boolean; data?: PaymentChannel[]; message?: string };
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("[Tripay] fetchPaymentChannels: response bukan JSON →", res.status, text.slice(0, 200));
+      return [];
+    }
+    if (!data.success || !data.data) {
+      console.error("[Tripay] fetchPaymentChannels gagal → success:", data.success, "| message:", data.message ?? "(kosong)");
+      return [];
+    }
     return data.data.filter(c => c.active);
-  } catch {
+  } catch (err) {
+    console.error("[Tripay] fetchPaymentChannels exception:", err);
     return [];
   }
 }
