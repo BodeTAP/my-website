@@ -16,7 +16,6 @@ import {
   Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
@@ -230,13 +229,7 @@ export default function LayananPage() {
                       {/* Header */}
                       <div className="flex items-start gap-4 mb-5">
                         <ScaleIn className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                          <motion.div
-                            initial={{ rotate: 0 }}
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-                          >
-                            <service.icon className={`w-6 h-6 ${c.text}`} />
-                          </motion.div>
+                          <service.icon className={`w-6 h-6 ${c.text}`} />
                         </ScaleIn>
                         <div>
                           <h3 className="text-white font-bold text-lg">{service.title}</h3>

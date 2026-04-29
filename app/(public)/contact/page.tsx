@@ -3,12 +3,11 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Send, MessageCircle, CheckCircle } from "lucide-react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { StaggerChildren, StaggerItem, FadeUp, ScaleIn } from "@/components/public/motion";
+import { StaggerChildren, StaggerItem, FadeUp, ScaleIn, SlideIn } from "@/components/public/motion";
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -190,12 +189,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-12"
-        >
+        <FadeUp className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
             Mulai <span className="text-gradient">Konsultasi Gratis</span>
           </h1>
@@ -203,16 +197,11 @@ export default function ContactPage() {
             Isi formulir di bawah dan kami akan menghubungi Anda melalui
             WhatsApp dalam waktu 1×24 jam.
           </p>
-        </motion.div>
+        </FadeUp>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-3"
-          >
+          <SlideIn delay={0.1} className="lg:col-span-3">
             <Suspense
               fallback={
                 <div className="glass rounded-2xl p-8 animate-pulse h-96" />
@@ -220,7 +209,7 @@ export default function ContactPage() {
             >
               <ContactForm />
             </Suspense>
-          </motion.div>
+          </SlideIn>
 
           {/* Info sidebar */}
           <div className="lg:col-span-2 space-y-5">
