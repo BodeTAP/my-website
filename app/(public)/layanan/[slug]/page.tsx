@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import {
   ArrowRight, CheckCircle, Clock, Smartphone,
   Megaphone, Building2, ShoppingCart, Search, Star,
-  Zap, Shield, Globe, BarChart3,
+  Zap, Shield, Globe, BarChart3, LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
@@ -228,6 +228,56 @@ const services: Record<string, ServiceData> = {
       { num: "2-4", label: "Bulan hasil awal" },
       { num: "0", label: "Biaya per klik" },
       { num: "∞", label: "Trafik organik" },
+    ],
+  },
+
+  "aplikasi-web": {
+    slug: "aplikasi-web",
+    title: "Aplikasi Web Bisnis",
+    metaTitle: "Jasa Pembuatan Aplikasi Web Bisnis — Kasir, Booking, Member | MFWEB",
+    metaDesc: "Jasa pembuatan aplikasi web bisnis: sistem kasir & inventori, booking online, portal member, dan sistem custom. Mulai Rp 5 juta. Konsultasi gratis.",
+    heroTitle: "Aplikasi Web yang Mengotomasi Operasional Bisnis Anda",
+    heroSubtitle: "Lebih dari sekadar website — sistem digital yang bekerja di balik layar untuk mengelola kasir, booking, member, dan laporan bisnis Anda secara otomatis.",
+    badge: "Mulai Rp 5 Juta",
+    icon: LayoutDashboard,
+    color: "violet",
+    price: "Mulai Rp 5.000.000",
+    priceNote: "Harga tergantung fitur dan kompleksitas sistem — konsultasi gratis",
+    description: "Aplikasi web bisnis adalah sistem digital yang dirancang khusus untuk kebutuhan operasional bisnis Anda. Berbeda dengan website biasa, aplikasi web memiliki logika bisnis, manajemen data, dan panel admin yang memungkinkan tim Anda bekerja lebih efisien setiap hari.",
+    features: [
+      { title: "Login & Manajemen User", desc: "Sistem autentikasi aman dengan level akses berbeda — admin, kasir, manajer, atau pelanggan. Setiap user hanya lihat apa yang relevan untuk mereka." },
+      { title: "Database & Laporan Bisnis", desc: "Semua data tersimpan rapi dan bisa diolah menjadi laporan penjualan, stok, booking, atau metrik bisnis lain yang Anda butuhkan." },
+      { title: "Panel Admin Lengkap", desc: "Dashboard terpusat untuk monitor semua aktivitas bisnis — transaksi, inventori, jadwal, atau member — dari satu tempat yang mudah digunakan." },
+      { title: "Notifikasi Otomatis", desc: "WhatsApp dan email otomatis untuk konfirmasi booking, invoice, pengingat jadwal, atau alert stok menipis. Tidak perlu kirim manual lagi." },
+      { title: "Responsif & Mobile-Friendly", desc: "Aplikasi berjalan mulus di smartphone, tablet, maupun laptop — tim Anda bisa akses dari mana saja." },
+      { title: "Keamanan Data Bisnis", desc: "Data terenkripsi, backup otomatis, dan akses terproteksi. Informasi bisnis dan pelanggan Anda aman sepenuhnya." },
+    ],
+    forWhom: [
+      "Restoran atau kafe yang butuh sistem kasir & manajemen meja digital",
+      "Klinik, salon, atau jasa yang mau terima booking online otomatis",
+      "Bisnis dengan program loyalitas yang butuh sistem poin & member",
+      "UMKM yang ingin digitalisasi proses operasional yang masih manual",
+    ],
+    deliverables: [
+      "Aplikasi web siap pakai sesuai spesifikasi",
+      "Panel admin untuk kelola data",
+      "Sistem login & manajemen user",
+      "Database & laporan bisnis",
+      "Domain & hosting (1 tahun)",
+      "Training penggunaan & dokumentasi",
+      "Garansi bug 60 hari setelah launch",
+    ],
+    faqs: [
+      { q: "Apa contoh aplikasi web bisnis yang bisa dibuat?", a: "Sistem kasir & inventori (POS), sistem booking & reservasi online, portal member & loyalty program, dashboard laporan bisnis, sistem antrian digital, atau sistem HR sederhana. Kami juga bangun sistem custom sesuai kebutuhan spesifik Anda." },
+      { q: "Berapa lama proses pengerjaannya?", a: "Rata-rata 14–30 hari kerja tergantung kompleksitas fitur. Kami kerjakan secara iteratif — Anda bisa lihat progress di setiap milestone dan memberikan feedback sebelum tahap berikutnya dimulai." },
+      { q: "Apa bedanya aplikasi web dengan website biasa?", a: "Website biasa menampilkan informasi statis (company profile, landing page). Aplikasi web memiliki logika bisnis — proses data, autentikasi user, manajemen inventori, laporan real-time, dan otomasi proses yang tidak bisa dilakukan website biasa." },
+      { q: "Apakah bisa diakses dari HP?", a: "Ya, semua aplikasi web yang kami bangun responsif dan bisa diakses dari browser di HP, tablet, atau laptop tanpa perlu install app. Untuk kebutuhan app native (Android/iOS), kami bisa diskusikan terpisah." },
+      { q: "Bagaimana dengan keamanan data pelanggan?", a: "Keamanan adalah prioritas. Kami implementasi enkripsi data, HTTPS, proteksi SQL injection dan XSS, serta backup otomatis berkala. Data bisnis dan pelanggan Anda tidak dibagikan ke pihak ketiga." },
+    ],
+    stats: [
+      { num: "14-30", label: "Hari pengerjaan" },
+      { num: "3x",    label: "Revisi gratis" },
+      { num: "60",    label: "Hari garansi bug" },
     ],
   },
 };

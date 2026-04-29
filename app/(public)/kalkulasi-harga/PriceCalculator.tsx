@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Megaphone, Building2, ShoppingCart, Check,
-  ArrowRight, MessageCircle, Info,
+  ArrowRight, MessageCircle, Info, LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -62,6 +62,16 @@ const TYPES: WebsiteType[] = [
     color: "teal",
     note: "Termasuk payment gateway setup",
   },
+  {
+    id: "app-web",
+    icon: LayoutDashboard,
+    label: "Aplikasi Web Bisnis",
+    desc: "Kasir, booking, member, atau sistem custom",
+    baseMin: 5_000_000,
+    baseMax: 15_000_000,
+    color: "violet",
+    note: "Harga final setelah konsultasi fitur",
+  },
 ];
 
 type Addon = {
@@ -91,6 +101,7 @@ const COLOR_MAP: Record<string, { bg: string; border: string; text: string; ring
   indigo: { bg: "bg-indigo-600/15", border: "border-indigo-500/50", text: "text-indigo-400", ring: "ring-indigo-500/30" },
   purple: { bg: "bg-purple-600/15", border: "border-purple-500/50", text: "text-purple-400", ring: "ring-purple-500/30" },
   teal:   { bg: "bg-teal-600/15",   border: "border-teal-500/50",   text: "text-teal-400",   ring: "ring-teal-500/30" },
+  violet: { bg: "bg-violet-600/15", border: "border-violet-500/50", text: "text-violet-400", ring: "ring-violet-500/30" },
 };
 
 function formatRp(n: number) {
@@ -148,9 +159,10 @@ export default function PriceCalculator() {
     });
   };
 
+  const isApp = selectedType === "app-web";
   const waMessage = type
-    ? `Halo MFWEB, saya ingin konsultasi pembuatan website.\n\nEstimasi saya:\n- Tipe: ${type.label}\n- Fitur tambahan: ${selectedAddons.size > 0 ? [...selectedAddons].map((id) => ADDONS.find((a) => a.id === id)?.label).join(", ") : "tidak ada"}\n- Total estimasi: ${formatRp(total)}\n\nBoleh saya konsultasi lebih lanjut?`
-    : "Halo MFWEB, saya ingin konsultasi pembuatan website.";
+    ? `Halo MFWEB, saya ingin konsultasi pembuatan ${isApp ? "aplikasi web" : "website"}.\n\nEstimasi saya:\n- Tipe: ${type.label}\n- Fitur tambahan: ${selectedAddons.size > 0 ? [...selectedAddons].map((id) => ADDONS.find((a) => a.id === id)?.label).join(", ") : "tidak ada"}\n- Total estimasi: ${formatRp(total)}\n\nBoleh saya konsultasi lebih lanjut?`
+    : "Halo MFWEB, saya ingin konsultasi layanan.";
 
   return (
     <div className="space-y-6">

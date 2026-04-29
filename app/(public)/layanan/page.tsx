@@ -14,6 +14,7 @@ import {
   Clock,
   MessageCircle,
   Headphones,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
@@ -94,6 +95,21 @@ const services = [
     price: "Konsultasi",
     color: "purple",
   },
+  {
+    icon: LayoutDashboard,
+    title: "Aplikasi Web Bisnis",
+    slug: "aplikasi-web",
+    desc: "Sistem digital untuk operasional bisnis Anda — kasir & inventori, booking online, portal member, atau sistem custom sesuai kebutuhan.",
+    features: [
+      "Login & manajemen user",
+      "Database & laporan bisnis",
+      "Panel admin lengkap",
+      "Notifikasi otomatis (WA/email)",
+      "Responsif & mobile-friendly",
+    ],
+    price: "5.000.000",
+    color: "violet",
+  },
 ];
 
 const process_steps = [
@@ -124,10 +140,11 @@ const process_steps = [
 ];
 
 const colorMap: Record<string, { bg: string; border: string; text: string; badge: string }> = {
-  blue:   { bg: "bg-blue-600/15", border: "border-blue-500/30", text: "text-blue-400", badge: "bg-blue-500" },
+  blue:   { bg: "bg-blue-600/15",   border: "border-blue-500/30",   text: "text-blue-400",   badge: "bg-blue-500" },
   indigo: { bg: "bg-indigo-600/15", border: "border-indigo-500/30", text: "text-indigo-400", badge: "bg-indigo-500" },
-  teal:   { bg: "bg-teal-600/15", border: "border-teal-500/30", text: "text-teal-400", badge: "bg-teal-500" },
+  teal:   { bg: "bg-teal-600/15",   border: "border-teal-500/30",   text: "text-teal-400",   badge: "bg-teal-500" },
   purple: { bg: "bg-purple-600/15", border: "border-purple-500/30", text: "text-purple-400", badge: "bg-purple-500" },
+  violet: { bg: "bg-violet-600/15", border: "border-violet-500/30", text: "text-violet-400", badge: "bg-violet-500" },
 };
 
 export default function LayananPage() {
