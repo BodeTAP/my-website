@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     if (invoice.client.phone) {
       await sendWA(
         invoice.client.phone,
-        waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate),
+        waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate, `${process.env.NEXT_PUBLIC_SITE_URL}/bayar/${invoice.invoiceNo}`),
       );
     } else {
       console.warn(`[WA] Invoice ${invoice.invoiceNo}: client.phone kosong — WA dilewati`);

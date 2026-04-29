@@ -74,7 +74,7 @@ export async function POST(req: Request, { params }: Params) {
     const phone = sub.client.phone;
     const clientName = sub.client.user.name ?? sub.client.businessName;
     if (phone) {
-      await sendWA(phone, waMsg.invoiceNew(clientName, invoiceNo, sub.package.price, dueDate)).catch((e) =>
+      await sendWA(phone, waMsg.invoiceNew(clientName, invoiceNo, sub.package.price, dueDate, `${process.env.NEXT_PUBLIC_SITE_URL}/bayar/${invoiceNo}`)).catch((e) =>
         console.error("[WA] maintenance invoice:", e),
       );
     }

@@ -87,16 +87,18 @@ export const waMsg = {
     invoiceNo: string,
     amount: number,
     dueDate?: Date | null,
+    paymentUrl?: string | null,
   ) {
     const rp = `Rp ${amount.toLocaleString("id-ID")}`;
     const due = dueDate
       ? `\n📅 Jatuh tempo: ${new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(dueDate)}`
       : "";
+    const link = paymentUrl ? `\n\n💳 Bayar sekarang:\n${paymentUrl}` : "";
     return (
       `Halo ${name}! 👋\n\n` +
       `Invoice baru telah diterbitkan untuk Anda.\n\n` +
       `📄 No. Invoice: *${invoiceNo}*\n` +
-      `💰 Jumlah: *${rp}*${due}\n\n` +
+      `💰 Jumlah: *${rp}*${due}${link}\n\n` +
       `Silakan cek portal klien untuk detail dan konfirmasi pembayaran.` +
       FOOTER
     );
