@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import PortalShell from "@/components/portal/PortalShell";
+import AIHelpWidget from "@/components/portal/AIHelpWidget";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -13,6 +14,7 @@ export default async function PortalLayout({ children }: { children: React.React
       userImage={session.user?.image ?? null}
     >
       {children}
+      <AIHelpWidget />
     </PortalShell>
   );
 }

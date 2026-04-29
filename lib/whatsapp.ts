@@ -104,6 +104,39 @@ export const waMsg = {
     );
   },
 
+  invoiceReminder(
+    name: string,
+    invoiceNo: string,
+    amount: number,
+    dueDate: Date,
+    paymentUrl: string | null,
+    daysLeft: number
+  ) {
+    const rp = `Rp ${amount.toLocaleString("id-ID")}`;
+    const due = new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(dueDate);
+
+    let title = "";
+    if (daysLeft > 0) title = `Tagihan Anda jatuh tempo dalam ${daysLeft} hari`;
+    else if (daysLeft === 0) title = "Tagihan Anda jatuh tempo *HARI INI*";
+    else title = "Tagihan Anda telah *melewati jatuh tempo*";
+
+    const link = paymentUrl ? `\n\n💳 Bayar sekarang:\n${paymentUrl}` : "";
+
+    return (
+      `Halo ${name}! 👋\n\n` +
+      `${title}.\n\n` +
+      `📄 No. Invoice: *${invoiceNo}*\n` +
+      `💰 Jumlah: *${rp}*\n` +
+      `📅 Jatuh tempo: ${due}${link}\n\n` +
+      `Silakan abaikan jika sudah melakukan pembayaran.` +
+      FOOTER
+    );
+  },
+
   projectStatus(name: string, projectName: string, status: string) {
     const stage = PROJECT_STAGE[status] ?? { label: status, desc: "" };
     return (

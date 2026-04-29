@@ -34,6 +34,7 @@ export default async function AdminDashboard() {
     paidMonthAgg, unpaidAgg,
     leadNew, leadFollowup, leadDeal, leadClosed,
     activeSubs,
+    tripayStatus, tripayLastAlert,
   ] = await Promise.all([
     prisma.article.count(),
     prisma.project.count({ where: { status: { not: "LIVE" } } }),
@@ -46,6 +47,8 @@ export default async function AdminDashboard() {
     prisma.lead.count({ where: { status: "DEAL" } }),
     prisma.lead.count({ where: { status: "CLOSED" } }),
     prisma.subscription.count({ where: { status: "ACTIVE" } }).catch(() => 0),
+    prisma.siteSetting.findUnique({ where: { key: "tripay_health_status" } }),
+    prisma.siteSetting.findUnique({ where: { key: "tripay_last_alert_at" } }),
   ]);
 
   const paidAmount   = paidMonthAgg._sum.amount ?? 0;
@@ -64,9 +67,24 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-blue-200/50 text-sm mt-1">Selamat datang kembali, Admin.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-blue-200/50 text-sm mt-1">Selamat datang kembali, Admin.</p>
+        </div>
+        
+        {/* Health Widget */}
+        <div className="flex items-center gap-3 px-3 py-1.5 glass rounded-full border border-white/5 self-start sm:self-center">
+          <div className={`w-2 h-2 rounded-full animate-pulse ${tripayStatus?.value === "ok" ? "bg-green-500" : "bg-red-500"}`} />
+          <span className="text-[11px] font-medium text-blue-200/70">
+            Tripay: {tripayStatus?.value === "ok" ? "Normal" : "Error"}
+          </span>
+          {tripayLastAlert && (
+            <span className="text-[10px] text-blue-200/30 border-l border-white/10 pl-2">
+              Lalu: {timeAgo(new Date(tripayLastAlert.value))}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Row 1 — Operations */}

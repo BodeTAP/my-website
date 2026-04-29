@@ -11,6 +11,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@auth/prisma-adapter": "^2.11.2",
     "@base-ui/react": "^1.4.1",
     "@prisma/adapter-pg": "^7.7.0",
