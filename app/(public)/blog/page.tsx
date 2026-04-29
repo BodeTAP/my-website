@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
+import BlogSearch from "./BlogSearch";
 
 export const metadata: Metadata = {
   title: "Tips & Panduan Website untuk Bisnis Lokal | Blog",
@@ -18,9 +19,9 @@ export const revalidate = 60;
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }) {
-  const { category } = await searchParams;
+  const { category, q } = await searchParams;
 
   const [categories, articles] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
@@ -28,6 +29,7 @@ export default async function BlogPage({
       where: {
         status: "PUBLISHED",
         ...(category ? { category: { slug: category } } : {}),
+        ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
       },
       orderBy: { publishedAt: "desc" },
       select: {
@@ -51,16 +53,17 @@ export default async function BlogPage({
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             Blog & <span className="text-gradient">Panduan</span>
           </h1>
-          <p className="text-blue-200/60 max-w-xl mx-auto">
+          <p className="text-blue-200/60 max-w-xl mx-auto mb-10">
             Tips praktis agar bisnis Anda mudah ditemukan di internet dan terlihat lebih profesional.
           </p>
+          <BlogSearch initialQuery={q ?? ""} />
         </FadeUp>
 
         {/* Category filter */}
         {categories.length > 0 && (
           <FadeUp delay={0.1} className="flex flex-wrap justify-center gap-2 mb-10">
             <Link
-              href="/blog"
+              href={`/blog${q ? `?q=${q}` : ""}`}
               className={`px-4 py-1.5 rounded-full text-sm transition-colors border ${
                 !category
                   ? "bg-blue-600 border-blue-500 text-white"
@@ -72,7 +75,7 @@ export default async function BlogPage({
             {categories.map((c) => (
               <Link
                 key={c.slug}
-                href={`/blog?category=${c.slug}`}
+                href={`/blog?category=${c.slug}${q ? `&q=${q}` : ""}`}
                 className={`px-4 py-1.5 rounded-full text-sm transition-colors border ${
                   category === c.slug
                     ? "bg-blue-600 border-blue-500 text-white"
@@ -87,9 +90,24 @@ export default async function BlogPage({
 
         {articles.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-blue-200/40 text-lg">
-              {category ? "Belum ada artikel di kategori ini." : "Artikel akan segera hadir. Pantau terus!"}
-            </p>
+            {q ? (
+              <div className="space-y-4">
+                <p className="text-blue-200/40 text-lg">
+                  Tidak ada artikel untuk pencarian "{q}"
+                </p>
+                <Link
+                  href={`/blog${category ? `?category=${category}` : ""}`}
+                  className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                >
+                  <X className="w-4 h-4" />
+                  Hapus pencarian
+                </Link>
+              </div>
+            ) : (
+              <p className="text-blue-200/40 text-lg">
+                {category ? "Belum ada artikel di kategori ini." : "Artikel akan segera hadir. Pantau terus!"}
+              </p>
+            )}
           </div>
         ) : (
           <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
