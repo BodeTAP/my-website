@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -8,18 +8,21 @@ import { Input } from "@/components/ui/input";
 export default function ArticleSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
+
   const [q, setQ] = useState(searchParams.get("q") ?? "");
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const params = new URLSearchParams(searchParams);
+      const params = new URLSearchParams(searchParamsRef.current);
       if (q) params.set("q", q);
       else params.delete("q");
       params.set("page", "1");
       router.push(`?${params.toString()}`);
     }, 300);
     return () => clearTimeout(timeout);
-  }, [q, router, searchParams]);
+  }, [q, router]); // searchParams sengaja tidak di deps — baca via ref agar page change tidak trigger reset
 
   return (
     <div className="relative w-full sm:w-64">
