@@ -305,6 +305,7 @@ const colorMap: Record<string, { bg: string; text: string; border: string; pill:
   indigo: { bg: "bg-indigo-600/15", text: "text-indigo-400", border: "border-indigo-500/30", pill: "bg-indigo-600" },
   teal:   { bg: "bg-teal-600/15",   text: "text-teal-400",   border: "border-teal-500/30",   pill: "bg-teal-600" },
   purple: { bg: "bg-purple-600/15", text: "text-purple-400", border: "border-purple-500/30", pill: "bg-purple-600" },
+  violet: { bg: "bg-violet-600/15", text: "text-violet-400", border: "border-violet-500/30", pill: "bg-violet-600" },
 };
 
 export default async function ServiceDetailPage({ params }: Params) {
