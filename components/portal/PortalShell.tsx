@@ -29,6 +29,30 @@ const Logo = () => (
   </Link>
 );
 
+function UserAvatar({ src, name, sizeClasses, imageClasses, fallbackClasses }: { src?: string | null, name: string, sizeClasses: string, imageClasses?: string, fallbackClasses?: string }) {
+  const [error, setError] = useState(false);
+  const initial = name ? name.charAt(0).toUpperCase() : "U";
+
+  if (!src || error) {
+    return (
+      <div className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold bg-gradient-to-br from-indigo-500 to-blue-600 ${fallbackClasses || ""}`}>
+        {initial}
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={name}
+      width={100}
+      height={100}
+      className={`${sizeClasses} rounded-full object-cover ${imageClasses || ""}`}
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export default function PortalShell({
   children,
   userName,
@@ -67,19 +91,13 @@ export default function PortalShell({
       <div className="px-5 py-5 border-b border-white/5 relative z-10 bg-black/20">
         <div className="flex items-center justify-between mb-3">
           <Link href="/portal/profile" className="relative">
-            {userImage ? (
-              <Image
-                src={userImage}
-                alt={userName}
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/30 hover:ring-blue-400/60 transition-all shadow-lg"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/10 shadow-lg">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <UserAvatar 
+              src={userImage} 
+              name={userName} 
+              sizeClasses="w-10 h-10" 
+              imageClasses="ring-2 ring-blue-500/30 hover:ring-blue-400/60 transition-all shadow-lg"
+              fallbackClasses="text-sm ring-2 ring-white/10 shadow-lg"
+            />
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#030914]"></div>
           </Link>
           <NotificationBell />
@@ -180,19 +198,13 @@ export default function PortalShell({
           <div className="flex items-center gap-2">
             <NotificationBell />
             <Link href="/portal/profile">
-              {userImage ? (
-                <Image
-                  src={userImage}
-                  alt={userName}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/20"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold ring-1 ring-white/10">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <UserAvatar 
+                src={userImage} 
+                name={userName} 
+                sizeClasses="w-8 h-8" 
+                imageClasses="ring-2 ring-blue-500/20"
+                fallbackClasses="text-xs ring-1 ring-white/10"
+              />
             </Link>
           </div>
         </header>

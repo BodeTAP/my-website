@@ -26,6 +26,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
   const [phone,        setPhone]        = useState(profile.phone);
   const [address,      setAddress]      = useState(profile.address);
   const [avatarUrl,    setAvatarUrl]    = useState(profile.image);
+  const [imgError,     setImgError]     = useState(false);
 
   const [uploading, setUploading]       = useState(false);
   const [toast,     setToast]           = useState<{ ok: boolean; msg: string } | null>(null);
@@ -42,6 +43,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     // Optimistic preview
     const preview = URL.createObjectURL(file);
     setAvatarUrl(preview);
+    setImgError(false);
     setUploading(true);
 
     const fd = new FormData();
@@ -52,6 +54,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
 
     if (res.ok) {
       setAvatarUrl(data.url);
+      setImgError(false);
       showToast(true, "Foto profil berhasil diperbarui.");
       router.refresh();
     } else {
@@ -79,7 +82,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     });
   }
 
-  const initial = (name || profile.email).charAt(0).toUpperCase();
+  const initial = (name || profile.email || "U").charAt(0).toUpperCase();
 
   return (
     <StaggerChildren className="max-w-2xl space-y-6">
@@ -109,15 +112,16 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
             <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-[#050b14] ring-1 ring-white/10 p-1">
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 opacity-20 blur-md" />
               <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-[#050b14]">
-                {avatarUrl ? (
+                {avatarUrl && !imgError ? (
                   <Image
                     src={avatarUrl}
                     alt={name || "Avatar"}
                     fill
                     className="object-cover"
+                    onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-blue-800/30 flex items-center justify-center text-blue-300 text-4xl font-bold">
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white text-4xl font-bold">
                     {initial}
                   </div>
                 )}
