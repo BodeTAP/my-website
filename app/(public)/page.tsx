@@ -235,9 +235,9 @@ export default async function HomePage() {
   };
 
   return (
-    <div>
+    <div className="relative overflow-x-clip">
       {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-28 pb-20 px-4 sm:px-6 lg:px-8">
         {/* Animated orbs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
         <div className="absolute top-20 left-1/4 w-64 h-64 bg-indigo-600/8 rounded-full blur-3xl pointer-events-none animate-float" />
@@ -253,31 +253,106 @@ export default async function HomePage() {
 
           <FadeUp delay={0.1}>
             <StaggerWords
-              text="Tingkatkan Kredibilitas Bisnis Lokal Anda dengan Website Profesional"
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
+              text="Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan"
+              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6"
             />
           </FadeUp>
 
           <FadeUp delay={0.3}>
             <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-              Bisnis Anda sudah ada di Google Maps — tapi itu belum cukup. Website profesional
-              memberi Anda kontrol penuh, tampil lebih kredibel, dan mudah ditemukan calon pelanggan.
+              Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!
             </p>
           </FadeUp>
 
           <FadeUp delay={0.4}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 relative z-20">
               <Link href="/contact">
-                <Button size="lg" className="btn-shine bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 shadow-lg shadow-blue-500/25 text-base">
-                  Konsultasi Gratis
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.6)] text-base font-semibold transition-all hover:scale-105 btn-shine">
+                  Mulai Buat Website Saya
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="/portfolio">
-                <Button size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 h-12 px-8 text-base">
-                  Lihat Portofolio
+                <Button size="lg" variant="outline" className="glass border-white/10 text-white hover:bg-white/10 h-14 px-8 rounded-full text-base font-medium transition-all hover:scale-105">
+                  Lihat Hasil Kerja Kami
                 </Button>
               </Link>
+            </div>
+          </FadeUp>
+
+          {/* Browser Mockup Visual Punch */}
+          <FadeUp delay={0.5} className="w-full max-w-4xl mx-auto relative hidden sm:block mb-16 pointer-events-none select-none">
+            {/* Ambient Glow */}
+            <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full" />
+            
+            <div className="relative glass border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+              {/* Browser Header */}
+              <div className="bg-white/5 border-b border-white/10 px-4 py-3 flex items-center">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                </div>
+                <div className="mx-auto bg-black/20 rounded-md px-4 py-1 text-[11px] text-blue-200/50 flex items-center gap-2 border border-white/5">
+                  <Globe className="w-3 h-3" />
+                  bisnis-anda.com
+                </div>
+                <div className="w-10"></div>
+              </div>
+              {/* Mockup Body */}
+              <div className="h-[280px] relative bg-[#060b14]/80 p-6 flex flex-col">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent" />
+                
+                <div className="flex gap-6 h-full relative z-10">
+                  {/* Left Sidebar */}
+                  <div className="w-40 flex flex-col gap-3 border-r border-white/5 pr-6">
+                    <div className="h-5 w-20 bg-white/10 rounded mb-4" />
+                    <div className="h-3 w-full bg-white/5 rounded" />
+                    <div className="h-3 w-3/4 bg-white/5 rounded" />
+                    <div className="h-3 w-5/6 bg-white/5 rounded" />
+                    <div className="h-3 w-full bg-white/5 rounded" />
+                  </div>
+                  {/* Main Content */}
+                  <div className="flex-1 flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <div className="h-6 w-1/3 bg-blue-500/20 rounded" />
+                      <div className="h-6 w-20 bg-blue-600/30 rounded-full" />
+                    </div>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-3 gap-4 mt-2">
+                      <div className="h-20 glass bg-white/5 rounded-xl border border-white/5 flex flex-col justify-center p-4">
+                        <div className="h-2 w-12 bg-white/20 rounded mb-2" />
+                        <div className="h-5 w-16 bg-blue-400/40 rounded" />
+                      </div>
+                      <div className="h-20 glass bg-white/5 rounded-xl border border-white/5 flex flex-col justify-center p-4">
+                        <div className="h-2 w-12 bg-white/20 rounded mb-2" />
+                        <div className="h-5 w-10 bg-green-400/40 rounded" />
+                      </div>
+                      <div className="h-20 glass bg-white/5 rounded-xl border border-white/5 flex flex-col justify-center p-4">
+                        <div className="h-2 w-12 bg-white/20 rounded mb-2" />
+                        <div className="h-5 w-20 bg-purple-400/40 rounded" />
+                      </div>
+                    </div>
+                    {/* Chart area */}
+                    <div className="flex-1 mt-2 glass bg-white/5 rounded-xl border border-white/5 p-4 overflow-hidden relative">
+                      <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-linear-to-t from-blue-500/10 to-transparent" />
+                      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                        <path d="M0,100 L0,60 Q25,30 50,50 T100,20 L100,100 Z" fill="url(#gradMockup)" opacity="0.3" />
+                        <path d="M0,60 Q25,30 50,50 T100,20" fill="none" stroke="#60a5fa" strokeWidth="1.5" />
+                        <defs>
+                          <linearGradient id="gradMockup" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Fade out bottom overlay */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-[#060b14] to-transparent z-20" />
+              </div>
             </div>
           </FadeUp>
 
@@ -303,8 +378,10 @@ export default async function HomePage() {
       </section>
 
       {/* ── Benefits ─────────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-[-200px] w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[150px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto relative z-10">
           <FadeUp className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Mengapa Bisnis Anda <span className="text-gradient">Butuh Website?</span>
@@ -338,8 +415,9 @@ export default async function HomePage() {
 
       {/* ── Portfolio Preview ─────────────────────────────────────── */}
       {portfolios.length > 0 && (
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
+        <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] pointer-events-none" />
+          <div className="max-w-7xl mx-auto relative z-10">
             <FadeUp className="flex items-end justify-between mb-12">
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2">Hasil Kerja Terbaru</h2>
@@ -436,8 +514,10 @@ export default async function HomePage() {
       )}
 
       {/* ── Testimonials ──────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <div className="absolute top-0 left-[-100px] w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-[-100px] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto relative z-10">
           <FadeUp className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
               Apa Kata <span className="text-gradient">Klien Kami</span>

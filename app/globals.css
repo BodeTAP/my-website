@@ -93,8 +93,10 @@
     background-image:
       linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px),
-      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(29,78,216,0.20) 0%, transparent 70%);
-    background-size: 60px 60px, 60px 60px, 100% 100%;
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(29,78,216,0.15) 0%, transparent 80%);
+    background-size: 60px 60px, 60px 60px, 100vw 100vh;
+    background-attachment: fixed;
+    background-repeat: repeat, repeat, no-repeat;
     min-height: 100vh;
   }
   html {

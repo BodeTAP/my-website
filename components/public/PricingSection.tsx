@@ -100,8 +100,12 @@ const plans = [
 
 export default function PricingSection() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      {/* Background Orbs */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-[-100px] w-[500px] h-[500px] bg-teal-600/5 rounded-full blur-[150px] pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         <FadeUp className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             Paket <span className="text-gradient">Harga Transparan</span>
@@ -123,36 +127,39 @@ export default function PricingSection() {
             const waText = `Halo MFWEB, saya tertarik dengan paket ${plan.name} (Rp ${plan.price}). Boleh konsultasi lebih lanjut?`;
 
             return (
-              <StaggerItem key={plan.name}>
+              <StaggerItem key={plan.name} className={plan.featured ? "relative z-10" : "relative z-0"}>
               <HoverCard className="h-full">
               <div
-                className={`relative flex flex-col rounded-2xl p-6 h-full transition-colors duration-300 ${
+                className={`relative flex flex-col rounded-2xl p-6 h-full transition-all duration-300 ${
                   plan.featured
-                    ? "glass border border-teal-500/50 shadow-[0_0_30px_rgba(20,184,166,0.15)]"
-                    : "glass hover:border-blue-500/30"
+                    ? "glass border-2 border-teal-500/60 shadow-[0_0_40px_-10px_rgba(20,184,166,0.3)] lg:scale-105 bg-linear-to-b from-[#0a1224]/90 to-[#060b14]/90"
+                    : "glass border border-white/5 hover:border-blue-500/30 bg-white/[0.02]"
                 }`}
               >
                 {plan.featured && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                    <span className="bg-linear-to-r from-teal-400 to-emerald-500 text-white text-[11px] font-extrabold tracking-wider px-4 py-1.5 rounded-full shadow-lg shadow-teal-500/30 whitespace-nowrap uppercase">
                       Paling Populer
                     </span>
                   </div>
                 )}
 
                 {/* Header */}
-                <div className="mb-5">
-                  <h3 className="text-white font-bold text-lg mb-1">{plan.name}</h3>
+                <div className="mb-5 relative">
+                  {plan.featured && (
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl pointer-events-none" />
+                  )}
+                  <h3 className="text-white font-bold text-xl mb-1">{plan.name}</h3>
                   <p className="text-blue-200/50 text-xs leading-snug">{plan.tagline}</p>
                 </div>
 
                 {/* Price */}
-                <div className="mb-6">
+                <div className="mb-6 relative">
                   <p className="text-blue-200/40 text-xs mb-1">Mulai dari</p>
                   <div className="flex items-baseline gap-1">
                     <span className="text-blue-200/60 text-sm font-medium">Rp</span>
                     <span
-                      className={`text-3xl font-extrabold leading-none ${
+                      className={`text-4xl font-extrabold leading-none tracking-tight ${
                         plan.featured ? "text-teal-400" : "text-white"
                       }`}
                     >
@@ -162,15 +169,15 @@ export default function PricingSection() {
                 </div>
 
                 {/* Features — flex-1 agar mendorong tombol ke bawah */}
-                <ul className="space-y-2.5 flex-1 mb-8">
+                <ul className="space-y-3 flex-1 mb-8 relative">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5">
+                    <li key={f} className="flex items-start gap-3">
                       <Check
                         className={`w-4 h-4 shrink-0 mt-0.5 ${
-                          plan.featured ? "text-teal-400" : "text-green-400"
+                          plan.featured ? "text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]" : "text-blue-400/70"
                         }`}
                       />
-                      <span className="text-blue-100/70 text-sm leading-snug">{f}</span>
+                      <span className={`${plan.featured ? "text-blue-50/90" : "text-blue-100/70"} text-sm leading-snug`}>{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -180,12 +187,12 @@ export default function PricingSection() {
                   href={`https://wa.me/${WA}?text=${encodeURIComponent(waText)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block mt-auto"
+                  className="block mt-auto relative z-20"
                 >
                   <Button
-                    className={`w-full h-11 font-semibold ${
+                    className={`w-full h-12 font-bold text-sm rounded-xl transition-all ${
                       plan.featured
-                        ? "bg-teal-500 hover:bg-teal-400 text-white shadow-lg shadow-teal-500/25"
+                        ? "bg-linear-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-[0_0_20px_-5px_rgba(20,184,166,0.5)] hover:scale-[1.02]"
                         : "border border-white/10 bg-white/5 hover:bg-white/10 text-white"
                     }`}
                   >
