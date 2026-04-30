@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Bell, X, Receipt, MessageSquare, Briefcase, CheckCheck, Info } from "lucide-react";
 
@@ -37,6 +38,8 @@ export default function NotificationBell() {
   const [loading, setLoading] = useState(true);
   // Position of the fixed dropdown (viewport-relative)
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const btnRef                = useRef<HTMLButtonElement>(null);
   const panelRef              = useRef<HTMLDivElement>(null);
   const router                = useRouter();
@@ -123,8 +126,8 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Fixed dropdown — renders above all overflow containers */}
-      {open && (
+      {/* Fixed dropdown — renders above all overflow containers via portal */}
+      {mounted && open && createPortal(
         <div
           ref={panelRef}
           className="fixed w-80 rounded-2xl border border-white/10 shadow-2xl shadow-black/60 overflow-hidden"
@@ -199,7 +202,8 @@ export default function NotificationBell() {
               })
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
