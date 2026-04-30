@@ -39,9 +39,16 @@ async function getHeroStats() {
 }
 
 const FALLBACK_TESTIMONIALS = [
-  { name: "Ibu Ratna",  business: "Klinik Gigi Sehat",    text: "Sejak punya website, pasien baru meningkat drastis. Banyak yang bilang nemunya dari Google!", rating: 5 },
-  { name: "Pak Budi",   business: "Resto Nusantara",      text: "Proses pembuatannya cepat dan hasilnya melebihi ekspektasi saya. Sangat profesional.", rating: 5 },
-  { name: "Mba Sinta",  business: "Butik Mode",           text: "Sekarang customer bisa lihat koleksi dan order langsung dari website. Omset naik 40%!", rating: 5 },
+  { name: "Ibu Ratna",  business: "Klinik Gigi Sehat",    text: "Sejak punya website, pasien baru meningkat drastis. Banyak yang bilang nemunya dari pencarian Google! Desainnya sangat rapi.", rating: 5 },
+  { name: "Pak Budi",   business: "Resto Nusantara",      text: "Proses pembuatannya cepat dan hasilnya melebihi ekspektasi saya. Sangat profesional dan timnya sangat responsif.", rating: 5 },
+  { name: "Mba Sinta",  business: "Butik Mode",           text: "Sekarang customer bisa lihat koleksi dan order langsung dari website tanpa nunggu balasan chat. Omset naik 40%!", rating: 5 },
+  { name: "Mas Doni",   business: "Bengkel Auto Jaya",    text: "Awalnya ragu butuh website, tapi ternyata banyak pelanggan baru datang karena lihat profil bengkel di internet. Keren!", rating: 5 },
+  { name: "Kak Maya",   business: "Event Organizer",      text: "Tampilan website elegan dan kekinian. Klien jadi lebih percaya melihat portofolio kami yang tertata rapi. Sangat puas.", rating: 5 },
+  { name: "Pak Hendra", business: "Distributor Kopi",     text: "Berkat website toko online, agen dari luar pulau bisa langsung pesan. Sistemnya mudah dimengerti, supportnya mantap.", rating: 5 },
+  { name: "Ibu Ani",    business: "Toko Bunga Mawar",     text: "Pengerjaannya selesai dalam 3 hari! Saya kaget secepat itu tapi hasilnya sangat cantik. Orderan buket makin lancar.", rating: 5 },
+  { name: "Pak Surya",  business: "Jasa Konstruksi",      text: "Desain website meyakinkan, cocok sekali dengan citra perusahaan saya. Harganya sangat transparan tanpa biaya tersembunyi.", rating: 5 },
+  { name: "Mba Rina",   business: "Salon & Spa",          text: "Suka banget sama fiturnya. Pelanggan pada bilang websitenya gampang diakses di HP dan sangat user-friendly.", rating: 5 },
+  { name: "Mas Reza",   business: "Rental Mobil",         text: "Website super cepat dan SEO-nya jalan. Waktu ketik rental mobil di kota saya, langsung nongol di halaman pertama!", rating: 5 },
 ];
 
 async function getTestimonials() {

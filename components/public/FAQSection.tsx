@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus } from "lucide-react";
-import { FadeUp, StaggerChildren, StaggerItem } from "./motion";
+import { ChevronDown, MessageCircle } from "lucide-react";
+import { FadeUp } from "./motion";
 
 const faqs = [
   {
@@ -48,26 +48,22 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
-      className={`glass rounded-2xl overflow-hidden transition-colors duration-300 ${
-        open ? "border-blue-500/30" : "hover:border-blue-500/20"
-      }`}
+      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      className="border-b border-white/10 last:border-0"
     >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left group"
+        className="w-full flex items-start justify-between gap-6 py-6 text-left group outline-none"
       >
-        <span className="text-white font-medium text-sm sm:text-base leading-snug group-hover:text-blue-200 transition-colors">
+        <span className={`font-medium text-base sm:text-lg transition-colors duration-300 pr-8 ${open ? "text-white" : "text-blue-100/70 group-hover:text-blue-100"}`}>
           {q}
         </span>
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.25, ease: "easeInOut" }}
-          className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-            open ? "bg-blue-600 text-white" : "bg-white/5 text-blue-400 group-hover:bg-white/10"
-          }`}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${open ? "bg-blue-600/20 text-blue-400" : "bg-white/5 text-blue-100/50 group-hover:bg-white/10 group-hover:text-white"}`}
         >
-          {open ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          <ChevronDown className="w-4 h-4" />
         </motion.span>
       </button>
 
@@ -79,8 +75,8 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="px-6 pb-5 border-t border-white/5">
-              <p className="text-blue-200/70 text-sm leading-relaxed pt-4">{a}</p>
+            <div className="pb-6 pr-12">
+              <p className="text-blue-200/60 leading-relaxed text-sm sm:text-base">{a}</p>
             </div>
           </motion.div>
         )}
@@ -91,40 +87,54 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
 
 export default function FAQSection() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <FadeUp className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-blue-300 mb-6 border border-blue-500/20">
-            Pertanyaan Umum
+    <section className="relative py-24 px-4 sm:px-6 lg:px-8">
+      {/* Subtle background glow for the FAQ section */}
+      <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none -translate-y-1/2" />
+      
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
+          
+          {/* Left Side: Sticky Title & CTA */}
+          <div className="lg:col-span-5 lg:sticky lg:top-32 relative z-10">
+            <FadeUp>
+              <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-blue-300 mb-6 border border-blue-500/20">
+                Pertanyaan Umum
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                Ada yang Ingin <br className="hidden lg:block"/>
+                <span className="text-gradient">Anda Tanyakan?</span>
+              </h2>
+              <p className="text-blue-200/60 text-lg mb-10 max-w-md">
+                Kami telah merangkum jawaban atas pertanyaan yang paling sering ditujukan oleh klien kami sebelum memulai proyek.
+              </p>
+              
+              <div className="glass rounded-3xl p-8 border border-white/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-2xl pointer-events-none" />
+                <h4 className="text-white font-semibold mb-2">Belum menemukan jawaban?</h4>
+                <p className="text-sm text-blue-200/60 mb-6">Jangan ragu untuk menghubungi tim kami secara langsung. Konsultasi 100% gratis.</p>
+                <a
+                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20ingin%20bertanya%20sebelum%20memesan`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Chat via WhatsApp
+                </a>
+              </div>
+            </FadeUp>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ada yang Ingin{" "}
-            <span className="text-gradient">Anda Tanyakan?</span>
-          </h2>
-          <p className="text-blue-200/60 max-w-xl mx-auto">
-            Pertanyaan yang paling sering ditanyakan sebelum klien memutuskan untuk bekerja sama dengan kami.
-          </p>
-        </FadeUp>
 
-        <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <FAQItem key={faq.q} q={faq.q} a={faq.a} index={i} />
-          ))}
+          {/* Right Side: Accordion List */}
+          <div className="lg:col-span-7 relative z-10 lg:pl-10">
+            <div className="bg-[#050b14]/50 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-10 shadow-2xl">
+              {faqs.map((faq, i) => (
+                <FAQItem key={faq.q} q={faq.q} a={faq.a} index={i} />
+              ))}
+            </div>
+          </div>
+
         </div>
-
-        <FadeUp delay={0.3} className="mt-10 text-center">
-          <p className="text-blue-200/50 text-sm mb-4">
-            Masih ada pertanyaan lain? Kami siap menjawab langsung.
-          </p>
-          <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20ingin%20bertanya%20sebelum%20memesan`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
-          >
-            💬 Tanya via WhatsApp
-          </a>
-        </FadeUp>
       </div>
     </section>
   );
