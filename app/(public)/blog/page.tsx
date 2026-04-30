@@ -140,17 +140,17 @@ function ArticlesLoading({ view }: { view: string }) {
   return (
     <div className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
       {[...Array(6)].map((_, i) => (
-        <div key={i} className={`glass rounded-2xl overflow-hidden animate-pulse flex ${isListView ? 'flex-col sm:flex-row h-[400px] sm:h-[220px]' : 'flex-col h-[400px]'}`}>
-          <div className={`${isListView ? 'h-48 sm:h-full sm:w-64 lg:w-80 shrink-0' : 'h-48 w-full'} bg-white/5`}></div>
-          <div className="p-6 flex flex-col flex-1 gap-4 w-full justify-center">
+        <div key={i} className={`glass rounded-2xl overflow-hidden animate-pulse flex ${isListView ? 'flex-row h-[120px] sm:h-[220px]' : 'flex-col h-[400px]'}`}>
+          <div className={`${isListView ? 'w-1/3 min-w-[100px] sm:min-w-[0] sm:w-64 lg:w-80 shrink-0 h-full' : 'h-48 w-full'} bg-white/5`}></div>
+          <div className={`p-4 sm:p-6 flex flex-col flex-1 gap-2 sm:gap-4 w-full justify-center`}>
             <div className="flex items-center gap-2">
-              <div className="h-6 w-20 bg-white/10 rounded-full"></div>
-              <div className="h-4 w-24 bg-white/10 rounded"></div>
+              <div className="h-4 sm:h-6 w-16 sm:w-20 bg-white/10 rounded-full"></div>
+              <div className="h-3 sm:h-4 w-20 sm:w-24 bg-white/10 rounded"></div>
             </div>
-            <div className="h-7 w-3/4 bg-white/10 rounded"></div>
-            <div className="h-4 w-full bg-white/10 rounded"></div>
-            <div className="h-4 w-5/6 bg-white/10 rounded"></div>
-            <div className="mt-auto h-4 w-32 bg-white/10 rounded"></div>
+            <div className="h-4 sm:h-7 w-full sm:w-3/4 bg-white/10 rounded"></div>
+            <div className={`${isListView ? 'hidden sm:block' : 'block'} h-4 w-full bg-white/10 rounded`}></div>
+            <div className={`${isListView ? 'hidden sm:block' : 'block'} h-4 w-5/6 bg-white/10 rounded`}></div>
+            <div className="mt-auto h-3 sm:h-4 w-20 sm:w-32 bg-white/10 rounded"></div>
           </div>
         </div>
       ))}
@@ -210,44 +210,45 @@ async function ArticlesGrid({ category, q, view }: { category?: string; q?: stri
         <StaggerItem key={a.slug}>
           <HoverCard className={isListView ? "h-full md:h-auto" : "h-full"}>
             <Link href={`/blog/${a.slug}`}>
-              <article className={`glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex ${isListView ? 'flex-col sm:flex-row' : 'flex-col'}`}>
-                <div className={`${isListView ? 'h-48 sm:h-auto sm:w-64 lg:w-80 shrink-0 min-h-[192px]' : 'h-48'} bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden relative`}>
+              <article className={`glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex ${isListView ? 'flex-row' : 'flex-col'}`}>
+                <div className={`${isListView ? 'w-1/3 min-w-[100px] sm:min-w-[0] sm:w-64 lg:w-80 shrink-0 min-h-[120px] sm:min-h-[192px]' : 'h-48'} bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden relative`}>
                   {a.coverImage ? (
                     <Image src={a.coverImage} alt={a.title} width={400} height={256} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-10 min-h-[192px]">📰</div>
+                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-10 min-h-[120px] sm:min-h-[192px]">📰</div>
                   )}
                 </div>
-                <div className={`p-6 flex flex-col flex-1 ${isListView ? 'justify-center' : ''}`}>
-                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <div className={`p-4 sm:p-6 flex flex-col flex-1 ${isListView ? 'justify-center' : ''}`}>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
                     {a.category && (
-                      <span className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-2.5 py-1 rounded-full">
+                      <span className="text-[10px] sm:text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap">
                         {a.category.name}
                       </span>
                     )}
                     {a.publishedAt && (
-                      <time className="text-blue-400/60 text-xs font-medium">
-                        {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(a.publishedAt))}
+                      <time className="text-blue-400/60 text-[10px] sm:text-xs font-medium whitespace-nowrap">
+                        {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(a.publishedAt))}
                       </time>
                     )}
                   </div>
-                  <h2 className={`text-white font-semibold mb-3 group-hover:text-blue-300 transition-colors ${isListView ? 'text-xl sm:text-2xl line-clamp-2' : 'text-lg line-clamp-2'}`}>
+                  <h2 className={`text-white font-semibold mb-2 sm:mb-3 group-hover:text-blue-300 transition-colors ${isListView ? 'text-sm sm:text-2xl line-clamp-2' : 'text-lg line-clamp-2'}`}>
                     {a.title}
                   </h2>
                   {(a.excerpt || a.metaDesc) && (
-                    <p className={`text-blue-200/50 text-sm mb-5 flex-1 ${isListView ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-3'}`}>{a.excerpt ?? a.metaDesc}</p>
+                    <p className={`text-blue-200/50 text-xs sm:text-sm mb-3 sm:mb-5 flex-1 ${isListView ? 'hidden sm:line-clamp-3' : 'line-clamp-3'}`}>{a.excerpt ?? a.metaDesc}</p>
                   )}
                   <div className="mt-auto">
                     {a.tags.length > 0 && !isListView && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
+                      <div className="flex flex-wrap gap-1.5 mb-3 sm:mb-4">
                         {a.tags.slice(0, 3).map((tag) => (
                           <span key={tag} className="text-xs text-blue-200/30">#{tag}</span>
                         ))}
                       </div>
                     )}
-                    <div className="flex items-center gap-1.5 text-blue-400 text-sm font-medium">
-                      Baca selengkapnya
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-blue-400 text-xs sm:text-sm font-medium">
+                      <span className={`${isListView ? 'hidden sm:inline' : 'inline'}`}>Baca selengkapnya</span>
+                      <span className={`${isListView ? 'inline sm:hidden' : 'hidden'}`}>Baca</span>
+                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1.5 transition-transform" />
                     </div>
                   </div>
                 </div>
