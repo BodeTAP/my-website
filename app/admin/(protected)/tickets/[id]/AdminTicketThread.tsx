@@ -42,42 +42,48 @@ export default function AdminTicketThread({
   }, [messages]);
 
   return (
-    <div className="glass rounded-2xl p-6 mb-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-white font-semibold text-sm">Percakapan</h2>
-        <p className="text-blue-200/20 text-xs flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-          Live
-        </p>
-      </div>
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 relative z-10 scroll-smooth bg-black/10">
+      {messages.length === 0 && (
+        <div className="h-full flex flex-col items-center justify-center">
+          <p className="text-blue-200/30 text-sm bg-white/5 border border-white/10 px-6 py-2 rounded-full">Belum ada percakapan.</p>
+        </div>
+      )}
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-        {messages.length === 0 && (
-          <p className="text-blue-200/30 text-sm text-center py-6">Belum ada pesan.</p>
-        )}
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`rounded-xl px-4 py-3 text-sm ${
-              m.senderRole === "ADMIN" ? "bg-blue-600/15 ml-10" : "bg-white/5 mr-10"
-            }`}
-          >
-            <p className={`font-medium text-xs mb-1 ${m.senderRole === "ADMIN" ? "text-blue-300" : "text-blue-200/50"}`}>
-              {m.senderRole === "ADMIN" ? "Tim MFWEB" : clientName}
-              <span className="ml-2 font-normal text-blue-200/30">
-                {new Intl.DateTimeFormat("id-ID", {
-                  day: "2-digit",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }).format(new Date(m.createdAt))}
+      {/* Date Divider */}
+      {messages.length > 0 && (
+        <div className="flex justify-center sticky top-0 z-20">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-blue-200/50 bg-[#050b14]/80 backdrop-blur-sm border border-white/10 px-4 py-1.5 rounded-full shadow-lg">
+            Riwayat Obrolan
+          </span>
+        </div>
+      )}
+
+      {messages.map((m) => {
+        const isAdmin = m.senderRole === "ADMIN";
+        return (
+          <div key={m.id} className={`flex flex-col ${isAdmin ? "items-end" : "items-start"} group`}>
+            <div className="flex items-baseline gap-2 mb-1.5 opacity-60 group-hover:opacity-100 transition-opacity px-1">
+              <span className={`text-xs font-semibold ${isAdmin ? "text-pink-400" : "text-blue-200/70"}`}>
+                {isAdmin ? "Anda (Tim MFWEB)" : clientName}
               </span>
-            </p>
-            <p className="text-blue-100/80 whitespace-pre-wrap">{m.body}</p>
+              <span className="text-[10px] text-blue-200/40">
+                {new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(new Date(m.createdAt))}
+              </span>
+            </div>
+            
+            <div
+              className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-5 py-3.5 text-sm shadow-lg ${
+                isAdmin 
+                  ? "bg-gradient-to-br from-pink-600 to-pink-500 text-white rounded-tr-sm shadow-pink-500/20" 
+                  : "bg-white/10 border border-white/10 text-white rounded-tl-sm backdrop-blur-md"
+              }`}
+            >
+              <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>
+            </div>
           </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
+        );
+      })}
+      <div ref={bottomRef} className="h-4" />
     </div>
   );
 }

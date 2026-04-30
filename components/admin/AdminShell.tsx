@@ -24,7 +24,6 @@ const navItems = [
   { label: "Invoice",     href: "/admin/invoices",         icon: Receipt },
   { label: "Maintenance", href: "/admin/maintenance",      icon: Wrench },
   { label: "Tiket",       href: "/admin/tickets",          icon: MessageSquare },
-  { label: "Tim Admin",   href: "/admin/team",             icon: ShieldCheck },
   { label: "Pengaturan",  href: "/admin/settings",         icon: Settings },
 ];
 

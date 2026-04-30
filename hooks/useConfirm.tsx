@@ -2,11 +2,12 @@
 
 import { useState, useCallback, type ReactNode } from "react";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { AnimatePresence } from "framer-motion";
 
 type Options = {
   description?:  string;
   confirmLabel?: string;
-  variant?:      "danger" | "warning";
+  variant?:      "danger" | "warning" | "info";
 };
 
 type State = {
@@ -24,16 +25,20 @@ export function useConfirm() {
     [],
   );
 
-  const node: ReactNode = state ? (
-    <ConfirmDialog
-      message={state.message}
-      description={state.options.description}
-      confirmLabel={state.options.confirmLabel}
-      variant={state.options.variant}
-      onConfirm={() => { state.resolve(true);  setState(null); }}
-      onCancel={() =>  { state.resolve(false); setState(null); }}
-    />
-  ) : null;
+  const node: ReactNode = (
+    <AnimatePresence>
+      {state && (
+        <ConfirmDialog
+          message={state.message}
+          description={state.options.description}
+          confirmLabel={state.options.confirmLabel}
+          variant={state.options.variant}
+          onConfirm={() => { state.resolve(true);  setState(null); }}
+          onCancel={() =>  { state.resolve(false); setState(null); }}
+        />
+      )}
+    </AnimatePresence>
+  );
 
   return { confirm, node };
 }
