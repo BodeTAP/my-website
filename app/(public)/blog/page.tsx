@@ -6,6 +6,7 @@ import { ArrowRight, X, LayoutGrid, List as ListIcon } from "lucide-react";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 import BlogSearch from "./BlogSearch";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Tips & Panduan Website untuk Bisnis Lokal | Blog",
@@ -24,27 +25,7 @@ export default async function BlogPage({
   const { category, q, view = "grid" } = await searchParams;
   const isListView = view === "list";
 
-  const [categories, articles] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.article.findMany({
-      where: {
-        status: "PUBLISHED",
-        ...(category ? { category: { slug: category } } : {}),
-        ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
-      },
-      orderBy: { publishedAt: "desc" },
-      select: {
-        title: true,
-        slug: true,
-        excerpt: true,
-        coverImage: true,
-        publishedAt: true,
-        metaDesc: true,
-        tags: true,
-        category: { select: { name: true, slug: true } },
-      },
-    }).catch(() => []),
-  ]);
+  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
 
   const createUrl = (updates: { category?: string | null; q?: string | null; view?: string | null }) => {
     const params = new URLSearchParams();
@@ -82,9 +63,9 @@ export default async function BlogPage({
           </FadeUp>
         </div>
 
-        <div className="flex flex-row items-center gap-3 mb-8 w-full">
+        <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 w-full">
           {/* View Toggle */}
-          <div className="flex items-center gap-1 p-1 glass rounded-xl border border-white/10 shrink-0 z-10">
+          <div className="flex items-center justify-center sm:justify-start gap-1 p-1 glass rounded-xl border border-white/10 shrink-0 z-10 w-full sm:w-auto">
             <Link
               href={createUrl({ view: "grid" })}
               className={`p-2 rounded-lg transition-all duration-300 ${
@@ -146,82 +127,135 @@ export default async function BlogPage({
           </div>
         </div>
 
-        {articles.length === 0 ? (
-          <div className="text-center py-20">
-            {q ? (
-              <div className="space-y-4">
-                <p className="text-blue-200/40 text-lg">
-                  Tidak ada artikel untuk pencarian "{q}"
-                </p>
-                <Link
-                  href={createUrl({ q: null })}
-                  className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm"
-                >
-                  <X className="w-4 h-4" />
-                  Hapus pencarian
-                </Link>
-              </div>
-            ) : (
-              <p className="text-blue-200/40 text-lg">
-                {category ? "Belum ada artikel di kategori ini." : "Artikel akan segera hadir. Pantau terus!"}
-              </p>
-            )}
-          </div>
-        ) : (
-          <StaggerChildren className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
-            {articles.map((a) => (
-              <StaggerItem key={a.slug}>
-                <HoverCard className={isListView ? "h-full md:h-auto" : "h-full"}>
-                  <Link href={`/blog/${a.slug}`}>
-                    <article className={`glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex ${isListView ? 'flex-col sm:flex-row' : 'flex-col'}`}>
-                      <div className={`${isListView ? 'h-48 sm:h-auto sm:w-64 lg:w-80 shrink-0 min-h-[192px]' : 'h-48'} bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden relative`}>
-                        {a.coverImage ? (
-                          <Image src={a.coverImage} alt={a.title} width={400} height={256} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-5xl opacity-10 min-h-[192px]">📰</div>
-                        )}
-                      </div>
-                      <div className={`p-6 flex flex-col flex-1 ${isListView ? 'justify-center' : ''}`}>
-                        <div className="flex items-center gap-2 mb-3 flex-wrap">
-                          {a.category && (
-                            <span className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-2.5 py-1 rounded-full">
-                              {a.category.name}
-                            </span>
-                          )}
-                          {a.publishedAt && (
-                            <time className="text-blue-400/60 text-xs font-medium">
-                              {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(a.publishedAt))}
-                            </time>
-                          )}
-                        </div>
-                        <h2 className={`text-white font-semibold mb-3 group-hover:text-blue-300 transition-colors ${isListView ? 'text-xl sm:text-2xl line-clamp-2' : 'text-lg line-clamp-2'}`}>
-                          {a.title}
-                        </h2>
-                        {(a.excerpt || a.metaDesc) && (
-                          <p className={`text-blue-200/50 text-sm mb-5 flex-1 ${isListView ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-3'}`}>{a.excerpt ?? a.metaDesc}</p>
-                        )}
-                        <div className="mt-auto">
-                          {a.tags.length > 0 && !isListView && (
-                            <div className="flex flex-wrap gap-1.5 mb-4">
-                              {a.tags.slice(0, 3).map((tag) => (
-                                <span key={tag} className="text-xs text-blue-200/30">#{tag}</span>
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1.5 text-blue-400 text-sm font-medium">
-                            Baca selengkapnya
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  </Link>
-                </HoverCard>
-              </StaggerItem>
-            ))}
-          </StaggerChildren>
-        )}
+        <Suspense key={`${category || 'all'}-${q || ''}-${view}`} fallback={<ArticlesLoading view={view} />}>
+          <ArticlesGrid category={category} q={q} view={view} />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+function ArticlesLoading({ view }: { view: string }) {
+  const isListView = view === "list";
+  return (
+    <div className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className={`glass rounded-2xl overflow-hidden animate-pulse flex ${isListView ? 'flex-col sm:flex-row h-[400px] sm:h-[220px]' : 'flex-col h-[400px]'}`}>
+          <div className={`${isListView ? 'h-48 sm:h-full sm:w-64 lg:w-80 shrink-0' : 'h-48 w-full'} bg-white/5`}></div>
+          <div className="p-6 flex flex-col flex-1 gap-4 w-full justify-center">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-20 bg-white/10 rounded-full"></div>
+              <div className="h-4 w-24 bg-white/10 rounded"></div>
+            </div>
+            <div className="h-7 w-3/4 bg-white/10 rounded"></div>
+            <div className="h-4 w-full bg-white/10 rounded"></div>
+            <div className="h-4 w-5/6 bg-white/10 rounded"></div>
+            <div className="mt-auto h-4 w-32 bg-white/10 rounded"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function ArticlesGrid({ category, q, view }: { category?: string; q?: string; view: string }) {
+  const isListView = view === "list";
+  const articles = await prisma.article.findMany({
+    where: {
+      status: "PUBLISHED",
+      ...(category ? { category: { slug: category } } : {}),
+      ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
+    },
+    orderBy: { publishedAt: "desc" },
+    select: {
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+      publishedAt: true,
+      metaDesc: true,
+      tags: true,
+      category: { select: { name: true, slug: true } },
+    },
+  }).catch(() => []);
+
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-20">
+        {q ? (
+          <div className="space-y-4">
+            <p className="text-blue-200/40 text-lg">
+              Tidak ada artikel untuk pencarian "{q}"
+            </p>
+            <Link
+              href={category ? `/blog?category=${category}&view=${view}` : `/blog?view=${view}`}
+              className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm"
+            >
+              <X className="w-4 h-4" />
+              Hapus pencarian
+            </Link>
+          </div>
+        ) : (
+          <p className="text-blue-200/40 text-lg">
+            {category ? "Belum ada artikel di kategori ini." : "Artikel akan segera hadir. Pantau terus!"}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <StaggerChildren className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
+      {articles.map((a) => (
+        <StaggerItem key={a.slug}>
+          <HoverCard className={isListView ? "h-full md:h-auto" : "h-full"}>
+            <Link href={`/blog/${a.slug}`}>
+              <article className={`glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex ${isListView ? 'flex-col sm:flex-row' : 'flex-col'}`}>
+                <div className={`${isListView ? 'h-48 sm:h-auto sm:w-64 lg:w-80 shrink-0 min-h-[192px]' : 'h-48'} bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden relative`}>
+                  {a.coverImage ? (
+                    <Image src={a.coverImage} alt={a.title} width={400} height={256} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-10 min-h-[192px]">📰</div>
+                  )}
+                </div>
+                <div className={`p-6 flex flex-col flex-1 ${isListView ? 'justify-center' : ''}`}>
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    {a.category && (
+                      <span className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-2.5 py-1 rounded-full">
+                        {a.category.name}
+                      </span>
+                    )}
+                    {a.publishedAt && (
+                      <time className="text-blue-400/60 text-xs font-medium">
+                        {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(a.publishedAt))}
+                      </time>
+                    )}
+                  </div>
+                  <h2 className={`text-white font-semibold mb-3 group-hover:text-blue-300 transition-colors ${isListView ? 'text-xl sm:text-2xl line-clamp-2' : 'text-lg line-clamp-2'}`}>
+                    {a.title}
+                  </h2>
+                  {(a.excerpt || a.metaDesc) && (
+                    <p className={`text-blue-200/50 text-sm mb-5 flex-1 ${isListView ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-3'}`}>{a.excerpt ?? a.metaDesc}</p>
+                  )}
+                  <div className="mt-auto">
+                    {a.tags.length > 0 && !isListView && (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {a.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="text-xs text-blue-200/30">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-blue-400 text-sm font-medium">
+                      Baca selengkapnya
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          </HoverCard>
+        </StaggerItem>
+      ))}
+    </StaggerChildren>
   );
 }
