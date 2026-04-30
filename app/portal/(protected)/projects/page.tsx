@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { ExternalLink, CheckCircle2, Loader2, Rocket, Clock } from "lucide-react";
+import { ExternalLink, CheckCircle2, Loader2, Rocket, Clock, MessageSquare } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem, ProgressBar } from "@/components/public/motion";
 
 type ProjectStatus = "DRAFTING" | "DEVELOPMENT" | "TESTING" | "LIVE";
@@ -227,13 +228,24 @@ export default async function PortalProjectsPage() {
 
                   {/* Notes from team */}
                   {project.notes && (
-                    <div className="mt-3 p-3.5 bg-amber-500/5 border border-amber-500/15 rounded-xl">
+                    <div className="mt-3 mb-4 p-3.5 bg-amber-500/5 border border-amber-500/15 rounded-xl">
                       <p className="text-amber-400/70 text-[10px] font-bold uppercase tracking-widest mb-1.5">
                         Catatan dari Tim
                       </p>
                       <p className="text-blue-200/60 text-xs leading-relaxed">{project.notes}</p>
                     </div>
                   )}
+                  
+                  {/* Actions: Asset Upload & Feedback */}
+                  <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap items-center gap-3">
+                    <Link href="/portal/tickets">
+                      <button className="flex items-center gap-2 bg-blue-600/20 hover:bg-blue-600 border border-blue-500/30 text-blue-300 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all">
+                        <MessageSquare className="w-4 h-4" />
+                        Diskusi / Unggah Aset
+                      </button>
+                    </Link>
+                    <p className="text-xs text-blue-200/40">Gunakan menu tiket untuk mengirim logo, foto, atau daftar revisi.</p>
+                  </div>
                 </div>
                   </FadeUp>
                 </StaggerItem>

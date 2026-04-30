@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import NewProjectModal from "@/components/admin/NewProjectModal";
 import ProjectStatusSelect from "./ProjectStatusSelect";
 import DeleteProjectButton from "@/components/admin/DeleteProjectButton";
+import EditProjectModal from "@/components/admin/EditProjectModal";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFTING: "Drafting",
@@ -90,7 +91,8 @@ export default async function ProjectsPage() {
                         <span className="text-blue-200/30 text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-4 sm:px-5 py-4">
+                    <td className="px-4 sm:px-5 py-4 flex items-center justify-end gap-2">
+                      <EditProjectModal project={p} />
                       <DeleteProjectButton projectId={p.id} projectName={p.name} />
                     </td>
                   </tr>

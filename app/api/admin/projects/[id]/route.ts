@@ -21,12 +21,14 @@ export async function PATCH(req: Request, { params }: Params) {
   }
 
   const { id } = await params;
-  const { status, liveUrl, deadline, notes } = await req.json();
+  const { status, liveUrl, deadline, notes, name, description } = await req.json();
 
   const project = await prisma.project.update({
     where: { id },
     data: {
       ...(status && { status }),
+      ...(name && { name }),
+      ...(description !== undefined && { description: description || null }),
       ...(liveUrl !== undefined && { liveUrl: liveUrl || null }),
       ...(deadline !== undefined && { deadline: deadline ? new Date(deadline) : null }),
       ...(notes !== undefined && { notes: notes || null }),
