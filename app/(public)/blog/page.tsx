@@ -82,18 +82,46 @@ export default async function BlogPage({
           </FadeUp>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+        <div className="flex flex-row items-center gap-3 mb-8 w-full">
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 p-1 glass rounded-xl border border-white/10 shrink-0 z-10">
+            <Link
+              href={createUrl({ view: "grid" })}
+              className={`p-2 rounded-lg transition-all duration-300 ${
+                !isListView 
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
+                  : "text-blue-200/60 hover:text-white hover:bg-white/10"
+              }`}
+              aria-label="Mode Galeri (Grid)"
+              title="Mode Galeri"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Link>
+            <Link
+              href={createUrl({ view: "list" })}
+              className={`p-2 rounded-lg transition-all duration-300 ${
+                isListView 
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
+                  : "text-blue-200/60 hover:text-white hover:bg-white/10"
+              }`}
+              aria-label="Mode Daftar (List)"
+              title="Mode Daftar"
+            >
+              <ListIcon className="w-4 h-4" />
+            </Link>
+          </div>
+
           {/* Category filter */}
-          <div className="flex-1 w-full overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+          <div className="flex-1 w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {categories.length > 0 && (
-              <StaggerChildren stagger={0.03} className="flex flex-nowrap md:flex-wrap justify-start gap-2">
+              <StaggerChildren stagger={0.03} className="flex flex-nowrap items-center gap-2 py-1 pr-4">
                 <StaggerItem>
                   <Link
                     href={createUrl({ category: null })}
-                    className={`shrink-0 px-4 py-1.5 rounded-full text-sm transition-colors border ${
+                    className={`shrink-0 flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
                       !category
-                        ? "bg-blue-600 border-blue-500 text-white"
-                        : "glass border-white/10 text-blue-200/60 hover:text-white hover:border-blue-500/30"
+                        ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20"
+                        : "glass border-white/10 text-blue-200/70 hover:text-white hover:border-blue-500/30 hover:bg-white/5 hover:-translate-y-0.5"
                     }`}
                   >
                     Semua
@@ -103,10 +131,10 @@ export default async function BlogPage({
                   <StaggerItem key={c.slug}>
                     <Link
                       href={createUrl({ category: c.slug })}
-                      className={`shrink-0 px-4 py-1.5 rounded-full text-sm transition-colors border ${
+                      className={`shrink-0 flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
                         category === c.slug
-                          ? "bg-blue-600 border-blue-500 text-white"
-                          : "glass border-white/10 text-blue-200/60 hover:text-white hover:border-blue-500/30"
+                          ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20"
+                          : "glass border-white/10 text-blue-200/70 hover:text-white hover:border-blue-500/30 hover:bg-white/5 hover:-translate-y-0.5"
                       }`}
                     >
                       {c.name}
@@ -115,30 +143,6 @@ export default async function BlogPage({
                 ))}
               </StaggerChildren>
             )}
-          </div>
-
-          {/* View Toggle */}
-          <div className="flex items-center gap-1 p-1 glass rounded-lg border border-white/10 shrink-0">
-            <Link
-              href={createUrl({ view: "grid" })}
-              className={`p-2 rounded-md transition-colors ${
-                !isListView ? "bg-white/10 text-white shadow-sm" : "text-blue-200/60 hover:text-white hover:bg-white/5"
-              }`}
-              aria-label="Mode Galeri (Grid)"
-              title="Mode Galeri"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Link>
-            <Link
-              href={createUrl({ view: "list" })}
-              className={`p-2 rounded-md transition-colors ${
-                isListView ? "bg-white/10 text-white shadow-sm" : "text-blue-200/60 hover:text-white hover:bg-white/5"
-              }`}
-              aria-label="Mode Daftar (List)"
-              title="Mode Daftar"
-            >
-              <ListIcon className="w-4 h-4" />
-            </Link>
           </div>
         </div>
 
