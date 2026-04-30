@@ -331,6 +331,11 @@ export default function LayananPage() {
                               Jadwalkan Meeting Spesifikasi
                             </Button>
                           </a>
+                          <Link href={`/layanan/${service.slug}`} className="flex-1 sm:flex-none sm:w-1/3">
+                            <Button variant="ghost" className="w-full h-14 text-white bg-white/5 hover:bg-white/10 border border-white/10 text-base font-bold rounded-xl">
+                              Pelajari Detail
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </div>
