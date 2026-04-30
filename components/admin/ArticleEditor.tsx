@@ -533,7 +533,7 @@ export default function ArticleEditor({
                 type="button"
                 size="sm"
                 disabled={loading || !schedDate}
-                onClick={() => handleSave("DRAFT", schedDate)}
+                onClick={() => handleSave("DRAFT", new Date(schedDate).toISOString())}
                 className="bg-blue-600 hover:bg-blue-500 text-white whitespace-nowrap"
               >
                 {loading ? "Menyimpan..." : "Simpan Jadwal"}
