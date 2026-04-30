@@ -93,9 +93,9 @@ export default async function BlogPage({
           </div>
 
           {/* Category filter */}
-          <div className="flex-1 w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -my-4">
             {categories.length > 0 && (
-              <StaggerChildren stagger={0.03} className="flex flex-nowrap items-center gap-2 py-1 pr-4">
+              <StaggerChildren stagger={0.03} className="flex flex-nowrap items-center gap-2 pt-3 pb-6 px-2 pr-6">
                 <StaggerItem>
                   <Link
                     href={createUrl({ category: null })}
