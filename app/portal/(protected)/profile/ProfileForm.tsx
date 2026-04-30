@@ -3,8 +3,9 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Loader2, Check, AlertCircle } from "lucide-react";
+import { Camera, Loader2, Check, AlertCircle, Save, User, Building, Phone, MapPin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
 type Profile = {
   name:         string | null;
@@ -81,101 +82,131 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
   const initial = (name || profile.email).charAt(0).toUpperCase();
 
   return (
-    <div className="max-w-xl space-y-6">
+    <StaggerChildren className="max-w-2xl space-y-6">
       {/* Toast */}
       {toast && (
-        <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm border ${
-          toast.ok
-            ? "bg-green-500/10 border-green-500/20 text-green-300"
-            : "bg-red-500/10 border-red-500/20 text-red-300"
-        }`}>
-          {toast.ok
-            ? <Check className="w-4 h-4 shrink-0" />
-            : <AlertCircle className="w-4 h-4 shrink-0" />}
-          {toast.msg}
-        </div>
+        <FadeUp>
+          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-lg backdrop-blur-md ${
+            toast.ok
+              ? "bg-green-500/10 border-green-500/30 text-green-300 shadow-green-500/10"
+              : "bg-red-500/10 border-red-500/30 text-red-300 shadow-red-500/10"
+          }`}>
+            {toast.ok
+              ? <Check className="w-5 h-5 shrink-0" />
+              : <AlertCircle className="w-5 h-5 shrink-0" />}
+            <span className="text-sm font-medium">{toast.msg}</span>
+          </div>
+        </FadeUp>
       )}
 
-      {/* Avatar */}
-      <div className="glass rounded-2xl p-6 flex items-center gap-6">
-        <div className="relative group shrink-0">
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={name || "Avatar"}
-              width={80}
-              height={80}
-              className="w-20 h-20 rounded-full object-cover ring-2 ring-blue-500/30"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-blue-600/30 flex items-center justify-center text-blue-300 text-3xl font-bold ring-2 ring-blue-500/30">
-              {initial}
+      {/* Avatar Section */}
+      <StaggerItem>
+        <div className="glass rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative overflow-hidden group">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none group-hover:bg-blue-500/20 transition-colors duration-700" />
+          
+          <div className="relative shrink-0 z-10">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-[#050b14] ring-1 ring-white/10 p-1">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 opacity-20 blur-md" />
+              <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-[#050b14]">
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt={name || "Avatar"}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-blue-800/30 flex items-center justify-center text-blue-300 text-4xl font-bold">
+                    {initial}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
 
-          {/* Upload overlay */}
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            aria-label="Ganti foto"
+            {/* Upload overlay button */}
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 ring-4 ring-[#050b14] transition-transform hover:scale-110 active:scale-95 z-20"
+              aria-label="Ganti foto"
+            >
+              {uploading
+                ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                : <Camera className="w-4 h-4 sm:w-5 sm:h-5" />}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
+          </div>
+
+          <div className="text-center sm:text-left z-10 pt-2 sm:pt-4">
+            <h2 className="text-white font-bold text-xl sm:text-2xl tracking-tight">{name || profile.email}</h2>
+            <p className="text-blue-300/80 text-sm mt-1">{profile.email}</p>
+            <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="bg-white/5 border-white/10 text-white hover:bg-white/10 text-xs rounded-full px-5 h-8"
+              >
+                {uploading ? "Mengunggah..." : "Ubah Foto"}
+              </Button>
+              <p className="text-blue-200/30 text-[10px] uppercase tracking-wider font-semibold">Maks 2MB (JPG, PNG)</p>
+            </div>
+          </div>
+        </div>
+      </StaggerItem>
+
+      {/* Form Fields Section */}
+      <StaggerItem>
+        <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <User className="w-4 h-4 text-blue-400" />
+            </div>
+            <h3 className="text-white font-semibold text-lg">Informasi Pribadi</h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+            <Field icon={User} label="Nama Lengkap" value={name} onChange={setName} placeholder="Nama Anda" />
+            <Field icon={Building} label="Nama Bisnis"  value={businessName} onChange={setBizName} placeholder="PT / CV Bisnis Anda" />
+          </div>
+          
+          <Field icon={Mail} label="Alamat Email (Tidak bisa diubah)" value={profile.email} disabled />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+            <Field icon={Phone} label="Nomor WA / HP" value={phone} onChange={setPhone} placeholder="08xxxxxxxxxx" />
+            <Field icon={MapPin} label="Alamat Lengkap" value={address} onChange={setAddress} placeholder="Kota, Provinsi" />
+          </div>
+        </div>
+      </StaggerItem>
+
+      {/* Save Button */}
+      <StaggerItem>
+        <div className="flex justify-end pt-2">
+          <Button
+            onClick={handleSave}
+            disabled={pending}
+            className="bg-blue-600 hover:bg-blue-500 text-white h-12 px-8 rounded-xl font-semibold shadow-[0_0_20px_rgba(37,99,235,0.25)] hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm w-full sm:w-auto"
           >
-            {uploading
-              ? <Loader2 className="w-6 h-6 text-white animate-spin" />
-              : <Camera className="w-6 h-6 text-white" />}
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="hidden"
-            onChange={handleAvatarChange}
-          />
+            {pending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menyimpan...</> : <><Save className="w-4 h-4 mr-2" /> Simpan Perubahan</>}
+          </Button>
         </div>
-
-        <div>
-          <p className="text-white font-semibold text-lg">{name || profile.email}</p>
-          <p className="text-blue-200/50 text-sm mb-3">{profile.email}</p>
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="text-xs text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
-          >
-            {uploading ? "Mengunggah..." : "Ganti foto profil"}
-          </button>
-          <p className="text-blue-200/30 text-xs mt-0.5">JPG, PNG, WebP — maks 2 MB</p>
-        </div>
-      </div>
-
-      {/* Form fields */}
-      <div className="glass rounded-2xl p-6 space-y-4">
-        <h3 className="text-white font-semibold mb-1">Informasi Pribadi</h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Nama Lengkap" value={name} onChange={setName} placeholder="Nama Anda" />
-          <Field label="Nama Bisnis"  value={businessName} onChange={setBizName} placeholder="Nama bisnis" />
-        </div>
-        <Field label="Email" value={profile.email} disabled />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Nomor WA / HP" value={phone} onChange={setPhone} placeholder="08xxxxxxxxxx" />
-          <Field label="Alamat"        value={address} onChange={setAddress} placeholder="Kota, Provinsi" />
-        </div>
-      </div>
-
-      <Button
-        onClick={handleSave}
-        disabled={pending}
-        className="bg-blue-600 hover:bg-blue-500 text-white h-11 px-8 font-semibold"
-      >
-        {pending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menyimpan...</> : "Simpan Perubahan"}
-      </Button>
-    </div>
+      </StaggerItem>
+    </StaggerChildren>
   );
 }
 
 function Field({
-  label, value, onChange, placeholder, disabled,
+  icon: Icon, label, value, onChange, placeholder, disabled,
 }: {
+  icon: any;
   label: string;
   value: string;
   onChange?: (v: string) => void;
@@ -183,15 +214,22 @@ function Field({
   disabled?: boolean;
 }) {
   return (
-    <div>
-      <label className="text-blue-200/60 text-xs mb-1.5 block">{label}</label>
-      <input
-        value={value}
-        onChange={e => onChange?.(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-sm placeholder:text-blue-200/25 focus:outline-none focus:border-blue-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      />
+    <div className="group">
+      <label className="text-blue-200/50 group-focus-within:text-blue-400 text-xs font-medium mb-2 flex items-center transition-colors">
+        {label}
+      </label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+          <Icon className="w-4 h-4 text-blue-200/30 group-focus-within:text-blue-400 transition-colors" />
+        </div>
+        <input
+          value={value}
+          onChange={e => onChange?.(e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className="w-full bg-[#050b14]/50 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-blue-200/20 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 disabled:opacity-50 disabled:bg-white/5 disabled:cursor-not-allowed transition-all"
+        />
+      </div>
     </div>
   );
 }
