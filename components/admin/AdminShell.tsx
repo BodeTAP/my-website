@@ -7,7 +7,7 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server
 } from "lucide-react";
 
 const menuGroups = [
@@ -29,10 +29,11 @@ const menuGroups = [
   {
     title: "Proyek & Layanan",
     items: [
-      { label: "Manajemen Proyek", href: "/admin/projects", icon: Briefcase },
-      { label: "Invoice & Tagihan", href: "/admin/invoices", icon: Receipt },
-      { label: "Tiket Dukungan", href: "/admin/tickets", icon: MessageSquare },
-      { label: "Maintenance", href: "/admin/maintenance", icon: Wrench },
+      { label: "Manajemen Proyek", href: "/admin/projects",  icon: Briefcase },
+      { label: "Invoice & Tagihan", href: "/admin/invoices",  icon: Receipt },
+      { label: "Tiket Dukungan",   href: "/admin/tickets",   icon: MessageSquare },
+      { label: "Maintenance",      href: "/admin/maintenance", icon: Wrench },
+      { label: "Hosting & Domain", href: "/admin/hosting",   icon: Server },
     ]
   },
   {

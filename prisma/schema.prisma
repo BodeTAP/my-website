@@ -285,6 +285,7 @@ model Client {
   subscriptions Subscription[]
   onboardings   OnboardingForm[]
   notifications Notification[]
+  hostingRecords HostingRecord[]
 
   @@map("clients")
 }
@@ -436,5 +437,48 @@ enum NotificationType {
   INVOICE_NEW
   TICKET_REPLY
   PROJECT_STATUS
+  HOSTING_EXPIRY
   GENERAL
+}
+
+// ─── Hosting & Domain Management ──────────────────────────────────────────────
+
+model HostingRecord {
+  id              String        @id @default(cuid())
+  clientId        String
+
+  // Domain
+  domainName      String
+  domainProvider  String?
+  domainExpiry    DateTime?
+
+  // Hosting
+  hostingProvider String?
+  hostingPlan     String?
+  hostingExpiry   DateTime?
+
+  // SSL
+  sslExpiry       DateTime?
+
+  // Status
+  status          HostingStatus @default(ACTIVE)
+  notes           String?       @db.Text
+
+  // Notif tracking (cegah spam — 1x per milestone)
+  notif30SentAt   DateTime?
+  notif14SentAt   DateTime?
+  notif7SentAt    DateTime?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("hosting_records")
+}
+
+enum HostingStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
 }

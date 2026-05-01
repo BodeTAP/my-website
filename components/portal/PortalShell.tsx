@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle, ChevronRight, Server } from "lucide-react";
 import NotificationBell from "@/components/portal/NotificationBell";
 
 const navItems = [
   { label: "Dashboard",   href: "/portal/dashboard", icon: LayoutDashboard },
   { label: "Proyek Saya", href: "/portal/projects",  icon: Briefcase },
   { label: "Tagihan",     href: "/portal/invoices",  icon: Receipt },
+  { label: "Hosting",     href: "/portal/hosting",   icon: Server },
   { label: "Bantuan",     href: "/portal/tickets",   icon: MessageSquare },
   { label: "Pengaturan",  href: "/portal/profile",   icon: UserCircle },
 ];

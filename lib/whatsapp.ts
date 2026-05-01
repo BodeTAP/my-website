@@ -238,4 +238,28 @@ export const waMsg = {
     lines.push(`\nBuka admin panel untuk follow-up.`);
     return lines.join("\n");
   },
+
+  hostingExpiry(
+    name: string,
+    domainName: string,
+    expiryDate: Date,
+    daysLeft: number,
+    type: "domain" | "hosting" | "ssl",
+  ) {
+    const typeLabel = type === "domain" ? "Domain" : type === "hosting" ? "Hosting" : "SSL";
+    const urgency = daysLeft <= 7 ? "🔴 KRITIS" : daysLeft <= 14 ? "🟡 SEGERA" : "⚠️ PERHATIAN";
+    const expiry = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(expiryDate);
+    const wa = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
+    return (
+      `Halo ${name}! 👋\n\n` +
+      `${urgency} *${typeLabel} Website Anda Akan Expired!*\n\n` +
+      `🌐 Domain: *${domainName}*\n` +
+      `📋 Tipe: *${typeLabel}*\n` +
+      `📅 Expired: *${expiry}*\n` +
+      `⏳ Sisa: *${daysLeft} hari lagi*\n\n` +
+      `Segera perpanjang agar website Anda tetap online dan dapat diakses oleh pelanggan Anda.\n\n` +
+      `Balas pesan ini atau hubungi kami untuk bantuan perpanjangan.` +
+      FOOTER
+    );
+  },
 };

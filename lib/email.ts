@@ -208,3 +208,38 @@ export async function sendNewTicketToAdminEmail(
   );
   await getResend().emails.send({ from: FROM, to: adminEmail, subject: `[Tiket Baru] ${ticketSubject}`, html });
 }
+
+/** Hosting/domain expiry reminder — sent to client */
+export async function sendHostingExpiryEmail(
+  email: string,
+  clientName: string,
+  domainName: string,
+  expiryDate: Date,
+  daysLeft: number,
+  type: "domain" | "hosting" | "ssl",
+) {
+  const typeLabel = type === "domain" ? "Domain" : type === "hosting" ? "Hosting" : "SSL Certificate";
+  const urgency = daysLeft <= 7 ? "🔴 Kritis" : daysLeft <= 14 ? "🟡 Segera" : "⚠️ Perhatian";
+  const expiry = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(expiryDate);
+
+  const html = base(
+    `${urgency}: ${typeLabel} Akan Segera Expired`,
+    p(`Halo <strong>${clientName}</strong>,`) +
+    p(`Kami ingin mengingatkan bahwa <strong>${typeLabel}</strong> untuk website Anda akan segera berakhir.`) +
+    info([
+      ["Domain", domainName],
+      [typeLabel, `Expired ${expiry}`],
+      ["Sisa Waktu", `<strong style="color:${daysLeft <= 7 ? "#dc2626" : daysLeft <= 14 ? "#d97706" : "#ca8a04"}">${daysLeft} hari lagi</strong>`],
+    ]) +
+    p(`Segera perpanjang <strong>${typeLabel.toLowerCase()}</strong> Anda untuk menghindari website tidak dapat diakses oleh pengunjung dan klien Anda.`) +
+    btn("Hubungi Kami via WhatsApp", `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent(`Halo MFWEB, saya ingin memperpanjang ${typeLabel} untuk domain ${domainName}.`)}`) +
+    `<p style="color:#94a3b8;margin:0;font-size:12px;text-align:center">Email ini dikirim otomatis oleh sistem MFWEB. Abaikan jika sudah melakukan perpanjangan.</p>`
+  );
+
+  await getResend().emails.send({
+    from: FROM,
+    to: email,
+    subject: `[${urgency}] ${typeLabel} ${domainName} Expired dalam ${daysLeft} Hari`,
+    html,
+  });
+}
