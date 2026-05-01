@@ -1,7 +1,7 @@
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import LiveChat from "@/components/public/LiveChat";
-import CookieConsent from "@/components/public/CookieConsent";
+
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +10,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <main className="flex-1">{children}</main>
       <Footer />
       <LiveChat />
-      <CookieConsent />
+
     </>
   );
 }
