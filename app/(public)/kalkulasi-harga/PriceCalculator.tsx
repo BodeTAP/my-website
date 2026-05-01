@@ -11,8 +11,6 @@ import Link from "next/link";
 
 const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
 
-// ── Data ─────────────────────────────────────────────────────────────────────
-
 type WebsiteType = {
   id: string;
   icon: React.ElementType;
@@ -29,7 +27,7 @@ const TYPES: WebsiteType[] = [
     id: "landing",
     icon: Megaphone,
     label: "Landing Page",
-    desc: "1 halaman untuk iklan & promosi",
+    desc: "1 halaman spesifik untuk iklan & konversi promosi",
     baseMin: 800_000,
     baseMax: 800_000,
     color: "blue",
@@ -37,8 +35,8 @@ const TYPES: WebsiteType[] = [
   {
     id: "compro-simple",
     icon: Building2,
-    label: "Company Profile Simple",
-    desc: "3–4 halaman, desain standar profesional",
+    label: "Company Profile Standar",
+    desc: "3–4 halaman untuk profil perusahaan profesional",
     baseMin: 1_500_000,
     baseMax: 1_500_000,
     color: "indigo",
@@ -46,8 +44,8 @@ const TYPES: WebsiteType[] = [
   {
     id: "compro-pro",
     icon: Building2,
-    label: "Company Profile Pro",
-    desc: "5–7 halaman, desain custom & modern",
+    label: "Company Profile Eksekutif",
+    desc: "5–7 halaman dengan desain custom eksklusif",
     baseMin: 3_500_000,
     baseMax: 3_500_000,
     color: "purple",
@@ -55,22 +53,22 @@ const TYPES: WebsiteType[] = [
   {
     id: "toko",
     icon: ShoppingCart,
-    label: "Toko Online",
-    desc: "E-commerce lengkap siap berjualan",
+    label: "E-Commerce / Toko Online",
+    desc: "Sistem toko lengkap siap menerima pesanan",
     baseMin: 5_400_000,
     baseMax: 5_400_000,
     color: "teal",
-    note: "Termasuk payment gateway setup",
+    note: "Termasuk integrasi Payment Gateway & Kurir",
   },
   {
     id: "app-web",
     icon: LayoutDashboard,
-    label: "Aplikasi Web Bisnis",
-    desc: "Kasir, booking, member, atau sistem custom",
+    label: "Web App / Custom Sistem",
+    desc: "Sistem kasir, booking, member, atau portal khusus",
     baseMin: 5_000_000,
     baseMax: 15_000_000,
     color: "violet",
-    note: "Harga final setelah konsultasi fitur",
+    note: "Memerlukan konsultasi mendalam",
   },
 ];
 
@@ -79,21 +77,21 @@ type Addon = {
   label: string;
   desc: string;
   price: number;
-  incompatible?: string[]; // type IDs that can't use this
-  only?: string[];         // only available for these type IDs
+  incompatible?: string[];
+  only?: string[];
 };
 
 const ADDONS: Addon[] = [
-  { id: "blog",       label: "Blog / Artikel",             desc: "Kelola artikel & tips untuk SEO",              price: 300_000, incompatible: ["landing"] },
-  { id: "booking",    label: "Booking / Reservasi Online",  desc: "Form jadwal appointment otomatis",              price: 700_000, incompatible: ["landing"] },
-  { id: "catalog",    label: "Katalog Produk",              desc: "Halaman produk dengan filter & search",         price: 500_000, only: ["compro-simple", "compro-pro"] },
-  { id: "multilang",  label: "Multi Bahasa",                desc: "Indonesia + Inggris (atau bahasa lain)",        price: 500_000, incompatible: ["landing"] },
-  { id: "livechat",   label: "Live Chat Widget",            desc: "Chat langsung via Crisp atau Tawk.to",          price: 200_000 },
-  { id: "member",     label: "Area Member / Login",         desc: "Halaman khusus untuk pelanggan terdaftar",      price: 1_500_000, incompatible: ["landing"] },
-  { id: "seo-basic",  label: "SEO Optimization",            desc: "Audit + optimasi keyword lokal",                price: 500_000 },
-  { id: "whatsapp",   label: "WhatsApp Business API",       desc: "Otomatisasi pesan & notifikasi via WA",        price: 800_000 },
-  { id: "analytics",  label: "Setup Google Analytics + Ads", desc: "Tag Manager, GA4, dan pixel iklan",           price: 300_000 },
-  { id: "maintenance", label: "Paket Maintenance 3 Bulan", desc: "Update konten + support teknis 3 bulan",        price: 900_000 },
+  { id: "blog",       label: "Sistem Blog & Artikel",       desc: "Fitur kelola konten untuk mendongkrak SEO organik",   price: 300_000, incompatible: ["landing"] },
+  { id: "booking",    label: "Sistem Booking Pintar",       desc: "Form jadwal reservasi yang sinkron dengan kalender",    price: 700_000, incompatible: ["landing"] },
+  { id: "catalog",    label: "Katalog Produk Interaktif",   desc: "Halaman grid produk dengan filter dan pencarian",       price: 500_000, only: ["compro-simple", "compro-pro"] },
+  { id: "multilang",  label: "Website Multi-Bahasa",        desc: "Dukungan Bahasa Indonesia & Inggris (Bilingual)",       price: 500_000, incompatible: ["landing"] },
+  { id: "livechat",   label: "Widget Live Chat",            desc: "Fitur chat melayang (Crisp/Tawk.to) di sudut web",      price: 200_000 },
+  { id: "member",     label: "Portal Area Member",          desc: "Sistem login untuk pelanggan khusus atau karyawan",     price: 1_500_000, incompatible: ["landing"] },
+  { id: "seo-basic",  label: "Optimasi SEO Fundamental",    desc: "Audit performa, meta tags, dan injeksi keyword lokal",  price: 500_000 },
+  { id: "whatsapp",   label: "Integrasi WhatsApp Business", desc: "Tombol CTA mengambang dan template pesan instan",       price: 300_000 },
+  { id: "analytics",  label: "Setup Analytics & Pixel",     desc: "Pemasangan Google Analytics 4 dan Facebook Pixel",      price: 300_000 },
+  { id: "maintenance", label: "Paket Maintenance 3 Bulan",  desc: "Garansi dukungan teknis dan update minor selama 3 bulan",price: 900_000 },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; border: string; text: string; ring: string }> = {
@@ -109,8 +107,6 @@ function formatRp(n: number) {
   if (n >= 1_000) return `Rp ${(n / 1_000).toFixed(0)}K`;
   return `Rp ${n.toLocaleString("id-ID")}`;
 }
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PriceCalculator() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -146,7 +142,6 @@ export default function PriceCalculator() {
 
   const handleTypeSelect = (id: string) => {
     setSelectedType(id);
-    // Remove addons incompatible with new type
     setSelectedAddons((prev) => {
       const next = new Set(prev);
       for (const addonId of next) {
@@ -161,50 +156,63 @@ export default function PriceCalculator() {
 
   const isApp = selectedType === "app-web";
   const waMessage = type
-    ? `Halo MFWEB, saya ingin konsultasi pembuatan ${isApp ? "aplikasi web" : "website"}.\n\nEstimasi saya:\n- Tipe: ${type.label}\n- Fitur tambahan: ${selectedAddons.size > 0 ? [...selectedAddons].map((id) => ADDONS.find((a) => a.id === id)?.label).join(", ") : "tidak ada"}\n- Total estimasi: ${formatRp(total)}\n\nBoleh saya konsultasi lebih lanjut?`
-    : "Halo MFWEB, saya ingin konsultasi layanan.";
+    ? `Halo Tim MFWEB,\n\nSaya ingin berkonsultasi mengenai pembuatan ${isApp ? "Aplikasi Web / Sistem Custom" : "Website baru"}.\n\nBerikut ringkasan hasil kalkulator web:\n- Kategori Platform: *${type.label}*\n- Fitur Tambahan: ${selectedAddons.size > 0 ? "*" + [...selectedAddons].map((id) => ADDONS.find((a) => a.id === id)?.label).join(", ") + "*" : "_Tanpa Fitur Tambahan_"}\n- Estimasi Awal Anggaran: *${formatRp(total)}*\n\nMohon informasi langkah selanjutnya untuk mendiskusikan teknis proyek ini.`
+    : "Halo Tim MFWEB, saya ingin konsultasi layanan pembuatan website.";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 relative z-10">
       {/* Step 1 — Pilih tipe */}
-      <div className="glass rounded-2xl p-6">
-        <h2 className="text-white font-semibold mb-1">
-          <span className="text-blue-400 mr-2">01</span> Pilih Tipe Website
-        </h2>
-        <p className="text-blue-200/40 text-sm mb-5">Pilih yang paling sesuai dengan kebutuhan bisnis Anda.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {TYPES.map((t) => {
-            const c = COLOR_MAP[t.color];
-            const isSelected = selectedType === t.id;
-            return (
-              <motion.button
-                key={t.id}
-                onClick={() => handleTypeSelect(t.id)}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className={`relative p-5 rounded-xl border text-left transition-all duration-200 ${
-                  isSelected
-                    ? `${c.bg} ${c.border} ring-2 ${c.ring}`
-                    : "glass border-white/8 hover:border-white/20"
-                }`}
-              >
-                {isSelected && (
-                  <motion.span layoutId="check" className="absolute top-3 right-3 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                    <Check className="w-3 h-3 text-white" />
-                  </motion.span>
-                )}
-                <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center mb-3`}>
-                  <t.icon className={`w-5 h-5 ${c.text}`} />
-                </div>
-                <p className="text-white font-semibold text-sm mb-0.5">{t.label}</p>
-                <p className="text-blue-200/50 text-xs mb-2">{t.desc}</p>
-                <p className={`font-bold text-sm ${c.text}`}>
-                  {t.baseMin === t.baseMax ? formatRp(t.baseMin) : `${formatRp(t.baseMin)} – ${formatRp(t.baseMax)}`}
-                </p>
-                {t.note && <p className="text-blue-200/30 text-xs mt-0.5">{t.note}</p>}
-              </motion.button>
-            );
-          })}
+      <div className="glass rounded-[32px] p-8 sm:p-10 border border-white/5 bg-[#050b14]/90 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
+            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] shrink-0">
+              <span className="text-blue-400 font-black text-xl">01</span>
+            </div>
+            <div>
+              <h2 className="text-white font-black text-2xl tracking-tight">Pilih Basis Platform</h2>
+              <p className="text-blue-200/50 text-sm mt-1">Pilih pondasi utama yang paling merepresentasikan model bisnis Anda.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {TYPES.map((t) => {
+              const c = COLOR_MAP[t.color];
+              const isSelected = selectedType === t.id;
+              return (
+                <motion.button
+                  key={t.id}
+                  onClick={() => handleTypeSelect(t.id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`relative p-6 rounded-2xl border text-left transition-all duration-300 ${
+                    isSelected
+                      ? `${c.bg} ${c.border} ring-1 ${c.ring} shadow-[0_0_30px_rgba(0,0,0,0.3)]`
+                      : "bg-black/40 border-white/5 hover:border-white/20 hover:bg-white/5"
+                  }`}
+                >
+                  {isSelected && (
+                    <motion.div layoutId="checkType" className={`absolute top-4 right-4 w-6 h-6 ${c.bg} border ${c.border} rounded-full flex items-center justify-center shadow-lg`}>
+                      <Check className={`w-3.5 h-3.5 ${c.text}`} />
+                    </motion.div>
+                  )}
+                  <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center mb-4 border ${isSelected ? c.border : "border-transparent"}`}>
+                    <t.icon className={`w-6 h-6 ${c.text}`} />
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-1">{t.label}</h3>
+                  <p className="text-blue-200/50 text-xs leading-relaxed mb-4 min-h-[32px]">{t.desc}</p>
+                  
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${isSelected ? c.bg + " " + c.border : "bg-white/5 border-white/5"}`}>
+                    <span className={`font-black text-sm tracking-wide ${c.text}`}>
+                      {t.baseMin === t.baseMax ? formatRp(t.baseMin) : `Mulai ${formatRp(t.baseMin)}`}
+                    </span>
+                  </div>
+                  {t.note && <p className="text-white/30 text-[10px] mt-3 font-semibold uppercase tracking-wider">{t.note}</p>}
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -212,43 +220,55 @@ export default function PriceCalculator() {
       <AnimatePresence>
         {selectedType && (
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="glass rounded-2xl p-6"
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="glass rounded-[32px] p-8 sm:p-10 border border-white/5 bg-[#050b14]/90 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl relative overflow-hidden"
           >
-            <h2 className="text-white font-semibold mb-1">
-              <span className="text-blue-400 mr-2">02</span> Pilih Fitur Tambahan
-            </h2>
-            <p className="text-blue-200/40 text-sm mb-5">Opsional — pilih sesuai kebutuhan spesifik bisnis Anda.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {availableAddons.map((addon) => {
-                const isOn = selectedAddons.has(addon.id);
-                return (
-                  <motion.button
-                    key={addon.id}
-                    onClick={() => toggleAddon(addon.id)}
-                    whileTap={{ scale: 0.98 }}
-                    className={`flex items-start gap-3 p-4 rounded-xl border text-left transition-all duration-150 ${
-                      isOn ? "bg-blue-600/15 border-blue-500/40" : "glass border-white/8 hover:border-white/20"
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-                      isOn ? "bg-blue-600 border-blue-500" : "border-white/20"
-                    }`}>
-                      {isOn && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2 flex-wrap">
-                        <span className={`text-sm font-medium ${isOn ? "text-white" : "text-blue-200/80"}`}>{addon.label}</span>
-                        <span className="text-blue-400 text-xs font-semibold">+{formatRp(addon.price)}</span>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)] shrink-0">
+                  <span className="text-indigo-400 font-black text-xl">02</span>
+                </div>
+                <div>
+                  <h2 className="text-white font-black text-2xl tracking-tight">Kustomisasi Fitur</h2>
+                  <p className="text-blue-200/50 text-sm mt-1">Pilih fitur opsional untuk memperkuat fungsionalitas platform Anda.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {availableAddons.map((addon) => {
+                  const isOn = selectedAddons.has(addon.id);
+                  return (
+                    <motion.button
+                      key={addon.id}
+                      onClick={() => toggleAddon(addon.id)}
+                      whileTap={{ scale: 0.98 }}
+                      className={`flex items-start gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${
+                        isOn 
+                          ? "bg-indigo-600/10 border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.1)]" 
+                          : "bg-black/40 border-white/5 hover:border-white/20 hover:bg-white/5"
+                      }`}
+                    >
+                      <div className={`w-6 h-6 rounded-md border flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                        isOn ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/40" : "border-white/20 bg-black/50"
+                      }`}>
+                        {isOn && <Check className="w-4 h-4 text-white" />}
                       </div>
-                      <p className="text-blue-200/40 text-xs mt-0.5">{addon.desc}</p>
-                    </div>
-                  </motion.button>
-                );
-              })}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <span className={`text-base font-bold tracking-tight ${isOn ? "text-white" : "text-blue-200/80"}`}>{addon.label}</span>
+                          <span className="text-indigo-400 text-xs font-black bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">+{formatRp(addon.price)}</span>
+                        </div>
+                        <p className="text-blue-200/40 text-xs leading-relaxed">{addon.desc}</p>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
           </motion.div>
         )}
@@ -258,86 +278,91 @@ export default function PriceCalculator() {
       <AnimatePresence>
         {selectedType && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.98, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="glass rounded-2xl p-6 border border-blue-500/20 glow-blue"
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="glass rounded-[40px] p-8 sm:p-12 border border-blue-500/30 bg-gradient-to-br from-[#050b14] to-[#0a1128] shadow-[0_0_80px_rgba(37,99,235,0.15)] relative overflow-hidden"
           >
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div>
-                <h2 className="text-white font-semibold mb-1">
-                  <span className="text-blue-400 mr-2">03</span> Estimasi Biaya
-                </h2>
-                <p className="text-blue-200/40 text-sm">Harga dapat berubah setelah konsultasi detail.</p>
-              </div>
-
-              <div className="text-right">
-                <motion.p
-                  key={total}
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-3xl sm:text-4xl font-black text-white"
-                >
-                  {formatRp(total)}
-                </motion.p>
-                {addonTotal > 0 && (
-                  <p className="text-blue-200/40 text-xs mt-1">
-                    Basis {formatRp(type!.baseMin)} + fitur {formatRp(addonTotal)}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 blur-[80px] rounded-full pointer-events-none" />
+            
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-8">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-blue-400 font-black text-xl">03</span>
+                    <h2 className="text-white font-black text-2xl tracking-tight">Kalkulasi Anggaran</h2>
+                  </div>
+                  <p className="text-blue-200/50 text-sm max-w-sm">
+                    Estimasi investasi digital yang perlu Anda persiapkan berdasarkan konfigurasi di atas.
                   </p>
-                )}
-              </div>
-            </div>
-
-            {/* Breakdown */}
-            {selectedAddons.size > 0 && (
-              <div className="mt-5 pt-5 border-t border-white/5 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-200/50">{type?.label}</span>
-                  <span className="text-blue-200/70">{formatRp(type!.baseMin)}</span>
                 </div>
-                {[...selectedAddons].map((id) => {
-                  const a = ADDONS.find((x) => x.id === id);
-                  if (!a) return null;
-                  return (
-                    <div key={id} className="flex justify-between text-sm">
-                      <span className="text-blue-200/50">+ {a.label}</span>
-                      <span className="text-blue-400">+{formatRp(a.price)}</span>
+
+                <div className="text-left md:text-right">
+                  <motion.p
+                    key={total}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tighter"
+                  >
+                    {formatRp(total)}
+                  </motion.p>
+                  {addonTotal > 0 && (
+                    <div className="inline-flex items-center gap-2 mt-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                      <span className="text-blue-200/50 text-[10px] font-bold uppercase tracking-wider">Basis: {formatRp(type!.baseMin)}</span>
+                      <span className="text-white/20 text-[10px]">|</span>
+                      <span className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">Fitur: {formatRp(addonTotal)}</span>
                     </div>
-                  );
-                })}
-                <div className="flex justify-between text-sm font-bold pt-2 border-t border-white/5">
-                  <span className="text-white">Total Estimasi</span>
-                  <span className="text-white">{formatRp(total)}</span>
+                  )}
                 </div>
               </div>
-            )}
 
-            <div className="flex items-start gap-2 mt-4 p-3 bg-yellow-500/5 border border-yellow-500/15 rounded-xl">
-              <Info className="w-4 h-4 text-yellow-400/70 shrink-0 mt-0.5" />
-              <p className="text-yellow-400/70 text-xs leading-relaxed">
-                Ini adalah estimasi awal. Harga final ditentukan setelah konsultasi dan disesuaikan dengan kebutuhan spesifik bisnis Anda. Semua paket sudah termasuk domain .com dan hosting 1 tahun pertama.
-              </p>
-            </div>
+              {/* Breakdown */}
+              {selectedAddons.size > 0 && (
+                <div className="mt-8 space-y-3">
+                  <div className="flex justify-between items-center text-sm p-4 rounded-xl bg-black/30 border border-white/5">
+                    <span className="text-blue-200/70 font-semibold">{type?.label}</span>
+                    <span className="text-white font-bold">{formatRp(type!.baseMin)}</span>
+                  </div>
+                  {[...selectedAddons].map((id) => {
+                    const a = ADDONS.find((x) => x.id === id);
+                    if (!a) return null;
+                    return (
+                      <div key={id} className="flex justify-between items-center text-sm p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                        <span className="text-indigo-200/70">{a.label}</span>
+                        <span className="text-indigo-400 font-bold">+{formatRp(a.price)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-5">
-              <a
-                href={`https://wa.me/${WA}?text=${encodeURIComponent(waMessage)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1"
-              >
-                <Button className="w-full btn-shine bg-blue-600 hover:bg-blue-500 text-white h-12">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Konsultasi via WhatsApp
-                </Button>
-              </a>
-              <Link href="/contact" className="flex-1">
-                <Button variant="outline" className="w-full border-white/10 text-white hover:bg-white/5 h-12">
-                  Kirim Brief Detail
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
+              <div className="flex items-start gap-3 mt-8 p-4 sm:p-5 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
+                <Info className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+                <p className="text-yellow-100/70 text-sm leading-relaxed">
+                  <strong className="text-yellow-400">Disclaimer:</strong> Ini adalah kalkulasi estimasi awal. Harga final akan ditetapkan setelah sesi bedah kebutuhan secara mendalam. Biaya di atas sudah mencakup <strong className="text-white">Hosting Premium, Domain .com, dan SSL untuk 1 tahun pertama.</strong>
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                <a
+                  href={`https://wa.me/${WA}?text=${encodeURIComponent(waMessage)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white h-14 rounded-xl font-black text-base shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] transition-all">
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Kunci Penawaran Ini via WhatsApp
+                  </Button>
+                </a>
+                <Link href="/contact" className="flex-1">
+                  <Button variant="outline" className="w-full glass border-white/10 text-white hover:bg-white/5 hover:border-white/20 h-14 rounded-xl font-bold text-base transition-all">
+                    Jadwalkan Konsultasi Gratis
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}
@@ -345,8 +370,12 @@ export default function PriceCalculator() {
 
       {/* Empty state */}
       {!selectedType && (
-        <div className="text-center py-8 text-blue-200/25 text-sm">
-          ← Pilih tipe website di atas untuk melihat estimasi harga
+        <div className="text-center pt-8 pb-12">
+          <p className="text-blue-200/30 text-sm font-semibold tracking-wider uppercase flex items-center justify-center gap-2">
+            <span className="w-8 h-px bg-blue-200/20" />
+            Selesaikan Langkah 01 Di Atas
+            <span className="w-8 h-px bg-blue-200/20" />
+          </p>
         </div>
       )}
     </div>
