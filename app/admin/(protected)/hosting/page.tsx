@@ -22,7 +22,7 @@ type HostingRecord = {
   client: { user: { name: string | null; email: string } };
 };
 
-type Client = { id: string; user: { name: string | null; email: string } };
+type Client = { id: string; businessName: string; user: { name: string | null; email: string } };
 
 function daysLeft(dateStr: string | null) {
   if (!dateStr) return null;
