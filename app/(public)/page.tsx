@@ -258,20 +258,20 @@ export default async function HomePage() {
             </div>
           </FadeUp>
 
-          <FadeUp delay={0.1}>
+          <FadeUp delay={0.1} instant>
             <StaggerWords
               text="Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan"
               className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6"
             />
           </FadeUp>
 
-          <FadeUp delay={0.3}>
+          <FadeUp delay={0.3} instant>
             <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
               Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!
             </p>
           </FadeUp>
 
-          <FadeUp delay={0.4}>
+          <FadeUp delay={0.4} instant>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 relative z-20">
               <Link href="/contact">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.6)] text-base font-semibold transition-all hover:scale-105 btn-shine">
