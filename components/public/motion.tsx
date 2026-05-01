@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useMotionValue, useSpring, useTransform, animate, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useInView, useMotionValue, useSpring, useTransform, animate, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -10,20 +10,11 @@ interface Props {
   children: ReactNode;
   delay?: number;
   className?: string;
-  /** Jika true, elemen langsung muncul tanpa animasi (untuk LCP / above-the-fold) */
-  instant?: boolean;
 }
 
-export function FadeUp({ children, delay = 0, className, instant = false }: Props) {
-  const ref        = useRef(null);
-  const inView     = useInView(ref, { once: true, margin: "-60px" });
-  const prefersReduced = useReducedMotion();
-
-  // Render langsung jika: mode instant, atau pengguna prefer-reduced-motion
-  if (instant || prefersReduced) {
-    return <div ref={ref} className={className}>{children}</div>;
-  }
-
+export function FadeUp({ children, delay = 0, className }: Props) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <motion.div
       ref={ref}

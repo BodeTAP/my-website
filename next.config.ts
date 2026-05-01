@@ -58,36 +58,9 @@ const nextConfig: NextConfig = {
         hostname: "**.public.blob.vercel-storage.com",
       },
     ],
-    // Aktifkan format modern untuk semua gambar
-    formats: ["image/avif", "image/webp"],
   },
   async headers() {
-    return [
-      // Security headers untuk semua halaman
-      { source: "/(.*)", headers: securityHeaders },
-
-      // Cache agresif 1 tahun untuk aset statis yang sudah di-hash oleh Next.js
-      {
-        source: "/_next/static/(.*)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      // Cache gambar publik
-      {
-        source: "/(.*)\\.(png|jpg|jpeg|gif|webp|avif|svg|ico)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      // Cache font
-      {
-        source: "/(.*)\\.(woff|woff2|ttf|otf|eot)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-    ];
+    return [{ source: "/(.*)", headers: securityHeaders }];
   },
 };
 
