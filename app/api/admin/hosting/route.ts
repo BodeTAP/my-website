@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 // GET /api/admin/hosting — list semua dengan info klien
 export async function GET(req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
   const clientId = searchParams.get("clientId");
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/hosting — tambah record baru
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const {
