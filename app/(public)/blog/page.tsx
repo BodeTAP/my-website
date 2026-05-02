@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { ArrowRight, X, LayoutGrid, List as ListIcon } from "lucide-react";
+import { ArrowRight, X, LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 import BlogSearch from "./BlogSearch";
@@ -20,9 +20,10 @@ export const revalidate = 60;
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string; view?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; view?: string; page?: string }>;
 }) {
-  const { category, q, view = "grid" } = await searchParams;
+  const { category, q, view = "grid", page = "1" } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page, 10) || 1);
   const isListView = view === "list";
 
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
@@ -38,6 +39,11 @@ export default async function BlogPage({
     if (newCat) params.set("category", newCat);
     if (newQ) params.set("q", newQ);
     if (newView && newView !== "grid") params.set("view", newView);
+
+    // Maintain current page only if purely toggling view
+    if (updates.view !== undefined && updates.category === undefined && updates.q === undefined && currentPage > 1) {
+      params.set("page", currentPage.toString());
+    }
 
     const queryString = params.toString();
     return `/blog${queryString ? `?${queryString}` : ""}`;
@@ -127,8 +133,8 @@ export default async function BlogPage({
           </div>
         </div>
 
-        <Suspense key={`${category || 'all'}-${q || ''}-${view}`} fallback={<ArticlesLoading view={view} />}>
-          <ArticlesGrid category={category} q={q} view={view} />
+        <Suspense key={`${category || 'all'}-${q || ''}-${view}-${currentPage}`} fallback={<ArticlesLoading view={view} />}>
+          <ArticlesGrid category={category} q={q} view={view} currentPage={currentPage} />
         </Suspense>
       </div>
     </div>
@@ -158,26 +164,38 @@ function ArticlesLoading({ view }: { view: string }) {
   );
 }
 
-async function ArticlesGrid({ category, q, view }: { category?: string; q?: string; view: string }) {
+async function ArticlesGrid({ category, q, view, currentPage }: { category?: string; q?: string; view: string; currentPage: number }) {
   const isListView = view === "list";
-  const articles = await prisma.article.findMany({
-    where: {
-      status: "PUBLISHED",
-      ...(category ? { category: { slug: category } } : {}),
-      ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
-    },
-    orderBy: { publishedAt: "desc" },
-    select: {
-      title: true,
-      slug: true,
-      excerpt: true,
-      coverImage: true,
-      publishedAt: true,
-      metaDesc: true,
-      tags: true,
-      category: { select: { name: true, slug: true } },
-    },
-  }).catch(() => []);
+  const take = 9;
+  const skip = (currentPage - 1) * take;
+
+  const whereClause = {
+    status: "PUBLISHED" as const,
+    ...(category ? { category: { slug: category } } : {}),
+    ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
+  };
+
+  const [articles, totalArticles] = await Promise.all([
+    prisma.article.findMany({
+      where: whereClause,
+      orderBy: { publishedAt: "desc" },
+      take,
+      skip,
+      select: {
+        title: true,
+        slug: true,
+        excerpt: true,
+        coverImage: true,
+        publishedAt: true,
+        metaDesc: true,
+        tags: true,
+        category: { select: { name: true, slug: true } },
+      },
+    }).catch(() => []),
+    prisma.article.count({ where: whereClause }).catch(() => 0),
+  ]);
+
+  const totalPages = Math.ceil(totalArticles / take);
 
   if (articles.length === 0) {
     return (
@@ -205,8 +223,9 @@ async function ArticlesGrid({ category, q, view }: { category?: string; q?: stri
   }
 
   return (
-    <StaggerChildren className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
-      {articles.map((a) => (
+    <>
+      <StaggerChildren className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
+        {articles.map((a) => (
         <StaggerItem key={a.slug}>
           <HoverCard className={isListView ? "h-full md:h-auto" : "h-full"}>
             <Link href={`/blog/${a.slug}`}>
@@ -256,7 +275,71 @@ async function ArticlesGrid({ category, q, view }: { category?: string; q?: stri
             </Link>
           </HoverCard>
         </StaggerItem>
-      ))}
-    </StaggerChildren>
+        ))}
+      </StaggerChildren>
+
+      {totalPages > 1 && (() => {
+        const getPageUrl = (p: number) => {
+          const params = new URLSearchParams();
+          if (category) params.set("category", category);
+          if (q) params.set("q", q);
+          if (view && view !== "grid") params.set("view", view);
+          if (p > 1) params.set("page", p.toString());
+          return `/blog${params.toString() ? `?${params.toString()}` : ""}`;
+        };
+
+        return (
+          <div className="flex items-center justify-center mt-12 gap-2 flex-wrap">
+            {/* Prev Button */}
+            {currentPage > 1 ? (
+              <Link
+                href={getPageUrl(currentPage - 1)}
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all glass text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
+                aria-label="Halaman sebelumnya"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Link>
+            ) : (
+              <div className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold glass text-white/10 border border-white/5 cursor-not-allowed">
+                <ChevronLeft className="w-4 h-4 opacity-50" />
+              </div>
+            )}
+
+            {/* Numbers */}
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const p = i + 1;
+              return (
+                <Link
+                  key={p}
+                  href={getPageUrl(p)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
+                    currentPage === p
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                      : "glass text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
+                  }`}
+                >
+                  {p}
+                </Link>
+              );
+            })}
+
+            {/* Next Button */}
+            {currentPage < totalPages ? (
+              <Link
+                href={getPageUrl(currentPage + 1)}
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all glass text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
+                aria-label="Halaman selanjutnya"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <div className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold glass text-white/10 border border-white/5 cursor-not-allowed">
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </div>
+            )}
+          </div>
+        );
+      })()}
+    </>
   );
 }
