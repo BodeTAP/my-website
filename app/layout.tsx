@@ -55,6 +55,13 @@ export const metadata: Metadata = {
       "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly.",
     images: ["/og-image.png"],
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/icon.png",
+  },
   robots: { index: true, follow: true },
   verification: {
     // Tambahkan Google Search Console verification code di sini nanti
