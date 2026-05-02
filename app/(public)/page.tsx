@@ -258,18 +258,14 @@ export default async function HomePage() {
             </div>
           </FadeUp>
 
-          <FadeUp delay={0.1}>
-            <StaggerWords
-              text="Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan"
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6"
-            />
-          </FadeUp>
+          {/* Hero text is rendered immediately (no JS animation) to fix 5.9s LCP issue */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
+            Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan
+          </h1>
 
-          <FadeUp delay={0.3}>
-            <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-              Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!
-            </p>
-          </FadeUp>
+          <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!
+          </p>
 
           <FadeUp delay={0.4}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 relative z-20">
