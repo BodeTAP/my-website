@@ -56,7 +56,7 @@ export default function AIHelpWidget() {
   }
 
   return (
-    <div className="fixed bottom-24 lg:bottom-6 right-6 w-80 max-h-[400px] glass border border-white/10 rounded-2xl flex flex-col shadow-2xl z-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-24 lg:bottom-6 right-6 w-80 max-h-[400px] bg-[#030914]/95 backdrop-blur-2xl border border-white/10 rounded-2xl flex flex-col shadow-2xl z-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-2">
