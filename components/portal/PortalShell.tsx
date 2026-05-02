@@ -212,7 +212,7 @@ export default function PortalShell({
 
         {/* Mobile bottom tab bar */}
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#030914]/90 backdrop-blur-xl border-t border-white/10 flex pb-safe">
-          {navItems.map((item) => {
+          {navItems.filter(item => !['Hosting', 'Pengaturan'].includes(item.label)).map((item) => {
             const active = isActive(item.href);
             return (
               <Link
