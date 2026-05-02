@@ -110,7 +110,7 @@ export default async function PortalDashboardPage() {
                 </div>
 
                 {/* Progress stepper */}
-                <div className="flex items-center gap-0 relative z-10 mb-8 bg-black/30 p-5 sm:p-8 rounded-2xl border border-white/5 overflow-x-auto custom-scrollbar">
+                <div className="flex items-start relative z-10 mb-8 bg-black/30 p-5 sm:p-8 rounded-2xl border border-white/5 overflow-x-auto custom-scrollbar">
                   {PROJECT_STEPS.map((step, i) => {
                     const currentIdx = PROJECT_STEPS.indexOf(activeProject.status as typeof PROJECT_STEPS[number]);
                     const isCompleted = currentIdx > i;
@@ -118,9 +118,14 @@ export default async function PortalDashboardPage() {
                     const isLast      = i === PROJECT_STEPS.length - 1;
 
                     return (
-                      <div key={step} className="flex items-center flex-1 last:flex-none min-w-[80px]">
-                        <div className="flex flex-col items-center gap-3 w-full">
-                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 shrink-0 transition-all duration-500 relative z-10 ${
+                      <div key={step} className="relative flex-1 min-w-[120px] sm:min-w-0">
+                        {!isLast && (
+                          <div className="absolute top-[20px] sm:top-[24px] left-1/2 w-full h-1.5 -translate-y-1/2 bg-white/5 z-0">
+                            <div className={`h-full transition-all duration-1000 ${isCompleted ? 'bg-gradient-to-r from-green-500 to-blue-500 w-full' : 'w-0'}`} />
+                          </div>
+                        )}
+                        <div className="relative z-10 flex flex-col items-center gap-3 w-full px-1">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 shrink-0 transition-all duration-500 ${
                             isCompleted
                               ? "bg-green-500 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
                               : isCurrent
@@ -135,17 +140,12 @@ export default async function PortalDashboardPage() {
                               <span className="text-xs font-bold text-blue-200/30">{i + 1}</span>
                             )}
                           </div>
-                          <span className={`text-[10px] sm:text-xs text-center leading-tight px-1 uppercase tracking-wider font-bold ${
+                          <span className={`text-[10px] sm:text-xs text-center leading-tight uppercase tracking-wider font-bold ${
                             isCurrent ? "text-white" : isCompleted ? "text-green-400" : "text-blue-200/30"
                           }`}>
                             {PROJECT_LABELS[step]}
                           </span>
                         </div>
-                        {!isLast && (
-                          <div className="flex-1 h-1.5 mx-1 sm:mx-3 mb-6 rounded-full overflow-hidden bg-white/5 relative -z-0">
-                            <div className={`h-full transition-all duration-1000 ${isCompleted ? 'bg-gradient-to-r from-green-500 to-blue-500 w-full' : 'w-0'}`} />
-                          </div>
-                        )}
                       </div>
                     );
                   })}
