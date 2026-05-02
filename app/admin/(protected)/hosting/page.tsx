@@ -6,6 +6,8 @@ import {
   AlertTriangle, CheckCircle, Clock, ChevronDown, X, Search,
 } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { useSearchParams } from "next/navigation";
+import HostingPagination from "./HostingPagination";
 
 type HostingRecord = {
   id: string;
@@ -52,6 +54,7 @@ const EMPTY_FORM = {
 };
 
 export default function AdminHostingPage() {
+  const searchParams = useSearchParams();
   const [records, setRecords] = useState<HostingRecord[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,6 +146,14 @@ export default function AdminHostingPage() {
     }
     return matchSearch && matchStatus;
   });
+
+  const currentPage = Number(searchParams.get("page") ?? "1");
+  const PER_PAGE = 10;
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / PER_PAGE);
+  const startIdx = totalItems > 0 ? (currentPage - 1) * PER_PAGE + 1 : 0;
+  const endIdx = Math.min(currentPage * PER_PAGE, totalItems);
+  const paginatedFiltered = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
   const stats = {
     total:   records.length,
@@ -254,7 +265,7 @@ export default function AdminHostingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filtered.map(r => {
+                  {paginatedFiltered.map(r => {
                     const minDays = Math.min(
                       daysLeft(r.domainExpiry)  ?? 999,
                       daysLeft(r.hostingExpiry) ?? 999,
@@ -311,6 +322,17 @@ export default function AdminHostingPage() {
           )}
         </div>
       </FadeUp>
+
+      {totalItems > 0 && (
+        <FadeUp delay={0.2}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10 mt-6">
+            <p className="text-xs text-blue-200/40 font-medium">
+              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{totalItems}</span> record
+            </p>
+            <HostingPagination totalPages={totalPages} />
+          </div>
+        </FadeUp>
+      )}
 
       {/* Modal Form */}
       {showModal && (

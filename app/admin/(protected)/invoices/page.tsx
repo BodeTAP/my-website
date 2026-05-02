@@ -7,6 +7,9 @@ import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 import DeleteInvoiceButton from "@/components/admin/DeleteInvoiceButton";
 import CopyPayLinkButton from "./CopyPayLinkButton";
 import { FadeUp } from "@/components/public/motion";
+import InvoiceSearch from "./InvoiceSearch";
+import InvoiceFilter from "./InvoiceFilter";
+import InvoicePagination from "./InvoicePagination";
 
 const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
 const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
@@ -19,17 +22,50 @@ function formatRupiah(amount: number) {
   }).format(amount);
 }
 
-export default async function InvoicesPage() {
-  const [invoices, clients] = await Promise.all([
+export default async function InvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
+}) {
+  const params = await searchParams;
+  const q = params.q || "";
+  const status = params.status || "";
+  const page = Number(params.page || "1");
+  const PER_PAGE = 10;
+
+  const validStatuses = ["UNPAID", "PAID", "EXPIRED", "FAILED"];
+  const finalStatus = validStatuses.includes(status) ? status : undefined;
+
+  const where = {
+    ...(q
+      ? {
+          OR: [
+            { invoiceNo: { contains: q, mode: "insensitive" as const } },
+            { client: { businessName: { contains: q, mode: "insensitive" as const } } },
+          ],
+        }
+      : {}),
+    ...(finalStatus ? { status: finalStatus as any } : {}),
+  };
+
+  const [invoices, total, clients] = await Promise.all([
     prisma.invoice.findMany({
+      where,
       include: { client: { include: { user: { select: { name: true } } } } },
       orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
     }),
+    prisma.invoice.count({ where }),
     prisma.client.findMany({
       include: { user: { select: { name: true, email: true } } },
       orderBy: { businessName: "asc" },
     }),
   ]);
+
+  const totalPages = Math.ceil(total / PER_PAGE);
+  const startIdx = (page - 1) * PER_PAGE + 1;
+  const endIdx = Math.min(page * PER_PAGE, total);
 
   return (
     <div>
@@ -42,10 +78,17 @@ export default async function InvoicesPage() {
             </div>
             Manajemen Invoice
           </h1>
-          <p className="text-blue-200/60 text-sm mt-2">{invoices.length} invoice tercatat di sistem.</p>
+          <p className="text-blue-200/60 text-sm mt-2">{total} invoice tercatat di sistem.</p>
         </div>
         <div className="relative z-10">
           <NewInvoiceModal clients={clients} />
+        </div>
+      </FadeUp>
+
+      <FadeUp delay={0.1}>
+        <div className="glass rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between border border-white/5 relative z-10">
+          <InvoiceSearch />
+          <InvoiceFilter />
         </div>
       </FadeUp>
 
@@ -136,6 +179,17 @@ export default async function InvoicesPage() {
           </div>
         </div>
       </FadeUp>
+
+      {total > 0 && (
+        <FadeUp delay={0.3}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10">
+            <p className="text-xs text-blue-200/40 font-medium">
+              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> invoice
+            </p>
+            <InvoicePagination totalPages={totalPages} />
+          </div>
+        </FadeUp>
+      )}
     </div>
   );
 }

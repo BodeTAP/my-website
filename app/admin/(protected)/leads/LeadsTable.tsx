@@ -5,6 +5,9 @@ import Link from "next/link";
 import { MessageCircle, ChevronDown, ScrollText, UserSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp } from "@/components/public/motion";
+import { useSearchParams } from "next/navigation";
+import LeadsSearch from "./LeadsSearch";
+import LeadsPagination from "./LeadsPagination";
 
 type Lead = {
   id: string;
@@ -34,14 +37,31 @@ const STATUS_COLORS: Record<Lead["status"], string> = {
 };
 
 export default function LeadsTable({ leads }: { leads: Lead[] }) {
+  const searchParams = useSearchParams();
+  const q = searchParams.get("q") ?? "";
+  const page = Number(searchParams.get("page") ?? "1");
+  const PER_PAGE = 10;
+
   const [filter, setFilter] = useState<Lead["status"] | "ALL">("ALL");
   const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
     Object.fromEntries(leads.map((l) => [l.id, l.status])),
   );
 
-  const filtered = leads.filter(
-    (l) => filter === "ALL" || statusMap[l.id] === filter,
-  );
+  const filtered = leads.filter((l) => {
+    const matchSearch = q === "" || 
+      l.name.toLowerCase().includes(q.toLowerCase()) || 
+      (l.businessName && l.businessName.toLowerCase().includes(q.toLowerCase())) ||
+      (l.domain && l.domain.toLowerCase().includes(q.toLowerCase()));
+    const matchStatus = filter === "ALL" || statusMap[l.id] === filter;
+    return matchSearch && matchStatus;
+  });
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / PER_PAGE);
+  const startIdx = totalItems > 0 ? (page - 1) * PER_PAGE + 1 : 0;
+  const endIdx = Math.min(page * PER_PAGE, totalItems);
+
+  const paginatedFiltered = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const updateStatus = async (id: string, status: Lead["status"]) => {
     setStatusMap((m) => ({ ...m, [id]: status }));
@@ -59,9 +79,11 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     <FadeUp delay={0.2} className="glass rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative">
       <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none" />
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 p-5 border-b border-white/10 overflow-x-auto relative z-10 custom-scrollbar">
-        {(["ALL", "NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
+      {/* Filter tabs & Search */}
+      <div className="flex flex-col sm:flex-row gap-4 p-5 border-b border-white/10 relative z-10 items-start sm:items-center">
+        <LeadsSearch />
+        <div className="flex gap-2 overflow-x-auto custom-scrollbar flex-1 w-full pb-2 sm:pb-0">
+          {(["ALL", "NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
           <button
             key={s}
             onClick={() => setFilter(s)}
@@ -79,6 +101,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
             )}
           </button>
         ))}
+        </div>
       </div>
 
       {/* Table */}
@@ -102,12 +125,12 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                       <UserSearch className="w-8 h-8 text-blue-200/20" />
                     </div>
-                    <p className="text-blue-200/50 font-medium">Tidak ada prospek (leads) pada filter ini.</p>
+                    <p className="text-blue-200/50 font-medium">Tidak ada prospek yang cocok dengan pencarian/filter.</p>
                   </div>
                 </td>
               </tr>
             ) : (
-              filtered.map((l) => (
+              paginatedFiltered.map((l) => (
                 <tr
                   key={l.id}
                   className="hover:bg-white/5 transition-colors group"
@@ -175,6 +198,16 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
+          <p className="text-xs text-blue-200/40 font-medium">
+            Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{totalItems}</span> prospek
+          </p>
+          <LeadsPagination totalPages={totalPages} />
+        </div>
+      )}
     </FadeUp>
   );
 }

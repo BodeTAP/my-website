@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Headset, Clock, CheckCircle2 } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import TicketSearch from "./TicketSearch";
+import TicketFilter from "./TicketFilter";
+import TicketPagination from "./TicketPagination";
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; border: string; text: string; icon: any }> = {
   OPEN: {
@@ -29,16 +32,51 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; border: string;
   },
 };
 
-export default async function TicketsPage() {
-  const tickets = await prisma.ticket.findMany({
-    include: {
-      client: { include: { user: { select: { name: true, email: true } } } },
-      messages: { orderBy: { createdAt: "desc" }, take: 1 },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+export default async function TicketsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
+}) {
+  const params = await searchParams;
+  const q = params.q || "";
+  const status = params.status || "";
+  const page = Number(params.page || "1");
+  const PER_PAGE = 10;
 
-  const openTickets = tickets.filter((t) => t.status === "OPEN").length;
+  const validStatuses = ["OPEN", "IN_PROGRESS", "CLOSED"];
+  const finalStatus = validStatuses.includes(status) ? status : undefined;
+
+  const where = {
+    ...(q
+      ? {
+          OR: [
+            { subject: { contains: q, mode: "insensitive" as const } },
+            { client: { businessName: { contains: q, mode: "insensitive" as const } } },
+            { client: { user: { email: { contains: q, mode: "insensitive" as const } } } },
+          ],
+        }
+      : {}),
+    ...(finalStatus ? { status: finalStatus as any } : {}),
+  };
+
+  const [tickets, total, openTicketsCount] = await Promise.all([
+    prisma.ticket.findMany({
+      where,
+      include: {
+        client: { include: { user: { select: { name: true, email: true } } } },
+        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+      },
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+    }),
+    prisma.ticket.count({ where }),
+    prisma.ticket.count({ where: { status: "OPEN" } })
+  ]);
+
+  const totalPages = Math.ceil(total / PER_PAGE);
+  const startIdx = (page - 1) * PER_PAGE + 1;
+  const endIdx = Math.min(page * PER_PAGE, total);
 
   return (
     <div>
@@ -52,8 +90,15 @@ export default async function TicketsPage() {
             Tiket Bantuan
           </h1>
           <p className="text-blue-200/60 text-sm mt-2">
-            Anda memiliki <strong className="text-pink-400">{openTickets} tiket terbuka</strong> yang membutuhkan respons.
+            Anda memiliki <strong className="text-pink-400">{openTicketsCount} tiket terbuka</strong> yang membutuhkan respons.
           </p>
+        </div>
+      </FadeUp>
+
+      <FadeUp delay={0.1}>
+        <div className="glass rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between border border-white/5 relative z-10">
+          <TicketSearch />
+          <TicketFilter />
         </div>
       </FadeUp>
 
@@ -134,6 +179,17 @@ export default async function TicketsPage() {
           })
         )}
       </StaggerChildren>
+
+      {total > 0 && (
+        <FadeUp delay={0.3}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10 mt-6">
+            <p className="text-xs text-blue-200/40 font-medium">
+              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> tiket
+            </p>
+            <TicketPagination totalPages={totalPages} />
+          </div>
+        </FadeUp>
+      )}
     </div>
   );
 }

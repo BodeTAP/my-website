@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Package, Plus, Pencil, Trash2, X, Loader2, Check,
   RefreshCw, Receipt, ChevronDown, Users,
@@ -11,6 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/hooks/useConfirm";
+import { FadeUp } from "@/components/public/motion";
+import MaintenanceSearch from "./MaintenanceSearch";
+import MaintenanceFilter from "./MaintenanceFilter";
+import MaintenancePagination from "./MaintenancePagination";
 
 type Pkg = { id: string; name: string; description: string | null; price: number; features: string[]; isActive: boolean };
 type Sub = {
@@ -204,9 +208,10 @@ function SubModal({ packages, clients, onClose, onSave }: {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function MaintenanceClient({
-  packages: initial, subscriptions: initSubs, clients,
+  packages: initial, subscriptions: initSubs, clients, pagination
 }: {
   packages: Pkg[]; subscriptions: Sub[]; clients: Client[];
+  pagination: { total: number; totalPages: number; startIdx: number; endIdx: number };
 }) {
   const [tab, setTab] = useState<"subs" | "pkgs">("subs");
   const [packages, setPackages] = useState(initial);
@@ -216,6 +221,11 @@ export default function MaintenanceClient({
   const [generating, setGenerating] = useState<string | null>(null);
   const [changing, setChanging] = useState<string | null>(null);
   const { confirm, node } = useConfirm();
+
+  // Sync state when searchParams changes data from server
+  useEffect(() => {
+    setSubs(initSubs);
+  }, [initSubs]);
 
   const handleGenerateInvoice = async (subId: string) => {
     if (!await confirm("Generate invoice bulan ini?", { description: "Invoice baru akan dibuat untuk langganan ini.", confirmLabel: "Generate", variant: "warning" })) return;
@@ -276,7 +286,15 @@ export default function MaintenanceClient({
 
       {/* Subscriptions Tab */}
       {tab === "subs" && (
-        <div className="space-y-3">
+        <>
+          <FadeUp delay={0.1}>
+            <div className="glass rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between border border-white/5 relative z-10">
+              <MaintenanceSearch />
+              <MaintenanceFilter />
+            </div>
+          </FadeUp>
+
+          <div className="space-y-3">
           {subs.length === 0 ? (
             <div className="glass rounded-2xl p-12 text-center">
               <Users className="w-10 h-10 text-blue-500/20 mx-auto mb-3" />
@@ -323,7 +341,19 @@ export default function MaintenanceClient({
               </div>
             </div>
           ))}
-        </div>
+          </div>
+
+          {pagination.total > 0 && (
+            <FadeUp delay={0.2}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10 mt-6">
+                <p className="text-xs text-blue-200/40 font-medium">
+                  Menampilkan <span className="text-blue-200">{pagination.startIdx}-{pagination.endIdx}</span> dari <span className="text-blue-200">{pagination.total}</span> langganan
+                </p>
+                <MaintenancePagination totalPages={pagination.totalPages} />
+              </div>
+            </FadeUp>
+          )}
+        </>
       )}
 
       {/* Packages Tab */}
