@@ -46,9 +46,12 @@ export async function rateLimit(
 }
 
 export function getClientIP(req: Request): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+  // On Vercel, the LAST entry in X-Forwarded-For is appended by the edge proxy
+  // and cannot be spoofed — the first entries can be forged by the client.
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded.split(",");
+    return parts[parts.length - 1].trim();
+  }
+  return req.headers.get("x-real-ip") ?? "unknown";
 }

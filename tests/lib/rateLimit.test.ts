@@ -50,11 +50,11 @@ describe("rateLimit() — in-memory fallback (local dev)", () => {
 });
 
 describe("getClientIP()", () => {
-  it("membaca IP dari x-forwarded-for", () => {
+  it("membaca IP terakhir dari x-forwarded-for (tidak bisa di-spoof)", () => {
     const req = new Request("http://localhost", {
-      headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
+      headers: { "x-forwarded-for": "spoofed-client, 1.2.3.4, 5.6.7.8" },
     });
-    expect(getClientIP(req)).toBe("1.2.3.4");
+    expect(getClientIP(req)).toBe("5.6.7.8");
   });
 
   it("fallback ke x-real-ip", () => {

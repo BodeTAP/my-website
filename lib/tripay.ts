@@ -1,4 +1,4 @@
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
 const SANDBOX    = process.env.TRIPAY_SANDBOX === "true";
 const DIRECT_URL = SANDBOX ? "https://tripay.co.id/api-sandbox" : "https://tripay.co.id/api";
@@ -54,7 +54,11 @@ function sign(merchantRef: string, amount: number): string {
 
 export function verifyWebhookSignature(body: string, sig: string): boolean {
   const expected = createHmac("sha256", PRIV_KEY()).update(body).digest("hex");
-  return expected === sig;
+  try {
+    return timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(sig, "hex"));
+  } catch {
+    return false;
+  }
 }
 
 // ── API calls ─────────────────────────────────────────────────────────────────

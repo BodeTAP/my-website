@@ -25,12 +25,20 @@ export async function GET() {
   return NextResponse.json(settings);
 }
 
+const ALLOWED_KEYS = new Set(Object.keys(DEFAULTS));
+
 export async function PATCH(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const updates: Record<string, string> = await req.json();
+  const filtered = Object.entries(updates).filter(([key]) => ALLOWED_KEYS.has(key));
+
+  if (filtered.length === 0) {
+    return NextResponse.json({ error: "Tidak ada key yang valid" }, { status: 400 });
+  }
+
   await Promise.all(
-    Object.entries(updates).map(([key, value]) =>
+    filtered.map(([key, value]) =>
       prisma.siteSetting.upsert({
         where: { key },
         create: { key, value },

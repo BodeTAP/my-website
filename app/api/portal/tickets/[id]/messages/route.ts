@@ -22,11 +22,18 @@ export async function POST(req: Request, { params }: Params) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: ticketId } = await params;
-  const { body, userId } = await req.json();
+  const { body } = await req.json();
+
+  // Resolve userId from session — never trust body for ownership
+  const user = await prisma.user.findUnique({
+    where: { email: session.user!.email! },
+    select: { id: true },
+  });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const [message, ticket] = await Promise.all([
     prisma.ticketMessage.create({
-      data: { ticketId, senderId: userId, senderRole: "CLIENT", body: body.trim() },
+      data: { ticketId, senderId: user.id, senderRole: "CLIENT", body: body.trim() },
     }),
     prisma.ticket.update({
       where: { id: ticketId },

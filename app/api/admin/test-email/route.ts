@@ -25,10 +25,5 @@ export async function GET() {
     html: "<p>Ini adalah email test dari sistem MFWEB. Jika Anda menerima ini, konfigurasi email sudah benar.</p>",
   });
 
-  return NextResponse.json({
-    from,
-    to,
-    apiKeyPrefix: apiKey.slice(0, 8) + "...",
-    resendResponse: result,
-  });
+  return NextResponse.json({ from, to, resendResponse: result });
 }
