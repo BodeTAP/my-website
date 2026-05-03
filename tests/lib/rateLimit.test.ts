@@ -1,31 +1,37 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Mock Upstash Redis — test selalu pakai in-memory fallback
+vi.mock("@upstash/redis", () => ({
+  Redis: class {
+    constructor() {}
+  },
+}));
+
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
 
-// Setiap test pakai key unik agar tidak saling mempengaruhi
-// (rate limiter menyimpan state di module-level Map)
 let keyCounter = 0;
 const key = () => `test-${Date.now()}-${keyCounter++}`;
 
-describe("rateLimit()", () => {
-  it("mengizinkan request pertama", () => {
-    const result = rateLimit(key(), 3, 60_000);
+describe("rateLimit() — in-memory fallback (local dev)", () => {
+  it("mengizinkan request pertama", async () => {
+    const result = await rateLimit(key(), 3, 60_000);
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(2);
     expect(result.retryAfterMs).toBe(0);
   });
 
-  it("mengurangi remaining pada setiap request", () => {
+  it("mengurangi remaining pada setiap request", async () => {
     const k = key();
-    rateLimit(k, 3, 60_000);
-    const second = rateLimit(k, 3, 60_000);
+    await rateLimit(k, 3, 60_000);
+    const second = await rateLimit(k, 3, 60_000);
     expect(second.remaining).toBe(1);
   });
 
-  it("memblokir saat limit terlampaui", () => {
+  it("memblokir saat limit terlampaui", async () => {
     const k = key();
-    rateLimit(k, 2, 60_000);
-    rateLimit(k, 2, 60_000);
-    const blocked = rateLimit(k, 2, 60_000);
+    await rateLimit(k, 2, 60_000);
+    await rateLimit(k, 2, 60_000);
+    const blocked = await rateLimit(k, 2, 60_000);
     expect(blocked.allowed).toBe(false);
     expect(blocked.remaining).toBe(0);
     expect(blocked.retryAfterMs).toBeGreaterThan(0);
@@ -33,12 +39,12 @@ describe("rateLimit()", () => {
 
   it("mereset counter setelah window berakhir", async () => {
     const k = key();
-    rateLimit(k, 1, 50); // window 50ms
-    rateLimit(k, 1, 50); // blocked
+    await rateLimit(k, 1, 50);
+    await rateLimit(k, 1, 50);
 
-    await new Promise((r) => setTimeout(r, 60)); // tunggu window reset
+    await new Promise((r) => setTimeout(r, 60));
 
-    const afterReset = rateLimit(k, 1, 50);
+    const afterReset = await rateLimit(k, 1, 50);
     expect(afterReset.allowed).toBe(true);
   });
 });

@@ -73,7 +73,7 @@ function parseMetaTags(html: string, baseUrl: string): MetaResult {
 
 export async function POST(req: NextRequest) {
   const ip = getClientIP(req);
-  const rl = rateLimit(`metatags:${ip}`, 5, 60_000);
+  const rl = await rateLimit(`metatags:${ip}`, 5, 60_000);
   if (!rl.allowed) return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
 
   const { url: rawUrl } = await req.json().catch(() => ({ url: "" })) as { url?: string };

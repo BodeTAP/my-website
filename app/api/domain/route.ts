@@ -3,7 +3,7 @@ import { rateLimit, getClientIP } from "@/lib/rateLimit";
 
 export async function GET(req: Request) {
   const ip = getClientIP(req);
-  const { allowed } = rateLimit(`domain:${ip}`, 30, 60 * 1000);
+  const { allowed } = await rateLimit(`domain:${ip}`, 30, 60 * 1000);
   if (!allowed) {
     return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
   }

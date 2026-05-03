@@ -5,7 +5,7 @@ import { sendWA, waMsg } from "@/lib/whatsapp";
 
 export async function POST(req: Request) {
   const ip = getClientIP(req);
-  const { allowed, retryAfterMs } = rateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
+  const { allowed, retryAfterMs } = await rateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
   if (!allowed) {
     return NextResponse.json(
       { error: "Terlalu banyak permintaan. Coba lagi dalam beberapa saat." },

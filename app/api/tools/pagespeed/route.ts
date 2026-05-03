@@ -36,7 +36,7 @@ function setCache(key: string, data: CachedResult) {
 
 export async function GET(req: NextRequest) {
   const ip = getClientIP(req);
-  const rl = rateLimit(`pagespeed:${ip}`, 5, 60_000);
+  const rl = await rateLimit(`pagespeed:${ip}`, 5, 60_000);
   if (!rl.allowed) {
     return NextResponse.json(
       { error: "Terlalu banyak permintaan. Coba lagi dalam 1 menit." },

@@ -11,7 +11,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
 
 export async function POST(req: NextRequest, { params }: Params) {
   const ip = getClientIP(req);
-  const rl = rateLimit(`pay:${ip}`, 5, 60_000);
+  const rl = await rateLimit(`pay:${ip}`, 5, 60_000);
   if (!rl.allowed) {
     return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi." }, { status: 429 });
   }

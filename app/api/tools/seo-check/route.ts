@@ -142,7 +142,7 @@ function analyzeSEO(html: string, url: string): { score: number; url: string; ch
 
 export async function POST(req: NextRequest) {
   const ip = getClientIP(req);
-  const rl = rateLimit(`seocheck:${ip}`, 5, 60_000);
+  const rl = await rateLimit(`seocheck:${ip}`, 5, 60_000);
   if (!rl.allowed) {
     return NextResponse.json(
       { error: "Terlalu banyak permintaan. Coba lagi dalam 1 menit." },

@@ -5,7 +5,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/rateLimit", () => ({
-  rateLimit: vi.fn(() => ({ allowed: true, remaining: 4, retryAfterMs: 0 })),
+  rateLimit: vi.fn(async () => ({ allowed: true, remaining: 4, retryAfterMs: 0 })),
   getClientIP: vi.fn(() => "127.0.0.1"),
 }));
 
@@ -49,7 +49,7 @@ function makeRequest(body: Record<string, unknown>) {
 describe("POST /api/contact", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(rateLimit).mockReturnValue({ allowed: true, remaining: 4, retryAfterMs: 0 });
+    vi.mocked(rateLimit).mockResolvedValue({ allowed: true, remaining: 4, retryAfterMs: 0 });
   });
 
   it("mengembalikan 400 jika field wajib tidak lengkap", async () => {
@@ -88,7 +88,7 @@ describe("POST /api/contact", () => {
   });
 
   it("mengembalikan 429 saat rate limit tercapai", async () => {
-    vi.mocked(rateLimit).mockReturnValue({ allowed: false, remaining: 0, retryAfterMs: 3_600_000 });
+    vi.mocked(rateLimit).mockResolvedValue({ allowed: false, remaining: 0, retryAfterMs: 3_600_000 });
 
     const res = await POST(
       makeRequest({ name: "Budi", businessName: "Toko", whatsapp: "0812" })

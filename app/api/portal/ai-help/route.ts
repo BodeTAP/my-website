@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Rate limit: 10 requests per hour per user
-  const { allowed } = rateLimit(`ai-help:${session.user.email}`, 10, 60 * 60 * 1000);
+  const { allowed } = await rateLimit(`ai-help:${session.user.email}`, 10, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak permintaan. Silakan coba lagi nanti." }, { status: 429 });
 
   try {

@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 export async function POST(req: Request) {
   const ip = getClientIP(req);
-  const { allowed } = rateLimit(`reset-pw:${ip}`, 3, 15 * 60 * 1000); // 3 per 15 min
+  const { allowed } = await rateLimit(`reset-pw:${ip}`, 3, 15 * 60 * 1000); // 3 per 15 min
   if (!allowed) {
     return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi dalam 15 menit." }, { status: 429 });
   }
