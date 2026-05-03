@@ -203,7 +203,7 @@ async function ArticlesGrid({ category, q, view, currentPage }: { category?: str
         {q ? (
           <div className="space-y-4">
             <p className="text-blue-200/40 text-lg">
-              Tidak ada artikel untuk pencarian "{q}"
+              Tidak ada artikel untuk pencarian &quot;{q}&quot;
             </p>
             <Link
               href={category ? `/blog?category=${category}&view=${view}` : `/blog?view=${view}`}

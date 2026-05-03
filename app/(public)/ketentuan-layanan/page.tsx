@@ -29,10 +29,10 @@ export default function TermsPage() {
           <section>
             <h2 className="text-white font-bold text-xl mb-3">1. Definisi</h2>
             <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li><strong className="text-blue-200">"MFWEB"</strong> merujuk pada penyedia layanan pembuatan website.</li>
-              <li><strong className="text-blue-200">"Klien"</strong> merujuk pada individu atau badan usaha yang menggunakan layanan MFWEB.</li>
-              <li><strong className="text-blue-200">"Layanan"</strong> merujuk pada jasa pembuatan website, portal klien, dan layanan terkait.</li>
-              <li><strong className="text-blue-200">"Portal Klien"</strong> merujuk pada platform digital untuk memantau proyek dan invoice.</li>
+              <li><strong className="text-blue-200">&quot;MFWEB&quot;</strong> merujuk pada penyedia layanan pembuatan website.</li>
+              <li><strong className="text-blue-200">&quot;Klien&quot;</strong> merujuk pada individu atau badan usaha yang menggunakan layanan MFWEB.</li>
+              <li><strong className="text-blue-200">&quot;Layanan&quot;</strong> merujuk pada jasa pembuatan website, portal klien, dan layanan terkait.</li>
+              <li><strong className="text-blue-200">&quot;Portal Klien&quot;</strong> merujuk pada platform digital untuk memantau proyek dan invoice.</li>
             </ul>
           </section>
 

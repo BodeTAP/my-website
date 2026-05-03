@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-blue-400/60 text-sm mb-2">Terakhir diperbarui: {UPDATED}</p>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">Kebijakan Privasi</h1>
           <p className="text-blue-200/60 leading-relaxed">
-            MFWEB ("<strong className="text-blue-200">kami</strong>") berkomitmen untuk melindungi privasi Anda.
+            MFWEB (&quot;<strong className="text-blue-200">kami</strong>&quot;) berkomitmen untuk melindungi privasi Anda.
             Kebijakan ini menjelaskan informasi apa yang kami kumpulkan, bagaimana kami menggunakannya,
             dan hak-hak yang Anda miliki atas data Anda.
           </p>
@@ -104,7 +104,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-white font-bold text-xl mb-3">8. Perubahan Kebijakan</h2>
             <p className="text-blue-200/60">
-              Kami dapat memperbarui kebijakan privasi ini sewaktu-waktu. Perubahan akan diumumkan di halaman ini dengan memperbarui tanggal "Terakhir diperbarui". Kami menyarankan Anda meninjau halaman ini secara berkala.
+              Kami dapat memperbarui kebijakan privasi ini sewaktu-waktu. Perubahan akan diumumkan di halaman ini dengan memperbarui tanggal &quot;Terakhir diperbarui&quot;. Kami menyarankan Anda meninjau halaman ini secara berkala.
             </p>
           </section>
 
