@@ -3,10 +3,10 @@ import { Redis } from "@upstash/redis";
 // Production: shared Redis via Upstash (limits enforced across all serverless instances)
 // Development: in-memory Map fallback when UPSTASH_REDIS_REST_URL is not set
 const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
     ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+        url: process.env.KV_REST_API_URL,
+        token: process.env.KV_REST_API_TOKEN,
       })
     : null;
 
