@@ -2,6 +2,8 @@
 
 # Ruflo runtime data
 .claude-flow/
+.swarm/
+ruvector.db
 lint-results.txt
 
 # dependencies
