@@ -2,9 +2,6 @@
   "name": "my-website",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": ">=22"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,7 +16,6 @@
     "@base-ui/react": "^1.4.1",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
-    "@prisma/extension-accelerate": "^3.0.1",
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/nextjs": "^10.50.0",
     "@tailwindcss/typography": "^0.5.19",

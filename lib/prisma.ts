@@ -1,31 +1,14 @@
 import { PrismaClient } from "@prisma/client";
-
-// ─── Production: Prisma Accelerate ────────────────────────────────────────────
-// Uses ACCELERATE_DATABASE_URL (format: prisma://accelerate.prisma-data.net/...)
-// Accelerate handles connection pooling so serverless functions don't exhaust
-// the PostgreSQL max_connections limit on cold starts.
-import { withAccelerate } from "@prisma/extension-accelerate";
-
-// ─── Development: Direct PostgreSQL via PrismaPg ──────────────────────────────
-// Uses DATABASE_URL (format: postgresql://user:pass@host/db)
-// PrismaPg is kept for local dev so Accelerate is not required locally.
 import { PrismaPg } from "@prisma/adapter-pg";
 
-function createPrismaClient(): PrismaClient {
-  if (process.env.NODE_ENV === "production") {
-    // Production: Prisma Accelerate pools connections across serverless instances.
-    // DATABASE_URL in Vercel must be set to the prisma:// URL from Accelerate.
-    return new PrismaClient()
-      .$extends(withAccelerate()) as unknown as PrismaClient;
-  }
-
-  // Development: direct PostgreSQL connection via DATABASE_URL
+function createPrismaClient() {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-  return new PrismaClient({ adapter, log: ["error"] });
+  return new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === "development" ? ["error"] : [],
+  });
 }
 
-// Reuse the client across hot-reloads in development to avoid
-// exhausting connections during `next dev`.
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
