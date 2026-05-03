@@ -74,8 +74,8 @@ export default async function PortalDashboardPage() {
 
       {/* Warning: nomor HP belum diisi */}
       {!client.phone && (
-        <div className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0 border border-amber-500/30">
               <PhoneCall className="w-4 h-4 text-amber-400" />
             </div>
@@ -83,8 +83,8 @@ export default async function PortalDashboardPage() {
               Nomor HP Anda belum diisi. Kami membutuhkannya untuk menghubungi Anda terkait proyek.
             </p>
           </div>
-          <Link href="/portal/profile" className="shrink-0">
-            <Button size="sm" className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold px-4 h-9 whitespace-nowrap transition-all">
+          <Link href="/portal/profile" className="w-full sm:w-auto shrink-0">
+            <Button size="sm" className="w-full sm:w-auto bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold px-4 h-9 whitespace-nowrap transition-all">
               Lengkapi Sekarang
             </Button>
           </Link>
