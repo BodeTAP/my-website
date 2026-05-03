@@ -13,14 +13,20 @@ Harga mulai Rp 800.000. Platform: mfweb.maffisorp.id.
 `.trim();
 
 function generateSlug(title: string): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const base = title
+  let slug = title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-")
-    .slice(0, 60);
-  return `${base}-${date}`;
+    .replace(/\s+/g, "-");
+
+  // Potong di batas kata, bukan di tengah kata
+  if (slug.length > 60) {
+    slug = slug.slice(0, 60);
+    const lastHyphen = slug.lastIndexOf("-");
+    if (lastHyphen > 30) slug = slug.slice(0, lastHyphen);
+  }
+
+  return slug;
 }
 
 /** Minta Claude memilih topik baru yang belum pernah ditulis */
