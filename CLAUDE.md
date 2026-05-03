@@ -29,6 +29,8 @@ npx prisma studio             # Open Prisma Studio GUI
 npx prisma generate           # Regenerate Prisma client
 ```
 
+There is no test suite configured.
+
 ---
 
 ## Architecture
@@ -86,6 +88,7 @@ Role enum: `ADMIN` | `CLIENT`. Status enums live on each model (see `prisma/sche
 
 | File | Purpose |
 |------|---------|
+| `lib/ai.ts` | Anthropic Claude SDK + Pexels cover image generation (keyword translation → image search → Vercel Blob upload) |
 | `lib/email.ts` | Resend transactional email templates for all notification types |
 | `lib/tripay.ts` | Tripay payment gateway integration + sandbox mode via `TRIPAY_SANDBOX` env |
 | `lib/whatsapp.ts` | WhatsApp API integration |
@@ -98,14 +101,22 @@ Role enum: `ADMIN` | `CLIENT`. Status enums live on each model (see `prisma/sche
 ```
 /api/auth/[...nextauth]      # NextAuth handlers
 /api/admin/*                 # Protected admin CRUD endpoints
+/api/admin/ai/*              # AI: draft-article, cover-image, seo-analyze, suggest-topics, draft-reply
 /api/portal/*                # Protected client endpoints
+/api/portal/ai-help          # Claude AI chat for ticket support
 /api/contact                 # Public contact form
 /api/upload                  # Vercel Blob file upload
-/api/tools/*                 # PageSpeed, SEO check (public)
+/api/tools/*                 # PageSpeed, SEO check, meta tags (public)
+/api/domain                  # Domain availability check (public)
+/api/invoices/[id]/pdf       # Invoice PDF generation
 /api/pay/[invoiceNo]         # Payment initiation (public)
 /api/webhooks/tripay         # Tripay payment webhook
 /api/cron/publish-scheduled  # Scheduled article publishing
 ```
+
+### AI Integration
+
+`lib/ai.ts` uses `@anthropic-ai/sdk` (model: `claude-haiku-4-5-20251001`). Admin endpoints at `/api/admin/ai/` handle article drafting, SEO analysis, topic suggestions, cover image generation, and ticket reply drafting. The client portal exposes `components/portal/AIHelpWidget.tsx` backed by `/api/portal/ai-help`. The public `app/(public)/tools/generator-nama/` tool also calls Claude directly.
 
 ### Payment Flow
 
@@ -114,6 +125,12 @@ Tripay is the payment gateway. A Cloudflare Worker (`cloudflare-worker/`) acts a
 ### File Storage
 
 Vercel Blob (`@vercel/blob`) for all uploaded images. `next.config.ts` whitelists `blob.vercel-storage.com` as a remote image pattern.
+
+### Monitoring
+
+- **Sentry** — error tracking configured in `sentry.*.config.ts`; `next.config.ts` tunnels reports through `/monitoring` via `withSentryConfig`
+- **Microsoft Clarity** — session recording via `components/public/Clarity.tsx`
+- **Vercel Analytics** — performance tracking injected in the root layout
 
 ### UI Stack
 
@@ -136,4 +153,7 @@ TRIPAY_API_KEY          # Tripay private key
 TRIPAY_MERCHANT_CODE    # Tripay merchant code
 TRIPAY_SANDBOX          # "true" for sandbox mode
 BLOB_READ_WRITE_TOKEN   # Vercel Blob token
+ANTHROPIC_API_KEY       # Claude API key (AI content + ticket features)
+PEXELS_API_KEY          # Pexels image search API (cover image generation)
+NEXT_PUBLIC_SENTRY_DSN  # Sentry error tracking
 ```
