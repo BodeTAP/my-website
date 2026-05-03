@@ -47,7 +47,7 @@ export default function PortalLoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("resend", { email, redirect: false });
+    const res = await signIn("resend", { email, redirect: false, callbackUrl: "/portal/dashboard" });
 
     if (res?.error) {
       setError("Gagal mengirim magic link. Mohon hubungi tim support.");
