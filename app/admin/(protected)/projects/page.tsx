@@ -59,7 +59,7 @@ export default async function ProjectsPage() {
                         <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                           <FolderKanban className="w-8 h-8 text-blue-200/20" />
                         </div>
-                        <p className="text-blue-200/50 font-medium">Belum ada proyek. Klik "Proyek Baru" untuk menambahkan.</p>
+                        <p className="text-blue-200/50 font-medium">Belum ada proyek. Klik &quot;Proyek Baru&quot; untuk menambahkan.</p>
                       </div>
                     </td>
                   </tr>

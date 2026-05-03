@@ -116,7 +116,7 @@ export default async function InvoicesPage({
                         <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                           <FileWarning className="w-8 h-8 text-blue-200/20" />
                         </div>
-                        <p className="text-blue-200/50 font-medium">Belum ada invoice. Klik "Invoice Baru" untuk membuat tagihan.</p>
+                        <p className="text-blue-200/50 font-medium">Belum ada invoice. Klik &quot;Invoice Baru&quot; untuk membuat tagihan.</p>
                       </div>
                     </td>
                   </tr>

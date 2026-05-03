@@ -22,7 +22,7 @@ export default async function AdminPortfolioPage() {
       {portfolios.length === 0 ? (
         <div className="glass rounded-2xl p-16 text-center">
           <Globe className="w-14 h-14 text-blue-500/20 mx-auto mb-4" />
-          <p className="text-blue-200/30">Belum ada portofolio. Klik "Portofolio Baru" untuk menambahkan.</p>
+          <p className="text-blue-200/30">Belum ada portofolio. Klik &quot;Portofolio Baru&quot; untuk menambahkan.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

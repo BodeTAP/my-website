@@ -154,7 +154,7 @@ export default async function TicketsPage({
                       {t.messages[0] && (
                         <div className="mt-3 bg-black/20 p-3 rounded-xl border border-white/5">
                           <p className="text-blue-200/60 text-xs line-clamp-2 italic leading-relaxed">
-                            "{t.messages[0].body}"
+                            &quot;{t.messages[0].body}&quot;
                           </p>
                         </div>
                       )}

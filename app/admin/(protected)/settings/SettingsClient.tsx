@@ -291,7 +291,7 @@ export default function SettingsClient({
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="glass rounded-3xl p-6 border border-white/5">
             <h2 className="text-white font-semibold text-lg mb-1">Statistik Hero</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Angka yang tampil di bawah tombol "Mulai Proyek" di beranda situs.</p>
+            <p className="text-blue-200/40 text-sm mb-6">Angka yang tampil di bawah tombol &quot;Mulai Proyek&quot; di beranda situs.</p>
             
             <div className="grid sm:grid-cols-3 gap-6">
               {stats.map((s, idx) => (
