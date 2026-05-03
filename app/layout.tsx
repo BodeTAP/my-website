@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { prisma } from "@/lib/prisma";
+import { FacebookPixel } from "@/components/public/FacebookPixel";
+import { GoogleAnalytics } from "@/components/public/GoogleAnalytics";
 import "./globals.css";
 
 const SITE_URL =
@@ -108,11 +111,17 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const trackingRows = await prisma.siteSetting.findMany({
+    where: { key: { in: ["facebook_pixel_id", "google_analytics_id"] } },
+  }).catch(() => []);
+  const fbPixelId = trackingRows.find((r) => r.key === "facebook_pixel_id")?.value ?? "";
+  const gaId      = trackingRows.find((r) => r.key === "google_analytics_id")?.value ?? "";
+
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
       <head>
@@ -137,6 +146,8 @@ export default function RootLayout({
         />
         {children}
         <Analytics />
+        <FacebookPixel pixelId={fbPixelId} />
+        <GoogleAnalytics gaId={gaId} />
       </body>
     </html>
   );

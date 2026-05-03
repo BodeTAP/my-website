@@ -323,6 +323,32 @@ export default function SettingsClient({
             </div>
           </div>
 
+          {/* Tracking & Analytics */}
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Tracking &amp; Analytics</h2>
+            <p className="text-blue-200/40 text-sm mb-6">ID pixel untuk mengukur performa dan konversi. Kosongkan untuk menonaktifkan.</p>
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Facebook Pixel ID</Label>
+                <Input
+                  value={form.facebook_pixel_id ?? ""}
+                  onChange={set("facebook_pixel_id")}
+                  placeholder="Contoh: 123456789012345"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Google Analytics ID</Label>
+                <Input
+                  value={form.google_analytics_id ?? ""}
+                  onChange={set("google_analytics_id")}
+                  placeholder="Contoh: G-XXXXXXXXXX"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                />
+              </div>
+            </div>
+          </div>
+
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
 
           <div className="flex items-center gap-4 pt-2">

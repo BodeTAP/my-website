@@ -9,6 +9,8 @@ const DEFAULTS: Record<string, string> = {
   hero_stat_2_label: "Klien puas",
   hero_stat_3_num:   "3 hari",
   hero_stat_3_label: "Rata-rata delivery",
+  facebook_pixel_id:  "",
+  google_analytics_id: "",
 };
 
 async function requireAdmin() {
