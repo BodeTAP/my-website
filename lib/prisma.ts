@@ -13,21 +13,15 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 function createPrismaClient(): PrismaClient {
   if (process.env.NODE_ENV === "production") {
-    // Production: connect through Prisma Accelerate connection pool.
-    // Requires ACCELERATE_DATABASE_URL to be set in Vercel environment variables.
-    return new PrismaClient({
-      datasourceUrl: process.env.ACCELERATE_DATABASE_URL!,
-      log: [],
-    }).$extends(withAccelerate()) as unknown as PrismaClient;
+    // Production: Prisma Accelerate pools connections across serverless instances.
+    // DATABASE_URL in Vercel must be set to the prisma:// URL from Accelerate.
+    return new PrismaClient()
+      .$extends(withAccelerate()) as unknown as PrismaClient;
   }
 
-  // Development: direct connection to local / remote PostgreSQL.
-  // Requires DATABASE_URL to be set in .env or .env.local.
+  // Development: direct PostgreSQL connection via DATABASE_URL
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-  return new PrismaClient({
-    adapter,
-    log: ["error"],
-  });
+  return new PrismaClient({ adapter, log: ["error"] });
 }
 
 // Reuse the client across hot-reloads in development to avoid
