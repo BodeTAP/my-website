@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check, Sparkles, AlertCircle, LayoutDashboard } from "lucide-react";
+import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check, Sparkles, AlertCircle, LayoutDashboard, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, CountUp } from "@/components/public/motion";
 
@@ -71,6 +71,26 @@ export default async function PortalDashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+
+      {/* Warning: nomor HP belum diisi */}
+      {!client.phone && (
+        <div className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0 border border-amber-500/30">
+              <PhoneCall className="w-4 h-4 text-amber-400" />
+            </div>
+            <p className="text-amber-200/90 text-sm font-medium leading-snug">
+              Nomor HP Anda belum diisi. Kami membutuhkannya untuk menghubungi Anda terkait proyek.
+            </p>
+          </div>
+          <Link href="/portal/profile" className="shrink-0">
+            <Button size="sm" className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold px-4 h-9 whitespace-nowrap transition-all">
+              Lengkapi Sekarang
+            </Button>
+          </Link>
+        </div>
+      )}
+
       <FadeUp className="relative">
         <div className="absolute -top-20 -left-20 w-48 h-48 bg-blue-600/20 rounded-full blur-[80px] pointer-events-none" />
         <div className="relative z-10">
