@@ -20,6 +20,7 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/refs": "warn",
       "react-hooks/static-components": "warn",
+      "react-hooks/impure-function-calls": "warn",
       // Explicit any is common in API route handlers and event callbacks.
       "@typescript-eslint/no-explicit-any": "warn",
     },
