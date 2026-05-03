@@ -31,6 +31,15 @@ module.exports = {
         lastmod: new Date().toISOString(),
       };
     }
+    // Service pages are high-intent commercial pages
+    if (path.startsWith("/layanan")) {
+      return {
+        loc: path,
+        changefreq: "weekly",
+        priority: 0.9,
+        lastmod: new Date().toISOString(),
+      };
+    }
     return {
       loc: path,
       changefreq: config.changefreq,

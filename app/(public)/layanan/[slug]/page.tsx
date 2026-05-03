@@ -494,7 +494,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: service.metaTitle,
     description: service.metaDesc,
     alternates: { canonical: `/layanan/${slug}` },
-    openGraph: { title: service.metaTitle, description: service.metaDesc },
+    openGraph: {
+      title: service.metaTitle,
+      description: service.metaDesc,
+      images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630 }],
+    },
   };
 }
 

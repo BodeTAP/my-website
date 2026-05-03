@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       type: "article",
       title: article.metaTitle ?? article.title,
       description: article.metaDesc ?? article.excerpt ?? undefined,
-      images: article.coverImage ? [article.coverImage] : [],
+      images: article.coverImage ? [article.coverImage] : [`${SITE_URL}/og-image.png`],
       publishedTime: article.publishedAt?.toISOString(),
       modifiedTime: article.updatedAt?.toISOString(),
     },
