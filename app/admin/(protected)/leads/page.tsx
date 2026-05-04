@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import LeadsTable from "./LeadsTable";
 import { FadeUp } from "@/components/public/motion";
-import { Magnet } from "lucide-react";
+import { Magnet, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default async function LeadsPage() {
   const leads = await prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
@@ -23,6 +25,11 @@ export default async function LeadsPage() {
             Mengelola <strong className="text-indigo-400">{leads.length} prospek</strong>, dengan {newLeadsCount} prospek baru menunggu.
           </p>
         </div>
+        <Link href="/admin/leads/finder" className="relative z-10">
+          <Button className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+            <MapPin className="w-4 h-4" /> Cari Calon Klien
+          </Button>
+        </Link>
       </FadeUp>
 
       <div className="relative z-10">

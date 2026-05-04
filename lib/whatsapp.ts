@@ -239,6 +239,20 @@ export const waMsg = {
     return lines.join("\n");
   },
 
+  prospectCold(businessName: string) {
+    return (
+      `Halo, apakah ini *${businessName}*? 👋\n\n` +
+      `Saya dari *MFWEB*, jasa pembuatan website profesional untuk bisnis lokal.\n\n` +
+      `Kami melihat bisnis Anda belum memiliki website. Website bisa membantu:\n` +
+      `✅ Muncul di pencarian Google\n` +
+      `✅ Terlihat lebih profesional & terpercaya\n` +
+      `✅ Dapat pelanggan baru 24 jam sehari\n\n` +
+      `Mulai dari *Rp 800.000* saja, sudah termasuk desain premium & SEO dasar.\n\n` +
+      `Boleh saya kirimkan info dan portofolio lengkapnya? 🙏` +
+      FOOTER
+    );
+  },
+
   hostingExpiry(
     name: string,
     domainName: string,
