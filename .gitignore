@@ -6,6 +6,11 @@
 ruvector.db
 lint-results.txt
 
+# Hook-generated anomalous files (code fragments accidentally created as files by post-edit hooks)
+/,
+/*.))
+/\`$*
+
 # dependencies
 /node_modules
 /.pnp
