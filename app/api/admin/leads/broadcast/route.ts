@@ -43,11 +43,11 @@ export async function POST(req: NextRequest) {
     const sent   = results.filter((r) => r.ok).length;
     const failed = results.filter((r) => !r.ok).length;
 
-    // Update status leads yang berhasil dikirim ke FOLLOWUP
+    // Update status semua lead yang berhasil dikirim ke FOLLOWUP
     const sentIds = results.filter((r) => r.ok).map((r) => r.id);
     if (sentIds.length > 0) {
       await prisma.lead.updateMany({
-        where: { id: { in: sentIds }, status: "NEW" },
+        where: { id: { in: sentIds } },
         data:  { status: "FOLLOWUP" },
       });
     }

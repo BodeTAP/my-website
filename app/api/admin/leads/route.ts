@@ -7,6 +7,23 @@ async function requireAdmin() {
   return !s || (s.user as { role?: string })?.role !== "ADMIN";
 }
 
+// DELETE — bulk delete leads
+export async function DELETE(req: NextRequest) {
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const { ids } = await req.json() as { ids: string[] };
+    if (!ids?.length) return NextResponse.json({ error: "Pilih minimal 1 lead" }, { status: 400 });
+    if (ids.length > 100) return NextResponse.json({ error: "Maksimal 100 lead sekaligus" }, { status: 400 });
+
+    const { count } = await prisma.lead.deleteMany({ where: { id: { in: ids } } });
+    return NextResponse.json({ deleted: count });
+  } catch (err) {
+    console.error("[Leads-DELETE]", err);
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+  }
+}
+
 // POST — bulk create leads (dari LeadFinder)
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

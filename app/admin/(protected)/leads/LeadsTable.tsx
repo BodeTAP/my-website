@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
@@ -36,7 +37,7 @@ const STATUS_COLORS: Record<Lead["status"], string> = {
 
 const DEFAULT_TEMPLATE = waMsg.prospectCold("{businessName}");
 
-function BroadcastModal({ leads, onClose }: { leads: Lead[]; onClose: () => void }) {
+function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: () => void; onDone: () => void }) {
   const [message, setMessage] = useState(DEFAULT_TEMPLATE);
   const [status, setStatus]   = useState<"idle" | "sending" | "done">("idle");
   const [result, setResult]   = useState<{ sent: number; failed: number } | null>(null);
@@ -106,9 +107,9 @@ function BroadcastModal({ leads, onClose }: { leads: Lead[]; onClose: () => void
               </div>
             </div>
             <p className="text-blue-200/40 text-xs">Lead yang berhasil dikirim otomatis dipindah ke status &ldquo;Follow-up&rdquo;</p>
-            <Button onClick={onClose} variant="outline"
+            <Button onClick={onDone} variant="outline"
               className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
-              Tutup
+              Tutup &amp; Refresh
             </Button>
           </div>
         )}
@@ -119,6 +120,7 @@ function BroadcastModal({ leads, onClose }: { leads: Lead[]; onClose: () => void
 
 export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const q    = searchParams.get("q") ?? "";
   const page = Number(searchParams.get("page") ?? "1");
   const PER_PAGE = 10;
@@ -127,8 +129,9 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
     Object.fromEntries(leads.map((l) => [l.id, l.status])),
   );
-  const [selected, setSelected]   = useState<Set<string>>(new Set());
+  const [selected, setSelected]       = useState<Set<string>>(new Set());
   const [showBroadcast, setShowBroadcast] = useState(false);
+  const [deleting, setDeleting]       = useState(false);
 
   const filtered = leads.filter((l) => {
     const matchSearch = q === "" ||
@@ -153,12 +156,54 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     });
   };
 
-  const toggleSelect  = (id: string) =>
+  const toggleSelect = (id: string) =>
     setSelected((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
-  const toggleAll     = () =>
+  const toggleAll = () =>
     setSelected(selected.size === paginated.length ? new Set() : new Set(paginated.map((l) => l.id)));
 
   const selectedLeads = leads.filter((l) => selected.has(l.id));
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Hapus ${selected.size} lead yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/admin/leads", {
+        method:  "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ ids: [...selected] }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      setSelected(new Set());
+      router.refresh();
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const rows = selectedLeads;
+    const headers = ["Nama", "Nama Bisnis", "WhatsApp", "Domain", "Website", "Status", "Catatan", "Tanggal Masuk"];
+    const csvRows = rows.map((l) => [
+      `"${l.name.replace(/"/g, '""')}"`,
+      `"${l.businessName.replace(/"/g, '""')}"`,
+      l.whatsapp,
+      `"${(l.domain ?? "").replace(/"/g, '""')}"`,
+      `"${(l.currentWebsite ?? "").replace(/"/g, '""')}"`,
+      l.status,
+      `"${(l.notes ?? "").replace(/"/g, '""')}"`,
+      new Intl.DateTimeFormat("id-ID").format(new Date(l.createdAt)),
+    ].join(","));
+    const csv = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `leads-mfweb-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const WA = (phone: string, name: string) =>
     `https://wa.me/${phone.replace(/\D/g, "")}?text=Halo%20${encodeURIComponent(name)}%2C%20saya%20dari%20MFWEB%20ingin%20menghubungi%20terkait%20pembuatan%20website.`;
@@ -166,7 +211,11 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   return (
     <>
       {showBroadcast && (
-        <BroadcastModal leads={selectedLeads} onClose={() => { setShowBroadcast(false); setSelected(new Set()); }} />
+        <BroadcastModal
+          leads={selectedLeads}
+          onClose={() => setShowBroadcast(false)}
+          onDone={() => { setShowBroadcast(false); setSelected(new Set()); router.refresh(); }}
+        />
       )}
 
       <FadeUp delay={0.2} className="glass rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative">
@@ -194,16 +243,25 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
           </div>
         </div>
 
-        {/* Broadcast bar */}
+        {/* Bulk action bar */}
         {selected.size > 0 && (
-          <div className="flex items-center justify-between px-5 py-3 bg-green-500/10 border-b border-green-500/20 relative z-10">
-            <span className="text-green-300 text-sm font-medium">{selected.size} lead dipilih</span>
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20 relative z-10">
+            <span className="text-indigo-300 text-sm font-medium">{selected.size} lead dipilih</span>
+            <div className="flex items-center gap-2 flex-wrap">
               <Button size="sm" onClick={() => setShowBroadcast(true)}
                 className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
                 <Send className="w-3 h-3" /> Broadcast WA
               </Button>
-              <button onClick={() => setSelected(new Set())} className="text-blue-200/40 hover:text-white transition-colors ml-1">
+              <Button size="sm" onClick={handleExportCSV}
+                className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 gap-1.5 h-8 text-xs shadow-none">
+                <Download className="w-3 h-3" /> Export CSV
+              </Button>
+              <Button size="sm" onClick={handleDelete} disabled={deleting}
+                className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 gap-1.5 h-8 text-xs shadow-none">
+                {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                Hapus
+              </Button>
+              <button onClick={() => setSelected(new Set())} className="text-blue-200/40 hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
