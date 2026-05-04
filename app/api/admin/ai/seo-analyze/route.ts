@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
+import { getAiSettings } from "@/lib/aiSettings";
 
 async function requireAdmin() {
   const s = await auth();
@@ -12,7 +13,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const { title, content, metaTitle, metaDescription } = await req.json();
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const [anthropic, aiSettings] = [
+      new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
+      await getAiSettings(),
+    ];
 
     // Strip HTML tags
     const textOnly = content.replace(/<[^>]*>/g, " ");
@@ -34,7 +38,7 @@ Meta Description: ${metaDescription || "N/A"}
 Content: ${textOnly.slice(0, 5000)}`;
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: aiSettings.model,
       max_tokens: 1000,
       system,
       messages: [{ role: "user", content: prompt }],

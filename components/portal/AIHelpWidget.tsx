@@ -33,16 +33,35 @@ export default function AIHelpWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: userMsg }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal mendapatkan jawaban");
 
-      setMessages((prev) => [...prev, { role: "ai", content: data.answer }]);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Gagal mendapatkan jawaban");
+      }
+
+      // Tambah pesan kosong sebagai placeholder streaming
+      setMessages((prev) => [...prev, { role: "ai", content: "" }]);
+      setLoading(false);
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: "ai", content: text };
+          return updated;
+        });
+      }
     } catch (err) {
       setMessages((prev) => [
         ...prev,
         { role: "ai", content: (err as Error).message },
       ]);
-    } finally {
       setLoading(false);
     }
   };
@@ -59,36 +78,27 @@ export default function AIHelpWidget() {
   }
 
   return (
-    <div className="fixed bottom-24 lg:bottom-6 right-6 w-80 max-h-[400px] bg-[#030914]/35 backdrop-blur-2xl border border-white/10 rounded-2xl flex flex-col shadow-2xl z-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-24 lg:bottom-6 right-6 w-80 max-h-100 bg-[#030914]/35 backdrop-blur-2xl border border-white/10 rounded-2xl flex flex-col shadow-2xl z-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-blue-400" />
           <span className="font-bold text-white text-sm">Tanya AI</span>
         </div>
-        <button
-          onClick={() => setOpen(false)}
-          className="text-blue-200/50 hover:text-white transition-colors"
-        >
+        <button onClick={() => setOpen(false)} className="text-blue-200/50 hover:text-white transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* Messages */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px]"
-      >
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-50">
         {messages.length === 0 && (
           <p className="text-xs text-blue-200/40 text-center mt-10">
             Halo! Ada yang bisa saya bantu terkait proyek atau invoice Anda?
           </p>
         )}
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[85%] p-2.5 rounded-2xl text-xs ${
                 m.role === "user"
@@ -96,7 +106,13 @@ export default function AIHelpWidget() {
                   : "bg-white/10 text-blue-100 border border-white/5"
               }`}
             >
-              {m.content}
+              {m.content || (
+                <span className="inline-flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                </span>
+              )}
             </div>
           </div>
         ))}

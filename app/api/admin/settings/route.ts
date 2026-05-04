@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AI_DEFAULTS } from "@/lib/aiSettings";
 
 const DEFAULTS: Record<string, string> = {
   hero_stat_1_num:   "50+",
@@ -12,6 +13,7 @@ const DEFAULTS: Record<string, string> = {
   hero_stat_3_label: "Rata-rata delivery",
   facebook_pixel_id:  "",
   google_analytics_id: "",
+  ...AI_DEFAULTS,
 };
 
 async function requireAdmin() {

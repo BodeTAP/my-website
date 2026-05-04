@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
+import { getAiSettings } from "@/lib/aiSettings";
 
 async function requireAdmin() {
   const s = await auth();
@@ -13,7 +14,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const { topic, keywords, tone, length } = await req.json();
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const [anthropic, aiSettings] = [
+      new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
+      await getAiSettings(),
+    ];
 
     // Ambil daftar kategori dari database
     const categories = await prisma.category.findMany({
@@ -41,7 +45,7 @@ If none of the available categories match, set suggestedCategoryId and suggested
 Keywords to include: ${keywords?.join(", ") || "relevant industry terms"}.`;
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: aiSettings.model,
       max_tokens: 4000,
       system,
       messages: [{ role: "user", content: prompt }],

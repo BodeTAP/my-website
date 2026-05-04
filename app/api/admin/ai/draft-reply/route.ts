@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
+import { getAiSettings } from "@/lib/aiSettings";
 
 async function requireAdmin() {
   const s = await auth();
@@ -29,7 +30,10 @@ export async function POST(req: NextRequest) {
 
     if (!ticket) return NextResponse.json({ error: "Tiket tidak ditemukan" }, { status: 404 });
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const [anthropic, aiSettings] = [
+      new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
+      await getAiSettings(),
+    ];
 
     const context = `
 Client: ${ticket.client.businessName}
@@ -48,7 +52,7 @@ Do NOT make promises about deadlines or prices.
 Keep the response helpful and concise.`;
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: aiSettings.model,
       max_tokens: 1000,
       system,
       messages: [{ role: "user", content: context }],

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, UserPlus, Trash2, KeyRound, X, Shield, Settings as SettingsIcon } from "lucide-react";
+import { Loader2, Save, UserPlus, Trash2, KeyRound, X, Shield, Settings as SettingsIcon, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -215,7 +215,7 @@ export default function SettingsClient({
   initialAdmins: Admin[]; 
   currentUserId: string; 
 }) {
-  const [activeTab, setActiveTab] = useState<"umum" | "tim">("umum");
+  const [activeTab, setActiveTab] = useState<"umum" | "ai" | "tim">("umum");
   
   // Settings State
   const [form, setForm] = useState(initial);
@@ -271,14 +271,20 @@ export default function SettingsClient({
 
       {/* Tabs */}
       <div className="flex border-b border-white/10 gap-8">
-        <button 
-          onClick={() => setActiveTab("umum")} 
+        <button
+          onClick={() => setActiveTab("umum")}
           className={`pb-3 text-sm font-medium transition-all border-b-2 ${activeTab === "umum" ? "border-blue-500 text-white" : "border-transparent text-blue-200/50 hover:text-white"}`}
         >
           Pengaturan Situs
         </button>
-        <button 
-          onClick={() => setActiveTab("tim")} 
+        <button
+          onClick={() => setActiveTab("ai")}
+          className={`pb-3 text-sm font-medium transition-all border-b-2 flex items-center gap-2 ${activeTab === "ai" ? "border-purple-500 text-white" : "border-transparent text-blue-200/50 hover:text-white"}`}
+        >
+          <Bot className="w-3.5 h-3.5" /> Konfigurasi AI
+        </button>
+        <button
+          onClick={() => setActiveTab("tim")}
           className={`pb-3 text-sm font-medium transition-all border-b-2 flex items-center gap-2 ${activeTab === "tim" ? "border-blue-500 text-white" : "border-transparent text-blue-200/50 hover:text-white"}`}
         >
           Manajemen Tim
@@ -355,6 +361,80 @@ export default function SettingsClient({
             <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.3)]">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Pengaturan
+            </Button>
+            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+          </div>
+        </form>
+      )}
+
+      {/* Tab: Konfigurasi AI */}
+      {activeTab === "ai" && (
+        <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {/* Model Selector */}
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Model AI</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Model yang lebih canggih menghasilkan konten lebih baik, namun lebih mahal per-request.</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { value: "claude-haiku-4-5-20251001", label: "Claude Haiku", desc: "Cepat & hemat. Cocok untuk penggunaan tinggi.", badge: "Direkomendasikan", badgeColor: "text-green-400 bg-green-500/10 border-green-500/20" },
+                { value: "claude-sonnet-4-5-20251001", label: "Claude Sonnet", desc: "Kualitas lebih tinggi. Cocok untuk konten premium.", badge: "Kualitas Lebih Baik", badgeColor: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
+              ].map((m) => (
+                <button key={m.value} type="button"
+                  onClick={() => setForm((f) => ({ ...f, ai_model: m.value }))}
+                  className={`text-left p-4 rounded-2xl border transition-all ${
+                    form.ai_model === m.value
+                      ? "border-purple-500/50 bg-purple-500/10"
+                      : "border-white/10 bg-black/20 hover:border-white/20"
+                  }`}>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <span className="text-white font-semibold text-sm">{m.label}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${m.badgeColor}`}>{m.badge}</span>
+                  </div>
+                  <p className="text-blue-200/50 text-xs">{m.desc}</p>
+                  <p className="text-blue-200/30 text-[10px] mt-1 font-mono">{m.value}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Feature Toggles */}
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Fitur AI Aktif</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Nonaktifkan fitur untuk menghentikan konsumsi token AI secara sementara.</p>
+            <div className="space-y-4">
+              {[
+                { key: "ai_feature_article",           label: "Pembuatan & Analisis Artikel",  desc: "Draft artikel, saran topik, analisis SEO, dan draft balasan tiket." },
+                { key: "ai_feature_portal_chat",       label: "Chat AI di Portal Klien",        desc: "Widget Tanya AI di dashboard portal klien." },
+                { key: "ai_feature_name_generator",    label: "Generator Nama Bisnis",          desc: "Tool publik generator nama bisnis & slogan." },
+                { key: "ai_feature_pricing_estimator", label: "Estimasi Harga Website",         desc: "Tool publik estimasi harga pembuatan website." },
+              ].map((feat) => (
+                <div key={feat.key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div>
+                    <p className="text-white text-sm font-medium">{feat.label}</p>
+                    <p className="text-blue-200/40 text-xs mt-0.5">{feat.desc}</p>
+                  </div>
+                  <button type="button"
+                    onClick={() => setForm((f) => ({ ...f, [feat.key]: f[feat.key] === "false" ? "true" : "false" }))}
+                    className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                      form[feat.key] !== "false"
+                        ? "bg-purple-600 border-purple-500/50"
+                        : "bg-white/10 border-white/10"
+                    }`}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      form[feat.key] !== "false" ? "translate-x-5" : "translate-x-0"
+                    }`} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+
+          <div className="flex items-center gap-4 pt-2">
+            <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(147,51,234,0.3)]">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              Simpan Pengaturan AI
             </Button>
             {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
           </div>

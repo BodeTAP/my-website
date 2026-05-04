@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, ArrowRight, Wrench, Sparkles } from "lucide-react";
+import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 
@@ -59,6 +59,14 @@ const tools = [
     label: "Cek Meta Tags Sosial",
     desc: "Intip bagaimana tautan website Anda ditampilkan saat dibagikan ke Google Search, Facebook, Twitter, dan WhatsApp.",
     tags: ["Card Preview", "Twitter Card", "Resolusi Gambar"],
+  },
+  {
+    href: "/tools/estimasi-harga",
+    icon: Calculator,
+    color: "green" as const,
+    label: "Estimasi Harga Website",
+    desc: "Dapatkan estimasi biaya pembuatan website secara instan menggunakan AI. Pilih jenis bisnis, fitur, dan timeline Anda.",
+    tags: ["AI-Powered", "Breakdown Biaya", "Rekomendasi Paket"],
   },
 ];
 

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AI_DEFAULTS } from "@/lib/aiSettings";
 import SettingsClient from "./SettingsClient";
 
 const DEFAULTS = {
@@ -9,6 +10,7 @@ const DEFAULTS = {
   hero_stat_3_num: "3 hari", hero_stat_3_label: "Rata-rata delivery",
   facebook_pixel_id: "",
   google_analytics_id: "",
+  ...AI_DEFAULTS,
 };
 
 export default async function SettingsPage() {

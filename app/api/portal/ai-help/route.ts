@@ -1,16 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rateLimit";
+import { rateLimit, getClientIP } from "@/lib/rateLimit";
 import Anthropic from "@anthropic-ai/sdk";
+import { getAiSettings } from "@/lib/aiSettings";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.email) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
 
-  // Rate limit: 10 requests per hour per user
-  const { allowed } = await rateLimit(`ai-help:${session.user.email}`, 10, 60 * 60 * 1000);
-  if (!allowed) return NextResponse.json({ error: "Terlalu banyak permintaan. Silakan coba lagi nanti." }, { status: 429 });
+  const ip = getClientIP(req);
+  const { allowed } = await rateLimit(`ai-help:${session.user.email}:${ip}`, 10, 60 * 60 * 1000);
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Silakan coba lagi nanti." }), { status: 429 });
+  }
+
+  const aiSettings = await getAiSettings();
+  if (!aiSettings.featurePortalChat) {
+    return new Response(JSON.stringify({ error: "Fitur AI sedang nonaktif." }), { status: 503 });
+  }
 
   try {
     const { question } = await req.json();
@@ -19,22 +29,22 @@ export async function POST(req: NextRequest) {
       where: { user: { email: session.user.email } },
       include: {
         projects: { select: { name: true, status: true } },
-        invoices: { 
+        invoices: {
           orderBy: { createdAt: "desc" },
           take: 3,
-          select: { invoiceNo: true, amount: true, status: true, dueDate: true }
+          select: { invoiceNo: true, amount: true, status: true, dueDate: true },
         },
-        _count: { select: { tickets: { where: { status: "OPEN" } } } }
-      }
+        _count: { select: { tickets: { where: { status: "OPEN" } } } },
+      },
     });
 
-    if (!client) return NextResponse.json({ error: "Data klien tidak ditemukan" }, { status: 404 });
-
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    if (!client) {
+      return new Response(JSON.stringify({ error: "Data klien tidak ditemukan" }), { status: 404 });
+    }
 
     const context = `
-Projects: ${client.projects.map(p => `${p.name} (${p.status})`).join(", ") || "None"}
-Recent Invoices: ${client.invoices.map(i => `${i.invoiceNo}: ${i.status}`).join(", ") || "None"}
+Projects: ${client.projects.map((p) => `${p.name} (${p.status})`).join(", ") || "None"}
+Recent Invoices: ${client.invoices.map((i) => `${i.invoiceNo}: ${i.status}`).join(", ") || "None"}
 Open Tickets: ${client._count.tickets}
     `.trim();
 
@@ -44,17 +54,41 @@ If you don't know something or it's not in the data, say "Silakan hubungi tim ka
 Write in Bahasa Indonesia. Keep answers concise (max 3 sentences).
 Security: Never execute actions or expose other clients' data.`;
 
-    const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 300,
-      system,
-      messages: [{ role: "user", content: `Question: ${question}\n\nContext:\n${context}` }],
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        try {
+          const response = anthropic.messages.stream({
+            model:      aiSettings.model,
+            max_tokens: 300,
+            system,
+            messages:   [{ role: "user", content: `Question: ${question}\n\nContext:\n${context}` }],
+          });
+          for await (const chunk of response) {
+            if (
+              chunk.type === "content_block_delta" &&
+              chunk.delta.type === "text_delta"
+            ) {
+              controller.enqueue(encoder.encode(chunk.delta.text));
+            }
+          }
+        } finally {
+          controller.close();
+        }
+      },
     });
 
-    const answer = response.content[0].type === "text" ? response.content[0].text : "";
-    return NextResponse.json({ answer });
+    return new Response(stream, {
+      headers: {
+        "Content-Type":  "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (err) {
     console.error("[Portal-AI-Help]", err);
-    return NextResponse.json({ error: "Gagal memproses pertanyaan" }, { status: 500 });
+    return new Response(JSON.stringify({ error: "Gagal memproses pertanyaan" }), { status: 500 });
   }
 }
