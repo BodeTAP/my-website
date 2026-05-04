@@ -25,6 +25,8 @@ const securityHeaders = [
 
       // Script: izinkan inline script (Next.js) + domain analytics
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'" +
+        " https://www.googletagmanager.com https://www.google-analytics.com" + // Google Analytics 4
+        " https://connect.facebook.net" +                              // Facebook Pixel
         " https://www.clarity.ms https://*.clarity.ms" +               // Microsoft Clarity
         " https://va.vercel-scripts.com https://*.vercel-scripts.com"+ // Vercel Analytics
         " https://*.sentry.io https://js.sentry-cdn.com",              // Sentry monitoring
