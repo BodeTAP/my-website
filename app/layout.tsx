@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { unstable_noStore as noStore } from "next/cache";
 import { Analytics } from "@vercel/analytics/react";
 import { prisma } from "@/lib/prisma";
 import { FacebookPixel } from "@/components/public/FacebookPixel";
@@ -116,6 +117,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  noStore();
   const trackingRows = await prisma.siteSetting.findMany({
     where: { key: { in: ["facebook_pixel_id", "google_analytics_id"] } },
   }).catch(() => []);
