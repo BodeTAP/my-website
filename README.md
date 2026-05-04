@@ -4,11 +4,37 @@ Platform SaaS full-stack untuk digital agency — mengelola leads, klien, proyek
 
 ## Fitur
 
-- **Public site** — blog, portfolio, kalkulator harga, tools SEO & PageSpeed
-- **Admin dashboard** — CMS artikel, manajemen leads/klien/proyek/invoice, proposal builder
-- **Client portal** — tracking proyek, download invoice PDF, tiket support dengan AI assistant
-- **AI features** — draft artikel, analisis SEO, generate cover image, saran topik (Claude API)
-- **Payment** — integrasi Tripay dengan Cloudflare Worker proxy
+### Public Site
+- Blog, portfolio, kalkulator harga, halaman layanan dengan JSON-LD schema
+- **Tools gratis**: Cek kecepatan, Cek SEO, Generator nama bisnis, QR Code, ROI kalkulator, Cek meta tags, **Estimasi harga website (AI)**
+- Sitemap otomatis dengan prioritas terbobot per jenis halaman
+
+### Admin Dashboard
+- CMS artikel (Tiptap editor, draft/publish/scheduled, SEO analyzer AI)
+- Manajemen leads, klien, proyek, invoice, proposal, tiket support
+- **Lead Finder** — cari bisnis lokal dari Google Maps, filter yang belum punya website, simpan sebagai lead
+- **WhatsApp Broadcast** — kirim pesan massal ke leads terpilih via Fonnte, auto-update status ke Follow-up
+- Export leads ke CSV (kompatibel Google Sheets)
+- Bulk delete leads
+- **Konfigurasi AI** — pilih model (Haiku/Sonnet), toggle fitur AI per kategori
+- **Tracking & Analytics** — kelola Facebook Pixel ID dan Google Analytics ID dari dashboard (tanpa redeploy)
+
+### Client Portal
+- Tracking proyek & milestone, download invoice PDF, tiket support
+- **AI Assistant** (streaming) — jawab pertanyaan klien berdasarkan data proyek & invoice mereka
+
+### AI Features (Claude API)
+- Draft artikel, analisis SEO, generate cover image (Pexels → Vercel Blob), saran topik
+- Draft balasan tiket support
+- Estimasi harga website via streaming (tool publik)
+- AI chat portal klien (streaming, context-aware)
+- Model dan toggles fitur dikonfigurasi dari admin dashboard
+
+### Payment & Notifications
+- Integrasi Tripay (VA, e-wallet, minimarket) dengan Cloudflare Worker proxy
+- WhatsApp notifikasi otomatis: invoice baru, pengingat tagihan, update status proyek, konfirmasi pembayaran
+
+---
 
 ## Tech Stack
 
@@ -20,15 +46,64 @@ Platform SaaS full-stack untuk digital agency — mengelola leads, klien, proyek
 | Styling | Tailwind CSS v4, shadcn/ui, Framer Motion |
 | Storage | Vercel Blob |
 | Rate limiting | Upstash Redis |
-| Monitoring | Sentry, Microsoft Clarity, Vercel Analytics |
+| Monitoring | Sentry, Microsoft Clarity, Vercel Analytics, Google Analytics 4, Facebook Pixel |
+| AI | Anthropic Claude (Haiku/Sonnet, configurable) |
+| WhatsApp | Fonnte API |
 | Testing | Vitest + React Testing Library |
 
-## Prasyarat
+---
 
-- Node.js 20+
-- PostgreSQL (atau akun [Neon](https://neon.tech))
-- Akun [Resend](https://resend.com) untuk email
-- Akun [Tripay](https://tripay.co.id) untuk payment gateway
+## Environment Variables
+
+Buat file `.env.local`:
+
+```env
+# Database
+DATABASE_URL=postgresql://...           # Neon pooled URL untuk production
+
+# Auth
+AUTH_SECRET=                            # openssl rand -base64 32
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Email (magic link + notifikasi)
+AUTH_RESEND_KEY=
+EMAIL_FROM=noreply@yourdomain.com
+
+# Payment
+TRIPAY_API_KEY=
+TRIPAY_MERCHANT_CODE=
+TRIPAY_SANDBOX=true                     # false di production
+
+# Storage
+BLOB_READ_WRITE_TOKEN=
+
+# AI
+ANTHROPIC_API_KEY=
+PEXELS_API_KEY=                         # untuk cover image artikel
+
+# WhatsApp
+FONNTE_API_KEY=
+NEXT_PUBLIC_WHATSAPP_NUMBER=628xxx      # nomor WA admin (tanpa +)
+
+# Lead Finder (Google Maps)
+GOOGLE_PLACES_API_KEY=                  # Google Places API (New)
+
+# Rate limiting
+KV_REST_API_URL=                        # Upstash Redis
+KV_REST_API_TOKEN=
+
+# Monitoring
+NEXT_PUBLIC_SENTRY_DSN=
+NEXT_PUBLIC_CLARITY_PROJECT_ID=         # Microsoft Clarity (opsional)
+```
+
+> **Catatan:** Facebook Pixel ID dan Google Analytics ID dikelola dari `/admin/settings` → tab Tracking & Analytics — tidak perlu env var.
+
+---
 
 ## Instalasi
 
@@ -36,81 +111,59 @@ Platform SaaS full-stack untuk digital agency — mengelola leads, klien, proyek
 git clone https://github.com/BodeTAP/my-website.git
 cd my-website
 npm install
-```
-
-Buat file `.env.local` dan isi variabel berikut:
-
-```env
-DATABASE_URL=postgresql://...
-AUTH_SECRET=                    # generate: openssl rand -base64 32
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-AUTH_RESEND_KEY=
-EMAIL_FROM=noreply@yourdomain.com
-
-TRIPAY_API_KEY=
-TRIPAY_MERCHANT_CODE=
-TRIPAY_SANDBOX=true
-
-BLOB_READ_WRITE_TOKEN=
-
-ANTHROPIC_API_KEY=
-PEXELS_API_KEY=
-
-NEXT_PUBLIC_SENTRY_DSN=
-```
-
-Jalankan migrasi dan seed database:
-
-```bash
 npx prisma migrate dev
 npx prisma db seed
-```
-
-Jalankan development server:
-
-```bash
 npm run dev
 ```
 
 Buka [http://localhost:3000](http://localhost:3000).
 
+Akun admin dibuat via seed atau langsung di database dengan `role: "ADMIN"`.
+
+---
+
 ## Scripts
 
 ```bash
-npm run dev          # Development server
-npm run build        # Production build
-npm run start        # Jalankan production build
-npm run lint         # ESLint
-npm test             # Vitest watch mode
-npm run test:run     # Vitest sekali jalan
-npx prisma studio    # GUI database
+npm run dev              # Development server
+npm run build            # Production build + generate sitemap
+npm run lint             # ESLint
+npm test                 # Vitest watch mode
+npm run test:run         # Vitest sekali jalan
+npx prisma studio        # GUI database
 npx prisma migrate dev   # Jalankan migrasi
-npx prisma db seed       # Seed database
+npx prisma db seed       # Seed data awal
 ```
+
+---
 
 ## Struktur Zona
 
 ```
-/                    → Public marketing site
-/admin               → Dashboard admin (role: ADMIN)
-/portal              → Client portal (role: CLIENT)
-/onboarding/[token]  → Form onboarding klien baru
-/bayar/[invoiceNo]   → Halaman pembayaran invoice
+/                        → Public marketing site
+/tools/*                 → Tools gratis (termasuk estimasi harga AI)
+/admin                   → Dashboard admin (role: ADMIN)
+  /leads/finder          → Lead Finder dari Google Maps
+/portal                  → Client portal (role: CLIENT)
+/onboarding/[token]      → Form onboarding klien baru
+/bayar/[invoiceNo]       → Halaman pembayaran invoice
 ```
 
-Akun admin dibuat via seed atau langsung di database dengan `role: "ADMIN"`.
+---
 
 ## Deployment
 
-Project ini di-deploy ke [Vercel](https://vercel.com). Layanan eksternal yang dibutuhkan:
+Di-deploy ke [Vercel](https://vercel.com). Layanan eksternal:
 
-- **Neon** — PostgreSQL dengan connection pooling (gunakan pooled URL untuk `DATABASE_URL` di production)
-- **Upstash Redis** — rate limiting lintas serverless instances (`KV_REST_API_URL`, `KV_REST_API_TOKEN`)
-- **Vercel Blob** — penyimpanan gambar upload
-- **Cloudflare Worker** — proxy untuk webhook Tripay (lihat `cloudflare-worker/`)
+| Layanan | Kegunaan |
+|---|---|
+| **Neon** | PostgreSQL + connection pooling |
+| **Upstash Redis** | Rate limiting lintas serverless |
+| **Vercel Blob** | Penyimpanan gambar upload |
+| **Cloudflare Worker** | Proxy webhook Tripay (`cloudflare-worker/`) |
+| **Fonnte** | WhatsApp API gateway |
+| **Google Places API (New)** | Lead Finder dari Google Maps |
+| **Anthropic API** | Semua fitur AI |
+| **Pexels API** | Cover image artikel |
 
 CI/CD via GitHub Actions — setiap push ke `main` otomatis menjalankan lint, typecheck, dan build.
