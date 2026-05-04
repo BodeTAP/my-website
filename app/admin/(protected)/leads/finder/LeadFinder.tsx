@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Loader2, Globe, GlobeOff, CheckSquare, Square, Save, ChevronRight } from "lucide-react";
+import { Search, Loader2, Globe, GlobeOff, CheckSquare, Square, Save, ChevronRight, DatabaseZap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PlaceLead } from "@/app/api/admin/leads/finder/route";
 
@@ -55,16 +55,24 @@ export default function LeadFinder() {
   };
 
   const filtered = places.filter((p) => {
+    if (savedIds.has(p.placeId)) return false; // sudah disimpan sesi ini
     if (filter === "NO_WEBSITE") return !p.hasWebsite;
     if (filter === "HAS_WEBSITE") return p.hasWebsite;
     return true;
-  }).filter((p) => !savedIds.has(p.placeId));
+  });
+
+  // hanya lead baru (belum di DB) yang bisa dipilih
+  const selectableFiltered = filtered.filter((p) => !p.alreadySaved && p.phoneNorm);
 
   const toggleSelect = (id: string) =>
     setSelected((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
   const toggleAll = () =>
-    setSelected(selected.size === filtered.length ? new Set() : new Set(filtered.map((p) => p.placeId)));
+    setSelected(
+      selected.size === selectableFiltered.length
+        ? new Set()
+        : new Set(selectableFiltered.map((p) => p.placeId))
+    );
 
   const handleSave = async () => {
     const toSave = filtered.filter((p) => selected.has(p.placeId) && p.phoneNorm);
@@ -102,7 +110,8 @@ export default function LeadFinder() {
     }
   };
 
-  const noWebsiteCount = places.filter((p) => !p.hasWebsite && !savedIds.has(p.placeId)).length;
+  const noWebsiteCount  = places.filter((p) => !p.hasWebsite && !p.alreadySaved && !savedIds.has(p.placeId)).length;
+  const alreadySavedCount = places.filter((p) => p.alreadySaved || savedIds.has(p.placeId)).length;
 
   return (
     <div className="space-y-6">
@@ -170,6 +179,11 @@ export default function LeadFinder() {
                     · <span className="font-semibold">{noWebsiteCount}</span> tanpa website
                   </span>
                 )}
+                {alreadySavedCount > 0 && (
+                  <span className="ml-2 text-sm text-blue-200/40 font-normal">
+                    · <span className="font-semibold">{alreadySavedCount}</span> sudah di DB
+                  </span>
+                )}
               </p>
             </div>
             <div className="flex gap-2">
@@ -189,13 +203,13 @@ export default function LeadFinder() {
           </div>
 
           {/* Bulk action bar */}
-          {filtered.length > 0 && (
+          {selectableFiltered.length > 0 && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl px-4 py-3">
               <button onClick={toggleAll} className="flex items-center gap-2 text-sm text-indigo-300 hover:text-white transition-colors">
-                {selected.size === filtered.length
+                {selected.size === selectableFiltered.length && selectableFiltered.length > 0
                   ? <CheckSquare className="w-4 h-4" />
                   : <Square className="w-4 h-4" />}
-                {selected.size === 0 ? "Pilih Semua" : `${selected.size} dipilih`}
+                {selected.size === 0 ? `Pilih Semua (${selectableFiltered.length})` : `${selected.size} dipilih`}
               </button>
               <div className="flex items-center gap-3">
                 {saveMsg && (
@@ -223,29 +237,40 @@ export default function LeadFinder() {
             <div className="grid sm:grid-cols-2 gap-3">
               {filtered.map((p) => (
                 <div key={p.placeId}
-                  onClick={() => p.phoneNorm && toggleSelect(p.placeId)}
-                  className={`glass rounded-2xl p-4 border transition-all cursor-pointer ${
-                    !p.phoneNorm ? "opacity-50 cursor-not-allowed" :
-                    selected.has(p.placeId)
-                      ? "border-indigo-500/50 bg-indigo-500/5"
-                      : "border-white/5 hover:border-white/15"
+                  onClick={() => p.phoneNorm && !p.alreadySaved && toggleSelect(p.placeId)}
+                  className={`glass rounded-2xl p-4 border transition-all ${
+                    p.alreadySaved
+                      ? "opacity-50 cursor-default border-white/5 bg-white/2"
+                      : !p.phoneNorm ? "opacity-50 cursor-not-allowed border-white/5"
+                      : selected.has(p.placeId)
+                        ? "cursor-pointer border-indigo-500/50 bg-indigo-500/5"
+                        : "cursor-pointer border-white/5 hover:border-white/15"
                   }`}>
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 shrink-0">
-                      {p.phoneNorm
-                        ? selected.has(p.placeId) ? <CheckSquare className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4 text-blue-200/30" />
-                        : <Square className="w-4 h-4 text-white/10" />}
+                      {p.alreadySaved
+                        ? <DatabaseZap className="w-4 h-4 text-blue-200/30" />
+                        : p.phoneNorm
+                          ? selected.has(p.placeId) ? <CheckSquare className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4 text-blue-200/30" />
+                          : <Square className="w-4 h-4 text-white/10" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-2 flex-wrap">
                         <p className="text-white font-semibold text-sm leading-snug line-clamp-1">{p.name}</p>
-                        {p.hasWebsite
-                          ? <span className="shrink-0 flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                              <Globe className="w-2.5 h-2.5" /> Punya
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {p.alreadySaved && (
+                            <span className="flex items-center gap-1 text-[10px] text-blue-200/50 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
+                              <DatabaseZap className="w-2.5 h-2.5" /> Sudah di DB
                             </span>
-                          : <span className="shrink-0 flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-                              <GlobeOff className="w-2.5 h-2.5" /> Belum
-                            </span>}
+                          )}
+                          {p.hasWebsite
+                            ? <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                                <Globe className="w-2.5 h-2.5" /> Punya
+                              </span>
+                            : <span className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
+                                <GlobeOff className="w-2.5 h-2.5" /> Belum
+                              </span>}
+                        </div>
                       </div>
                       {p.category && <p className="text-blue-200/40 text-[11px] mt-0.5">{p.category}</p>}
                       <p className="text-blue-200/50 text-xs mt-1.5 line-clamp-2">{p.address}</p>

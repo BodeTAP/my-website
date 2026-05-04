@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/whatsapp";
 
 async function requireAdmin() {
@@ -8,14 +9,15 @@ async function requireAdmin() {
 }
 
 export type PlaceLead = {
-  placeId:     string;
-  name:        string;
-  address:     string;
-  phone:       string;
-  phoneNorm:   string;
-  website:     string | null;
-  category:    string;
-  hasWebsite:  boolean;
+  placeId:      string;
+  name:         string;
+  address:      string;
+  phone:        string;
+  phoneNorm:    string;
+  website:      string | null;
+  category:     string;
+  hasWebsite:   boolean;
+  alreadySaved: boolean;
 };
 
 export async function POST(req: NextRequest) {
@@ -60,16 +62,30 @@ export async function POST(req: NextRequest) {
       const phone   = (p.nationalPhoneNumber as string) ?? "";
       const website = (p.websiteUri as string) ?? null;
       return {
-        placeId:    (p.id as string) ?? "",
+        placeId:      (p.id as string) ?? "",
         name,
-        address:    (p.formattedAddress as string) ?? "",
+        address:      (p.formattedAddress as string) ?? "",
         phone,
-        phoneNorm:  phone ? normalizePhone(phone) : "",
+        phoneNorm:    phone ? normalizePhone(phone) : "",
         website,
-        category:   (p.primaryTypeDisplayName as { text?: string })?.text ?? "",
-        hasWebsite: !!website,
+        category:     (p.primaryTypeDisplayName as { text?: string })?.text ?? "",
+        hasWebsite:   !!website,
+        alreadySaved: false, // akan di-update di bawah
       };
     });
+
+    // Cek nomor mana yang sudah ada di DB
+    const phones = places.map((p) => p.phoneNorm).filter(Boolean);
+    if (phones.length > 0) {
+      const existing = await prisma.lead.findMany({
+        where:  { whatsapp: { in: phones } },
+        select: { whatsapp: true },
+      });
+      const savedPhones = new Set(existing.map((e) => e.whatsapp));
+      for (const p of places) {
+        if (p.phoneNorm && savedPhones.has(p.phoneNorm)) p.alreadySaved = true;
+      }
+    }
 
     return NextResponse.json({ places, total: places.length });
   } catch (err) {
