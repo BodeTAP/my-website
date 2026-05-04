@@ -31,7 +31,7 @@ export default async function AdminDashboard() {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  const hour = now.getHours();
+  const hour = (now.getUTCHours() + 7) % 24; // WIB = UTC+7
   const greeting = hour < 11 ? "Selamat pagi" : hour < 15 ? "Selamat siang" : hour < 18 ? "Selamat sore" : "Selamat malam";
 
   const [

@@ -65,8 +65,7 @@ export default async function PortalDashboardPage() {
   }
 
   const activeProject = client.projects[0];
-  const now = new Date();
-  const hour = now.getHours();
+  const hour = (new Date().getUTCHours() + 7) % 24; // WIB = UTC+7
   const greeting = hour < 11 ? "Selamat Pagi" : hour < 15 ? "Selamat Siang" : hour < 18 ? "Selamat Sore" : "Selamat Malam";
 
   return (
