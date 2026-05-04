@@ -60,7 +60,7 @@ export async function sendWA(to: string, message: string): Promise<boolean> {
 
 // ── Message templates ──────────────────────────────────────────────────────────
 
-const FOOTER = "\n\n_MFWEB · mfweb.id_";
+const FOOTER = "\n\n_MFWEB · mfweb.maffisorp.id_";
 
 const PROJECT_STAGE: Record<string, { label: string; desc: string }> = {
   DRAFTING: {
@@ -110,7 +110,7 @@ export const waMsg = {
     amount: number,
     dueDate: Date,
     paymentUrl: string | null,
-    daysLeft: number
+    daysLeft: number,
   ) {
     const rp = `Rp ${amount.toLocaleString("id-ID")}`;
     const due = new Intl.DateTimeFormat("id-ID", {
@@ -260,9 +260,19 @@ export const waMsg = {
     daysLeft: number,
     type: "domain" | "hosting" | "ssl",
   ) {
-    const typeLabel = type === "domain" ? "Domain" : type === "hosting" ? "Hosting" : "SSL";
-    const urgency = daysLeft <= 7 ? "🔴 KRITIS" : daysLeft <= 14 ? "🟡 SEGERA" : "⚠️ PERHATIAN";
-    const expiry = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(expiryDate);
+    const typeLabel =
+      type === "domain" ? "Domain" : type === "hosting" ? "Hosting" : "SSL";
+    const urgency =
+      daysLeft <= 7
+        ? "🔴 KRITIS"
+        : daysLeft <= 14
+          ? "🟡 SEGERA"
+          : "⚠️ PERHATIAN";
+    const expiry = new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(expiryDate);
     const wa = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
     return (
       `Halo ${name}! 👋\n\n` +
