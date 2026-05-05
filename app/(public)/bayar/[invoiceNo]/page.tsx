@@ -108,17 +108,19 @@ export default async function PublicPayPage({ params }: Params) {
                 </div>
               )}
 
-              {/* Divider + total */}
-              <div className="border-t border-white/10 pt-4">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-blue-200/60 text-sm">Total Tagihan</span>
-                  <span className="text-white font-black text-3xl">{formatRp(invoice.amount)}</span>
+              {/* Divider + static total for non-active states */}
+              {(isPaid || isExpired || isFailed) && (
+                <div className="border-t border-white/10 pt-4">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-blue-200/60 text-sm">Total Tagihan</span>
+                    <span className="text-white font-black text-3xl">{formatRp(invoice.amount)}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* CTA or paid state */}
               {isPaid ? (
-                <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mt-4">
                   <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
                   <div>
                     <p className="text-green-300 font-semibold text-sm">Invoice Sudah Lunas</p>
@@ -128,7 +130,7 @@ export default async function PublicPayPage({ params }: Params) {
                   </div>
                 </div>
               ) : isExpired ? (
-                <div className="flex items-center gap-3 bg-gray-500/10 border border-gray-500/20 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3 bg-gray-500/10 border border-gray-500/20 rounded-xl px-4 py-3 mt-4">
                   <XCircle className="w-5 h-5 text-gray-400 shrink-0" />
                   <div>
                     <p className="text-gray-300 font-semibold text-sm">Sesi Pembayaran Kadaluarsa</p>
@@ -136,7 +138,7 @@ export default async function PublicPayPage({ params }: Params) {
                   </div>
                 </div>
               ) : isFailed ? (
-                <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mt-4">
                   <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
                   <div>
                     <p className="text-red-300 font-semibold text-sm">Pembayaran Gagal</p>
@@ -145,7 +147,7 @@ export default async function PublicPayPage({ params }: Params) {
                 </div>
               ) : (
                 <SlideIn delay={0.3}>
-                  <PaymentSelector invoiceNo={invoice.invoiceNo} channels={channels} />
+                  <PaymentSelector invoiceNo={invoice.invoiceNo} baseAmount={invoice.amount} channels={channels} />
                 </SlideIn>
               )}
             </div>

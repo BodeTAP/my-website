@@ -6,8 +6,9 @@ import { Loader2, ShieldCheck, ChevronDown } from "lucide-react";
 import type { PaymentChannel } from "@/lib/tripay";
 
 type Props = {
-  invoiceNo: string;
-  channels:  PaymentChannel[];
+  invoiceNo:  string;
+  baseAmount: number;
+  channels:   PaymentChannel[];
 };
 
 // Group channels by their group label
@@ -32,7 +33,20 @@ function formatFee(ch: PaymentChannel): string | null {
   return null; // Tidak ada biaya untuk customer (dibebankan ke merchant)
 }
 
-export default function PaymentSelector({ invoiceNo, channels }: Props) {
+function calculateAdminFee(ch: PaymentChannel | null, baseAmount: number): number {
+  if (!ch || !ch.fee_customer) return 0;
+  const flat = ch.fee_customer.flat ?? 0;
+  const percent = ch.fee_customer.percent ? parseFloat(ch.fee_customer.percent) : 0;
+  return flat + Math.round((baseAmount * percent) / 100);
+}
+
+function formatRp(n: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency", currency: "IDR", maximumFractionDigits: 0,
+  }).format(n);
+}
+
+export default function PaymentSelector({ invoiceNo, baseAmount, channels }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
@@ -43,6 +57,10 @@ export default function PaymentSelector({ invoiceNo, channels }: Props) {
 
   // Auto-open first group
   const firstGroup = openGroup ?? groupKeys[0] ?? null;
+
+  const selectedChannel = channels.find(ch => ch.code === selected) ?? null;
+  const adminFee = calculateAdminFee(selectedChannel, baseAmount);
+  const grandTotal = baseAmount + adminFee;
 
   async function handlePay() {
     if (!selected) { setError("Pilih metode pembayaran terlebih dahulu."); return; }
@@ -78,6 +96,25 @@ export default function PaymentSelector({ invoiceNo, channels }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Dynamic Total */}
+      <div className="border-t border-white/10 pt-4 mb-6">
+        <div className="flex justify-between items-end">
+          <div className="space-y-1">
+            <span className="text-blue-200/60 text-sm">Total Tagihan</span>
+            {adminFee > 0 && (
+              <p className="text-[11px] text-amber-300/80 bg-amber-500/10 px-2 py-0.5 rounded-full inline-block mt-1">
+                Termasuk admin +{formatRp(adminFee)}
+              </p>
+            )}
+          </div>
+          <div className="text-right">
+            <span className="text-white font-black text-3xl transition-all duration-300">
+              {formatRp(grandTotal)}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <p className="text-blue-200/70 text-sm font-medium">Pilih Metode Pembayaran</p>
 
       {/* Grouped channels */}
