@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const batchResults = await sendWABatch(
       items.map(({ phone, message }) => ({ phone, message })),
       waKeys,
-      "8-16", // delay 8-16 detik random antar pesan, dihandle server Fonnte
+      "20-40", // delay 20-40 detik random antar pesan, dihandle server Fonnte
     );
 
     // Map hasil kembali ke lead ID

@@ -85,7 +85,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Maks <strong>20 pesan/sesi</strong>, tunggu 2–3 jam sebelum sesi berikutnya</li>
                 <li>Jika penerima lapor spam, nomor Anda bisa diblokir permanen</li>
-                <li>Pesan dikirim dengan jeda <strong>8–16 detik acak</strong> antar nomor (dihandle Fonnte)</li>
+                <li>Pesan dikirim dengan jeda <strong>20–40 detik acak</strong> antar nomor (dihandle Fonnte)</li>
               </ul>
             </div>
             <div className="bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 flex items-start gap-2">
@@ -133,7 +133,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <p className="text-blue-200/50 text-xs">Device</p>
               </div>
             </div>
-            <p className="text-blue-200/40 text-xs">Pesan masuk antrian Fonnte &amp; akan terkirim otomatis dengan jeda 8–16 detik</p>
+            <p className="text-blue-200/40 text-xs">Pesan masuk antrian Fonnte &amp; akan terkirim otomatis dengan jeda 20–40 detik</p>
             <Button onClick={onDone} variant="outline"
               className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
               Tutup &amp; Refresh
