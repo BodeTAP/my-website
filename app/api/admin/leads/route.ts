@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
 
 // DELETE — bulk delete leads
 export async function DELETE(req: NextRequest) {

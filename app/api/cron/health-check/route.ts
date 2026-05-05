@@ -26,6 +26,13 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ status: "ok" });
   } catch (err) {
+    // Update DB status to error before alerting
+    await prisma.siteSetting.upsert({
+      where: { key: "tripay_health_status" },
+      create: { key: "tripay_health_status", value: "error" },
+      update: { value: "error" },
+    }).catch(() => {}); // non-fatal
+
     const lastAlert = await prisma.siteSetting.findUnique({
       where: { key: "tripay_last_alert_at" },
     });

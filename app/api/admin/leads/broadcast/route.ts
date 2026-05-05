@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendWABatch } from "@/lib/whatsapp";
 import { getFonnteKeys } from "@/lib/getFonnteKey";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
 
 // Minimum hours between broadcasts to the same lead
 const COOLDOWN_HOURS = 24;

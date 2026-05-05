@@ -163,10 +163,19 @@ export async function POST(req: NextRequest) {
       ? finalCategoryId
       : null;
 
-    // 6. Generate slug + cek duplikat
-    let slug      = generateSlug(parsed.title);
-    const dupCheck = await prisma.article.findUnique({ where: { slug } });
-    if (dupCheck) slug = `${slug}-${Date.now()}`; // Tambah timestamp jika duplikat
+    // 6. Generate slug + cek duplikat (robust retry loop)
+    let slug = generateSlug(parsed.title);
+    let finalSlug = slug;
+    let attempt = 0;
+    while (attempt < 5) {
+      const dupCheck = await prisma.article.findUnique({ where: { slug: finalSlug } });
+      if (!dupCheck) break;
+      attempt++;
+      finalSlug = attempt === 1
+        ? `${slug}-${Date.now()}`
+        : `${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    }
+    slug = finalSlug;
 
     // 7. Fetch & upload cover image (dengan keyword auto-translated)
     const coverImage = await fetchAndUploadCoverImage(topic, "articles");

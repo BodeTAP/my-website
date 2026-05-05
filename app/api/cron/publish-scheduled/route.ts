@@ -46,8 +46,3 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ published: result.count, at: now.toISOString() });
 }
-
-// Allow GET for quick health-check / manual trigger via browser (admin only)
-export async function GET(req: NextRequest) {
-  return POST(req);
-}

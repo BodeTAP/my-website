@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -85,3 +86,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+/** Shared helper — returns true if the request is NOT from an ADMIN.
+ *  Usage: if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ */
+export async function requireAdmin(): Promise<boolean> {
+  const s = await auth();
+  return !s || (s.user as { role?: string })?.role !== "ADMIN";
+}

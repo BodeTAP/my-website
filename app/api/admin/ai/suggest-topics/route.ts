@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAiSettings } from "@/lib/aiSettings";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
+import { rateLimit } from "@/lib/rateLimit";
 
 // POST /api/admin/ai/suggest-topics
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await auth();
+  const { allowed } = await rateLimit(`ai-topics:${session!.user!.email}`, 20, 60 * 60 * 1000);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
 
   try {
     const { categoryId, count = 6 } = await req.json();
+    const safeCount = Math.min(Math.max(1, Number(count) || 6), 10);
 
     // Ambil konteks dari database secara paralel
     const [categories, recentArticles] = await Promise.all([
@@ -56,7 +56,7 @@ Profil bisnis MFWEB:
 - Keunggulan: desain premium, SEO-friendly, mobile-friendly, cepat
 - Platform: mfweb.maffisorp.id
 
-Tugasmu: Buat ${count} ide topik artikel blog yang:
+Tugasmu: Buat ${safeCount} ide topik artikel blog yang:
 1. Relevan dengan kebutuhan/masalah target klien MFWEB
 2. Berpotensi menarik traffic dari Google (search intent jelas)
 3. Membangun kepercayaan calon klien untuk menggunakan jasa MFWEB
@@ -77,7 +77,7 @@ Kembalikan JSON array SAJA (tanpa teks lain):
     "description": "Alasan kenapa topik ini relevan dan potensial (1 kalimat)"
   }
 ]`,
-      messages: [{ role: "user", content: `Berikan ${count} ide topik artikel blog terbaik untuk MFWEB.` }],
+      messages: [{ role: "user", content: `Berikan ${safeCount} ide topik artikel blog terbaik untuk MFWEB.` }],
     });
 
     const text      = response.content[0].type === "text" ? response.content[0].text : "";

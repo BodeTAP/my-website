@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAiSettings } from "@/lib/aiSettings";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await auth();
+  const { allowed } = await rateLimit(`ai-reply:${session!.user!.email}`, 20, 60 * 60 * 1000);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
 
   try {
     const { ticketId } = await req.json();
+    if (!ticketId?.trim()) return NextResponse.json({ error: "ticketId wajib diisi." }, { status: 400 });
 
     const ticket = await prisma.ticket.findUnique({
       where: { id: ticketId },

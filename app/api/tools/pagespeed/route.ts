@@ -52,6 +52,17 @@ export async function GET(req: NextRequest) {
   let targetUrl: string;
   try {
     const parsed = new URL(rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`);
+
+    const PRIVATE_HOST_RE = [
+      /^localhost$/i, /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./, /^169\.254\./,
+    ];
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      return NextResponse.json({ error: "Hanya URL HTTP/HTTPS yang diperbolehkan" }, { status: 400 });
+    }
+    if (PRIVATE_HOST_RE.some((r) => r.test(parsed.hostname))) {
+      return NextResponse.json({ error: "URL tidak dapat diakses" }, { status: 400 });
+    }
+
     targetUrl = parsed.toString();
   } catch {
     return NextResponse.json({ error: "URL tidak valid" }, { status: 400 });

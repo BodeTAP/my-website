@@ -1,5 +1,5 @@
 import { NextResponse, after } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
@@ -8,10 +8,7 @@ import { sendWA, waMsg } from "@/lib/whatsapp";
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
-  const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: ticketId } = await params;
   const messages = await prisma.ticketMessage.findMany({
     where: { ticketId },
@@ -21,10 +18,8 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function POST(req: Request, { params }: Params) {
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const { id: ticketId } = await params;
   const { body, status } = await req.json();
@@ -69,10 +64,7 @@ export async function POST(req: Request, { params }: Params) {
 }
 
 export async function PATCH(req: Request, { params }: Params) {
-  const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: ticketId } = await params;
   const { status } = await req.json();

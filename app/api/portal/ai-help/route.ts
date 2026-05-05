@@ -47,9 +47,13 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: "Data klien tidak ditemukan" }), { status: 404 });
     }
 
+    // Truncate individual fields to prevent oversized context
+    const projectList = client.projects.map((p) => `${p.name} (${p.status})`).join(", ").slice(0, 500) || "None";
+    const invoiceList = client.invoices.map((i) => `${i.invoiceNo}: ${i.status}`).join(", ").slice(0, 300) || "None";
+
     const context = `
-Projects: ${client.projects.map((p) => `${p.name} (${p.status})`).join(", ") || "None"}
-Recent Invoices: ${client.invoices.map((i) => `${i.invoiceNo}: ${i.status}`).join(", ") || "None"}
+Projects: ${projectList}
+Recent Invoices: ${invoiceList}
 Open Tickets: ${client._count.tickets}
     `.trim();
 

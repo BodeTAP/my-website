@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, requireAdmin } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAiSettings } from "@/lib/aiSettings";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await auth();
+  const { allowed } = await rateLimit(`ai-seo:${session!.user!.email}`, 30, 60 * 60 * 1000);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
 
   try {
     const { title, content, metaTitle, metaDescription } = await req.json();
+    if (!title?.trim() || !content?.trim()) return NextResponse.json({ error: "Title dan content wajib diisi." }, { status: 400 });
     const [anthropic, aiSettings] = [
       new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
       await getAiSettings(),
     ];
 
-    // Strip HTML tags
-    const textOnly = content.replace(/<[^>]*>/g, " ");
+    // Strip HTML tags and truncate content to prevent huge prompts
+    const textOnly = content.replace(/<[^>]*>/g, " ").slice(0, 8000);
 
     const system = `You are an SEO expert. Analyze the provided content and return a JSON object with:
 {

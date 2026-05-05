@@ -1,15 +1,12 @@
 import { NextResponse, after } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail, validateEmailConfig } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 import { sendWA, waMsg } from "@/lib/whatsapp";
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { clientId, invoiceNo, description, amount, lineItems, dueDate, whatsappMsg: customWaMsg } = await req.json();
 

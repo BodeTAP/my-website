@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAiSettings } from "@/lib/aiSettings";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await auth();
+  const { allowed } = await rateLimit(`ai-draft:${session!.user!.email}`, 20, 60 * 60 * 1000);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
 
   try {
     const { topic, keywords, tone, length } = await req.json();
+    // Input validation
+    if (!topic?.trim()) return NextResponse.json({ error: "Topik wajib diisi." }, { status: 400 });
+    if (topic.length > 500) return NextResponse.json({ error: "Topik maksimal 500 karakter." }, { status: 400 });
+    const safeKeywords = Array.isArray(keywords) ? keywords.slice(0, 10).map((k: unknown) => String(k).slice(0, 100)) : [];
     const [anthropic, aiSettings] = [
       new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
       await getAiSettings(),
@@ -42,7 +45,7 @@ ${categoryList}
 If none of the available categories match, set suggestedCategoryId and suggestedCategoryName to null.`;
 
     const prompt = `Write a high-quality blog article about: ${topic}. 
-Keywords to include: ${keywords?.join(", ") || "relevant industry terms"}.`;
+Keywords to include: ${safeKeywords.join(", ") || "relevant industry terms"}.`;
 
     const response = await anthropic.messages.create({
       model: aiSettings.model,

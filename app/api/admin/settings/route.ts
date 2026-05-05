@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AI_DEFAULTS } from "@/lib/aiSettings";
 
@@ -17,11 +17,6 @@ const DEFAULTS: Record<string, string> = {
   fonnte_api_keys:     "",
   ...AI_DEFAULTS,
 };
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
 
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
