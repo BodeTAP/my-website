@@ -11,6 +11,7 @@ const DEFAULTS = {
   facebook_pixel_id:   "",
   google_analytics_id: "",
   fonnte_api_key:      "",
+  fonnte_api_keys:     "",
   ...AI_DEFAULTS,
 };
 
