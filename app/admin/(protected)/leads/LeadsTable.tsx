@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download } from "lucide-react";
+import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
@@ -36,6 +36,8 @@ const STATUS_COLORS: Record<Lead["status"], string> = {
 };
 
 const DEFAULT_TEMPLATE = waMsg.prospectCold("{businessName}");
+const WA_TEMPLATE_KEY  = "mfweb_wa_manual_template";
+const DEFAULT_WA_MANUAL = "Halo, apakah ini *{businessName}*? 👋\n\nSaya dari *MFWEB*, jasa pembuatan website profesional untuk bisnis lokal.\n\nBoleh saya kirimkan info lengkapnya? 🙏";
 
 function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: () => void; onDone: () => void }) {
   const [message, setMessage] = useState(DEFAULT_TEMPLATE);
@@ -140,9 +142,14 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
     Object.fromEntries(leads.map((l) => [l.id, l.status])),
   );
-  const [selected, setSelected]       = useState<Set<string>>(new Set());
+  const [selected, setSelected]           = useState<Set<string>>(new Set());
   const [showBroadcast, setShowBroadcast] = useState(false);
-  const [deleting, setDeleting]       = useState(false);
+  const [deleting, setDeleting]           = useState(false);
+  const [waTemplate, setWaTemplate]       = useState<string>(() =>
+    (typeof window !== "undefined" && localStorage.getItem(WA_TEMPLATE_KEY)) || DEFAULT_WA_MANUAL
+  );
+  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
+  const [draftTemplate, setDraftTemplate] = useState(waTemplate);
 
   const filtered = leads.filter((l) => {
     const matchSearch = q === "" ||
@@ -216,11 +223,61 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     URL.revokeObjectURL(url);
   };
 
-  const WA = (phone: string, name: string) =>
-    `https://wa.me/${phone.replace(/\D/g, "")}?text=Halo%20${encodeURIComponent(name)}%2C%20saya%20dari%20MFWEB%20ingin%20menghubungi%20terkait%20pembuatan%20website.`;
+  const WA = (phone: string, name: string, businessName: string) => {
+    const text = waTemplate
+      .replace(/\{name\}/g, name)
+      .replace(/\{businessName\}/g, businessName);
+    return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
+  };
+
+  const saveWaTemplate = () => {
+    localStorage.setItem(WA_TEMPLATE_KEY, draftTemplate);
+    setWaTemplate(draftTemplate);
+    setShowTemplateEditor(false);
+  };
 
   return (
     <>
+      {/* Template WA Manual Editor */}
+      {showTemplateEditor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowTemplateEditor(false)} />
+          <div className="relative glass rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+              <div>
+                <h2 className="text-white font-bold text-sm">Template Pesan WA Manual</h2>
+                <p className="text-blue-200/50 text-xs mt-0.5">Gunakan {"{name}"} atau {"{businessName}"} sebagai variabel</p>
+              </div>
+              <button onClick={() => setShowTemplateEditor(false)} className="text-blue-200/40 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <textarea
+                value={draftTemplate}
+                onChange={(e) => setDraftTemplate(e.target.value)}
+                rows={8}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-green-500/50 resize-none font-mono"
+              />
+              <div className="flex gap-3">
+                <button onClick={() => setDraftTemplate(DEFAULT_WA_MANUAL)}
+                  className="text-xs text-blue-200/40 hover:text-white transition-colors underline">
+                  Reset ke default
+                </button>
+                <div className="flex-1" />
+                <button onClick={() => setShowTemplateEditor(false)}
+                  className="px-4 py-2 rounded-xl text-xs border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 transition-all">
+                  Batal
+                </button>
+                <Button onClick={saveWaTemplate} className="bg-green-600 hover:bg-green-500 text-white gap-2 h-9 text-xs px-4">
+                  Simpan Template
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showBroadcast && (
         <BroadcastModal
           leads={selectedLeads}
@@ -235,6 +292,11 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
         {/* Filter + Search */}
         <div className="flex flex-col sm:flex-row gap-4 p-5 border-b border-white/10 relative z-10 items-start sm:items-center">
           <LeadsSearch />
+          <button onClick={() => { setDraftTemplate(waTemplate); setShowTemplateEditor(true); }}
+            title="Edit template pesan WA manual"
+            className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-green-400 hover:border-green-500/30 transition-all bg-white/5">
+            <Pencil className="w-3 h-3" /> Template WA
+          </button>
           <div className="flex gap-2 overflow-x-auto flex-1 w-full pb-2 sm:pb-0">
             {(["ALL", "NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
               <button key={s} onClick={() => setFilter(s)}
@@ -328,7 +390,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                       <p className="text-blue-200/50 text-xs mt-0.5">{l.businessName}</p>
                     </td>
                     <td className="px-4 py-5">
-                      <a href={WA(l.whatsapp, l.name)} target="_blank" rel="noopener noreferrer"
+                      <a href={WA(l.whatsapp, l.name, l.businessName)} target="_blank" rel="noopener noreferrer"
                         className="text-blue-200/70 hover:text-green-400 transition-colors font-mono text-xs flex items-center gap-1.5 w-fit">
                         {l.whatsapp}
                       </a>
@@ -352,7 +414,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                     </td>
                     <td className="px-4 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                        <a href={WA(l.whatsapp, l.name)} target="_blank" rel="noopener noreferrer">
+                        <a href={WA(l.whatsapp, l.name, l.businessName)} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" className="bg-green-600/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-500/30 shadow-none transition-all h-9 px-3 text-xs">
                             <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> WA
                           </Button>
