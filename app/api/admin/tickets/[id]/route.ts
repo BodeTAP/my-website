@@ -18,8 +18,10 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function POST(req: Request, { params }: Params) {
-  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const session = await auth();
+  if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { id: ticketId } = await params;
   const { body, status } = await req.json();

@@ -37,8 +37,10 @@ export async function GET(_req: Request, { params }: Params) {
   if (!invoice) return NextResponse.json({ error: "Invoice tidak ditemukan." }, { status: 404 });
 
   if (!isAdmin) {
+    const userEmail = session.user?.email;
+    if (!userEmail) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     const user = await prisma.user.findUnique({
-      where: { email: session.user!.email! },
+      where: { email: userEmail },
       include: { client: true },
     });
     if (!user?.client || user.client.id !== invoice.clientId) {
