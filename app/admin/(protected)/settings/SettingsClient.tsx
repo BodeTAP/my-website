@@ -357,30 +357,63 @@ export default function SettingsClient({
 
           {/* WhatsApp Device */}
           <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">WhatsApp Device</h2>
+            <h2 className="text-white font-semibold text-lg mb-1">WhatsApp Device (Fonnte)</h2>
             <p className="text-blue-200/40 text-sm mb-6">
-              API key Fonnte untuk nomor WA yang digunakan broadcast. Kosongkan untuk menggunakan nilai dari environment variable <code className="text-blue-300 bg-blue-900/30 px-1.5 py-0.5 rounded text-xs">FONNTE_API_KEY</code>.
+              API key Fonnte untuk pengiriman pesan WhatsApp. Kosongkan untuk menggunakan nilai dari environment variable{" "}
+              <code className="text-blue-300 bg-blue-900/30 px-1.5 py-0.5 rounded text-xs">FONNTE_API_KEY</code>.
             </p>
-            <div className="space-y-3">
+            <div className="space-y-5">
+              {/* Single key */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Fonnte API Key</Label>
+                <Label className="text-blue-200/70 text-xs">Fonnte API Key (1 Device)</Label>
                 <Input
-                  type="password"
+                  type="text"
                   value={form.fonnte_api_key ?? ""}
                   onChange={set("fonnte_api_key")}
-                  placeholder="Masukkan API key Fonnte device baru..."
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 font-mono"
+                  placeholder="Masukkan API key Fonnte..."
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 font-mono text-sm"
                 />
-              </div>
-              {form.fonnte_api_key && (
-                <p className="text-green-400/70 text-xs flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  Menggunakan API key dari pengaturan (override env variable)
+                <p className="text-blue-200/30 text-[11px]">
+                  Digunakan untuk kirim pesan WA notifikasi (invoice, tiket, dll).
                 </p>
-              )}
-              {!form.fonnte_api_key && (
+              </div>
+
+              {/* Multi-key rotator */}
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs flex items-center gap-2">
+                  Fonnte API Keys — Rotator Broadcast
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 font-medium">
+                    🔄 Multi-Device
+                  </span>
+                </Label>
+                <Input
+                  type="text"
+                  value={form.fonnte_api_keys ?? ""}
+                  onChange={set("fonnte_api_keys")}
+                  placeholder="TOKEN_1,TOKEN_2,TOKEN_3"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 font-mono text-sm"
+                />
+                <p className="text-blue-200/30 text-[11px]">
+                  Pisahkan dengan koma jika lebih dari 1 device.{" "}
+                  Semua token <strong className="text-blue-200/50">harus dari akun Fonnte yang sama</strong>.{" "}
+                  Digunakan khusus untuk fitur <span className="text-indigo-300/70">Broadcast WA</span> di halaman Leads — Fonnte akan menggilir device secara otomatis untuk mengurangi risiko ban.
+                </p>
+              </div>
+
+              {/* Status indicator */}
+              {(form.fonnte_api_keys || form.fonnte_api_key) ? (
+                <div className="flex items-center gap-2 text-green-400/70 text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                  Menggunakan API key dari pengaturan
+                  {form.fonnte_api_keys && (
+                    <span className="ml-1 text-indigo-300/60">
+                      · {form.fonnte_api_keys.split(",").filter(Boolean).length} device rotator terdaftar
+                    </span>
+                  )}
+                </div>
+              ) : (
                 <p className="text-blue-200/30 text-xs flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400/40" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400/40 shrink-0" />
                   Menggunakan <code className="text-blue-300/50">FONNTE_API_KEY</code> dari Vercel environment
                 </p>
               )}
