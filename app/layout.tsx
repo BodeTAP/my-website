@@ -43,21 +43,14 @@ export const metadata: Metadata = {
     title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
     description:
       "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly. Mulai Rp 800K.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "MFWEB - Jasa Pembuatan Website Profesional",
-      },
-    ],
+    // Tidak override images — biarkan Next.js pakai /opengraph-image (1200×630) dari opengraph-image.tsx
   },
   twitter: {
     card: "summary_large_image",
     title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
     description:
       "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly.",
-    images: ["/og-image.png"],
+    // Next.js otomatis pakai /opengraph-image sebagai twitter:image
   },
   icons: {
     icon: [
