@@ -8,7 +8,9 @@ async function requireAdmin() {
   return !s || (s.user as { role?: string })?.role !== "ADMIN";
 }
 
-function delay(ms: number) {
+/** Delay random antara min-max ms agar tidak terdeteksi sebagai bot */
+function randomDelay(minMs: number, maxMs: number) {
+  const ms = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
   return new Promise((r) => setTimeout(r, ms));
 }
 
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
     const { leadIds, message } = await req.json() as { leadIds: string[]; message: string };
     if (!leadIds?.length) return NextResponse.json({ error: "Pilih minimal 1 lead" }, { status: 400 });
     if (!message?.trim()) return NextResponse.json({ error: "Pesan tidak boleh kosong" }, { status: 400 });
-    if (leadIds.length > 50) return NextResponse.json({ error: "Maksimal 50 lead per broadcast" }, { status: 400 });
+    if (leadIds.length > 20) return NextResponse.json({ error: "Maksimal 20 lead per broadcast untuk menghindari blokir WA." }, { status: 400 });
 
     const leads = await prisma.lead.findMany({
       where: { id: { in: leadIds } },
@@ -36,8 +38,8 @@ export async function POST(req: NextRequest) {
       const ok = await sendWA(lead.whatsapp, personalizedMsg);
       results.push({ id: lead.id, name: lead.name, ok });
 
-      // Jeda 1.5 detik antar pesan agar tidak kena rate limit Fonnte
-      if (leads.indexOf(lead) < leads.length - 1) await delay(1500);
+      // Jeda random 4-8 detik antar pesan agar tidak terdeteksi sebagai bot oleh WhatsApp
+      if (leads.indexOf(lead) < leads.length - 1) await randomDelay(4000, 8000);
     }
 
     const sent   = results.filter((r) => r.ok).length;

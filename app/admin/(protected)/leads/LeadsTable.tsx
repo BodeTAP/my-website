@@ -76,20 +76,31 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
 
         {status !== "done" ? (
           <div className="p-5 space-y-4">
+            {/* Warning banner */}
+            <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 space-y-1.5">
+              <p className="text-amber-400 text-xs font-semibold">⚠️ Peringatan Risiko Blokir WhatsApp</p>
+              <ul className="text-amber-300/70 text-[11px] space-y-1 list-disc ml-4">
+                <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
+                <li>Maks <strong>20 pesan/sesi</strong>, tunggu 2–3 jam sebelum sesi berikutnya</li>
+                <li>Jika penerima lapor spam, nomor Anda bisa diblokir permanen</li>
+                <li>Pesan dikirim dengan jeda <strong>4–8 detik acak</strong> antar nomor</li>
+              </ul>
+            </div>
+
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              rows={10}
+              rows={9}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/30 outline-none focus:border-indigo-500/50 resize-none font-mono"
             />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Button onClick={handleSend} disabled={status === "sending" || !message.trim()}
                 className="bg-green-600 hover:bg-green-500 text-white gap-2">
                 {status === "sending"
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</>
                   : <><Send className="w-4 h-4" /> Kirim ke {leads.length} Lead</>}
               </Button>
-              <p className="text-blue-200/30 text-xs">Jeda 1.5 dtk antar pesan</p>
+              <p className="text-blue-200/30 text-xs">Estimasi ~{Math.ceil(leads.length * 6 / 60)} menit</p>
             </div>
           </div>
         ) : (
@@ -249,8 +260,10 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
             <span className="text-indigo-300 text-sm font-medium">{selected.size} lead dipilih</span>
             <div className="flex items-center gap-2 flex-wrap">
               <Button size="sm" onClick={() => setShowBroadcast(true)}
-                className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
-                <Send className="w-3 h-3" /> Broadcast WA
+                disabled={selected.size > 20}
+                title={selected.size > 20 ? "Maks 20 lead per broadcast" : undefined}
+                className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs disabled:opacity-40">
+                <Send className="w-3 h-3" /> Broadcast WA {selected.size > 20 && <span className="text-[10px]">(maks 20)</span>}
               </Button>
               <Button size="sm" onClick={handleExportCSV}
                 className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 gap-1.5 h-8 text-xs shadow-none">
