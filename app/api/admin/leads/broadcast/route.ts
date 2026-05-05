@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendWA, getFonnteKey } from "@/lib/whatsapp";
+import { sendWA } from "@/lib/whatsapp";
+import { getFonnteKey } from "@/lib/getFonnteKey";
 
 async function requireAdmin() {
   const s = await auth();
