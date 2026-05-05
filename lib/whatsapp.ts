@@ -1,3 +1,5 @@
+import { getFonnteKey } from "./getFonnteKey";
+
 const FONNTE_URL = "https://api.fonnte.com/send";
 
 /** Normalize Indonesian phone to 628xxx format (no +, no spaces) */
@@ -15,10 +17,11 @@ export async function sendWA(
   message: string,
   apiKey?: string,
 ): Promise<boolean> {
-  const key = apiKey ?? process.env.FONNTE_API_KEY;
+  // Fallback to DB key if not provided and env var is missing
+  const key = apiKey ?? (await getFonnteKey());
 
   if (!key) {
-    console.error("[WA] FONNTE_API_KEY belum dikonfigurasi");
+    console.error("[WA] FONNTE_API_KEY belum dikonfigurasi (cek env var atau database SiteSetting)");
     return false;
   }
   if (!to?.trim()) {

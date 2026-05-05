@@ -1,7 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendInvoiceCreatedEmail } from "@/lib/email";
+import { sendInvoiceCreatedEmail, validateEmailConfig } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 import { sendWA, waMsg } from "@/lib/whatsapp";
 
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { clientId, invoiceNo, description, amount, lineItems, dueDate, whatsappMsg } = await req.json();
+  const { clientId, invoiceNo, description, amount, lineItems, dueDate, whatsappMsg: customWaMsg } = await req.json();
 
   if (!clientId || !invoiceNo?.trim() || !amount) {
     return NextResponse.json({ error: "Klien, nomor invoice, dan jumlah wajib diisi." }, { status: 400 });
@@ -35,17 +35,29 @@ export async function POST(req: Request) {
       amount: Math.round(Number(amount)),
       lineItems: Array.isArray(lineItems) ? lineItems : [],
       dueDate: dueDate ? new Date(dueDate) : null,
-      whatsappMsg: whatsappMsg?.trim() || null,
+      whatsappMsg: customWaMsg?.trim() || null,
       status: "UNPAID",
     },
     include: { client: { include: { user: { select: { name: true, email: true } } } } },
   });
 
-  // Non-blocking email + in-app notification
   const clientEmail = invoice.client.user.email;
   const clientName  = invoice.client.user.name ?? invoice.client.businessName;
+  const clientPhone = invoice.client.phone;
   const rpAmount    = `Rp ${invoice.amount.toLocaleString("id-ID")}`;
-  // after() menjamin semua notifikasi (email + WA + in-app) selesai sebelum fungsi dimatikan
+
+  // Pre-flight checks — detect config issues before after()
+  const emailConfig = validateEmailConfig();
+  const warnings: string[] = [];
+
+  if (!clientPhone) {
+    warnings.push("Klien tidak memiliki nomor WhatsApp — notifikasi WA dilewati.");
+  }
+  if (!emailConfig.valid) {
+    warnings.push(`Notifikasi email dilewati: ${emailConfig.error}`);
+  }
+
+  // In-app notification (synchronous, fast)
   createNotification(
     invoice.clientId,
     "INVOICE_NEW",
@@ -54,20 +66,33 @@ export async function POST(req: Request) {
     "/portal/invoices",
   ).catch((e) => console.error("[Notif] invoice create:", e));
 
+  // Email + WA — run after response via after()
   after(async () => {
-    if (clientEmail) {
-      await sendInvoiceCreatedEmail(clientEmail, clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate)
-        .catch((e) => console.error("[Email] invoice created:", e));
+    // Email
+    if (emailConfig.valid && clientEmail) {
+      try {
+        await sendInvoiceCreatedEmail(clientEmail, clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate);
+        console.log(`[Email] Invoice ${invoice.invoiceNo} terkirim ke ${clientEmail}`);
+      } catch (e) {
+        console.error(`[Email] Invoice ${invoice.invoiceNo} GAGAL:`, e);
+      }
     }
-    if (invoice.client.phone) {
-      await sendWA(
-        invoice.client.phone,
-        waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate, `${process.env.NEXT_PUBLIC_SITE_URL}/bayar/${invoice.invoiceNo}`),
+
+    // WhatsApp
+    if (clientPhone) {
+      const payUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/bayar/${invoice.invoiceNo}`;
+      const sent = await sendWA(
+        clientPhone,
+        waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate, payUrl),
       );
-    } else {
-      console.warn(`[WA] Invoice ${invoice.invoiceNo}: client.phone kosong — WA dilewati`);
+      if (!sent) {
+        console.error(`[WA] Invoice ${invoice.invoiceNo}: gagal kirim ke ${clientPhone}`);
+      }
     }
   });
 
-  return NextResponse.json(invoice, { status: 201 });
+  return NextResponse.json(
+    { ...invoice, warnings: warnings.length > 0 ? warnings : undefined },
+    { status: 201 }
+  );
 }

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Client = { id: string; businessName: string; user: { name: string | null; email: string } };
+type Client = { id: string; businessName: string; phone: string | null; user: { name: string | null; email: string } };
 type LineItem = { label: string; amount: number };
 
 const PACKAGE_PRESETS: { label: string; items: LineItem[] }[] = [
@@ -61,6 +61,7 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
   const [dueDate, setDueDate]         = useState("");
   const [whatsappMsg, setWhatsappMsg] = useState("");
   const [lineItems, setLineItems]     = useState<LineItem[]>([{ label: "", amount: 0 }]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -70,12 +71,14 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
     setInvoiceNo(generateInvoiceNo());
     setClientId(""); setDueDate(""); setWhatsappMsg(""); setError("");
     setLineItems([{ label: "", amount: 0 }]);
+    setSelectedClient(null);
     setOpen(true);
   }
 
   function handleClientChange(id: string) {
     setClientId(id);
-    const client = clients.find(c => c.id === id);
+    const client = clients.find(c => c.id === id) ?? null;
+    setSelectedClient(client);
     if (client) {
       setWhatsappMsg(
         `Halo ${client.user.name ?? client.businessName}, berikut tagihan ${invoiceNo} dari MFWEB. ` +
@@ -134,6 +137,10 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
     if (!res.ok) { setError(data.error ?? "Gagal membuat invoice."); setLoading(false); return; }
     setOpen(false);
     setLoading(false);
+    // Show config warnings in console so admin can investigate
+    if (data.warnings?.length) {
+      console.warn("[Invoice] Peringatan notifikasi:", data.warnings);
+    }
     router.refresh();
   }
 
@@ -190,6 +197,12 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
                     </option>
                   ))}
                 </select>
+                {/* Warning: no phone number */}
+                {selectedClient && !selectedClient.phone && (
+                  <p className="mt-2 text-xs text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 flex items-center gap-2">
+                    ⚠️ Klien ini belum memiliki nomor WhatsApp — notifikasi WA tidak akan terkirim. Tambahkan nomor di halaman profil klien.
+                  </p>
+                )}
               </div>
 
               {/* No + Due */}

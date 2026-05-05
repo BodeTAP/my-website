@@ -12,6 +12,19 @@ function getResend() {
 const FROM   = process.env.EMAIL_FROM ?? "noreply@mfweb.com";
 const SITE   = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
+// ── Validation ─────────────────────────────────────────────────────────────────
+
+/** Validate email configuration before attempting to send */
+export function validateEmailConfig(): { valid: boolean; error?: string } {
+  if (!process.env.AUTH_RESEND_KEY) {
+    return { valid: false, error: "AUTH_RESEND_KEY tidak dikonfigurasi di environment variables" };
+  }
+  if (!process.env.EMAIL_FROM) {
+    return { valid: false, error: "EMAIL_FROM tidak dikonfigurasi di environment variables" };
+  }
+  return { valid: true };
+}
+
 function base(title: string, body: string) {
   return `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"></head>
