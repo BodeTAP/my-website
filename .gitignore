@@ -63,3 +63,5 @@ public/sitemap*.xml
 .claude/
 
 .kiro/
+
+.vscode
