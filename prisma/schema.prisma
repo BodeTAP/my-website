@@ -232,6 +232,7 @@ model Lead {
   message        String?
   status         LeadStatus @default(NEW)
   notes          String?
+  lastContactedAt DateTime? // Kapan terakhir dikirim WA broadcast
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 

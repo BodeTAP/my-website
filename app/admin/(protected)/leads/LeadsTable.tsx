@@ -21,6 +21,7 @@ type Lead = {
   message: string | null;
   status: "NEW" | "FOLLOWUP" | "DEAL" | "CLOSED";
   notes: string | null;
+  lastContactedAt: Date | null;
   createdAt: Date;
 };
 
@@ -39,10 +40,33 @@ const DEFAULT_TEMPLATE = waMsg.prospectCold("{businessName}");
 const WA_TEMPLATE_KEY  = "mfweb_wa_manual_template";
 const DEFAULT_WA_MANUAL = "Halo, apakah ini *{businessName}*? 👋\n\nSaya dari *MFWEB*, jasa pembuatan website profesional untuk bisnis lokal.\n\nBoleh saya kirimkan info lengkapnya? 🙏";
 
+const COOLDOWN_HOURS = 24;
+
+function isCoolingDown(lastContactedAt: Date | null): boolean {
+  if (!lastContactedAt) return false;
+  return Date.now() - new Date(lastContactedAt).getTime() < COOLDOWN_HOURS * 60 * 60 * 1000;
+}
+
+function cooldownRemaining(lastContactedAt: Date | null): string {
+  if (!lastContactedAt) return "";
+  const ms = COOLDOWN_HOURS * 60 * 60 * 1000 - (Date.now() - new Date(lastContactedAt).getTime());
+  if (ms <= 0) return "";
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return h > 0 ? `${h}j ${m}m` : `${m}m`;
+}
+
 function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: () => void; onDone: () => void }) {
-  const [message, setMessage] = useState(DEFAULT_TEMPLATE);
-  const [status, setStatus]   = useState<"idle" | "sending" | "done">("idle");
-  const [result, setResult]   = useState<{ sent: number; failed: number; devices: number } | null>(null);
+  const [message, setMessage]         = useState(DEFAULT_TEMPLATE);
+  const [status, setStatus]           = useState<"idle" | "sending" | "done">("idle");
+  const [skipCooldown, setSkipCooldown] = useState(false);
+  const [result, setResult]           = useState<{
+    sent: number; failed: number; devices: number;
+    skipped: number; cooldownLeads?: string[]; delayRange: string;
+  } | null>(null);
+
+  const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt));
+  const eligibleCount = skipCooldown ? leads.length : leads.length - coolingLeads.length;
 
   const handleSend = async () => {
     setStatus("sending");
@@ -50,11 +74,18 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
       const res = await fetch("/api/admin/leads/broadcast", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ leadIds: leads.map((l) => l.id), message }),
+        body:    JSON.stringify({ leadIds: leads.map((l) => l.id), message, skipCooldown }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setResult({ sent: data.sent, failed: data.failed, devices: data.devices ?? 1 });
+      setResult({
+        sent:          data.sent,
+        failed:        data.failed,
+        devices:       data.devices ?? 1,
+        skipped:       data.skipped ?? 0,
+        cooldownLeads: data.cooldownLeads,
+        delayRange:    data.delayRange ?? "20-40",
+      });
       setStatus("done");
     } catch (err) {
       alert((err as Error).message);
@@ -85,16 +116,39 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Maks <strong>20 pesan/sesi</strong>, tunggu 2–3 jam sebelum sesi berikutnya</li>
                 <li>Jika penerima lapor spam, nomor Anda bisa diblokir permanen</li>
-                <li>Pesan dikirim dengan jeda <strong>20–40 detik acak</strong> antar nomor (dihandle Fonnte)</li>
+                <li>Pesan dikirim dengan jeda <strong>20–60 detik acak</strong> antar nomor (adaptif)</li>
+                <li>Pesan otomatis divariasikan agar tidak identik satu sama lain</li>
               </ul>
             </div>
+
+            {/* Cooldown info */}
+            {coolingLeads.length > 0 && (
+              <div className="bg-orange-500/10 border border-orange-500/25 rounded-xl px-4 py-3 space-y-2">
+                <p className="text-orange-400 text-xs font-semibold flex items-center gap-1.5">
+                  🕐 {coolingLeads.length} lead masih dalam cooldown {COOLDOWN_HOURS} jam
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {coolingLeads.map((l) => (
+                    <span key={l.id} className="text-[10px] bg-orange-500/10 border border-orange-500/20 text-orange-300/70 px-2 py-0.5 rounded-full">
+                      {l.businessName} · {cooldownRemaining(l.lastContactedAt)}
+                    </span>
+                  ))}
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer mt-1">
+                  <input type="checkbox" checked={skipCooldown} onChange={(e) => setSkipCooldown(e.target.checked)}
+                    className="w-3.5 h-3.5 accent-orange-500" />
+                  <span className="text-orange-300/70 text-[11px]">Kirim tetap ke semua (abaikan cooldown) — risiko lebih tinggi</span>
+                </label>
+              </div>
+            )}
+
             <div className="bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 flex items-start gap-2">
               <span className="text-lg leading-none">🔄</span>
               <div>
-                <p className="text-indigo-300 text-xs font-semibold">Rotator Aktif</p>
+                <p className="text-indigo-300 text-xs font-semibold">Rotator + Variasi Aktif</p>
                 <p className="text-indigo-200/60 text-[11px] mt-0.5">
-                  Jika Anda memiliki lebih dari 1 token Fonnte di Settings, sistem akan otomatis
-                  menggilir device pengirim — mengurangi risiko ban secara signifikan.
+                  Device digilir otomatis jika ada lebih dari 1 token Fonnte. Pesan juga divariasikan
+                  otomatis agar tidak identik — mengurangi risiko deteksi spam.
                 </p>
               </div>
             </div>
@@ -106,20 +160,20 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/30 outline-none focus:border-indigo-500/50 resize-none font-mono"
             />
             <div className="flex items-center gap-3 flex-wrap">
-              <Button onClick={handleSend} disabled={status === "sending" || !message.trim()}
+              <Button onClick={handleSend} disabled={status === "sending" || !message.trim() || eligibleCount === 0}
                 className="bg-green-600 hover:bg-green-500 text-white gap-2">
                 {status === "sending"
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</>
-                  : <><Send className="w-4 h-4" /> Kirim ke {leads.length} Lead</>}
+                  : <><Send className="w-4 h-4" /> Kirim ke {eligibleCount} Lead</>}
               </Button>
-              <p className="text-blue-200/30 text-xs">Dikirim sekaligus · delay dihandle Fonnte</p>
+              <p className="text-blue-200/30 text-xs">Delay adaptif · variasi otomatis · dihandle Fonnte</p>
             </div>
           </div>
         ) : (
           <div className="p-8 text-center space-y-4">
             <div className="text-5xl">✅</div>
             <p className="text-white font-bold text-lg">Broadcast Selesai</p>
-            <div className="flex justify-center gap-6">
+            <div className="flex justify-center gap-6 flex-wrap">
               <div className="text-center">
                 <p className="text-green-400 text-2xl font-bold">{result?.sent}</p>
                 <p className="text-blue-200/50 text-xs">Terkirim</p>
@@ -128,12 +182,25 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <p className="text-red-400 text-2xl font-bold">{result?.failed}</p>
                 <p className="text-blue-200/50 text-xs">Gagal</p>
               </div>
+              {(result?.skipped ?? 0) > 0 && (
+                <div className="text-center">
+                  <p className="text-orange-400 text-2xl font-bold">{result?.skipped}</p>
+                  <p className="text-blue-200/50 text-xs">Cooldown</p>
+                </div>
+              )}
               <div className="text-center">
                 <p className="text-indigo-400 text-2xl font-bold">{result?.devices ?? 1}</p>
                 <p className="text-blue-200/50 text-xs">Device</p>
               </div>
             </div>
-            <p className="text-blue-200/40 text-xs">Pesan masuk antrian Fonnte &amp; akan terkirim otomatis dengan jeda 20–40 detik</p>
+            <p className="text-blue-200/40 text-xs">
+              Antrian Fonnte · jeda {result?.delayRange ?? "20-40"}s · pesan divariasikan
+            </p>
+            {result?.cooldownLeads && result.cooldownLeads.length > 0 && (
+              <p className="text-orange-400/60 text-xs">
+                Dilewati (cooldown): {result.cooldownLeads.join(", ")}
+              </p>
+            )}
             <Button onClick={onDone} variant="outline"
               className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
               Tutup &amp; Refresh
@@ -413,7 +480,17 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                       {l.domain ? <span className="px-2.5 py-1 bg-white/5 rounded-md border border-white/5 text-blue-200/70">{l.domain}</span> : "—"}
                     </td>
                     <td className="px-4 py-5 text-blue-200/50 text-xs font-medium hidden lg:table-cell">
-                      {new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(l.createdAt))}
+                      <div className="space-y-0.5">
+                        <p>{new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(l.createdAt))}</p>
+                        {l.lastContactedAt && (
+                          <p className={`text-[10px] flex items-center gap-1 ${isCoolingDown(l.lastContactedAt) ? "text-orange-400/70" : "text-blue-200/30"}`}>
+                            {isCoolingDown(l.lastContactedAt) ? "🕐" : "✉️"}
+                            {isCoolingDown(l.lastContactedAt)
+                              ? `Cooldown ${cooldownRemaining(l.lastContactedAt)}`
+                              : `Terkirim ${new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short" }).format(new Date(l.lastContactedAt))}`}
+                          </p>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-5">
                       <div className="relative inline-block">
