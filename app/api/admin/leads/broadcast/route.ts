@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendWA } from "@/lib/whatsapp";
-import { getFonnteKey } from "@/lib/getFonnteKey";
+import { sendWABatch } from "@/lib/whatsapp";
+import { getFonnteKeys } from "@/lib/getFonnteKey";
 
 async function requireAdmin() {
   const s = await auth();
   return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
-
-/** Delay random antara min-max ms agar tidak terdeteksi sebagai bot */
-function randomDelay(minMs: number, maxMs: number) {
-  const ms = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
-  return new Promise((r) => setTimeout(r, ms));
 }
 
 export async function POST(req: NextRequest) {
@@ -29,22 +23,37 @@ export async function POST(req: NextRequest) {
       select: { id: true, name: true, businessName: true, whatsapp: true },
     });
 
-    const results: { id: string; name: string; ok: boolean }[] = [];
+    // Fetch semua token yang tersedia — jika lebih dari 1, Fonnte otomatis rotasi device
+    const waKeys = await getFonnteKeys();
 
-    // Fetch key once — bisa dari DB (admin settings) atau env var
-    const waKey = await getFonnteKey();
-
-    for (const lead of leads) {
-      const personalizedMsg = message
-        .replace(/\{name\}/g, lead.name)
-        .replace(/\{businessName\}/g, lead.businessName);
-
-      const ok = await sendWA(lead.whatsapp, personalizedMsg, waKey);
-      results.push({ id: lead.id, name: lead.name, ok });
-
-      // Jeda random 4-8 detik antar pesan agar tidak terdeteksi sebagai bot oleh WhatsApp
-      if (leads.indexOf(lead) < leads.length - 1) await randomDelay(4000, 8000);
+    if (!waKeys.length) {
+      return NextResponse.json({ error: "Fonnte API key belum dikonfigurasi" }, { status: 500 });
     }
+
+    // Personalisasi pesan untuk setiap lead
+    const items = leads.map((lead) => ({
+      phone: lead.whatsapp,
+      message: message
+        .replace(/\{name\}/g, lead.name)
+        .replace(/\{businessName\}/g, lead.businessName),
+      leadId: lead.id,
+      name: lead.name,
+    }));
+
+    // Kirim semua pesan dalam 1 API call — delay & rotasi device dihandle Fonnte
+    // Tidak ada loop blocking → aman dari timeout Vercel
+    const batchResults = await sendWABatch(
+      items.map(({ phone, message }) => ({ phone, message })),
+      waKeys,
+      "8-16", // delay 8-16 detik random antar pesan, dihandle server Fonnte
+    );
+
+    // Map hasil kembali ke lead ID
+    const results = items.map((item, idx) => ({
+      id: item.leadId,
+      name: item.name,
+      ok: batchResults[idx]?.ok ?? false,
+    }));
 
     const sent   = results.filter((r) => r.ok).length;
     const failed = results.filter((r) => !r.ok).length;
@@ -58,7 +67,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ sent, failed, results });
+    console.log(
+      `[Broadcast] ${sent} queued, ${failed} failed` +
+      ` | ${waKeys.length} device(s) rotated` +
+      ` | leads: ${leadIds.length}`,
+    );
+
+    return NextResponse.json({ sent, failed, results, devices: waKeys.length });
   } catch (err) {
     console.error("[Broadcast]", err);
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });

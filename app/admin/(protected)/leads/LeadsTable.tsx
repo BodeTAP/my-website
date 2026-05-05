@@ -42,7 +42,7 @@ const DEFAULT_WA_MANUAL = "Halo, apakah ini *{businessName}*? 👋\n\nSaya dari 
 function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: () => void; onDone: () => void }) {
   const [message, setMessage] = useState(DEFAULT_TEMPLATE);
   const [status, setStatus]   = useState<"idle" | "sending" | "done">("idle");
-  const [result, setResult]   = useState<{ sent: number; failed: number } | null>(null);
+  const [result, setResult]   = useState<{ sent: number; failed: number; devices: number } | null>(null);
 
   const handleSend = async () => {
     setStatus("sending");
@@ -54,7 +54,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setResult({ sent: data.sent, failed: data.failed });
+      setResult({ sent: data.sent, failed: data.failed, devices: data.devices ?? 1 });
       setStatus("done");
     } catch (err) {
       alert((err as Error).message);
@@ -85,8 +85,18 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Maks <strong>20 pesan/sesi</strong>, tunggu 2–3 jam sebelum sesi berikutnya</li>
                 <li>Jika penerima lapor spam, nomor Anda bisa diblokir permanen</li>
-                <li>Pesan dikirim dengan jeda <strong>4–8 detik acak</strong> antar nomor</li>
+                <li>Pesan dikirim dengan jeda <strong>8–16 detik acak</strong> antar nomor (dihandle Fonnte)</li>
               </ul>
+            </div>
+            <div className="bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 flex items-start gap-2">
+              <span className="text-lg leading-none">🔄</span>
+              <div>
+                <p className="text-indigo-300 text-xs font-semibold">Rotator Aktif</p>
+                <p className="text-indigo-200/60 text-[11px] mt-0.5">
+                  Jika Anda memiliki lebih dari 1 token Fonnte di Settings, sistem akan otomatis
+                  menggilir device pengirim — mengurangi risiko ban secara signifikan.
+                </p>
+              </div>
             </div>
 
             <textarea
@@ -102,7 +112,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</>
                   : <><Send className="w-4 h-4" /> Kirim ke {leads.length} Lead</>}
               </Button>
-              <p className="text-blue-200/30 text-xs">Estimasi ~{Math.ceil(leads.length * 6 / 60)} menit</p>
+              <p className="text-blue-200/30 text-xs">Dikirim sekaligus · delay dihandle Fonnte</p>
             </div>
           </div>
         ) : (
@@ -118,8 +128,12 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <p className="text-red-400 text-2xl font-bold">{result?.failed}</p>
                 <p className="text-blue-200/50 text-xs">Gagal</p>
               </div>
+              <div className="text-center">
+                <p className="text-indigo-400 text-2xl font-bold">{result?.devices ?? 1}</p>
+                <p className="text-blue-200/50 text-xs">Device</p>
+              </div>
             </div>
-            <p className="text-blue-200/40 text-xs">Lead yang berhasil dikirim otomatis dipindah ke status &ldquo;Follow-up&rdquo;</p>
+            <p className="text-blue-200/40 text-xs">Pesan masuk antrian Fonnte &amp; akan terkirim otomatis dengan jeda 8–16 detik</p>
             <Button onClick={onDone} variant="outline"
               className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
               Tutup &amp; Refresh
