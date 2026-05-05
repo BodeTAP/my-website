@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   Search, Loader2, Globe, GlobeOff, CheckSquare, Square,
   Save, ChevronRight, DatabaseZap, Star, Download,
-  MapPin, Clock, XCircle, History, Crosshair,
+  MapPin, Clock, XCircle, History, Crosshair, ChevronDown, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PlaceLead } from "@/app/api/admin/leads/finder/route";
@@ -15,12 +15,36 @@ const PRESETS = [
   "minimarket", "konter hp", "travel agent", "percetakan", "jasa fotografi",
 ];
 
-const CITIES = [
-  "Jakarta", "Bandung", "Surabaya", "Medan", "Semarang",
-  "Makassar", "Palembang", "Tangerang", "Depok", "Bekasi",
-  "Bogor", "Yogyakarta", "Solo", "Malang", "Denpasar",
-  "Balikpapan", "Pekanbaru", "Batam", "Manado", "Cirebon",
+type CityGroup = { label: string; cities: string[] };
+
+const CITY_GROUPS: CityGroup[] = [
+  {
+    label: "Jawa",
+    cities: ["Jakarta", "Jakarta Selatan", "Jakarta Utara", "Jakarta Barat", "Jakarta Timur", "Jakarta Pusat",
+             "Bandung", "Surabaya", "Semarang", "Yogyakarta", "Solo", "Malang",
+             "Tangerang", "Depok", "Bekasi", "Bogor", "Cirebon", "Serang", "Cilegon"],
+  },
+  {
+    label: "Bali & Nusa Tenggara",
+    cities: ["Denpasar", "Kuta", "Seminyak", "Ubud", "Canggu", "Sanur", "Nusa Dua",
+             "Gianyar", "Tabanan", "Singaraja", "Karangasem", "Jimbaran"],
+  },
+  {
+    label: "Sumatera",
+    cities: ["Medan", "Palembang", "Pekanbaru", "Batam", "Padang", "Lampung"],
+  },
+  {
+    label: "Kalimantan",
+    cities: ["Balikpapan", "Samarinda", "Pontianak", "Banjarmasin"],
+  },
+  {
+    label: "Sulawesi & Timur",
+    cities: ["Makassar", "Manado"],
+  },
 ];
+
+// Flat list for search filtering
+const ALL_CITIES = CITY_GROUPS.flatMap((g) => g.cities);
 
 type SavedStatus = "idle" | "saving" | "saved" | "error";
 type FilterType  = "ALL" | "NO_WEBSITE" | "HAS_WEBSITE";
@@ -57,6 +81,155 @@ function BusinessStatusBadge({ status }: { status: PlaceLead["businessStatus"] }
     <span className="flex items-center gap-1 text-[10px] text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
       <Clock className="w-2.5 h-2.5" /> Tutup Sementara
     </span>
+  );
+}
+
+// ── Custom City Dropdown ───────────────────────────────────────────────────────
+function CityDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen]       = useState(false);
+  const [search, setSearch]   = useState("");
+  const containerRef          = useRef<HTMLDivElement>(null);
+  const searchRef             = useRef<HTMLInputElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (open) setTimeout(() => searchRef.current?.focus(), 50);
+  }, [open]);
+
+  const filtered = search.trim()
+    ? ALL_CITIES.filter((c) => c.toLowerCase().includes(search.toLowerCase()))
+    : null; // null = show grouped
+
+  const select = (city: string) => {
+    onChange(city);
+    setOpen(false);
+    setSearch("");
+  };
+
+  const clear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange("");
+    setSearch("");
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`w-full flex items-center justify-between gap-2 bg-white/5 border rounded-xl px-4 py-2.5 text-sm transition-all outline-none ${
+          open ? "border-indigo-500/50 bg-white/8" : "border-white/10 hover:border-white/20"
+        }`}
+      >
+        <span className={`flex items-center gap-2 truncate ${value ? "text-white" : "text-blue-200/30"}`}>
+          {value ? (
+            <>
+              <MapPin className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              {value}
+            </>
+          ) : (
+            "Pilih kota / area..."
+          )}
+        </span>
+        <span className="flex items-center gap-1 shrink-0">
+          {value && (
+            <span onClick={clear}
+              className="p-0.5 rounded hover:bg-white/10 text-blue-200/40 hover:text-white transition-colors">
+              <X className="w-3 h-3" />
+            </span>
+          )}
+          <ChevronDown className={`w-4 h-4 text-blue-200/40 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        </span>
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div className="absolute z-50 top-full mt-2 w-full rounded-2xl border border-white/10 bg-[#0f1629]/95 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden">
+          {/* Search inside dropdown */}
+          <div className="p-2 border-b border-white/5">
+            <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
+              <Search className="w-3.5 h-3.5 text-blue-200/40 shrink-0" />
+              <input
+                ref={searchRef}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari kota..."
+                className="flex-1 bg-transparent text-white text-sm placeholder:text-blue-200/30 outline-none"
+              />
+              {search && (
+                <button type="button" onClick={() => setSearch("")}>
+                  <X className="w-3 h-3 text-blue-200/40 hover:text-white" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="max-h-64 overflow-y-auto py-1.5 scrollbar-thin">
+            {filtered ? (
+              // Search results — flat list
+              filtered.length === 0 ? (
+                <p className="text-blue-200/30 text-xs text-center py-4">Tidak ditemukan</p>
+              ) : (
+                filtered.map((city) => (
+                  <button key={city} type="button" onClick={() => select(city)}
+                    className={`w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left transition-colors ${
+                      value === city
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                    }`}>
+                    <MapPin className="w-3.5 h-3.5 text-indigo-400/50 shrink-0" />
+                    {city}
+                  </button>
+                ))
+              )
+            ) : (
+              // Grouped list
+              CITY_GROUPS.map((group) => (
+                <div key={group.label}>
+                  <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-blue-200/30">
+                    {group.label}
+                  </p>
+                  {group.cities.map((city) => (
+                    <button key={city} type="button" onClick={() => select(city)}
+                      className={`w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left transition-colors ${
+                        value === city
+                          ? "bg-indigo-500/20 text-indigo-300"
+                          : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                      }`}>
+                      <MapPin className="w-3.5 h-3.5 text-indigo-400/50 shrink-0" />
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Or type manually */}
+          <div className="p-2 border-t border-white/5">
+            <button type="button"
+              onClick={() => { onChange(search || value); setOpen(false); setSearch(""); }}
+              className="w-full text-center text-[11px] text-blue-200/30 hover:text-blue-200/60 py-1 transition-colors">
+              atau ketik manual lalu tekan Enter
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -237,16 +410,7 @@ export default function LeadFinder() {
                   <Crosshair className="w-2.5 h-2.5" /> Presisi lebih akurat
                 </span>
               </label>
-              <input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="contoh: Bandung, Jakarta Selatan..."
-                list="city-suggestions"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/30 outline-none focus:border-indigo-500/50 text-sm"
-              />
-              <datalist id="city-suggestions">
-                {CITIES.map((c) => <option key={c} value={c} />)}
-              </datalist>
+              <CityDropdown value={city} onChange={setCity} />
             </div>
           </div>
 
