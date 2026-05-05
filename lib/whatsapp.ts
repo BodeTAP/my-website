@@ -10,7 +10,11 @@ export function normalizePhone(raw: string): string {
 
 /** Send a WhatsApp message via Fonnte. Returns true on success.
  *  Pass apiKey explicitly for bulk sends (pre-fetched via getFonnteKey from lib/getFonnteKey). */
-export async function sendWA(to: string, message: string, apiKey?: string): Promise<boolean> {
+export async function sendWA(
+  to: string,
+  message: string,
+  apiKey?: string,
+): Promise<boolean> {
   const key = apiKey ?? process.env.FONNTE_API_KEY;
 
   if (!key) {
@@ -62,7 +66,7 @@ export async function sendWA(to: string, message: string, apiKey?: string): Prom
 // ── Batch sender (rotator) ─────────────────────────────────────────────────────
 
 type BatchItem = {
-  phone: string;   // raw phone, will be normalized
+  phone: string; // raw phone, will be normalized
   message: string;
 };
 
@@ -120,10 +124,17 @@ export async function sendWABatch(
       body,
     });
 
-    const json = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+    const json = (await res.json().catch(() => null)) as Record<
+      string,
+      unknown
+    > | null;
 
     if (!res.ok || json?.status === false) {
-      console.error("[WA Batch] Fonnte error:", res.status, JSON.stringify(json));
+      console.error(
+        "[WA Batch] Fonnte error:",
+        res.status,
+        JSON.stringify(json),
+      );
       // Mark all as failed on API-level error
       return items.map((i) => ({ phone: i.phone, ok: false }));
     }
@@ -331,7 +342,7 @@ export const waMsg = {
       `✅ Terlihat lebih profesional & terpercaya\n` +
       `✅ Dapat pelanggan baru 24 jam sehari\n\n` +
       `Mulai dari *Rp 800.000* saja, sudah termasuk desain premium & SEO dasar.\n\n` +
-      `Boleh saya kirimkan info dan portofolio lengkapnya? 🙏` +
+      `Bisa kita atur jadwal untuk membahas detail lebih lanjut? 🙏` +
       FOOTER
     );
   },
