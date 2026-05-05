@@ -16,6 +16,7 @@ type SavedStatus = "idle" | "saving" | "saved" | "error";
 export default function LeadFinder() {
   const [query, setQuery]         = useState("");
   const [city, setCity]           = useState("");
+  const [pages, setPages]         = useState(3);
   const [loading, setLoading]     = useState(false);
   const [places, setPlaces]       = useState<PlaceLead[]>([]);
   const [searched, setSearched]   = useState(false);
@@ -41,7 +42,7 @@ export default function LeadFinder() {
       const res = await fetch("/api/admin/leads/finder", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ query: fullQuery }),
+        body:    JSON.stringify({ query: fullQuery, pages }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal mengambil data");
@@ -151,12 +152,24 @@ export default function LeadFinder() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading}
               className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2 px-6">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              {loading ? "Mencari..." : "Cari Calon Klien"}
+              {loading ? `Mencari ${pages === 1 ? "20" : pages === 2 ? "40" : "60"} data...` : "Cari Calon Klien"}
             </Button>
+            {/* Jumlah hasil */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-blue-200/40 text-xs">Maks hasil:</span>
+              {([1, 2, 3] as const).map((n) => (
+                <button key={n} type="button" onClick={() => setPages(n)}
+                  className={`px-2.5 py-1 rounded-lg text-xs border transition-all ${
+                    pages === n ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300" : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                  }`}>
+                  {n * 20}
+                </button>
+              ))}
+            </div>
             {fullQuery && !loading && (
               <span className="text-blue-200/40 text-xs">Query: &ldquo;{fullQuery}&rdquo;</span>
             )}

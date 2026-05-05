@@ -27,37 +27,57 @@ export async function POST(req: NextRequest) {
   if (!apiKey) return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY belum dikonfigurasi" }, { status: 503 });
 
   try {
-    const { query, maxResults = 20 } = await req.json();
+    const { query, pages = 3 } = await req.json();
     if (!query?.trim()) return NextResponse.json({ error: "Query tidak boleh kosong" }, { status: 400 });
 
-    const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
-      method: "POST",
-      headers: {
-        "Content-Type":    "application/json",
-        "X-Goog-Api-Key":  apiKey,
-        "X-Goog-FieldMask": [
-          "places.id",
-          "places.displayName",
-          "places.formattedAddress",
-          "places.nationalPhoneNumber",
-          "places.websiteUri",
-          "places.primaryTypeDisplayName",
-        ].join(","),
-      },
-      body: JSON.stringify({
-        textQuery:      query.trim(),
-        maxResultCount: Math.min(maxResults, 20),
-        languageCode:   "id",
-      }),
-    });
+    const FIELD_MASK = [
+      "places.id",
+      "places.displayName",
+      "places.formattedAddress",
+      "places.nationalPhoneNumber",
+      "places.websiteUri",
+      "places.primaryTypeDisplayName",
+      "nextPageToken",
+    ].join(",");
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return NextResponse.json({ error: `Google Places API error: ${res.status}`, detail: err }, { status: 502 });
+    const fetchPage = async (pageToken?: string) => {
+      const body: Record<string, unknown> = {
+        textQuery:      query.trim(),
+        maxResultCount: 20,
+        languageCode:   "id",
+      };
+      if (pageToken) body.pageToken = pageToken;
+
+      const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+        method: "POST",
+        headers: {
+          "Content-Type":    "application/json",
+          "X-Goog-Api-Key":  apiKey,
+          "X-Goog-FieldMask": FIELD_MASK,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`Google Places API error ${res.status}: ${JSON.stringify(err)}`);
+      }
+      return res.json() as Promise<{ places?: Record<string, unknown>[]; nextPageToken?: string }>;
+    };
+
+    // Ambil hingga `pages` halaman (maks 3 = 60 hasil)
+    const maxPages = Math.min(Math.max(1, pages), 3);
+    const allRaw: Record<string, unknown>[] = [];
+    let nextToken: string | undefined;
+
+    for (let i = 0; i < maxPages; i++) {
+      const data = await fetchPage(nextToken);
+      allRaw.push(...(data.places ?? []));
+      nextToken = data.nextPageToken;
+      if (!nextToken) break;
     }
 
-    const data = await res.json() as { places?: Record<string, unknown>[] };
-    const places: PlaceLead[] = (data.places ?? []).map((p) => {
+    const places: PlaceLead[] = allRaw.map((p) => {
       const name    = (p.displayName as { text?: string })?.text ?? "";
       const phone   = (p.nationalPhoneNumber as string) ?? "";
       const website = (p.websiteUri as string) ?? null;
@@ -70,7 +90,7 @@ export async function POST(req: NextRequest) {
         website,
         category:     (p.primaryTypeDisplayName as { text?: string })?.text ?? "",
         hasWebsite:   !!website,
-        alreadySaved: false, // akan di-update di bawah
+        alreadySaved: false,
       };
     });
 
