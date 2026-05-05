@@ -26,6 +26,7 @@ export type PaymentChannel = {
   name:     string;
   type:     string;
   fee_merchant: { flat: number; percent: string };
+  fee_customer: { flat: number; percent: string };
   total_fee:    { flat: number; percent: string };
   icon_url: string;
   active:   boolean;

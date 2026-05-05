@@ -21,13 +21,15 @@ function groupChannels(channels: PaymentChannel[]) {
   return map;
 }
 
-function formatFee(ch: PaymentChannel): string {
-  const flat    = ch.total_fee.flat;
-  const percent = parseFloat(ch.total_fee.percent);
+function formatFee(ch: PaymentChannel): string | null {
+  // Hanya tampilkan biaya jika dibebankan ke customer
+  const flat    = ch.fee_customer?.flat ?? 0;
+  const percent = ch.fee_customer?.percent ? parseFloat(ch.fee_customer.percent) : 0;
+  
   if (flat > 0 && percent > 0) return `+Rp ${flat.toLocaleString("id-ID")} + ${percent}%`;
   if (flat > 0)    return `+Rp ${flat.toLocaleString("id-ID")}`;
   if (percent > 0) return `+${percent}%`;
-  return "Gratis";
+  return null; // Tidak ada biaya untuk customer (dibebankan ke merchant)
 }
 
 export default function PaymentSelector({ invoiceNo, channels }: Props) {
@@ -133,9 +135,11 @@ export default function PaymentSelector({ invoiceNo, channels }: Props) {
                           <p className={`text-sm font-medium ${isSelected ? "text-white" : "text-blue-200/80"}`}>
                             {ch.name}
                           </p>
-                          <p className={`text-[10px] mt-0.5 ${isSelected ? "text-blue-200/60" : "text-blue-200/40"}`}>
-                            Biaya Admin: {formatFee(ch)}
-                          </p>
+                          {formatFee(ch) && (
+                            <p className={`text-[10px] mt-0.5 ${isSelected ? "text-blue-200/60" : "text-blue-200/40"}`}>
+                              Biaya Admin: {formatFee(ch)}
+                            </p>
+                          )}
                         </div>
                       </button>
                     );
