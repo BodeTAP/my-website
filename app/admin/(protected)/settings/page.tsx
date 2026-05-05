@@ -8,8 +8,9 @@ const DEFAULTS = {
   hero_stat_1_num: "50+", hero_stat_1_label: "Proyek selesai",
   hero_stat_2_num: "95%", hero_stat_2_label: "Klien puas",
   hero_stat_3_num: "3 hari", hero_stat_3_label: "Rata-rata delivery",
-  facebook_pixel_id: "",
+  facebook_pixel_id:   "",
   google_analytics_id: "",
+  fonnte_api_key:      "",
   ...AI_DEFAULTS,
 };
 

@@ -355,6 +355,38 @@ export default function SettingsClient({
             </div>
           </div>
 
+          {/* WhatsApp Device */}
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">WhatsApp Device</h2>
+            <p className="text-blue-200/40 text-sm mb-6">
+              API key Fonnte untuk nomor WA yang digunakan broadcast. Kosongkan untuk menggunakan nilai dari environment variable <code className="text-blue-300 bg-blue-900/30 px-1.5 py-0.5 rounded text-xs">FONNTE_API_KEY</code>.
+            </p>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Fonnte API Key</Label>
+                <Input
+                  type="password"
+                  value={form.fonnte_api_key ?? ""}
+                  onChange={set("fonnte_api_key")}
+                  placeholder="Masukkan API key Fonnte device baru..."
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 font-mono"
+                />
+              </div>
+              {form.fonnte_api_key && (
+                <p className="text-green-400/70 text-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  Menggunakan API key dari pengaturan (override env variable)
+                </p>
+              )}
+              {!form.fonnte_api_key && (
+                <p className="text-blue-200/30 text-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400/40" />
+                  Menggunakan <code className="text-blue-300/50">FONNTE_API_KEY</code> dari Vercel environment
+                </p>
+              )}
+            </div>
+          </div>
+
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
 
           <div className="flex items-center gap-4 pt-2">

@@ -1,4 +1,15 @@
+import { prisma } from "@/lib/prisma";
+
 const FONNTE_URL = "https://api.fonnte.com/send";
+
+/** Ambil Fonnte API key: DB (admin settings) → env var */
+export async function getFonnteKey(): Promise<string | undefined> {
+  try {
+    const row = await prisma.siteSetting.findUnique({ where: { key: "fonnte_api_key" } });
+    if (row?.value) return row.value;
+  } catch { /* fallback */ }
+  return process.env.FONNTE_API_KEY;
+}
 
 /** Normalize Indonesian phone to 628xxx format (no +, no spaces) */
 export function normalizePhone(raw: string): string {
@@ -8,12 +19,13 @@ export function normalizePhone(raw: string): string {
   return n;
 }
 
-/** Send a WhatsApp message via Fonnte. Returns true on success. */
-export async function sendWA(to: string, message: string): Promise<boolean> {
-  const key = process.env.FONNTE_API_KEY;
+/** Send a WhatsApp message via Fonnte. Returns true on success.
+ *  apiKey param: pass pre-fetched key for bulk sends to avoid repeated DB queries. */
+export async function sendWA(to: string, message: string, apiKey?: string): Promise<boolean> {
+  const key = apiKey ?? await getFonnteKey();
 
   if (!key) {
-    console.error("[WA] FONNTE_API_KEY belum dikonfigurasi");
+    console.error("[WA] API key tidak ditemukan — set FONNTE_API_KEY atau simpan di admin settings");
     return false;
   }
   if (!to?.trim()) {

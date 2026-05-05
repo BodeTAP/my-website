@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendWA } from "@/lib/whatsapp";
+import { sendWA, getFonnteKey } from "@/lib/whatsapp";
 
 async function requireAdmin() {
   const s = await auth();
@@ -30,12 +30,15 @@ export async function POST(req: NextRequest) {
 
     const results: { id: string; name: string; ok: boolean }[] = [];
 
+    // Fetch key once — bisa dari DB (admin settings) atau env var
+    const waKey = await getFonnteKey();
+
     for (const lead of leads) {
       const personalizedMsg = message
         .replace(/\{name\}/g, lead.name)
         .replace(/\{businessName\}/g, lead.businessName);
 
-      const ok = await sendWA(lead.whatsapp, personalizedMsg);
+      const ok = await sendWA(lead.whatsapp, personalizedMsg, waKey);
       results.push({ id: lead.id, name: lead.name, ok });
 
       // Jeda random 4-8 detik antar pesan agar tidak terdeteksi sebagai bot oleh WhatsApp
