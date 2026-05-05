@@ -21,6 +21,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nama, nama bisnis, dan WhatsApp wajib diisi" }, { status: 400 });
     }
 
+    // Basic phone validation — must contain at least 8 digits
+    const digitsOnly = whatsapp.replace(/\D/g, "");
+    if (digitsOnly.length < 8 || digitsOnly.length > 15) {
+      return NextResponse.json({ error: "Nomor WhatsApp tidak valid" }, { status: 400 });
+    }
+
     const lead = await prisma.lead.create({
       data: {
         name: name.trim(),

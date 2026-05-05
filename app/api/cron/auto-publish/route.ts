@@ -124,8 +124,6 @@ Jangan tambahkan teks apapun di luar JSON.`,
   return JSON.parse(jsonMatch[0]);
 }
 
-export async function GET(req: NextRequest) { return POST(req); }
-
 export async function POST(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   const given  = req.headers.get("x-cron-secret")

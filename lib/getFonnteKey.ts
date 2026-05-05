@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 /**
  * Returns a single active Fonnte API key.
  * Priority: DB setting `fonnte_api_key` → env FONNTE_API_KEY
+ *
+ * NOTE: Keys stored in DB are plaintext. For higher security,
+ * prefer using env vars (FONNTE_API_KEY / FONNTE_API_KEYS) instead.
  */
 export async function getFonnteKey(): Promise<string | undefined> {
   try {

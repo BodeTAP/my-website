@@ -34,8 +34,12 @@ export async function GET(req: NextRequest) {
       sentCount++;
       
       after(async () => {
+        if (!inv.client.phone) {
+          console.warn(`[InvoiceReminder] Client ${inv.clientId} tidak punya nomor WA — reminder dilewati`);
+          return;
+        }
         await sendWA(
-          inv.client.phone!,
+          inv.client.phone,
           waMsg.invoiceReminder(
             inv.client.user.name || "Klien",
             inv.invoiceNo,

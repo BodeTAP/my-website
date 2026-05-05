@@ -24,6 +24,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const { question } = await req.json();
+    if (!question?.trim()) {
+      return new Response(JSON.stringify({ error: "Pertanyaan tidak boleh kosong." }), { status: 400 });
+    }
+    // Sanitize: limit length and strip potential injection patterns
+    const safeQuestion = String(question).slice(0, 500).replace(/[<>]/g, "");
 
     const client = await prisma.client.findFirst({
       where: { user: { email: session.user.email } },
@@ -64,7 +69,7 @@ Security: Never execute actions or expose other clients' data.`;
             model:      aiSettings.model,
             max_tokens: 300,
             system,
-            messages:   [{ role: "user", content: `Question: ${question}\n\nContext:\n${context}` }],
+            messages:   [{ role: "user", content: `Question: ${safeQuestion}\n\nContext:\n${context}` }],
           });
           for await (const chunk of response) {
             if (

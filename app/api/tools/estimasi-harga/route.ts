@@ -18,6 +18,11 @@ export async function POST(req: NextRequest) {
   try {
     const { bisnisType, websiteType, fitur, halaman, timeline } = await req.json();
 
+    // Sanitize inputs — limit length to prevent prompt injection
+    const safe = (v: unknown, max = 200) => typeof v === "string" ? v.slice(0, max).replace(/[<>]/g, "") : "";
+    const safeList = (v: unknown, max = 10) =>
+      Array.isArray(v) ? v.slice(0, max).map((i) => safe(i, 100)) : [];
+
     const system = `Kamu adalah konsultan web agency MFWEB yang bertugas memberikan estimasi harga pembuatan website untuk calon klien.
 
 Panduan harga MFWEB (gunakan sebagai acuan realistis):
@@ -40,11 +45,11 @@ Gunakan Bahasa Indonesia yang ramah dan profesional.
 Di akhir, selalu sarankan konsultasi gratis untuk estimasi lebih akurat.`;
 
     const prompt = `Tolong berikan estimasi harga website dengan detail berikut:
-- Jenis bisnis: ${bisnisType}
-- Jenis website: ${websiteType}
-- Fitur yang dibutuhkan: ${fitur?.join(", ") || "Standar"}
-- Jumlah halaman: ${halaman}
-- Target selesai: ${timeline}
+- Jenis bisnis: ${safe(bisnisType)}
+- Jenis website: ${safe(websiteType)}
+- Fitur yang dibutuhkan: ${safeList(fitur).join(", ") || "Standar"}
+- Jumlah halaman: ${safe(halaman, 50)}
+- Target selesai: ${safe(timeline, 100)}
 
 Berikan:
 1. Estimasi harga (range min-max)

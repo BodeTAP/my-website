@@ -5,11 +5,31 @@ import { sendTicketReplyToAdminEmail } from "@/lib/email";
 
 type Params = { params: Promise<{ id: string }> };
 
+/** Resolve the authenticated client and verify they own the ticket */
+async function getClientAndVerifyTicket(email: string, ticketId: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, client: { select: { id: true } } },
+  });
+  if (!user?.client) return null;
+
+  const ticket = await prisma.ticket.findFirst({
+    where: { id: ticketId, clientId: user.client.id },
+    include: { client: { include: { user: { select: { name: true } } } } },
+  });
+  return ticket ? { userId: user.id, clientId: user.client.id, ticket } : null;
+}
+
 export async function GET(_req: Request, { params }: Params) {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: ticketId } = await params;
+
+  // Verify ownership before returning messages
+  const ownership = await getClientAndVerifyTicket(session.user.email, ticketId);
+  if (!ownership) return NextResponse.json({ error: "Tiket tidak ditemukan" }, { status: 404 });
+
   const messages = await prisma.ticketMessage.findMany({
     where: { ticketId },
     orderBy: { createdAt: "asc" },
@@ -19,26 +39,26 @@ export async function GET(_req: Request, { params }: Params) {
 
 export async function POST(req: Request, { params }: Params) {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: ticketId } = await params;
+
+  // Verify ownership before allowing message creation
+  const ownership = await getClientAndVerifyTicket(session.user.email, ticketId);
+  if (!ownership) return NextResponse.json({ error: "Tiket tidak ditemukan" }, { status: 404 });
+
   const { body } = await req.json();
+  if (!body?.trim()) return NextResponse.json({ error: "Pesan tidak boleh kosong" }, { status: 400 });
 
-  // Resolve userId from session — never trust body for ownership
-  const user = await prisma.user.findUnique({
-    where: { email: session.user!.email! },
-    select: { id: true },
-  });
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { userId, ticket } = ownership;
 
-  const [message, ticket] = await Promise.all([
+  const [message] = await Promise.all([
     prisma.ticketMessage.create({
-      data: { ticketId, senderId: user.id, senderRole: "CLIENT", body: body.trim() },
+      data: { ticketId, senderId: userId, senderRole: "CLIENT", body: body.trim().slice(0, 5000) },
     }),
     prisma.ticket.update({
       where: { id: ticketId },
       data: { status: "OPEN", updatedAt: new Date() },
-      include: { client: { include: { user: { select: { name: true } } } } },
     }),
   ]);
 

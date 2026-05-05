@@ -46,15 +46,17 @@ export async function GET(req: NextRequest) {
           if (adminPhone) {
             await sendWA(adminPhone, `⚠️ Reconciliation: Invoice ${inv.invoiceNo} ditandai LUNAS (webhook missed)`);
           }
-          await sendWA(
-            inv.client.phone!,
-            waMsg.paymentPaid(
-              inv.client.user.name || "Klien",
-              inv.invoiceNo,
-              inv.amount,
-              "Tripay (Reconciled)"
-            )
-          );
+          if (inv.client.phone) {
+            await sendWA(
+              inv.client.phone,
+              waMsg.paymentPaid(
+                inv.client.user.name || "Klien",
+                inv.invoiceNo,
+                inv.amount,
+                "Tripay (Reconciled)"
+              )
+            );
+          }
         });
       }
     } catch (err) {

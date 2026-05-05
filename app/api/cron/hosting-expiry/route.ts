@@ -12,9 +12,9 @@ function daysBetween(a: Date, b: Date) {
 // POST /api/cron/hosting-expiry
 // Dipanggil oleh cron-job.org setiap hari jam 07.00 WIB
 export async function POST(req: NextRequest) {
-  // Verifikasi CRON_SECRET untuk keamanan
-  const secret = req.headers.get("x-cron-secret");
-  if (CRON_SECRET && secret !== CRON_SECRET) {
+  // Verifikasi CRON_SECRET — gunakan header Authorization: Bearer <secret> (konsisten dengan cron lain)
+  const authHeader = req.headers.get("authorization");
+  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
