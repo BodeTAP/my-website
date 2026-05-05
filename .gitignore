@@ -61,3 +61,5 @@ public/sitemap*.xml
 
 # Claude Code internal files
 .claude/
+
+.kiro/
