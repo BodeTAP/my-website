@@ -12,22 +12,45 @@ async function requireAdmin() {
 // Minimum hours between broadcasts to the same lead
 const COOLDOWN_HOURS = 24;
 
-// Message variation prefixes — randomly prepended to avoid identical messages
-const MSG_VARIATIONS = [
-  "", // no prefix (original)
-  "Selamat pagi! ",
-  "Halo! ",
-  "Permisi, ",
-  "Salam kenal! ",
+// Message variation suffixes — appended to the end of every message.
+// This approach works regardless of how the message starts (avoids the
+// "Halo" prefix conflict with the default prospectCold template).
+const MSG_SUFFIXES = [
+  "",                                          // slot 0 — no suffix (original)
+  "\n\n_Semoga harinya menyenangkan!_ 😊",
+  "\n\n_Kami siap membantu kapan saja._ 🙏",
+  "\n\n_Jangan ragu untuk bertanya!_ 💬",
+  "\n\n_Terima kasih atas waktunya._ 🌟",
+  "\n\n_Salam sukses untuk bisnisnya!_ 🚀",
 ];
 
-/** Inject a random variation prefix into the message to avoid identical texts */
+// Emoji variations injected before the first bullet point (✅) if present,
+// to add visual variety without changing the message meaning.
+const BULLET_EMOJIS = ["✅", "☑️", "✔️", "💡", "⭐"];
+
+/** Apply variation to a message based on its index in the batch */
 function varyMessage(message: string, index: number): string {
-  const prefix = MSG_VARIATIONS[index % MSG_VARIATIONS.length];
-  if (!prefix) return message;
-  // Only prepend if message starts with "Halo" — avoid double greeting
-  if (message.startsWith("Halo") || message.startsWith("halo")) return message;
-  return prefix + message;
+  let result = message;
+
+  // 1. Rotate bullet emojis if message contains ✅
+  if (result.includes("✅")) {
+    const emoji = BULLET_EMOJIS[index % BULLET_EMOJIS.length];
+    result = result.replaceAll("✅", emoji);
+  }
+
+  // 2. Append a rotating suffix (cycles through all 6 slots)
+  const suffix = MSG_SUFFIXES[index % MSG_SUFFIXES.length];
+  if (suffix) {
+    // Insert before the FOOTER line if present, otherwise append at end
+    const footerIdx = result.lastIndexOf("\n\n_MFWEB");
+    if (footerIdx !== -1) {
+      result = result.slice(0, footerIdx) + suffix + result.slice(footerIdx);
+    } else {
+      result = result + suffix;
+    }
+  }
+
+  return result;
 }
 
 export async function POST(req: NextRequest) {
