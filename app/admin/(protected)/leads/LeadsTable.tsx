@@ -9,7 +9,7 @@ import { FadeUp } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
 import LeadsSearch from "./LeadsSearch";
 import LeadsPagination from "./LeadsPagination";
-import { waMsg } from "@/lib/whatsapp";
+import { waMsg } from "@/lib/waTemplates";
 
 type Lead = {
   id: string;

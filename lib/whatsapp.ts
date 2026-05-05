@@ -1,3 +1,4 @@
+import "server-only";
 import { getFonnteKey } from "./getFonnteKey";
 
 const FONNTE_URL = "https://api.fonnte.com/send";
