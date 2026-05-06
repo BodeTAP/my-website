@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ id: string }> };
@@ -10,6 +11,8 @@ export async function PUT(req: Request, { params }: Params) {
   if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const denied = await requireApiPermission("articles");
+  if (denied) return denied;
 
   const { id } = await params;
   const body = await req.json();
@@ -54,6 +57,8 @@ export async function DELETE(_req: Request, { params }: Params) {
   if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const denied = await requireApiPermission("articles");
+  if (denied) return denied;
 
   const { id } = await params;
   try {

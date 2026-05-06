@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 // PATCH /api/admin/hosting/[id]
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("hosting");
+  if (denied) return denied;
 
   const { id } = await params;
   const body = await req.json();
@@ -38,6 +41,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("hosting");
+  if (denied) return denied;
 
   const { id } = await params;
   await prisma.hostingRecord.delete({ where: { id } });

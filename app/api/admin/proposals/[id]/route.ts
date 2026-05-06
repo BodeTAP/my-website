@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ id: string }> };
@@ -13,6 +14,8 @@ async function requireAdmin() {
 
 export async function GET(_req: NextRequest, { params }: Params) {
   if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("proposals");
+  if (denied) return denied;
 
   const { id } = await params;
   const proposal = await prisma.proposal.findUnique({
@@ -25,6 +28,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("proposals");
+  if (denied) return denied;
 
   const { id } = await params;
   const body = await req.json();
@@ -52,6 +57,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("proposals");
+  if (denied) return denied;
 
   const { id } = await params;
   await prisma.proposal.delete({ where: { id } });

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 function requireAdmin() {
@@ -13,6 +14,8 @@ function requireAdmin() {
 export async function GET() {
   const denied = await requireAdmin();
   if (denied) return denied;
+  const apiDenied = await requireApiPermission("testimonials");
+  if (apiDenied) return apiDenied;
   const testimonials = await prisma.testimonial.findMany({ orderBy: { order: "asc" } });
   return NextResponse.json(testimonials);
 }
@@ -20,6 +23,8 @@ export async function GET() {
 export async function POST(req: Request) {
   const denied = await requireAdmin();
   if (denied) return denied;
+  const apiDenied = await requireApiPermission("testimonials");
+  if (apiDenied) return apiDenied;
 
   const { name, business, text, rating, order, featured } = await req.json();
   if (!name?.trim() || !business?.trim() || !text?.trim()) {

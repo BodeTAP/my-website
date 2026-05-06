@@ -10,6 +10,7 @@ import { FadeUp } from "@/components/public/motion";
 import InvoiceSearch from "./InvoiceSearch";
 import InvoiceFilter from "./InvoiceFilter";
 import InvoicePagination from "./InvoicePagination";
+import { requireModule } from "@/lib/permissions";
 
 const WA_NUMBER = process.env.WHATSAPP_NUMBER ?? "6282221682343";
 const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
@@ -27,6 +28,7 @@ export default async function InvoicesPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  await requireModule("invoices");
   const params = await searchParams;
   const q = params.q || "";
   const status = params.status || "";

@@ -19,9 +19,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  client   Client?
+  accounts         Account[]
+  sessions         Session[]
+  client           Client?
+  adminPermission  AdminPermission?
 
   @@map("users")
 }
@@ -499,4 +500,56 @@ enum HostingStatus {
   ACTIVE
   EXPIRED
   SUSPENDED
+}
+
+// ─── Team Permissions ─────────────────────────────────────────────────────────
+
+model TeamRole {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  permissions      TeamRolePermission[]
+  adminAssignments AdminPermission[]
+
+  @@map("team_roles")
+}
+
+model TeamRolePermission {
+  id     String @id @default(cuid())
+  roleId String
+  module String // nilai dari VALID_MODULES
+
+  role TeamRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, module])
+  @@map("team_role_permissions")
+}
+
+model AdminPermission {
+  id           String   @id @default(cuid())
+  adminId      String   @unique
+  roleId       String?
+  isSuperAdmin Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  admin User      @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  role  TeamRole? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  @@map("admin_permissions")
+}
+
+model PermissionAuditLog {
+  id            String   @id @default(cuid())
+  changedBy     String   // userId Super Admin
+  targetAdminId String?
+  targetRoleId  String?
+  action        String   // ROLE_CREATED, ROLE_UPDATED, dll.
+  before        Json
+  after         Json
+  createdAt     DateTime @default(now())
+
+  @@map("permission_audit_logs")
 }

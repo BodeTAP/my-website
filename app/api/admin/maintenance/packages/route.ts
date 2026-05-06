@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 async function requireAdmin() {
@@ -9,12 +10,16 @@ async function requireAdmin() {
 
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("maintenance");
+  if (denied) return denied;
   const packages = await prisma.maintenancePackage.findMany({ orderBy: { price: "asc" } });
   return NextResponse.json(packages);
 }
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("maintenance");
+  if (denied) return denied;
   const { name, description, price, features, isActive } = await req.json();
   if (!name?.trim() || !price) return NextResponse.json({ error: "Nama dan harga wajib diisi." }, { status: 400 });
 

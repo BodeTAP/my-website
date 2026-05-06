@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendWABatch } from "@/lib/whatsapp";
 import { getFonnteKeys } from "@/lib/getFonnteKey";
@@ -87,6 +88,8 @@ function varyMessage(message: string, index: number): string {
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("broadcast");
+  if (denied) return denied;
 
   // 1. Time restriction — only allow 08:00–20:00 WIB
   if (!isWithinAllowedHours()) {
@@ -253,6 +256,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("broadcast");
+  if (denied) return denied;
 
   const logs = await prisma.broadcastLog.findMany({
     orderBy: { sentAt: "desc" },

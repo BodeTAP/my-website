@@ -27,7 +27,13 @@ function timeAgo(date: Date): string {
   return `${months} bln lalu`;
 }
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ denied?: string }>;
+}) {
+  const params = await searchParams;
+  const isDenied = params.denied === "1";
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
@@ -85,6 +91,12 @@ export default async function AdminDashboard() {
 
   return (
     <div>
+      {isDenied && (
+        <div className="mb-6 flex items-center gap-3 px-5 py-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-300">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-400" />
+          <p className="text-sm font-medium">Akses ditolak: Anda tidak memiliki izin untuk modul ini.</p>
+        </div>
+      )}
       <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
         <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-600/20 rounded-full blur-[60px] pointer-events-none" />
         <div className="relative z-10">

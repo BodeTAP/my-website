@@ -3,8 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Globe, ExternalLink, Star } from "lucide-react";
 import PortfolioModal from "@/components/admin/PortfolioModal";
 import DeletePortfolioButton from "@/components/admin/DeletePortfolioButton";
+import { requireModule } from "@/lib/permissions";
 
 export default async function AdminPortfolioPage() {
+  await requireModule("portfolio");
   const portfolios = await prisma.portfolio.findMany({
     orderBy: [{ order: "asc" }, { createdAt: "desc" }],
   });

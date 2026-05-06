@@ -40,13 +40,24 @@ export async function POST(req: Request) {
       data: { role: "ADMIN", password: await bcrypt.hash(password, 12) },
       select: { id: true, name: true, email: true, createdAt: true },
     });
+    await prisma.adminPermission.upsert({
+      where: { adminId: updated.id },
+      create: { adminId: updated.id, roleId: null, isSuperAdmin: false },
+      update: {},
+    });
     return NextResponse.json(updated, { status: 201 });
   }
 
   const hashed = await bcrypt.hash(password, 12);
-  const admin = await prisma.user.create({
-    data: { name: name || null, email, password: hashed, role: "ADMIN" },
-    select: { id: true, name: true, email: true, createdAt: true },
+  const [admin] = await prisma.$transaction(async (tx) => {
+    const newUser = await tx.user.create({
+      data: { name: name || null, email, password: hashed, role: "ADMIN" },
+      select: { id: true, name: true, email: true, createdAt: true },
+    });
+    await tx.adminPermission.create({
+      data: { adminId: newUser.id, roleId: null, isSuperAdmin: false },
+    });
+    return [newUser];
   });
 
   return NextResponse.json(admin, { status: 201 });

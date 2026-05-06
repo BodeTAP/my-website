@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ id: string }> };
@@ -11,6 +12,8 @@ async function requireAdmin() {
 
 export async function PATCH(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("testimonials");
+  if (denied) return denied;
   const { id } = await params;
   const { name, business, text, rating, order, featured } = await req.json();
 
@@ -30,6 +33,8 @@ export async function PATCH(req: Request, { params }: Params) {
 
 export async function DELETE(_req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("testimonials");
+  if (denied) return denied;
   const { id } = await params;
   await prisma.testimonial.delete({ where: { id } });
   return NextResponse.json({ ok: true });

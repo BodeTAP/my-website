@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Plus, Download, FileText, ScrollText } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { requireModule } from "@/lib/permissions";
 
 function formatRp(n: number) {
   if (n >= 1_000_000) return `Rp ${(n / 1_000_000).toFixed(1)}jt`;
@@ -22,6 +23,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function ProposalsPage() {
+  await requireModule("proposals");
   const proposals = await prisma.proposal.findMany({
     orderBy: { createdAt: "desc" },
     include: { lead: { select: { name: true } } },

@@ -8,6 +8,7 @@ import ArticleSearch from "./ArticleSearch";
 import ArticleFilter from "./ArticleFilter";
 import ArticlePagination from "./ArticlePagination";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { requireModule } from "@/lib/permissions";
 
 const PER_PAGE = 10;
 
@@ -16,6 +17,7 @@ export default async function ArticlesPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  await requireModule("articles");
   const params = await searchParams;
   const q = params.q || "";
   const status = params.status || "";

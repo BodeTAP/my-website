@@ -1,5 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
@@ -9,6 +10,8 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("tickets");
+  if (denied) return denied;
   const { id: ticketId } = await params;
   const messages = await prisma.ticketMessage.findMany({
     where: { ticketId },
@@ -22,6 +25,8 @@ export async function POST(req: Request, { params }: Params) {
   if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const denied = await requireApiPermission("tickets");
+  if (denied) return denied;
 
   const { id: ticketId } = await params;
   const { body, status } = await req.json();
@@ -67,6 +72,8 @@ export async function POST(req: Request, { params }: Params) {
 
 export async function PATCH(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("tickets");
+  if (denied) return denied;
 
   const { id: ticketId } = await params;
   const { status } = await req.json();

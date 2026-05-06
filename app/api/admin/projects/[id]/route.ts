@@ -1,5 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendProjectStatusEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
@@ -16,6 +17,8 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("projects");
+  if (denied) return denied;
 
   const { id } = await params;
   const { status, liveUrl, deadline, notes, name, description } = await req.json();
@@ -62,6 +65,8 @@ export async function PATCH(req: Request, { params }: Params) {
 
 export async function DELETE(_req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("projects");
+  if (denied) return denied;
 
   const { id } = await params;
   await prisma.project.delete({ where: { id } });

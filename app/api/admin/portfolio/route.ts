@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import slugify from "slugify";
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("portfolio");
+  if (denied) return denied;
 
   const body = await req.json();
   const { title, description, coverImage, clientName, techStack, liveUrl, metrics, order, featured } = body;

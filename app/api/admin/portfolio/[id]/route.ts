@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import slugify from "slugify";
 
@@ -14,6 +15,8 @@ async function requireAdmin() {
 
 export async function PATCH(req: Request, { params }: Params) {
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("portfolio");
+  if (denied) return denied;
 
   const { id } = await params;
   const body = await req.json();
@@ -49,6 +52,8 @@ export async function PATCH(req: Request, { params }: Params) {
 
 export async function DELETE(_req: Request, { params }: Params) {
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("portfolio");
+  if (denied) return denied;
 
   const { id } = await params;
   await prisma.portfolio.delete({ where: { id } });

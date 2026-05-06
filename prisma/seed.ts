@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { seedPermissions } from "./seed-permissions";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -22,6 +23,9 @@ async function main() {
 
   console.log("✅ Admin user created:", admin.email);
   console.log("   Password: admin123 (ganti setelah login pertama!)");
+
+  // Seed permissions — buat role "Full Access" dan migrasi admin yang ada
+  await seedPermissions();
 }
 
 main()

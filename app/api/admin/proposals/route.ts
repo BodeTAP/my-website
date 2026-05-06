@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 async function requireAdmin() {
@@ -11,6 +12,8 @@ async function requireAdmin() {
 
 export async function GET() {
   if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("proposals");
+  if (denied) return denied;
 
   const proposals = await prisma.proposal.findMany({
     orderBy: { createdAt: "desc" },
@@ -21,6 +24,8 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("proposals");
+  if (denied) return denied;
 
   const body = await req.json();
   const {

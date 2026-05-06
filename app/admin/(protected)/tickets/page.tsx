@@ -7,6 +7,7 @@ import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion
 import TicketSearch from "./TicketSearch";
 import TicketFilter from "./TicketFilter";
 import TicketPagination from "./TicketPagination";
+import { requireModule } from "@/lib/permissions";
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; border: string; text: string; icon: any }> = {
   OPEN: {
@@ -37,6 +38,7 @@ export default async function TicketsPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  await requireModule("tickets");
   const params = await searchParams;
   const q = params.q || "";
   const status = params.status || "";

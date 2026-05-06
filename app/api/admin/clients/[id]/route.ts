@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ id: string }> };
@@ -13,6 +14,8 @@ async function requireAdmin() {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("clients");
+  if (denied) return denied;
 
   const { id } = await params;
   const { phone, businessName, address } = await req.json();

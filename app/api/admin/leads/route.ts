@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 // DELETE — bulk delete leads
 export async function DELETE(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("leads");
+  if (denied) return denied;
 
   try {
     const { ids } = await req.json() as { ids: string[] };
@@ -22,6 +25,8 @@ export async function DELETE(req: NextRequest) {
 // POST — bulk create leads (dari LeadFinder)
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("leads");
+  if (denied) return denied;
 
   try {
     const body = await req.json();

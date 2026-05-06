@@ -4,8 +4,10 @@ import LeadsTable from "./LeadsTable";
 import { FadeUp } from "@/components/public/motion";
 import { Magnet, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { requireModule } from "@/lib/permissions";
 
 export default async function LeadsPage() {
+  await requireModule("leads");
   const leads = await prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
 
   const newLeadsCount = leads.filter(l => l.status === "NEW").length;

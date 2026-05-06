@@ -1,5 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendWA, waMsg } from "@/lib/whatsapp";
 
@@ -12,6 +13,8 @@ async function requireAdmin() {
 
 export async function PATCH(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("maintenance");
+  if (denied) return denied;
   const { id } = await params;
   const { status, notes } = await req.json();
 
@@ -32,6 +35,8 @@ export async function PATCH(req: Request, { params }: Params) {
 /** Generate monthly invoice for this subscription */
 export async function POST(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("maintenance");
+  if (denied) return denied;
   const { id } = await params;
 
   const sub = await prisma.subscription.findUnique({

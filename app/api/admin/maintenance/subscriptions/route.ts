@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 async function requireAdmin() {
@@ -9,6 +10,8 @@ async function requireAdmin() {
 
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("maintenance");
+  if (denied) return denied;
   const subs = await prisma.subscription.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -21,6 +24,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("maintenance");
+  if (denied) return denied;
   const { clientId, packageId, startDate, notes } = await req.json();
 
   if (!clientId || !packageId) {

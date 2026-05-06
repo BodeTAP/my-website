@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
@@ -7,6 +8,8 @@ export async function POST(req: Request) {
   if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const denied = await requireApiPermission("projects");
+  if (denied) return denied;
 
   const { clientId, name, description, status, deadline, liveUrl, notes } = await req.json();
 

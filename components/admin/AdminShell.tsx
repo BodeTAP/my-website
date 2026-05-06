@@ -7,10 +7,25 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server, Shield
 } from "lucide-react";
+import type { AdminModule } from "@/lib/permissions";
 
-const menuGroups = [
+type MenuModule = AdminModule | "team";
+
+interface MenuItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  module?: MenuModule;
+}
+
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+const ALL_MENU_GROUPS: MenuGroup[] = [
   {
     title: "Utama",
     items: [
@@ -20,38 +35,52 @@ const menuGroups = [
   {
     title: "Penjualan & Klien",
     items: [
-      { label: "Inbox Leads", href: "/admin/leads", icon: Users },
-      { label: "Klien & Kontak", href: "/admin/clients", icon: UserCheck },
-      { label: "Proposal", href: "/admin/proposals", icon: ScrollText },
+      { label: "Inbox Leads", href: "/admin/leads", icon: Users, module: "leads" },
+      { label: "Klien & Kontak", href: "/admin/clients", icon: UserCheck, module: "clients" },
+      { label: "Proposal", href: "/admin/proposals", icon: ScrollText, module: "proposals" },
       { label: "Onboarding", href: "/admin/onboarding", icon: ClipboardList },
     ]
   },
   {
     title: "Proyek & Layanan",
     items: [
-      { label: "Manajemen Proyek", href: "/admin/projects",  icon: Briefcase },
-      { label: "Invoice & Tagihan", href: "/admin/invoices",  icon: Receipt },
-      { label: "Tiket Dukungan",   href: "/admin/tickets",   icon: MessageSquare },
-      { label: "Maintenance",      href: "/admin/maintenance", icon: Wrench },
-      { label: "Hosting & Domain", href: "/admin/hosting",   icon: Server },
+      { label: "Manajemen Proyek", href: "/admin/projects",  icon: Briefcase, module: "projects" },
+      { label: "Invoice & Tagihan", href: "/admin/invoices",  icon: Receipt, module: "invoices" },
+      { label: "Tiket Dukungan",   href: "/admin/tickets",   icon: MessageSquare, module: "tickets" },
+      { label: "Maintenance",      href: "/admin/maintenance", icon: Wrench, module: "maintenance" },
+      { label: "Hosting & Domain", href: "/admin/hosting",   icon: Server, module: "hosting" },
     ]
   },
   {
     title: "Konten Publik",
     items: [
-      { label: "Artikel Blog", href: "/admin/articles", icon: FileText },
+      { label: "Artikel Blog", href: "/admin/articles", icon: FileText, module: "articles" },
       { label: "Kategori Artikel", href: "/admin/categories", icon: Tag },
-      { label: "Portofolio", href: "/admin/portfolio", icon: Globe },
-      { label: "Testimoni", href: "/admin/testimonials", icon: Star },
+      { label: "Portofolio", href: "/admin/portfolio", icon: Globe, module: "portfolio" },
+      { label: "Testimoni", href: "/admin/testimonials", icon: Star, module: "testimonials" },
     ]
   },
   {
     title: "Sistem",
     items: [
       { label: "Pengaturan", href: "/admin/settings", icon: Settings },
+      { label: "Team Settings", href: "/admin/settings/team", icon: Shield, module: "team" },
     ]
   }
 ];
+
+function getFilteredMenuGroups(allowedModules: AdminModule[], isSuperAdmin: boolean): MenuGroup[] {
+  return ALL_MENU_GROUPS
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (!item.module) return true; // always show items without a module
+        if (item.module === "team") return isSuperAdmin; // team only for Super Admin
+        return allowedModules.includes(item.module as AdminModule);
+      }),
+    }))
+    .filter((group) => group.items.length > 0); // remove empty groups
+}
 
 const Logo = () => (
   <Link href="/admin" className="flex items-center gap-3 px-2 group">
@@ -66,9 +95,18 @@ const Logo = () => (
   </Link>
 );
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+interface AdminShellProps {
+  children: React.ReactNode;
+  allowedModules: AdminModule[];
+  isSuperAdmin: boolean;
+}
+
+export default function AdminShell({ children, allowedModules, isSuperAdmin }: AdminShellProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  
+  const menuGroups = getFilteredMenuGroups(allowedModules, isSuperAdmin);
+  const hasNoAccess = allowedModules.length === 0 && !isSuperAdmin;
 
   // Close drawer on route change
   useEffect(() => { setOpen(false); }, [pathname]);
@@ -95,7 +133,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* Nav */}
       <nav className="flex-1 px-5 py-6 space-y-8 overflow-y-auto custom-scrollbar relative z-10">
-        {menuGroups.map((group, i) => (
+        {hasNoAccess ? (
+          <div className="px-3 py-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300/80 text-xs leading-relaxed">
+            Anda belum memiliki akses modul. Hubungi Super Admin.
+          </div>
+        ) : (
+          menuGroups.map((group, i) => (
           <div key={i} className="space-y-2">
             <h4 className="px-3 text-[10px] font-black uppercase tracking-widest text-blue-200/40 mb-3">{group.title}</h4>
             <div className="space-y-1.5">
@@ -121,7 +164,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               })}
             </div>
           </div>
-        ))}
+        ))
+        )}
       </nav>
 
       {/* User / Logout */}

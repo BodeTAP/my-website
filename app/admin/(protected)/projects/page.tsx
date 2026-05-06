@@ -6,8 +6,10 @@ import DeleteProjectButton from "@/components/admin/DeleteProjectButton";
 import EditProjectModal from "@/components/admin/EditProjectModal";
 import { FadeUp } from "@/components/public/motion";
 import { Briefcase, FolderKanban } from "lucide-react";
+import { requireModule } from "@/lib/permissions";
 
 export default async function ProjectsPage() {
+  await requireModule("projects");
   const [projects, clients] = await Promise.all([
     prisma.project.findMany({
       include: { client: { include: { user: { select: { name: true, email: true } } } } },

@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import MaintenanceClient from "./MaintenanceClient";
+import { requireModule } from "@/lib/permissions";
 
 export default async function MaintenancePage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  await requireModule("maintenance");
   const params = await searchParams;
   const q = params.q || "";
   const status = params.status || "";

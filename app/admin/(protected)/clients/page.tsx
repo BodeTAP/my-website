@@ -2,8 +2,10 @@ import { prisma } from "@/lib/prisma";
 import ClientsClient from "./ClientsClient";
 import { FadeUp } from "@/components/public/motion";
 import { UsersRound } from "lucide-react";
+import { requireModule } from "@/lib/permissions";
 
 export default async function AdminClientsPage() {
+  await requireModule("clients");
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: "desc" },
     include: {

@@ -1,5 +1,6 @@
 import { NextResponse, after } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail, validateEmailConfig } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
@@ -7,6 +8,8 @@ import { sendWA, waMsg } from "@/lib/whatsapp";
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("invoices");
+  if (denied) return denied;
 
   const { clientId, invoiceNo, description, amount, lineItems, dueDate, whatsappMsg: customWaMsg } = await req.json();
 
