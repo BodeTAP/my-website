@@ -839,15 +839,17 @@ function RoleList({
   );
 }
 
-// ─── 13.5 MemberRoleAssigner ──────────────────────────────────────────────────
+// ─── 13.5 MemberRoleAssigner (merged with admin management) ──────────────────
 
 function MemberRoleAssigner({
   members,
   roles,
+  currentUserId,
   onRefresh,
 }: {
   members: MemberItem[];
   roles: RoleItem[];
+  currentUserId: string;
   onRefresh: () => void;
 }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -865,7 +867,6 @@ function MemberRoleAssigner({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Terjadi kesalahan.");
-      // Show success indicator briefly
       setSuccessIds((prev) => new Set(prev).add(memberId));
       setTimeout(() => {
         setSuccessIds((prev) => {
@@ -885,16 +886,22 @@ function MemberRoleAssigner({
     }
   };
 
+  // Convert MemberItem to Admin shape for modals
+  const toAdmin = (m: MemberItem): Admin => ({ id: m.id, name: m.name, email: m.email, createdAt: "" });
+
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-white font-semibold text-lg flex items-center gap-2">
-          <Users className="w-5 h-5 text-blue-400" />
-          Assignment Role Anggota Tim
-        </h2>
-        <p className="text-blue-200/50 text-sm mt-0.5">
-          Assign role ke setiap admin untuk mengatur akses modul mereka.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-white font-semibold text-lg flex items-center gap-2">
+            <Users className="w-5 h-5 text-blue-400" />
+            Anggota Tim
+          </h2>
+          <p className="text-blue-200/50 text-sm mt-0.5">
+            Kelola admin, assign role, dan atur akses modul mereka.
+          </p>
+        </div>
+        <AddAdminModal onDone={onRefresh} />
       </div>
 
       {members.length === 0 ? (
@@ -914,7 +921,7 @@ function MemberRoleAssigner({
                   Email
                 </th>
                 <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs uppercase tracking-wider">
-                  Role Saat Ini
+                  Role
                 </th>
                 <th className="px-6 py-4 text-blue-200/40 font-medium text-xs uppercase tracking-wider text-right">
                   Aksi
@@ -924,6 +931,7 @@ function MemberRoleAssigner({
             <tbody className="divide-y divide-white/5">
               {members.map((member) => (
                 <tr key={member.id} className="hover:bg-white/5 transition-colors group">
+                  {/* Admin */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-600/30 border border-indigo-500/20 flex items-center justify-center shrink-0">
@@ -933,13 +941,16 @@ function MemberRoleAssigner({
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-white font-medium text-sm">
-                            {member.name ?? "—"}
-                          </span>
+                          <span className="text-white font-medium text-sm">{member.name ?? "—"}</span>
                           {member.isSuperAdmin && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
                               <Crown className="w-2.5 h-2.5" />
                               Super Admin
+                            </span>
+                          )}
+                          {member.id === currentUserId && (
+                            <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-medium border border-blue-500/20">
+                              Anda
                             </span>
                           )}
                         </div>
@@ -947,68 +958,56 @@ function MemberRoleAssigner({
                       </div>
                     </div>
                   </td>
+
+                  {/* Email */}
                   <td className="px-6 py-4 text-blue-200/60 text-sm hidden sm:table-cell">
                     {member.email}
                   </td>
+
+                  {/* Role dropdown */}
                   <td className="px-6 py-4">
                     {member.isSuperAdmin ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300/80 text-xs font-medium">
                         <Crown className="w-3 h-3" />
                         Akses Penuh
                       </span>
-                    ) : member.roleName ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium">
-                        <Shield className="w-3 h-3" />
-                        {member.roleName}
-                      </span>
+                    ) : loadingId === member.id ? (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 w-fit">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
+                        <span className="text-blue-200/50 text-xs">Menyimpan...</span>
+                      </div>
+                    ) : successIds.has(member.id) ? (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20 w-fit">
+                        <Check className="w-3.5 h-3.5 text-green-400" />
+                        <span className="text-green-400 text-xs">Tersimpan</span>
+                      </div>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-blue-200/40 text-xs font-medium">
-                        Tanpa Role
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <div className="relative">
+                          <select
+                            value={member.roleId ?? ""}
+                            onChange={(e) => handleRoleChange(member.id, e.target.value || null)}
+                            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition-all appearance-none pr-8 min-w-[140px]"
+                          >
+                            <option value="" className="bg-[#030914]">Tanpa Role</option>
+                            {roles.map((r) => (
+                              <option key={r.id} value={r.id} className="bg-[#030914]">{r.name}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-200/40 pointer-events-none" />
+                        </div>
+                        {errors[member.id] && (
+                          <p className="text-red-400 text-xs">{errors[member.id]}</p>
+                        )}
+                      </div>
                     )}
                   </td>
+
+                  {/* Aksi: reset password + hapus */}
                   <td className="px-6 py-4">
-                    <div className="flex flex-col items-end gap-1">
-                      {member.isSuperAdmin ? (
-                        <span className="text-blue-200/30 text-xs italic">Tidak dapat diubah</span>
-                      ) : (
-                        <div className="relative">
-                          {loadingId === member.id ? (
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
-                              <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
-                              <span className="text-blue-200/50 text-xs">Menyimpan...</span>
-                            </div>
-                          ) : successIds.has(member.id) ? (
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20">
-                              <Check className="w-3.5 h-3.5 text-green-400" />
-                              <span className="text-green-400 text-xs">Tersimpan</span>
-                            </div>
-                          ) : (
-                            <div className="relative">
-                              <select
-                                value={member.roleId ?? ""}
-                                onChange={(e) =>
-                                  handleRoleChange(member.id, e.target.value || null)
-                                }
-                                className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition-all appearance-none pr-8 min-w-[140px]"
-                              >
-                                <option value="" className="bg-[#030914]">Tanpa Role</option>
-                                {roles.map((r) => (
-                                  <option key={r.id} value={r.id} className="bg-[#030914]">
-                                    {r.name}
-                                  </option>
-                                ))}
-                              </select>
-                              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-200/40 pointer-events-none" />
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {errors[member.id] && (
-                        <p className="text-red-400 text-xs max-w-[200px] text-right">
-                          {errors[member.id]}
-                        </p>
-                      )}
+                    <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                      <ResetPasswordModal admin={toAdmin(member)} onDone={onRefresh} />
+                      <DeleteAdminButton admin={toAdmin(member)} currentId={currentUserId} onDone={onRefresh} />
                     </div>
                   </td>
                 </tr>
@@ -1017,6 +1016,14 @@ function MemberRoleAssigner({
           </table>
         </div>
       )}
+
+      <div className="glass rounded-2xl p-5 border border-yellow-500/10 bg-yellow-500/5 flex items-start gap-3">
+        <AlertTriangle className="w-5 h-5 text-yellow-500/70 shrink-0 mt-0.5" />
+        <p className="text-yellow-300/80 text-sm leading-relaxed">
+          <span className="font-bold text-yellow-400">Peringatan Keamanan:</span> Seluruh akun yang terdaftar di sini memiliki hak akses ke{" "}
+          <strong>semua data proyek, invoice keuangan, keluhan tiket, dan data privasi klien</strong>. Berikan akses ini secara hati-hati.
+        </p>
+      </div>
     </div>
   );
 }
@@ -1034,22 +1041,17 @@ export default function TeamSettingsClient({
 }) {
   const [roles, setRoles] = useState<RoleItem[]>(initialRoles);
   const [members, setMembers] = useState<MemberItem[]>(initialMembers);
-  const [admins, setAdmins] = useState<Admin[]>(
-    initialMembers.map((m) => ({ id: m.id, name: m.name, email: m.email, createdAt: "" }))
-  );
   const [refreshing, setRefreshing] = useState(false);
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      const [rolesRes, membersRes, adminsRes] = await Promise.all([
+      const [rolesRes, membersRes] = await Promise.all([
         fetch("/api/admin/team/roles"),
         fetch("/api/admin/team/members"),
-        fetch("/api/admin/team"),
       ]);
       if (rolesRes.ok) setRoles(await rolesRes.json());
       if (membersRes.ok) setMembers(await membersRes.json());
-      if (adminsRes.ok) setAdmins(await adminsRes.json());
     } catch {
       // silently fail — data stays as-is
     } finally {
@@ -1127,107 +1129,18 @@ export default function TeamSettingsClient({
         </div>
       </FadeUp>
 
-      {/* Member Role Assignment Section */}
+      {/* Member Role Assignment + Admin Management (merged) */}
       <FadeUp delay={0.15}>
         <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative">
           <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-500/5 blur-[80px] pointer-events-none" />
           <div className="relative z-10">
-            <MemberRoleAssigner roles={roles} members={members} onRefresh={refresh} />
-          </div>
-        </div>
-      </FadeUp>
-
-      {/* Admin Management Section */}
-      <FadeUp delay={0.2}>
-        <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-[80px] pointer-events-none" />
-          <div className="relative z-10 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-white font-semibold text-lg flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-blue-400" />
-                  Daftar Admin
-                </h2>
-                <p className="text-blue-200/50 text-sm mt-0.5">
-                  Kelola siapa saja yang bisa masuk ke dashboard panel admin ini.
-                </p>
-              </div>
-              <AddAdminModal onDone={refresh} />
-            </div>
-
-            {admins.length === 0 ? (
-              <div className="glass rounded-2xl p-10 text-center border border-white/5">
-                <UserPlus className="w-10 h-10 text-blue-200/20 mx-auto mb-3" />
-                <p className="text-blue-200/40 text-sm">Belum ada admin.</p>
-              </div>
-            ) : (
-              <div className="glass rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10 bg-white/5">
-                      <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs uppercase tracking-wider">
-                        Profil Admin
-                      </th>
-                      <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs uppercase tracking-wider hidden sm:table-cell">
-                        Kontak Email
-                      </th>
-                      <th className="px-6 py-4 text-blue-200/40 font-medium text-xs uppercase tracking-wider text-right">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {admins.map((admin) => (
-                      <tr key={admin.id} className="hover:bg-white/5 transition-colors group">
-                        <td className="px-6 py-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center shrink-0">
-                              <span className="text-blue-300 text-sm font-bold">
-                                {(admin.name ?? admin.email)[0].toUpperCase()}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="text-white font-medium text-sm group-hover:text-blue-300 transition-colors">
-                                {admin.name ?? "—"}
-                              </p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                {admin.id === currentUserId && (
-                                  <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-medium border border-blue-500/20">
-                                    Anda
-                                  </span>
-                                )}
-                                <span className="text-blue-200/40 text-xs sm:hidden">{admin.email}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 text-blue-200/70 text-sm hidden sm:table-cell">{admin.email}</td>
-                        <td className="px-6 py-5">
-                          <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                            <ResetPasswordModal admin={admin} onDone={refresh} />
-                            <DeleteAdminButton admin={admin} currentId={currentUserId} onDone={refresh} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div className="glass rounded-2xl p-5 border border-yellow-500/10 bg-yellow-500/5 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-500/70 shrink-0 mt-0.5" />
-              <p className="text-yellow-300/80 text-sm leading-relaxed">
-                <span className="font-bold text-yellow-400">Peringatan Keamanan:</span> Seluruh akun yang terdaftar di sini memiliki hak akses ke{" "}
-                <strong>semua data proyek, invoice keuangan, keluhan tiket, dan data privasi klien</strong>. Berikan akses ini secara hati-hati.
-              </p>
-            </div>
+            <MemberRoleAssigner roles={roles} members={members} currentUserId={currentUserId} onRefresh={refresh} />
           </div>
         </div>
       </FadeUp>
 
       {/* Info note */}
-      <FadeUp delay={0.25}>
+      <FadeUp delay={0.2}>
         <div className="glass rounded-2xl p-5 border border-blue-500/10 bg-blue-500/5 flex items-start gap-3">
           <Shield className="w-5 h-5 text-blue-400/70 shrink-0 mt-0.5" />
           <div className="space-y-1">
