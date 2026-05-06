@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { getAiSettings } from "@/lib/aiSettings";
@@ -7,6 +8,8 @@ import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
   const session = await auth();
   const { allowed } = await rateLimit(`ai-reply:${session!.user!.email}`, 20, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });

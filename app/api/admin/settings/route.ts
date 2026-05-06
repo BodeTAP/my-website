@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { AI_DEFAULTS } from "@/lib/aiSettings";
 
@@ -20,6 +21,8 @@ const DEFAULTS: Record<string, string> = {
 
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const rows = await prisma.siteSetting.findMany();
   const settings: Record<string, string> = { ...DEFAULTS };
@@ -31,6 +34,8 @@ const ALLOWED_KEYS = new Set(Object.keys(DEFAULTS));
 
 export async function PATCH(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const updates: Record<string, string> = await req.json();
   const filtered = Object.entries(updates).filter(([key]) => ALLOWED_KEYS.has(key));

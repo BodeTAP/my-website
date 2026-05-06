@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/whatsapp";
 import { rateLimit } from "@/lib/rateLimit";
@@ -81,6 +82,8 @@ function getCityCoords(query: string): { lat: number; lng: number } | null {
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("leads");
+  if (denied) return denied;
 
   // Rate limit: 30 searches per hour per admin session
   const session = await auth();

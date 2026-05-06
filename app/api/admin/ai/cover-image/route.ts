@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { translateToVisualKeyword, uploadPhotoToBlob } from "@/lib/ai";
 import { rateLimit } from "@/lib/rateLimit";
 
@@ -18,6 +19,8 @@ type PexelsPhoto = { id: number; src: { medium: string }; photographer: string; 
 
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
   const session = await auth();
   const { allowed } = await rateLimit(`ai-cover:${session!.user!.email}`, 30, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
