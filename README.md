@@ -1,38 +1,85 @@
 # MFWEB
 
-Platform SaaS full-stack untuk digital agency — mengelola leads, klien, proyek, invoice, dan konten dari satu dashboard.
+Platform SaaS full-stack untuk digital agency — mengelola leads, klien, proyek, invoice, dan konten dari satu dashboard admin yang terintegrasi.
+
+---
 
 ## Fitur
 
 ### Public Site
-- Blog, portfolio, kalkulator harga, halaman layanan dengan JSON-LD schema
-- **Tools gratis**: Cek kecepatan, Cek SEO, Generator nama bisnis, QR Code, ROI kalkulator, Cek meta tags, **Estimasi harga website (AI)**
-- Sitemap otomatis dengan prioritas terbobot per jenis halaman
+- Blog dengan SEO lengkap (JSON-LD, sitemap otomatis, meta tags)
+- Halaman portfolio, layanan, tentang, kontak
+- **Tools gratis publik**: Cek kecepatan, Cek SEO, Generator nama bisnis, QR Code, ROI kalkulator, Cek meta tags, Estimasi harga website (AI streaming)
+- Kalkulator harga interaktif
+- Cookie consent, Facebook Pixel, Google Analytics, Microsoft Clarity
 
 ### Admin Dashboard
-- CMS artikel (Tiptap editor, draft/publish/scheduled, SEO analyzer AI)
-- Manajemen leads, klien, proyek, invoice, proposal, tiket support
-- **Lead Finder** — cari bisnis lokal dari Google Maps, filter yang belum punya website, simpan sebagai lead
-- **WhatsApp Broadcast** — kirim pesan massal ke leads terpilih via Fonnte, auto-update status ke Follow-up
+
+#### CRM & Leads
+- Manajemen leads dengan filter status (Baru / Follow-up / Deal / Selesai)
+- **Lead Finder** — cari bisnis lokal dari Google Maps API, filter yang belum punya website, simpan sebagai lead
+- Pagination dengan pilihan jumlah item per halaman (10 / 25 / 50 / 100)
 - Export leads ke CSV (kompatibel Google Sheets)
 - Bulk delete leads
-- **Konfigurasi AI** — pilih model (Haiku/Sonnet), toggle fitur AI per kategori
-- **Tracking & Analytics** — kelola Facebook Pixel ID dan Google Analytics ID dari dashboard (tanpa redeploy)
+
+#### WhatsApp Broadcast
+- Kirim pesan massal ke leads terpilih via Fonnte API
+- **9-layer message humanization engine** untuk menghindari deteksi spam:
+  - Sinonim kata kunci (13 grup, 4 varian tiap kata)
+  - Rotasi emoji bullet (10 varian)
+  - Variasi pembuka (salam waktu + 6 varian kasual)
+  - Hook pembuka personal (pertanyaan 30% / statistik 70%)
+  - Konteks per kategori bisnis (8 kategori: food, retail, health, beauty, service, property, edu, general)
+  - Variasi CTA (8 varian + tanpa CTA)
+  - Variasi footer/nama pengirim (5 varian + tanpa footer)
+  - Humanisasi tanda baca
+  - Zero-width character fingerprint
+- **Delay non-linear** dengan distribusi bell-curve + burst pause setiap 5 pesan
+- **Rotasi device per batch** — setiap sub-batch dikirim dari device berbeda
+- Cooldown 24 jam per lead, rate limit 50 pesan/hari per admin
+- Riwayat broadcast dengan statistik lengkap
+- Template pesan WA manual yang bisa dikustomisasi
+
+#### Manajemen Konten
+- CMS artikel dengan Tiptap editor (draft/publish/scheduled)
+- Analisis SEO artikel dengan AI
+- Generate cover image dari Pexels → upload ke Vercel Blob
+- Saran topik artikel berbasis AI dengan konteks bisnis MFWEB
+- Draft balasan tiket support dengan AI
+
+#### Manajemen Bisnis
+- Klien, proyek (tracking milestone), invoice (PDF, Tripay payment), proposal
+- Tiket support dengan balasan AI
+- Hosting & domain tracking dengan notifikasi expiry
+- Paket maintenance & subscription
+
+#### Pengaturan Admin
+- **Konfigurasi AI** — pilih model Claude (Haiku/Sonnet), toggle fitur AI per kategori
+- **Tracking & Analytics** — kelola Facebook Pixel ID dan Google Analytics ID dari dashboard
+- **WhatsApp Device** — konfigurasi Fonnte API key (single/multi-device rotator)
+- Statistik hero beranda yang bisa dikustomisasi
+
+#### Team Settings (RBAC)
+- Sistem permission granular berbasis role (Role-Based Access Control)
+- Super Admin dapat membuat/edit/hapus role dengan modul yang dikonfigurasi
+- 15 modul permission: articles, leads, broadcast, clients, projects, invoices, proposals, tickets, portfolio, testimonials, hosting, maintenance, ai_settings, analytics, team
+- Assignment role ke setiap admin dari satu halaman terpadu
+- Tambah admin baru, reset password, hapus admin
+- Sidebar navigasi adaptif — hanya tampilkan modul yang diizinkan
+- Permission divalidasi dari database (bukan JWT) — perubahan berlaku segera
+- Audit log setiap perubahan permission
 
 ### Client Portal
-- Tracking proyek & milestone, download invoice PDF, tiket support
+- Tracking proyek & milestone
+- Download invoice PDF
+- Tiket support dengan notifikasi email & WA
 - **AI Assistant** (streaming) — jawab pertanyaan klien berdasarkan data proyek & invoice mereka
+- Notifikasi in-app (invoice baru, balasan tiket, update proyek)
 
-### AI Features (Claude API)
-- Draft artikel, analisis SEO, generate cover image (Pexels → Vercel Blob), saran topik
-- Draft balasan tiket support
-- Estimasi harga website via streaming (tool publik)
-- AI chat portal klien (streaming, context-aware)
-- Model dan toggles fitur dikonfigurasi dari admin dashboard
-
-### Payment & Notifications
-- Integrasi Tripay (VA, e-wallet, minimarket) dengan Cloudflare Worker proxy
-- WhatsApp notifikasi otomatis: invoice baru, pengingat tagihan, update status proyek, konfirmasi pembayaran
+### Notifikasi Otomatis
+- WhatsApp: invoice baru, pengingat tagihan, update status proyek, konfirmasi pembayaran, expiry hosting/domain
+- Email: invoice, balasan tiket, update proyek (via Resend)
+- In-app notifications di portal klien
 
 ---
 
@@ -49,7 +96,72 @@ Platform SaaS full-stack untuk digital agency — mengelola leads, klien, proyek
 | Monitoring | Sentry, Microsoft Clarity, Vercel Analytics, Google Analytics 4, Facebook Pixel |
 | AI | Anthropic Claude (Haiku/Sonnet, configurable) |
 | WhatsApp | Fonnte API |
-| Testing | Vitest + React Testing Library |
+| Payment | Tripay (VA, e-wallet, minimarket) via Cloudflare Worker proxy |
+| Testing | Vitest + fast-check (property-based testing) |
+
+---
+
+## Arsitektur Permission (RBAC)
+
+```
+proxy.ts (Edge)
+  └── Cek JWT: role === "ADMIN"
+        └── AdminLayout / API Route
+              └── lib/permissions.ts
+                    ├── checkPermission(adminId, module) → DB query
+                    ├── requireModule(module) → redirect jika ditolak
+                    └── requireApiPermission(module) → 403 JSON jika ditolak
+```
+
+Permission selalu divalidasi dari database, bukan dari JWT. Perubahan role berlaku segera tanpa perlu admin login ulang.
+
+---
+
+## Struktur Direktori
+
+```
+app/
+  (public)/          → Public marketing site
+  admin/             → Admin dashboard (role: ADMIN)
+    (protected)/
+      leads/         → CRM leads + broadcast WA
+      settings/
+        team/        → Team Settings (RBAC, hanya Super Admin)
+  api/admin/         → API routes admin (semua dilindungi permission guard)
+  portal/            → Client portal (role: CLIENT)
+  onboarding/        → Form onboarding klien
+  bayar/             → Halaman pembayaran invoice
+
+lib/
+  permissions.ts     → Permission service (checkPermission, requireModule, dll)
+  audit.ts           → Audit logger untuk perubahan permission
+  whatsapp.ts        → sendWA, sendWABatch, sendWABatchRotated
+  waTemplates.ts     → Template pesan WA (invoice, proyek, tiket, dll)
+  auth.ts            → NextAuth v5 config
+  email.ts           → Email via Resend
+  ai.ts              → AI utilities (translate keyword, upload blob)
+  aiSettings.ts      → Baca konfigurasi AI dari database
+  rateLimit.ts       → Rate limiting via Upstash Redis
+  tripay.ts          → Integrasi payment Tripay
+  notifications.ts   → In-app notifications
+
+components/
+  admin/
+    AdminShell.tsx         → Sidebar navigasi admin (adaptive)
+    AdminShellServer.tsx   → Server wrapper untuk adaptive navigation
+  portal/            → Komponen portal klien
+  public/            → Komponen public site
+  ui/                → shadcn/ui components
+
+prisma/
+  schema.prisma      → Database schema lengkap
+  seed.ts            → Seed data awal
+  seed-permissions.ts → Seed RBAC untuk admin yang sudah ada
+
+tests/
+  lib/               → Unit & property tests (permissions, audit, rateLimit)
+  api/               → API tests (roles, members)
+```
 
 ---
 
@@ -59,7 +171,7 @@ Buat file `.env.local`:
 
 ```env
 # Database
-DATABASE_URL=postgresql://...           # Neon pooled URL untuk production
+DATABASE_URL=postgresql://...           # Neon pooled URL
 
 # Auth
 AUTH_SECRET=                            # openssl rand -base64 32
@@ -86,10 +198,11 @@ ANTHROPIC_API_KEY=
 PEXELS_API_KEY=                         # untuk cover image artikel
 
 # WhatsApp
-FONNTE_API_KEY=
+FONNTE_API_KEY=                         # single device
+# FONNTE_API_KEYS dikonfigurasi dari /admin/settings (multi-device rotator)
 NEXT_PUBLIC_WHATSAPP_NUMBER=628xxx      # nomor WA admin (tanpa +)
 
-# Lead Finder (Google Maps)
+# Lead Finder
 GOOGLE_PLACES_API_KEY=                  # Google Places API (New)
 
 # Rate limiting
@@ -101,7 +214,7 @@ NEXT_PUBLIC_SENTRY_DSN=
 NEXT_PUBLIC_CLARITY_PROJECT_ID=         # Microsoft Clarity (opsional)
 ```
 
-> **Catatan:** Facebook Pixel ID dan Google Analytics ID dikelola dari `/admin/settings` → tab Tracking & Analytics — tidak perlu env var.
+> **Catatan:** Facebook Pixel ID, Google Analytics ID, Fonnte API keys, dan konfigurasi AI dikelola dari `/admin/settings` — tidak perlu env var.
 
 ---
 
@@ -118,7 +231,7 @@ npm run dev
 
 Buka [http://localhost:3000](http://localhost:3000).
 
-Akun admin dibuat via seed atau langsung di database dengan `role: "ADMIN"`.
+Akun admin pertama dibuat via seed atau langsung di database dengan `role: "ADMIN"`. Admin pertama (berdasarkan `createdAt` paling awal) otomatis menjadi Super Admin.
 
 ---
 
@@ -132,18 +245,22 @@ npm test                 # Vitest watch mode
 npm run test:run         # Vitest sekali jalan
 npx prisma studio        # GUI database
 npx prisma migrate dev   # Jalankan migrasi
-npx prisma db seed       # Seed data awal
+npx prisma db seed       # Seed data awal + seed permissions
 ```
 
 ---
 
-## Struktur Zona
+## Zona Aplikasi
 
 ```
 /                        → Public marketing site
-/tools/*                 → Tools gratis (termasuk estimasi harga AI)
+/blog/*                  → Blog artikel
+/portfolio               → Portfolio
+/tools/*                 → Tools gratis (estimasi harga AI, dll)
 /admin                   → Dashboard admin (role: ADMIN)
-  /leads/finder          → Lead Finder dari Google Maps
+  /leads                 → CRM + Lead Finder + Broadcast WA
+  /settings              → Pengaturan situs & AI
+  /settings/team         → Team Settings (RBAC) — hanya Super Admin
 /portal                  → Client portal (role: CLIENT)
 /onboarding/[token]      → Form onboarding klien baru
 /bayar/[invoiceNo]       → Halaman pembayaran invoice
@@ -153,7 +270,7 @@ npx prisma db seed       # Seed data awal
 
 ## Deployment
 
-Di-deploy ke [Vercel](https://vercel.com). Layanan eksternal:
+Di-deploy ke [Vercel](https://vercel.com). CI/CD via GitHub Actions — setiap push ke `main` otomatis menjalankan lint, typecheck, dan build.
 
 | Layanan | Kegunaan |
 |---|---|
@@ -161,9 +278,25 @@ Di-deploy ke [Vercel](https://vercel.com). Layanan eksternal:
 | **Upstash Redis** | Rate limiting lintas serverless |
 | **Vercel Blob** | Penyimpanan gambar upload |
 | **Cloudflare Worker** | Proxy webhook Tripay (`cloudflare-worker/`) |
-| **Fonnte** | WhatsApp API gateway |
-| **Google Places API (New)** | Lead Finder dari Google Maps |
-| **Anthropic API** | Semua fitur AI |
+| **Fonnte** | WhatsApp API gateway (single/multi-device) |
+| **Google Places API** | Lead Finder dari Google Maps |
+| **Anthropic API** | Semua fitur AI (Claude Haiku/Sonnet) |
 | **Pexels API** | Cover image artikel |
+| **Resend** | Email transaksional |
+| **Tripay** | Payment gateway (VA, e-wallet, minimarket) |
 
-CI/CD via GitHub Actions — setiap push ke `main` otomatis menjalankan lint, typecheck, dan build.
+---
+
+## Testing
+
+Proyek menggunakan Vitest dengan property-based testing via fast-check:
+
+```bash
+npm run test:run         # Jalankan semua test sekali
+```
+
+Test mencakup:
+- `tests/lib/permissions.ts` — 10 correctness properties untuk sistem RBAC
+- `tests/lib/audit.ts` — Audit log selalu tercatat
+- `tests/api/roles.ts` — Validasi modul, keunikan nama role, atomisitas update
+- `tests/api/members.ts` — Satu admin satu role, atomisitas hapus dengan reassign
