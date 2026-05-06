@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function logPermissionChange(params: {
@@ -20,8 +21,8 @@ export async function logPermissionChange(params: {
       targetAdminId: params.targetAdminId,
       targetRoleId: params.targetRoleId,
       action: params.action,
-      before: params.before,
-      after: params.after,
+      before: params.before as Prisma.InputJsonValue,
+      after: params.after as Prisma.InputJsonValue,
     },
   });
 }
