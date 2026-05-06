@@ -45,9 +45,48 @@ const MSG_SUFFIXES = [
   "\n\n_Jangan ragu untuk bertanya!_ 💬",
   "\n\n_Terima kasih atas waktunya._ 🌟",
   "\n\n_Salam sukses untuk bisnisnya!_ 🚀",
+  "\n\n_Semoga bisnis {name} makin berkembang!_ 🌱",
+  "\n\n_Kami tunggu kabar baiknya ya!_ 😄",
+  "\n\n_Senang bisa terhubung dengan Anda._ 🤝",
+  "\n\n_Semoga hari ini penuh produktivitas!_ ⚡",
+  "\n\n_Sukses selalu untuk {businessName}!_ 🎯",
+  "\n\n_Terima kasih sudah meluangkan waktu._ 🙌",
+  "\n\n_Kami siap jadi mitra terpercaya Anda._ 💼",
+  "\n\n_Semoga kerja sama kita bisa segera dimulai!_ ✨",
+  "\n\n_Salam hangat dari tim MFWEB._ 👋",
 ];
 
-const BULLET_EMOJIS = ["✅", "☑️", "✔️", "💡", "⭐"];
+const BULLET_EMOJIS = ["✅", "☑️", "✔️", "💡", "⭐", "🔹", "▶️", "🎯", "💎", "🔑"];
+
+const OPENING_VARIANTS = [
+  "Halo",
+  "Hai",
+  "Hei",
+  "Permisi",
+  "Salam kenal",
+];
+
+const CLOSING_PHRASES = [
+  "Boleh kami bantu?",
+  "Apakah ada yang bisa kami bantu?",
+  "Kami siap melayani Anda.",
+  "Hubungi kami kapan saja ya!",
+  "Kami tunggu respons Anda. 😊",
+  "Silakan balas pesan ini jika tertarik!",
+  "Yuk, kita diskusi lebih lanjut!",
+  "Kami terbuka untuk konsultasi gratis.",
+];
+
+// Subtle unicode variations to make identical strings look different to spam filters
+const ZERO_WIDTH_CHARS = ["\u200B", "\u200C", "\u200D", "\uFEFF"];
+
+function injectZeroWidth(text: string, index: number): string {
+  // Insert a zero-width char after the first word — invisible to reader, unique to filter
+  const zwc = ZERO_WIDTH_CHARS[index % ZERO_WIDTH_CHARS.length];
+  const spaceIdx = text.indexOf(" ");
+  if (spaceIdx === -1) return text;
+  return text.slice(0, spaceIdx) + zwc + text.slice(spaceIdx);
+}
 
 /** Greeting variants based on current WIB hour */
 function getTimeGreeting(): string {
@@ -58,28 +97,47 @@ function getTimeGreeting(): string {
   return "Selamat malam";
 }
 
-function varyMessage(message: string, index: number): string {
+function varyMessage(message: string, index: number, name: string, businessName: string): string {
   let result = message;
 
-  // 1. Replace bullet emojis
+  // 1. Replace bullet emojis with rotating variants
   if (result.includes("✅")) {
     result = result.replaceAll("✅", BULLET_EMOJIS[index % BULLET_EMOJIS.length]);
   }
 
-  // 2. Replace generic "Halo" opener with time-based greeting (every 3rd message)
-  if (index % 3 !== 0 && result.startsWith("Halo")) {
-    const greeting = getTimeGreeting();
-    result = result.replace(/^Halo/, greeting);
+  // 2. Vary the opening greeting
+  const opening = index % 4 === 0
+    ? getTimeGreeting()
+    : OPENING_VARIANTS[index % OPENING_VARIANTS.length];
+
+  if (result.startsWith("Halo") || result.startsWith("Hai") || result.startsWith("Hei")) {
+    result = result.replace(/^(Halo|Hai|Hei)/, opening);
   }
 
-  // 3. Append rotating suffix
-  const suffix = MSG_SUFFIXES[index % MSG_SUFFIXES.length];
+  // 3. Append rotating suffix (with personalization placeholders resolved)
+  const rawSuffix = MSG_SUFFIXES[index % MSG_SUFFIXES.length];
+  const suffix = rawSuffix
+    .replace(/\{name\}/g, name)
+    .replace(/\{businessName\}/g, businessName);
+
   if (suffix) {
     const footerIdx = result.lastIndexOf("\n\n_MFWEB");
     result = footerIdx !== -1
       ? result.slice(0, footerIdx) + suffix + result.slice(footerIdx)
       : result + suffix;
   }
+
+  // 4. Every 5th message: append a varied closing phrase before the footer
+  if (index % 5 === 4) {
+    const closing = "\n\n" + CLOSING_PHRASES[index % CLOSING_PHRASES.length];
+    const footerIdx = result.lastIndexOf("\n\n_MFWEB");
+    result = footerIdx !== -1
+      ? result.slice(0, footerIdx) + closing + result.slice(footerIdx)
+      : result + closing;
+  }
+
+  // 5. Inject invisible zero-width char to make each message unique to spam filters
+  result = injectZeroWidth(result, index);
 
   return result;
 }
@@ -178,6 +236,8 @@ export async function POST(req: NextRequest) {
       message: varyMessage(
         message.replace(/\{name\}/g, lead.name).replace(/\{businessName\}/g, lead.businessName),
         idx,
+        lead.name,
+        lead.businessName,
       ),
       leadId: lead.id,
       name:   lead.name,
