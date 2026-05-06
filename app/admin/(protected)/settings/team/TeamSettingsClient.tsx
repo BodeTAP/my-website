@@ -2,6 +2,7 @@
 
 
 import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Shield, Plus, Edit2, Trash2, Loader2, X, Check, ChevronDown,
   Users, Layers, AlertTriangle, Crown,
@@ -40,8 +41,8 @@ const MODULE_LABELS: Record<AdminModule, string> = {
 // ─── Shared Modal Wrapper ─────────────────────────────────────────────────────
 
 function ModalWrapper({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  const content = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
@@ -51,6 +52,9 @@ function ModalWrapper({ onClose, children }: { onClose: () => void; children: Re
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(content, document.body);
 }
 
 // ─── Module Toggles ───────────────────────────────────────────────────────────
@@ -886,7 +890,7 @@ export default function TeamSettingsClient({
 
       {/* Role Management Section */}
       <FadeUp delay={0.1}>
-        <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
+        <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] pointer-events-none" />
           <div className="relative z-10">
             <RoleList roles={roles} members={members} onRefresh={refresh} />
@@ -896,7 +900,7 @@ export default function TeamSettingsClient({
 
       {/* Member Role Assignment Section */}
       <FadeUp delay={0.15}>
-        <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
+        <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative">
           <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-500/5 blur-[80px] pointer-events-none" />
           <div className="relative z-10">
             <MemberRoleAssigner roles={roles} members={members} onRefresh={refresh} />
