@@ -88,16 +88,145 @@ const SYNONYMS: Record<string, string[]> = {
   "Online":        ["Online", "Digital", "Di internet", "Secara daring"],
   "gratis":        ["gratis", "tanpa biaya", "free", "cuma-cuma"],
   "Gratis":        ["Gratis", "Tanpa biaya", "Free", "Cuma-cuma"],
+  "jasa":          ["jasa", "layanan", "servis", "solusi"],
+  "Jasa":          ["Jasa", "Layanan", "Servis", "Solusi"],
+  "harga":         ["harga", "biaya", "tarif", "investasi"],
+  "Harga":         ["Harga", "Biaya", "Tarif", "Investasi"],
 };
 
 function applySynonyms(text: string, seed: number): string {
   let result = text;
   for (const [word, variants] of Object.entries(SYNONYMS)) {
     if (result.includes(word)) {
-      const replacement = variants[seed % variants.length];
-      // Replace only first occurrence to avoid over-substitution
-      result = result.replace(word, replacement);
+      result = result.replace(word, variants[seed % variants.length]);
     }
+  }
+  return result;
+}
+
+// ── Business category detection ───────────────────────────────────────────────
+
+type BizCategory = "food" | "retail" | "health" | "beauty" | "service" | "property" | "edu" | "general";
+
+const CATEGORY_KEYWORDS: Record<BizCategory, string[]> = {
+  food:     ["resto", "restoran", "warung", "cafe", "kafe", "makan", "kuliner", "bakery", "catering", "kedai", "rumah makan", "food"],
+  retail:   ["toko", "shop", "store", "jualan", "dagang", "olshop", "online shop", "butik", "fashion", "pakaian", "baju", "sepatu"],
+  health:   ["klinik", "dokter", "apotek", "farmasi", "kesehatan", "medis", "rumah sakit", "puskesmas", "fisioterapi"],
+  beauty:   ["salon", "spa", "kecantikan", "barbershop", "barber", "nail", "skincare", "kosmetik", "perawatan"],
+  service:  ["jasa", "servis", "bengkel", "laundry", "cuci", "ekspedisi", "logistik", "travel", "tour", "rental", "sewa"],
+  property: ["properti", "rumah", "kos", "kontrakan", "apartemen", "ruko", "tanah", "agen", "developer"],
+  edu:      ["kursus", "les", "bimbel", "sekolah", "pendidikan", "training", "pelatihan", "akademi"],
+  general:  [],
+};
+
+function detectCategory(businessName: string, notes?: string | null): BizCategory {
+  const text = (businessName + " " + (notes ?? "")).toLowerCase();
+  for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS) as [BizCategory, string[]][]) {
+    if (cat === "general") continue;
+    if (keywords.some((k) => text.includes(k))) return cat;
+  }
+  return "general";
+}
+
+// ── Category-specific hooks ───────────────────────────────────────────────────
+
+const CATEGORY_HOOKS: Record<BizCategory, string[]> = {
+  food: [
+    "Banyak orang cari tempat makan enak lewat Google Maps sebelum pergi — kalau {businessName} belum muncul di sana, sayang banget.",
+    "Pelanggan sekarang sering cek menu online dulu sebelum datang. Website bisa bantu {businessName} tampil lebih menarik.",
+    "Foto makanan yang bagus di website bisa bikin orang langsung pengen datang ke {businessName}.",
+  ],
+  retail: [
+    "Toko online yang punya website sendiri jauh lebih dipercaya dibanding yang cuma jualan di marketplace.",
+    "Dengan website, {businessName} bisa terima order 24 jam tanpa harus standby di HP terus.",
+    "Pelanggan lebih percaya beli dari website resmi — bisa bantu {businessName} keliatan lebih profesional.",
+  ],
+  health: [
+    "Pasien sekarang sering cari klinik atau dokter lewat Google dulu sebelum datang. Website bisa bantu {businessName} lebih mudah ditemukan.",
+    "Website yang informatif bisa bantu calon pasien {businessName} tahu layanan apa saja yang tersedia sebelum mereka datang.",
+    "Kepercayaan pasien meningkat kalau {businessName} punya website yang rapi dan informatif.",
+  ],
+  beauty: [
+    "Banyak orang cari salon atau spa lewat Instagram dan Google — website bisa bantu {businessName} tampil lebih profesional.",
+    "Portofolio hasil kerja di website bisa jadi daya tarik tersendiri buat calon pelanggan {businessName}.",
+    "Booking online lewat website bisa bikin pelanggan {businessName} lebih mudah buat janji tanpa harus WA dulu.",
+  ],
+  service: [
+    "Calon pelanggan lebih percaya pakai jasa yang punya website resmi dibanding yang cuma ada di WA.",
+    "Website bisa jadi 'kartu nama digital' {businessName} yang bisa dilihat kapan saja dan dari mana saja.",
+    "Dengan website, {businessName} bisa tampilkan portofolio dan testimoni pelanggan — bikin orang makin yakin.",
+  ],
+  property: [
+    "Calon pembeli atau penyewa properti hampir selalu cari info online dulu. Website bisa bantu {businessName} lebih mudah ditemukan.",
+    "Listing properti yang ada di website sendiri terlihat lebih profesional dan terpercaya.",
+    "Website bisa bantu {businessName} tampilkan foto dan detail properti dengan lebih menarik.",
+  ],
+  edu: [
+    "Orang tua dan calon siswa biasanya cari info kursus atau bimbel lewat Google. Website bisa bantu {businessName} lebih mudah ditemukan.",
+    "Website yang informatif bisa bantu calon siswa {businessName} tahu program apa saja yang tersedia.",
+    "Testimoni alumni yang ditampilkan di website bisa jadi daya tarik kuat buat {businessName}.",
+  ],
+  general: [
+    "Bisnis yang punya website terlihat lebih serius dan terpercaya di mata calon pelanggan.",
+    "Dengan website, {businessName} bisa ditemukan oleh orang yang belum pernah dengar nama bisnisnya sebelumnya.",
+    "Website adalah investasi jangka panjang — sekali buat, bisa terus kerja 24 jam untuk {businessName}.",
+  ],
+};
+
+function getCategoryHook(lead: LeadContext, index: number): string {
+  const cat = detectCategory(lead.businessName, lead.notes);
+  const hooks = CATEGORY_HOOKS[cat];
+  return hooks[index % hooks.length]
+    .replace(/\{businessName\}/g, lead.businessName)
+    .replace(/\{name\}/g, lead.name);
+}
+
+// ── Statistics variants ───────────────────────────────────────────────────────
+
+const STAT_VARIANTS = [
+  "78% konsumen",
+  "8 dari 10 orang",
+  "hampir 80% pembeli",
+  "mayoritas pelanggan",
+  "sebagian besar orang",
+  "lebih dari 3/4 konsumen",
+];
+
+// ── CTA variants ──────────────────────────────────────────────────────────────
+
+const CTA_VARIANTS = [
+  "Balas pesan ini kalau tertarik, ya!",
+  "Ketik *INFO* untuk tahu lebih lanjut.",
+  "Hubungi kami kapan saja — kami siap bantu.",
+  "Mau konsultasi gratis? Balas aja dulu.",
+  "Kalau ada pertanyaan, langsung tanya aja ya!",
+  "Yuk ngobrol dulu, tanpa komitmen apa pun.",
+  "Balas *YA* kalau mau kami kirimkan contoh desainnya.",
+  "", // no CTA — feels most natural
+  "", // weighted toward no CTA
+];
+
+// ── Footer name variants ──────────────────────────────────────────────────────
+
+const FOOTER_NAMES = [
+  "Tim MFWEB",
+  "MFWEB",
+  "Tim kami di MFWEB",
+  "MFWEB Team",
+  "", // no footer — 10% of messages
+];
+
+// ── Punctuation humanizer ─────────────────────────────────────────────────────
+
+function humanizePunctuation(text: string, seed: number): string {
+  let result = text;
+  // Occasionally drop trailing period on last sentence (feels more casual)
+  if (seed % 3 === 0) result = result.replace(/\.\s*$/, "");
+  // Vary emoji spacing: "sukses 🚀" vs "sukses🚀"
+  if (seed % 4 === 1) result = result.replace(/\s([\u{1F300}-\u{1FFFF}])/gu, "$1");
+  // Occasionally use lowercase for first word after newline (casual tone)
+  if (seed % 7 === 0) {
+    result = result.replace(/\n([A-Z])/g, (_, c) => "\n" + c.toLowerCase());
   }
   return result;
 }
@@ -112,53 +241,39 @@ type LeadContext = {
   notes?: string | null;
 };
 
-/**
- * Build a personalized context line based on available lead data.
- * Injected just before the footer to make each message feel tailored.
- */
-function buildPersonalizedLine(lead: LeadContext, index: number): string {
-  const lines: string[] = [];
-
-  // If they have an existing website, acknowledge it
-  if (lead.currentWebsite) {
-    const websiteLines = [
-      `Kami sudah melihat website ${lead.businessName} dan ada beberapa hal yang bisa kami tingkatkan.`,
-      `Website ${lead.businessName} saat ini sudah bagus, tapi kami bisa bantu buat lebih optimal lagi.`,
-      `Kami perhatikan ${lead.businessName} sudah punya website — kami bisa bantu upgrade tampilannya.`,
+function buildPersonalizedOpener(lead: LeadContext, index: number): string {
+  // 30% of messages: start with a question hook (conversational)
+  if (index % 3 === 0) {
+    const questions = [
+      `Apakah ${lead.businessName} sudah punya website?`,
+      `Sudah punya website untuk ${lead.businessName} belum?`,
+      `${lead.businessName} sudah hadir secara online belum?`,
     ];
-    lines.push(websiteLines[index % websiteLines.length]);
-  } else {
-    // No website yet — opportunity framing
-    const noWebLines = [
-      `Bisnis seperti ${lead.businessName} sangat potensial untuk hadir secara online.`,
-      `Banyak pelanggan mencari ${lead.businessName} lewat Google — website bisa bantu mereka menemukannya.`,
-      `Dengan website, ${lead.businessName} bisa menjangkau lebih banyak pelanggan setiap harinya.`,
-    ];
-    lines.push(noWebLines[index % noWebLines.length]);
+    return questions[index % questions.length];
   }
+  // 70%: stat-based hook
+  const stat = STAT_VARIANTS[index % STAT_VARIANTS.length];
+  const statHooks = [
+    `${stat} cari produk atau jasa lewat Google sebelum memutuskan beli.`,
+    `${stat} lebih percaya bisnis yang punya website resmi.`,
+    `${stat} cek website dulu sebelum menghubungi sebuah bisnis.`,
+  ];
+  return statHooks[index % statHooks.length];
+}
 
-  return lines[0];
+function buildWebsiteContext(lead: LeadContext, index: number): string {
+  if (lead.currentWebsite) {
+    const lines = [
+      `Kami sempat lihat website ${lead.businessName} — ada beberapa hal yang bisa kami bantu tingkatkan biar makin optimal.`,
+      `Website ${lead.businessName} sudah ada, bagus! Kami bisa bantu buat tampilannya lebih modern dan lebih mudah ditemukan di Google.`,
+      `Kami perhatikan ${lead.businessName} sudah online — kami bisa bantu upgrade supaya lebih banyak orang yang menemukannya.`,
+    ];
+    return lines[index % lines.length];
+  }
+  return getCategoryHook(lead, index);
 }
 
 // ── Message variation ─────────────────────────────────────────────────────────
-
-const MSG_SUFFIXES = [
-  "",
-  "\n\n_Semoga harinya menyenangkan!_ 😊",
-  "\n\n_Kami siap membantu kapan saja._ 🙏",
-  "\n\n_Jangan ragu untuk bertanya!_ 💬",
-  "\n\n_Terima kasih atas waktunya._ 🌟",
-  "\n\n_Salam sukses untuk bisnisnya!_ 🚀",
-  "\n\n_Semoga bisnis {name} makin berkembang!_ 🌱",
-  "\n\n_Kami tunggu kabar baiknya ya!_ 😄",
-  "\n\n_Senang bisa terhubung dengan Anda._ 🤝",
-  "\n\n_Semoga hari ini penuh produktivitas!_ ⚡",
-  "\n\n_Sukses selalu untuk {businessName}!_ 🎯",
-  "\n\n_Terima kasih sudah meluangkan waktu._ 🙌",
-  "\n\n_Kami siap jadi mitra terpercaya Anda._ 💼",
-  "\n\n_Semoga kerja sama kita bisa segera dimulai!_ ✨",
-  "\n\n_Salam hangat dari tim MFWEB._ 👋",
-];
 
 const BULLET_EMOJIS = ["✅", "☑️", "✔️", "💡", "⭐", "🔹", "▶️", "🎯", "💎", "🔑"];
 
@@ -168,17 +283,7 @@ const OPENING_VARIANTS = [
   "Hei",
   "Permisi",
   "Salam kenal",
-];
-
-const CLOSING_PHRASES = [
-  "Boleh kami bantu?",
-  "Apakah ada yang bisa kami bantu?",
-  "Kami siap melayani Anda.",
-  "Hubungi kami kapan saja ya!",
-  "Kami tunggu respons Anda. 😊",
-  "Silakan balas pesan ini jika tertarik!",
-  "Yuk, kita diskusi lebih lanjut!",
-  "Kami terbuka untuk konsultasi gratis.",
+  "Halo, selamat",
 ];
 
 // Subtle unicode variations — invisible to reader, unique to spam filter hash
@@ -191,7 +296,6 @@ function injectZeroWidth(text: string, index: number): string {
   return text.slice(0, spaceIdx) + zwc + text.slice(spaceIdx);
 }
 
-/** Greeting variants based on current WIB hour */
 function getTimeGreeting(): string {
   const h = getWIBHour();
   if (h >= 4  && h < 11) return "Selamat pagi";
@@ -200,6 +304,10 @@ function getTimeGreeting(): string {
   return "Selamat malam";
 }
 
+/**
+ * Core message variation engine.
+ * Applies all 8 humanization layers to the admin-written template.
+ */
 function varyMessage(
   message: string,
   index: number,
@@ -207,55 +315,61 @@ function varyMessage(
 ): string {
   let result = message;
 
-  // 1. Synonym substitution — seed based on index for deterministic variety
+  // ── Layer 1: Synonym substitution ──
   result = applySynonyms(result, index + 7);
 
-  // 2. Replace bullet emojis with rotating variants
+  // ── Layer 2: Bullet emoji rotation ──
   if (result.includes("✅")) {
     result = result.replaceAll("✅", BULLET_EMOJIS[index % BULLET_EMOJIS.length]);
   }
 
-  // 3. Vary the opening greeting
-  const opening = index % 4 === 0
+  // ── Layer 3: Opening greeting variation ──
+  const opening = index % 5 === 0
     ? getTimeGreeting()
     : OPENING_VARIANTS[index % OPENING_VARIANTS.length];
-
-  if (/^(Halo|Hai|Hei|Permisi)/.test(result)) {
-    result = result.replace(/^(Halo|Hai|Hei|Permisi)/, opening);
+  if (/^(Halo|Hai|Hei|Permisi|Salam kenal)/.test(result)) {
+    result = result.replace(/^(Halo|Hai|Hei|Permisi|Salam kenal)/, opening);
   }
 
-  // 4. Inject personalized context line before footer
-  const personalLine = buildPersonalizedLine(lead, index);
+  // ── Layer 4: Personalized opener (question or stat hook) ──
+  // Injected right after the greeting line, before the main body
+  const firstNewline = result.indexOf("\n");
+  const personalOpener = buildPersonalizedOpener(lead, index);
+  if (firstNewline !== -1) {
+    result = result.slice(0, firstNewline) + "\n\n" + personalOpener + result.slice(firstNewline);
+  }
+
+  // ── Layer 5: Category-specific context + website acknowledgment ──
+  const contextLine = buildWebsiteContext(lead, index);
   const footerIdx = result.lastIndexOf("\n\n_MFWEB");
   if (footerIdx !== -1) {
-    result = result.slice(0, footerIdx) + "\n\n" + personalLine + result.slice(footerIdx);
+    result = result.slice(0, footerIdx) + "\n\n" + contextLine + result.slice(footerIdx);
   } else {
-    result = result + "\n\n" + personalLine;
+    result += "\n\n" + contextLine;
   }
 
-  // 5. Append rotating suffix (with personalization placeholders resolved)
-  const rawSuffix = MSG_SUFFIXES[index % MSG_SUFFIXES.length];
-  const suffix = rawSuffix
-    .replace(/\{name\}/g, lead.name)
-    .replace(/\{businessName\}/g, lead.businessName);
-
-  if (suffix) {
+  // ── Layer 6: CTA variation (10% no CTA, 90% varied CTA) ──
+  const cta = CTA_VARIANTS[index % CTA_VARIANTS.length];
+  if (cta) {
     const fi = result.lastIndexOf("\n\n_MFWEB");
+    const ctaLine = "\n\n" + cta;
     result = fi !== -1
-      ? result.slice(0, fi) + suffix + result.slice(fi)
-      : result + suffix;
+      ? result.slice(0, fi) + ctaLine + result.slice(fi)
+      : result + ctaLine;
   }
 
-  // 6. Every 5th message: append a varied closing phrase
-  if (index % 5 === 4) {
-    const closing = "\n\n" + CLOSING_PHRASES[index % CLOSING_PHRASES.length];
-    const fi = result.lastIndexOf("\n\n_MFWEB");
-    result = fi !== -1
-      ? result.slice(0, fi) + closing + result.slice(fi)
-      : result + closing;
+  // ── Layer 7: Footer name variation (10% no footer) ──
+  const footerName = FOOTER_NAMES[index % FOOTER_NAMES.length];
+  if (footerName) {
+    // Replace "_MFWEB_" pattern with varied name if present
+    result = result.replace(/_MFWEB_/g, `_${footerName}_`);
+    result = result.replace(/\bMFWEB\b(?!_)/g, footerName);
   }
 
-  // 7. Inject invisible zero-width char for unique fingerprint
+  // ── Layer 8: Punctuation humanization ──
+  result = humanizePunctuation(result, index * 3 + 11);
+
+  // ── Layer 9: Invisible fingerprint ──
   result = injectZeroWidth(result, index);
 
   return result;
