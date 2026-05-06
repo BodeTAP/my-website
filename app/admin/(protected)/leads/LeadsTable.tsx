@@ -339,7 +339,9 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const router = useRouter();
   const q    = searchParams.get("q") ?? "";
   const page = Number(searchParams.get("page") ?? "1");
-  const PER_PAGE = 10;
+  const [perPage, setPerPage] = useState<number>(10);
+
+  const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
   const [filter, setFilter]       = useState<Lead["status"] | "ALL">("ALL");
   const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
@@ -364,10 +366,10 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     return matchSearch && matchStatus;
   });
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const startIdx   = filtered.length > 0 ? (page - 1) * PER_PAGE + 1 : 0;
-  const endIdx     = Math.min(page * PER_PAGE, filtered.length);
-  const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const startIdx   = filtered.length > 0 ? (page - 1) * perPage + 1 : 0;
+  const endIdx     = Math.min(page * perPage, filtered.length);
+  const paginated  = filtered.slice((page - 1) * perPage, page * perPage);
 
   const updateStatus = async (id: string, status: Lead["status"]) => {
     setStatusMap((m) => ({ ...m, [id]: status }));
@@ -661,7 +663,27 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
             <p className="text-xs text-blue-200/40 font-medium">
               Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{filtered.length}</span> prospek
             </p>
-            <LeadsPagination totalPages={totalPages} />
+            <div className="flex items-center gap-4 flex-wrap justify-end">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-blue-200/40">Tampilkan</span>
+                <div className="flex gap-1">
+                  {PER_PAGE_OPTIONS.map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => { setPerPage(n); router.push("?page=1" + (q ? `&q=${encodeURIComponent(q)}` : "")); }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                        perPage === n
+                          ? "bg-indigo-600 text-white border-indigo-500/50"
+                          : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <LeadsPagination totalPages={totalPages} />
+            </div>
           </div>
         )}
       </FadeUp>
