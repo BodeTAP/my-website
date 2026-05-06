@@ -156,6 +156,99 @@ export async function sendWABatch(
   }
 }
 
+// ── Rotated batch sender (per-message delay + per-device rotation) ─────────────
+
+type RotatedBatchItem = BatchItem & {
+  delayRange: string; // per-message delay like "25-38"
+};
+
+/**
+ * Advanced batch sender with:
+ * 1. Per-message custom delay (non-linear, bell-curve, burst pauses)
+ * 2. Per-device rotation: each sub-batch of BATCH_SIZE messages uses a
+ *    different Fonnte token, so messages come from different physical devices.
+ *
+ * Strategy: split items into chunks of BATCH_SIZE, send each chunk with a
+ * different API key. Within each chunk, use the per-message delay schedule.
+ */
+export async function sendWABatchRotated(
+  items: RotatedBatchItem[],
+  apiKeys: string[],
+): Promise<BatchResult[]> {
+  if (!apiKeys.length) {
+    console.error("[WA Rotated] No Fonnte API keys configured");
+    return items.map((i) => ({ phone: i.phone, ok: false }));
+  }
+  if (!items.length) return [];
+
+  // If only one key, fall back to single-batch with per-message delays
+  if (apiKeys.length === 1) {
+    return _sendChunk(items, apiKeys[0]);
+  }
+
+  // Split into sub-batches — each assigned to a different device
+  const BATCH_SIZE = Math.ceil(items.length / apiKeys.length);
+  const results: BatchResult[] = new Array(items.length);
+
+  const chunks: Array<{ items: RotatedBatchItem[]; key: string; startIdx: number }> = [];
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    const keyIdx = Math.floor(i / BATCH_SIZE) % apiKeys.length;
+    chunks.push({
+      items: items.slice(i, i + BATCH_SIZE),
+      key: apiKeys[keyIdx],
+      startIdx: i,
+    });
+  }
+
+  // Send chunks sequentially (not parallel) to avoid flooding Fonnte
+  for (const chunk of chunks) {
+    const chunkResults = await _sendChunk(chunk.items, chunk.key);
+    chunkResults.forEach((r, i) => {
+      results[chunk.startIdx + i] = r;
+    });
+  }
+
+  return results;
+}
+
+async function _sendChunk(
+  items: RotatedBatchItem[],
+  apiKey: string,
+): Promise<BatchResult[]> {
+  const dataPayload = items.map((item, idx) => ({
+    target: normalizePhone(item.phone),
+    message: item.message,
+    countryCode: "62",
+    ...(idx > 0 ? { delay: item.delayRange } : {}),
+  }));
+
+  const body = new URLSearchParams({ data: JSON.stringify(dataPayload) });
+
+  try {
+    const res = await fetch(FONNTE_URL, {
+      method: "POST",
+      headers: { Authorization: apiKey },
+      body,
+    });
+
+    const json = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+
+    if (!res.ok || json?.status === false) {
+      console.error("[WA Rotated] Fonnte error:", res.status, JSON.stringify(json));
+      return items.map((i) => ({ phone: i.phone, ok: false }));
+    }
+
+    console.log(
+      `[WA Rotated] Queued ${items.length} messages via key …${apiKey.slice(-6)} →`,
+      json?.detail ?? "ok",
+    );
+    return items.map((i) => ({ phone: i.phone, ok: true }));
+  } catch (err) {
+    console.error("[WA Rotated] Fetch error:", err);
+    return items.map((i) => ({ phone: i.phone, ok: false }));
+  }
+}
+
 // ── Message templates ──────────────────────────────────────────────────────────
 // Re-exported from lib/waTemplates.ts (no Node.js deps — safe for Client Components)
 export { waMsg } from "./waTemplates";
