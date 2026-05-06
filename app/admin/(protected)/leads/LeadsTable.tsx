@@ -334,7 +334,7 @@ function BroadcastHistoryModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-
+export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const q    = searchParams.get("q") ?? "";
