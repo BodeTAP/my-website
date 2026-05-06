@@ -478,6 +478,23 @@ model HostingRecord {
   @@map("hosting_records")
 }
 
+// ─── Broadcast Log ────────────────────────────────────────────────────────────
+
+model BroadcastLog {
+  id          String   @id @default(cuid())
+  sentAt      DateTime @default(now())
+  totalLeads  Int
+  sent        Int
+  failed      Int
+  skipped     Int      @default(0)
+  devices     Int      @default(1)
+  delayRange  String
+  messageSnippet String  // first 100 chars of message
+  createdAt   DateTime @default(now())
+
+  @@map("broadcast_logs")
+}
+
 enum HostingStatus {
   ACTIVE
   EXPIRED

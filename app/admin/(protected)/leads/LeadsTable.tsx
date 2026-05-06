@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download, Pencil } from "lucide-react";
+import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download, Pencil, History, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
@@ -57,16 +57,33 @@ function cooldownRemaining(lastContactedAt: Date | null): string {
 }
 
 function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: () => void; onDone: () => void }) {
-  const [message, setMessage]         = useState(DEFAULT_TEMPLATE);
-  const [status, setStatus]           = useState<"idle" | "sending" | "done">("idle");
+  const [message, setMessage]           = useState(DEFAULT_TEMPLATE);
+  const [status, setStatus]             = useState<"idle" | "sending" | "done">("idle");
   const [skipCooldown, setSkipCooldown] = useState(false);
-  const [result, setResult]           = useState<{
-    sent: number; failed: number; devices: number;
-    skipped: number; cooldownLeads?: string[]; delayRange: string;
+  const [countdown, setCountdown]       = useState<number | null>(null);
+  const [result, setResult]             = useState<{
+    sent: number; failed: number; devices: number; skipped: number;
+    cooldownLeads?: string[]; invalidPhones?: string[];
+    delayRange: string; estimatedSeconds: number; remainingToday: number;
   } | null>(null);
 
   const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt));
   const eligibleCount = skipCooldown ? leads.length : leads.length - coolingLeads.length;
+
+  // Estimate completion time for display
+  const estimateSeconds = (count: number, delayRange: string) => {
+    const [min, max] = delayRange.split("-").map(Number);
+    return Math.round(count * (min + max) / 2);
+  };
+  const previewDelay = eligibleCount <= 5 ? "15-30" : eligibleCount <= 10 ? "20-40" : "30-60";
+  const previewEta   = estimateSeconds(eligibleCount, previewDelay);
+
+  // Countdown timer after send
+  useEffect(() => {
+    if (countdown === null || countdown <= 0) return;
+    const t = setTimeout(() => setCountdown((c) => (c ?? 1) - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown]);
 
   const handleSend = async () => {
     setStatus("sending");
@@ -79,13 +96,17 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult({
-        sent:          data.sent,
-        failed:        data.failed,
-        devices:       data.devices ?? 1,
-        skipped:       data.skipped ?? 0,
-        cooldownLeads: data.cooldownLeads,
-        delayRange:    data.delayRange ?? "20-40",
+        sent:             data.sent,
+        failed:           data.failed,
+        devices:          data.devices ?? 1,
+        skipped:          data.skipped ?? 0,
+        cooldownLeads:    data.cooldownLeads,
+        invalidPhones:    data.invalidPhones,
+        delayRange:       data.delayRange ?? "20-40",
+        estimatedSeconds: data.estimatedSeconds ?? 0,
+        remainingToday:   data.remainingToday ?? 0,
       });
+      setCountdown(data.estimatedSeconds ?? 0);
       setStatus("done");
     } catch (err) {
       alert((err as Error).message);
@@ -108,18 +129,30 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
         </div>
 
         {status !== "done" ? (
-          <div className="p-5 space-y-4">
+          <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
             {/* Warning banner */}
             <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 space-y-1.5">
               <p className="text-amber-400 text-xs font-semibold">⚠️ Peringatan Risiko Blokir WhatsApp</p>
               <ul className="text-amber-300/70 text-[11px] space-y-1 list-disc ml-4">
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
-                <li>Maks <strong>20 pesan/sesi</strong>, tunggu 2–3 jam sebelum sesi berikutnya</li>
-                <li>Jika penerima lapor spam, nomor Anda bisa diblokir permanen</li>
-                <li>Pesan dikirim dengan jeda <strong>20–60 detik acak</strong> antar nomor (adaptif)</li>
+                <li>Broadcast hanya diizinkan <strong>08.00–20.00 WIB</strong></li>
+                <li>Maks <strong>50 pesan/hari</strong> per akun admin</li>
+                <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
                 <li>Pesan otomatis divariasikan agar tidak identik satu sama lain</li>
               </ul>
             </div>
+
+            {/* ETA preview */}
+            {eligibleCount > 0 && (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                <span className="text-blue-200/60 text-xs">Estimasi selesai:</span>
+                <span className="text-blue-300 text-xs font-semibold">
+                  ~{previewEta >= 60
+                    ? `${Math.floor(previewEta / 60)} menit ${previewEta % 60} detik`
+                    : `${previewEta} detik`}
+                </span>
+              </div>
+            )}
 
             {/* Cooldown info */}
             {coolingLeads.length > 0 && (
@@ -145,10 +178,9 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
             <div className="bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 flex items-start gap-2">
               <span className="text-lg leading-none">🔄</span>
               <div>
-                <p className="text-indigo-300 text-xs font-semibold">Rotator + Variasi Aktif</p>
+                <p className="text-indigo-300 text-xs font-semibold">Rotator + Variasi + Greeting Aktif</p>
                 <p className="text-indigo-200/60 text-[11px] mt-0.5">
-                  Device digilir otomatis jika ada lebih dari 1 token Fonnte. Pesan juga divariasikan
-                  otomatis agar tidak identik — mengurangi risiko deteksi spam.
+                  Device digilir otomatis. Pesan divariasikan suffix, emoji, dan sapaan sesuai waktu (pagi/siang/sore).
                 </p>
               </div>
             </div>
@@ -156,7 +188,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              rows={9}
+              rows={8}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/30 outline-none focus:border-indigo-500/50 resize-none font-mono"
             />
             <div className="flex items-center gap-3 flex-wrap">
@@ -172,11 +204,25 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
         ) : (
           <div className="p-8 text-center space-y-4">
             <div className="text-5xl">✅</div>
-            <p className="text-white font-bold text-lg">Broadcast Selesai</p>
+            <p className="text-white font-bold text-lg">Broadcast Dikirim ke Antrian</p>
+
+            {/* Countdown */}
+            {countdown !== null && countdown > 0 && (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3">
+                <p className="text-blue-300 text-xs font-semibold mb-1">Estimasi selesai terkirim semua:</p>
+                <p className="text-white text-2xl font-bold font-mono">
+                  {countdown >= 60
+                    ? `${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`
+                    : `${countdown}s`}
+                </p>
+                <p className="text-blue-200/40 text-[10px] mt-1">Fonnte mengirim dengan jeda {result?.delayRange}s antar pesan</p>
+              </div>
+            )}
+
             <div className="flex justify-center gap-6 flex-wrap">
               <div className="text-center">
                 <p className="text-green-400 text-2xl font-bold">{result?.sent}</p>
-                <p className="text-blue-200/50 text-xs">Terkirim</p>
+                <p className="text-blue-200/50 text-xs">Diantrekan</p>
               </div>
               <div className="text-center">
                 <p className="text-red-400 text-2xl font-bold">{result?.failed}</p>
@@ -185,22 +231,30 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
               {(result?.skipped ?? 0) > 0 && (
                 <div className="text-center">
                   <p className="text-orange-400 text-2xl font-bold">{result?.skipped}</p>
-                  <p className="text-blue-200/50 text-xs">Cooldown</p>
+                  <p className="text-blue-200/50 text-xs">Dilewati</p>
                 </div>
               )}
               <div className="text-center">
                 <p className="text-indigo-400 text-2xl font-bold">{result?.devices ?? 1}</p>
                 <p className="text-blue-200/50 text-xs">Device</p>
               </div>
+              <div className="text-center">
+                <p className="text-blue-300 text-2xl font-bold">{result?.remainingToday ?? 0}</p>
+                <p className="text-blue-200/50 text-xs">Sisa hari ini</p>
+              </div>
             </div>
-            <p className="text-blue-200/40 text-xs">
-              Antrian Fonnte · jeda {result?.delayRange ?? "20-40"}s · pesan divariasikan
-            </p>
+
             {result?.cooldownLeads && result.cooldownLeads.length > 0 && (
               <p className="text-orange-400/60 text-xs">
-                Dilewati (cooldown): {result.cooldownLeads.join(", ")}
+                Cooldown: {result.cooldownLeads.join(", ")}
               </p>
             )}
+            {result?.invalidPhones && result.invalidPhones.length > 0 && (
+              <p className="text-red-400/60 text-xs">
+                Nomor tidak valid: {result.invalidPhones.join(", ")}
+              </p>
+            )}
+
             <Button onClick={onDone} variant="outline"
               className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
               Tutup &amp; Refresh
@@ -212,7 +266,75 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
   );
 }
 
-export default function LeadsTable({ leads }: { leads: Lead[] }) {
+// ── Broadcast History Modal ────────────────────────────────────────────────────
+type BroadcastLogEntry = {
+  id: string; sentAt: string; totalLeads: number; sent: number;
+  failed: number; skipped: number; devices: number;
+  delayRange: string; messageSnippet: string;
+};
+
+function BroadcastHistoryModal({ onClose }: { onClose: () => void }) {
+  const [logs, setLogs]       = useState<BroadcastLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/leads/broadcast")
+      .then((r) => r.json())
+      .then((data) => { setLogs(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative glass rounded-2xl w-full max-w-2xl border border-white/10 shadow-2xl max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-indigo-400" />
+            <h2 className="text-white font-bold">Riwayat Broadcast</h2>
+          </div>
+          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 p-4 space-y-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-200/40" />
+            </div>
+          ) : logs.length === 0 ? (
+            <p className="text-blue-200/40 text-sm text-center py-12">Belum ada riwayat broadcast.</p>
+          ) : (
+            logs.map((log) => (
+              <div key={log.id} className="bg-white/5 border border-white/5 rounded-xl p-4 space-y-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-white/70 text-xs font-medium flex items-center gap-1.5">
+                    <Clock className="w-3 h-3 text-blue-200/40" />
+                    {new Intl.DateTimeFormat("id-ID", {
+                      day: "2-digit", month: "short", year: "numeric",
+                      hour: "2-digit", minute: "2-digit",
+                    }).format(new Date(log.sentAt))}
+                  </span>
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <span className="text-green-400 font-bold">{log.sent} terkirim</span>
+                    {log.failed > 0 && <span className="text-red-400">{log.failed} gagal</span>}
+                    {log.skipped > 0 && <span className="text-orange-400/70">{log.skipped} dilewati</span>}
+                    <span className="text-blue-200/30">{log.devices} device · {log.delayRange}s</span>
+                  </div>
+                </div>
+                <p className="text-blue-200/40 text-[11px] font-mono truncate">
+                  &ldquo;{log.messageSnippet}{log.messageSnippet.length >= 100 ? "…" : ""}&rdquo;
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const q    = searchParams.get("q") ?? "";
@@ -225,6 +347,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   );
   const [selected, setSelected]           = useState<Set<string>>(new Set());
   const [showBroadcast, setShowBroadcast] = useState(false);
+  const [showHistory, setShowHistory]     = useState(false);
   const [deleting, setDeleting]           = useState(false);
   const [waTemplate, setWaTemplate]       = useState<string>(() =>
     (typeof window !== "undefined" && localStorage.getItem(WA_TEMPLATE_KEY)) || DEFAULT_WA_MANUAL
@@ -359,6 +482,10 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
         </div>
       )}
 
+      {showHistory && (
+        <BroadcastHistoryModal onClose={() => setShowHistory(false)} />
+      )}
+
       {showBroadcast && (
         <BroadcastModal
           leads={selectedLeads}
@@ -377,6 +504,11 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
             title="Edit template pesan WA manual"
             className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-green-400 hover:border-green-500/30 transition-all bg-white/5">
             <Pencil className="w-3 h-3" /> Template WA
+          </button>
+          <button onClick={() => setShowHistory(true)}
+            title="Riwayat broadcast"
+            className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-indigo-400 hover:border-indigo-500/30 transition-all bg-white/5">
+            <History className="w-3 h-3" /> Riwayat
           </button>
           <div className="flex gap-2 overflow-x-auto flex-1 w-full pb-2 sm:pb-0">
             {(["ALL", "NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
