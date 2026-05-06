@@ -19,20 +19,10 @@ export default async function SettingsPage() {
   const session = await auth();
   if (!session || (session.user as { role?: string })?.role !== "ADMIN") redirect("/admin/login");
 
-  const [rows, admins] = await Promise.all([
-    prisma.siteSetting.findMany(),
-    prisma.user.findMany({
-      where: { role: "ADMIN" },
-      select: { id: true, name: true, email: true, createdAt: true },
-      orderBy: { createdAt: "asc" },
-    })
-  ]);
+  const rows = await prisma.siteSetting.findMany();
 
   const settings: Record<string, string> = { ...DEFAULTS };
   for (const row of rows) settings[row.key] = row.value;
 
-  const serializedAdmins = admins.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }));
-  const currentUserId = (session.user as { id?: string })?.id ?? "";
-
-  return <SettingsClient initial={settings} initialAdmins={serializedAdmins} currentUserId={currentUserId} />;
+  return <SettingsClient initial={settings} />;
 }

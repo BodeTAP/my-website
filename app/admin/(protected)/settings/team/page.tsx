@@ -1,4 +1,5 @@
 import { requireModule } from "@/lib/permissions";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import TeamSettingsClient from "./TeamSettingsClient";
 
@@ -29,6 +30,9 @@ export interface MemberItem {
 export default async function TeamSettingsPage() {
   // Only Super Admin can access this page
   await requireModule("team");
+
+  const session = await auth();
+  const currentUserId = (session?.user as { id?: string })?.id ?? "";
 
   // Fetch roles and members in parallel directly from DB
   const [roles, users] = await Promise.all([
@@ -79,6 +83,7 @@ export default async function TeamSettingsPage() {
     <TeamSettingsClient
       initialRoles={initialRoles}
       initialMembers={initialMembers}
+      currentUserId={currentUserId}
     />
   );
 }
