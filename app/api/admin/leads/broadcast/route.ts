@@ -208,12 +208,18 @@ const CTA_VARIANTS = [
 
 // ── Footer name variants ──────────────────────────────────────────────────────
 
-const FOOTER_NAMES = [
-  "Tim MFWEB",
-  "MFWEB",
-  "Tim kami di MFWEB",
-  "MFWEB Team",
-  "", // no footer — 10% of messages
+// Full footer variants — must match the actual format from waTemplates.ts
+// Original: "\n\n_MFWEB · mfweb.maffisorp.id_"
+const FOOTER_VARIANTS = [
+  "\n\n_MFWEB · mfweb.maffisorp.id_",
+  "\n\n_Tim MFWEB · mfweb.maffisorp.id_",
+  "\n\n_MFWEB Team · mfweb.maffisorp.id_",
+  "\n\n_Tim kami di MFWEB · mfweb.maffisorp.id_",
+  "\n\n_Salam, MFWEB · mfweb.maffisorp.id_",
+  "\n\n_Hormat kami, Tim MFWEB_",
+  "\n\n_MFWEB — Jasa Website Profesional_",
+  "", // no footer — ~12% of messages feel more personal without it
+  "", // weighted twice for higher probability
 ];
 
 // ── Punctuation humanizer ─────────────────────────────────────────────────────
@@ -358,13 +364,10 @@ function varyMessage(
       : result + ctaLine;
   }
 
-  // ── Layer 7: Footer name variation (10% no footer) ──
-  const footerName = FOOTER_NAMES[index % FOOTER_NAMES.length];
-  if (footerName) {
-    // Replace "_MFWEB_" pattern with varied name if present
-    result = result.replace(/_MFWEB_/g, `_${footerName}_`);
-    result = result.replace(/\bMFWEB\b(?!_)/g, footerName);
-  }
+  // ── Layer 7: Footer variation — replace entire footer string ──
+  const footerVariant = FOOTER_VARIANTS[index % FOOTER_VARIANTS.length];
+  // Match the full footer pattern: "\n\n_MFWEB..._" (with or without URL)
+  result = result.replace(/\n\n_MFWEB[^_]*_/g, footerVariant);
 
   // ── Layer 8: Punctuation humanization ──
   result = humanizePunctuation(result, index * 3 + 11);
