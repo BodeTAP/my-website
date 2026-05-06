@@ -4,11 +4,23 @@ module.exports = {
   generateRobotsTxt: true,
   robotsTxtOptions: {
     policies: [
-      { userAgent: "*", allow: "/" },
-      { userAgent: "*", disallow: ["/admin", "/portal", "/api"] },
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/admin",
+          "/portal",
+          "/api/",
+          "/onboarding/",
+          "/bayar/",
+        ],
+      },
+    ],
+    additionalSitemaps: [
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id"}/sitemap.xml`,
     ],
   },
-  exclude: ["/admin/*", "/portal/*", "/api/*"],
+  exclude: ["/admin/*", "/portal/*", "/api/*", "/onboarding/*", "/bayar/*"],
   changefreq: "weekly",
   priority: 0.7,
   sitemapSize: 5000,
