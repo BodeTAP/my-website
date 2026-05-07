@@ -531,10 +531,8 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
             <span className="text-indigo-300 text-sm font-medium">{selected.size} lead dipilih</span>
             <div className="flex items-center gap-2 flex-wrap">
               <Button size="sm" onClick={() => setShowBroadcast(true)}
-                disabled={selected.size > 20}
-                title={selected.size > 20 ? "Maks 20 lead per broadcast" : undefined}
-                className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs disabled:opacity-40">
-                <Send className="w-3 h-3" /> Broadcast WA {selected.size > 20 && <span className="text-[10px]">(maks 20)</span>}
+                className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
+                <Send className="w-3 h-3" /> Broadcast WA
               </Button>
               <Button size="sm" onClick={handleExportCSV}
                 className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 gap-1.5 h-8 text-xs shadow-none">

@@ -402,7 +402,6 @@ export async function POST(req: NextRequest) {
 
     if (!leadIds?.length) return NextResponse.json({ error: "Pilih minimal 1 lead" }, { status: 400 });
     if (!message?.trim()) return NextResponse.json({ error: "Pesan tidak boleh kosong" }, { status: 400 });
-    if (leadIds.length > 20) return NextResponse.json({ error: "Maksimal 20 lead per broadcast." }, { status: 400 });
 
     const waKeys = await getFonnteKeys();
     if (!waKeys.length) return NextResponse.json({ error: "Fonnte API key belum dikonfigurasi" }, { status: 500 });
