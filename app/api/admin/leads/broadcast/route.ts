@@ -92,11 +92,19 @@ const SYNONYMS: Record<string, string[]> = {
   "Harga":         ["Harga", "Biaya", "Tarif", "Investasi"],
 };
 
+/**
+ * FIX #2: Replace ALL occurrences of each synonym consistently within a message,
+ * using a per-word offset so different words get different variants even with the same seed.
+ */
 function applySynonyms(text: string, seed: number): string {
   let result = text;
+  let wordOffset = 0;
   for (const [word, variants] of Object.entries(SYNONYMS)) {
     if (result.includes(word)) {
-      result = result.replace(word, variants[seed % variants.length]);
+      const variant = variants[(seed + wordOffset) % variants.length];
+      // Replace ALL occurrences, not just the first
+      result = result.replaceAll(word, variant);
+      wordOffset++;
     }
   }
   return result;
@@ -198,15 +206,19 @@ const STAT_VARIANTS = [
 // ── Business name shortener ───────────────────────────────────────────────────
 
 /**
- * Returns a shortened or varied form of the business name.
- * seed % 3 === 0 → full name, === 1 → last word only, === 2 → "bisnis Anda"
+ * FIX #3: Context-aware business name variation.
+ * Only shortens if the name has 3+ words (avoids "Budi" from "Warung Pak Budi").
+ * Short names (1-2 words) always use full name.
+ * seed % 3 === 0 → full name
+ * seed % 3 === 1 → last 2 words (safer than last 1 word)
+ * seed % 3 === 2 → "bisnis Anda"
  */
 function varyBusinessName(businessName: string, seed: number): string {
-  if (seed % 3 === 0) return businessName;
-  if (seed % 3 === 1) {
-    const words = businessName.trim().split(/\s+/);
-    // Use last meaningful word if name has multiple words
-    return words.length > 1 ? words[words.length - 1] : businessName;
+  const words = businessName.trim().split(/\s+/);
+  if (seed % 3 === 0 || words.length <= 2) return businessName;
+  if (seed % 3 === 1 && words.length >= 3) {
+    // Take last 2 words — more natural than last 1
+    return words.slice(-2).join(" ");
   }
   return "bisnis Anda";
 }
@@ -276,31 +288,34 @@ function varyParagraphSpacing(text: string, seed: number): string {
 
 // ── Intentional light typos ───────────────────────────────────────────────────
 
-// Pairs: [original, typo] — subtle enough to still be readable
+// Pairs: [original, replacement] — only informal substitutions that fit any tone
+// FIX #4: Removed "tidak " → "ga " (too casual for formal context).
+// Only use substitutions that work in both formal and informal sentences.
 const TYPO_PAIRS: [string, string][] = [
   ["yang ", "yg "],
   ["dengan ", "dgn "],
   ["untuk ", "utk "],
   ["karena ", "krn "],
   ["sudah ", "udah "],
-  ["tidak ", "ga "],
-  ["bisa ", "bisa "],   // no-op placeholder for weight
-  ["kami ", "kita "],
   ["sangat ", "banget "],
-  ["lebih ", "lebih "],  // no-op
+  ["kami ", "kita "],
+  ["sekarang ", "skrg "],
+  ["banyak ", "banyak "],   // no-op for weight balance
+  ["mudah ", "gampang "],
 ];
 
 /**
- * Apply 1 subtle typo/informal substitution to make the message feel hand-typed.
+ * Apply 1 subtle informal substitution to make the message feel hand-typed.
  * Only applied to ~40% of messages (seed % 5 < 2).
+ * Skips substitution if the word appears in a formal sentence opener.
  */
 function applyLightTypo(text: string, seed: number): string {
-  if (seed % 5 >= 2) return text; // 60% no typo
+  if (seed % 5 >= 2) return text; // 60% no substitution
   const pair = TYPO_PAIRS[seed % TYPO_PAIRS.length];
   const [original, replacement] = pair;
   if (original === replacement) return text; // no-op pair
-  // Replace only the first occurrence
-  return text.replace(original, replacement);
+  // Only replace if not at the very start of a line (avoids mangling sentence openers)
+  return text.replace(new RegExp(`(?<!^)${original}`, "m"), replacement);
 }
 
 // ── CTA variants ──────────────────────────────────────────────────────────────
@@ -424,48 +439,52 @@ function getTimeGreeting(): string {
 
 /**
  * Core message variation engine.
- * Applies all 16 humanization layers to the admin-written template.
+ * FIX #1: Uses sessionSalt (random per broadcast session) mixed with index
+ * so two different broadcast sessions never produce the same message for index 0.
+ * Applies all 13 humanization layers to the admin-written template.
  */
 function varyMessage(
   message: string,
   index: number,
   lead: LeadContext,
+  sessionSalt: number,
 ): string {
+  // Mix index with session salt — different every broadcast run
+  const s = (index * 31 + sessionSalt) >>> 0; // unsigned 32-bit for stability
   let result = message;
 
-  // ── Layer 1: Synonym substitution ──
-  result = applySynonyms(result, index + 7);
+  // ── Layer 1: Synonym substitution (consistent within message, varied across sessions) ──
+  result = applySynonyms(result, s + 7);
 
   // ── Layer 2: Bullet emoji rotation ──
   if (result.includes("✅")) {
-    result = result.replaceAll("✅", BULLET_EMOJIS[index % BULLET_EMOJIS.length]);
+    result = result.replaceAll("✅", BULLET_EMOJIS[s % BULLET_EMOJIS.length]);
   }
 
   // ── Layer 3: Emoji position variation (start vs end of line) ──
-  result = varyEmojiPosition(result, index + 5);
+  result = varyEmojiPosition(result, s + 5);
 
   // ── Layer 4: Opening greeting variation ──
-  const opening = index % 5 === 0
+  const opening = s % 5 === 0
     ? getTimeGreeting()
-    : OPENING_VARIANTS[index % OPENING_VARIANTS.length];
+    : OPENING_VARIANTS[s % OPENING_VARIANTS.length];
   if (/^(Halo|Hai|Hei|Permisi|Salam kenal)/.test(result)) {
     result = result.replace(/^(Halo|Hai|Hei|Permisi|Salam kenal)/, opening);
   }
 
   // ── Layer 5: Personalized opener (question or stat hook with varied number format) ──
   const firstNewline = result.indexOf("\n");
-  const personalOpener = buildPersonalizedOpener(lead, index);
+  const personalOpener = buildPersonalizedOpener(lead, s);
   if (firstNewline !== -1) {
     result = result.slice(0, firstNewline) + "\n\n" + personalOpener + result.slice(firstNewline);
   }
 
   // ── Layer 6: Bullet line order shuffle ──
-  result = shuffleBulletLines(result, index * 13 + 3);
+  result = shuffleBulletLines(result, s * 13 + 3);
 
   // ── Layer 7: Category-specific context + website acknowledgment ──
-  // Use varied business name in context line
-  const contextLine = buildWebsiteContext(lead, index)
-    .replace(lead.businessName, varyBusinessName(lead.businessName, index + 9));
+  const contextLine = buildWebsiteContext(lead, s)
+    .replace(lead.businessName, varyBusinessName(lead.businessName, s + 9));
   const footerIdx = result.lastIndexOf("\n\n_MFWEB");
   if (footerIdx !== -1) {
     result = result.slice(0, footerIdx) + "\n\n" + contextLine + result.slice(footerIdx);
@@ -473,8 +492,8 @@ function varyMessage(
     result += "\n\n" + contextLine;
   }
 
-  // ── Layer 8: CTA variation (10% no CTA, 90% varied CTA) ──
-  const cta = CTA_VARIANTS[index % CTA_VARIANTS.length];
+  // ── Layer 8: CTA variation ──
+  const cta = CTA_VARIANTS[s % CTA_VARIANTS.length];
   if (cta) {
     const fi = result.lastIndexOf("\n\n_MFWEB");
     const ctaLine = "\n\n" + cta;
@@ -483,21 +502,21 @@ function varyMessage(
       : result + ctaLine;
   }
 
-  // ── Layer 9: Footer variation — replace entire footer string ──
-  const footerVariant = FOOTER_VARIANTS[index % FOOTER_VARIANTS.length];
+  // ── Layer 9: Footer variation ──
+  const footerVariant = FOOTER_VARIANTS[s % FOOTER_VARIANTS.length];
   result = result.replace(/\n\n_MFWEB[^_]*_/g, footerVariant);
 
   // ── Layer 10: Paragraph spacing variation ──
-  result = varyParagraphSpacing(result, index + 17);
+  result = varyParagraphSpacing(result, s + 17);
 
-  // ── Layer 11: Light typo / informal substitution ──
-  result = applyLightTypo(result, index + 23);
+  // ── Layer 11: Light informal substitution ──
+  result = applyLightTypo(result, s + 23);
 
   // ── Layer 12: Punctuation humanization ──
-  result = humanizePunctuation(result, index * 3 + 11);
+  result = humanizePunctuation(result, s * 3 + 11);
 
-  // ── Layer 13: Invisible fingerprint ──
-  result = injectZeroWidth(result, index);
+  // ── Layer 13: Invisible fingerprint (unique per message + session) ──
+  result = injectZeroWidth(result, s);
 
   return result;
 }
@@ -573,6 +592,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Build items with personalization + variation
+    // FIX #1: Generate a random session salt so each broadcast run produces unique messages
+    // even for the same lead at index 0
+    const sessionSalt = Math.floor(Math.random() * 0xFFFF);
+
     const items = eligibleLeads.map((lead, idx) => ({
       phone:  lead.whatsapp,
       message: varyMessage(
@@ -585,6 +608,7 @@ export async function POST(req: NextRequest) {
           message:        lead.message,
           notes:          lead.notes,
         },
+        sessionSalt,
       ),
       leadId: lead.id,
       name:   lead.name,
