@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendWABatchRotated } from "@/lib/whatsapp";
 import { getFonnteKeys } from "@/lib/getFonnteKey";
-import { rateLimit } from "@/lib/rateLimit";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const COOLDOWN_HOURS    = 24;
-const DAILY_LIMIT       = 50;   // max messages per Fonnte token per day
 const ALLOWED_HOURS_WIB = { start: 8, end: 20 }; // 08:00–20:00 WIB (UTC+7)
 const BURST_PAUSE_EVERY = 5;    // pause after every N messages
 const BURST_PAUSE_RANGE = { min: 90, max: 180 }; // seconds (1.5–3 min burst pause)
@@ -409,23 +407,6 @@ export async function POST(req: NextRequest) {
     const waKeys = await getFonnteKeys();
     if (!waKeys.length) return NextResponse.json({ error: "Fonnte API key belum dikonfigurasi" }, { status: 500 });
 
-    // 2. Daily counter per Fonnte token via Redis
-    const session = await auth();
-    const adminEmail = session?.user?.email ?? "unknown";
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
-    const { allowed, remaining } = await rateLimit(
-      `broadcast-daily:${adminEmail}:${today}`,
-      DAILY_LIMIT,
-      24 * 60 * 60 * 1000,
-    );
-    if (!allowed) {
-      return NextResponse.json({
-        error: `Batas harian ${DAILY_LIMIT} pesan tercapai. Coba lagi besok.`,
-        code:  "DAILY_LIMIT",
-      }, { status: 429 });
-    }
-
     const leads = await prisma.lead.findMany({
       where:  { id: { in: leadIds } },
       select: { id: true, name: true, businessName: true, whatsapp: true, lastContactedAt: true, currentWebsite: true, message: true, notes: true },
@@ -537,7 +518,7 @@ export async function POST(req: NextRequest) {
     console.log(
       `[Broadcast] ${sent} queued, ${failed} failed` +
       ` | cooldown: ${cooldownLeads.length}, invalid: ${invalidPhones.length}` +
-      ` | ${waKeys.length} device(s) | delay: ${delayRange}s | remaining today: ${remaining}`,
+      ` | ${waKeys.length} device(s) | delay: ${delayRange}s`,
     );
 
     return NextResponse.json({
@@ -550,7 +531,6 @@ export async function POST(req: NextRequest) {
       cooldownLeads:    cooldownLeads.length > 0 ? cooldownLeads : undefined,
       delayRange,
       estimatedSeconds,
-      remainingToday:   remaining,
     });
   } catch (err) {
     console.error("[Broadcast]", err);

@@ -64,7 +64,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
   const [result, setResult]             = useState<{
     sent: number; failed: number; devices: number; skipped: number;
     cooldownLeads?: string[]; invalidPhones?: string[];
-    delayRange: string; estimatedSeconds: number; remainingToday: number;
+    delayRange: string; estimatedSeconds: number;
   } | null>(null);
 
   const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt));
@@ -104,7 +104,6 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
         invalidPhones:    data.invalidPhones,
         delayRange:       data.delayRange ?? "20-40",
         estimatedSeconds: data.estimatedSeconds ?? 0,
-        remainingToday:   data.remainingToday ?? 0,
       });
       setCountdown(data.estimatedSeconds ?? 0);
       setStatus("done");
@@ -136,7 +135,6 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
               <ul className="text-amber-300/70 text-[11px] space-y-1 list-disc ml-4">
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Broadcast hanya diizinkan <strong>08.00–20.00 WIB</strong></li>
-                <li>Maks <strong>50 pesan/hari</strong> per akun admin</li>
                 <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
                 <li>Pesan otomatis divariasikan agar tidak identik satu sama lain</li>
               </ul>
@@ -237,10 +235,6 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
               <div className="text-center">
                 <p className="text-indigo-400 text-2xl font-bold">{result?.devices ?? 1}</p>
                 <p className="text-blue-200/50 text-xs">Device</p>
-              </div>
-              <div className="text-center">
-                <p className="text-blue-300 text-2xl font-bold">{result?.remainingToday ?? 0}</p>
-                <p className="text-blue-200/50 text-xs">Sisa hari ini</p>
               </div>
             </div>
 
