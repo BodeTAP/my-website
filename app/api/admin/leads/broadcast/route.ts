@@ -181,6 +181,7 @@ function getCategoryHook(lead: LeadContext, index: number): string {
 
 // ── Statistics variants ───────────────────────────────────────────────────────
 
+// Same fact, many different phrasings
 const STAT_VARIANTS = [
   "78% konsumen",
   "8 dari 10 orang",
@@ -188,7 +189,119 @@ const STAT_VARIANTS = [
   "mayoritas pelanggan",
   "sebagian besar orang",
   "lebih dari 3/4 konsumen",
+  "78 dari 100 calon pembeli",
+  "hampir 4 dari 5 orang",
+  "lebih dari separuh konsumen",
+  "rata-rata 8 dari 10 pembeli",
 ];
+
+// ── Business name shortener ───────────────────────────────────────────────────
+
+/**
+ * Returns a shortened or varied form of the business name.
+ * seed % 3 === 0 → full name, === 1 → last word only, === 2 → "bisnis Anda"
+ */
+function varyBusinessName(businessName: string, seed: number): string {
+  if (seed % 3 === 0) return businessName;
+  if (seed % 3 === 1) {
+    const words = businessName.trim().split(/\s+/);
+    // Use last meaningful word if name has multiple words
+    return words.length > 1 ? words[words.length - 1] : businessName;
+  }
+  return "bisnis Anda";
+}
+
+// ── Paragraph shuffler ────────────────────────────────────────────────────────
+
+/**
+ * Shuffle the order of bullet-point lines within a paragraph block.
+ * Only shuffles lines that start with a bullet emoji or "✅/☑️/etc."
+ * Leaves non-bullet lines (greeting, footer, etc.) in place.
+ */
+function shuffleBulletLines(text: string, seed: number): string {
+  // Only shuffle if there are 3+ bullet lines
+  const lines = text.split("\n");
+  const bulletPattern = /^[✅☑️✔️💡⭐🔹▶️🎯💎🔑•\-*]/u;
+  const bulletIndices: number[] = [];
+  lines.forEach((line, i) => {
+    if (bulletPattern.test(line.trim())) bulletIndices.push(i);
+  });
+
+  if (bulletIndices.length < 3) return text; // not enough bullets to shuffle
+
+  // Fisher-Yates with deterministic seed
+  const bullets = bulletIndices.map((i) => lines[i]);
+  for (let i = bullets.length - 1; i > 0; i--) {
+    const j = (seed * (i + 3) + 7) % (i + 1);
+    [bullets[i], bullets[j]] = [bullets[j], bullets[i]];
+  }
+  bulletIndices.forEach((lineIdx, i) => { lines[lineIdx] = bullets[i]; });
+  return lines.join("\n");
+}
+
+// ── Emoji position variation ──────────────────────────────────────────────────
+
+/**
+ * For some messages, move trailing emoji to the start of the line.
+ * "Muncul di Google ✅" → "✅ Muncul di Google"
+ */
+function varyEmojiPosition(text: string, seed: number): string {
+  if (seed % 3 !== 1) return text; // only 1/3 of messages
+  return text.replace(
+    /^(.+?)\s([\u{1F300}-\u{1FFFF}✅☑️✔️💡⭐🔹▶️🎯💎🔑])$/gmu,
+    (_, content, emoji) => `${emoji} ${content}`,
+  );
+}
+
+// ── Paragraph spacing variation ───────────────────────────────────────────────
+
+/**
+ * Vary the number of blank lines between paragraphs.
+ * Some messages use single blank line, others double.
+ */
+function varyParagraphSpacing(text: string, seed: number): string {
+  if (seed % 4 === 0) {
+    // Compress double newlines to single in some paragraphs
+    return text.replace(/\n\n\n/g, "\n\n");
+  }
+  if (seed % 4 === 2) {
+    // Add extra spacing before the last paragraph
+    const lastPara = text.lastIndexOf("\n\n");
+    if (lastPara > 0) {
+      return text.slice(0, lastPara) + "\n\n\n" + text.slice(lastPara + 2);
+    }
+  }
+  return text;
+}
+
+// ── Intentional light typos ───────────────────────────────────────────────────
+
+// Pairs: [original, typo] — subtle enough to still be readable
+const TYPO_PAIRS: [string, string][] = [
+  ["yang ", "yg "],
+  ["dengan ", "dgn "],
+  ["untuk ", "utk "],
+  ["karena ", "krn "],
+  ["sudah ", "udah "],
+  ["tidak ", "ga "],
+  ["bisa ", "bisa "],   // no-op placeholder for weight
+  ["kami ", "kita "],
+  ["sangat ", "banget "],
+  ["lebih ", "lebih "],  // no-op
+];
+
+/**
+ * Apply 1 subtle typo/informal substitution to make the message feel hand-typed.
+ * Only applied to ~40% of messages (seed % 5 < 2).
+ */
+function applyLightTypo(text: string, seed: number): string {
+  if (seed % 5 >= 2) return text; // 60% no typo
+  const pair = TYPO_PAIRS[seed % TYPO_PAIRS.length];
+  const [original, replacement] = pair;
+  if (original === replacement) return text; // no-op pair
+  // Replace only the first occurrence
+  return text.replace(original, replacement);
+}
 
 // ── CTA variants ──────────────────────────────────────────────────────────────
 
@@ -246,16 +359,17 @@ type LeadContext = {
 };
 
 function buildPersonalizedOpener(lead: LeadContext, index: number): string {
+  const bizName = varyBusinessName(lead.businessName, index + 2);
   // 30% of messages: start with a question hook (conversational)
   if (index % 3 === 0) {
     const questions = [
-      `Apakah ${lead.businessName} sudah punya website?`,
-      `Sudah punya website untuk ${lead.businessName} belum?`,
-      `${lead.businessName} sudah hadir secara online belum?`,
+      `Apakah ${bizName} sudah punya website?`,
+      `Sudah punya website untuk ${bizName} belum?`,
+      `${bizName} sudah hadir secara online belum?`,
     ];
     return questions[index % questions.length];
   }
-  // 70%: stat-based hook
+  // 70%: stat-based hook with varied number format
   const stat = STAT_VARIANTS[index % STAT_VARIANTS.length];
   const statHooks = [
     `${stat} cari produk atau jasa lewat Google sebelum memutuskan beli.`,
@@ -310,7 +424,7 @@ function getTimeGreeting(): string {
 
 /**
  * Core message variation engine.
- * Applies all 8 humanization layers to the admin-written template.
+ * Applies all 16 humanization layers to the admin-written template.
  */
 function varyMessage(
   message: string,
@@ -327,7 +441,10 @@ function varyMessage(
     result = result.replaceAll("✅", BULLET_EMOJIS[index % BULLET_EMOJIS.length]);
   }
 
-  // ── Layer 3: Opening greeting variation ──
+  // ── Layer 3: Emoji position variation (start vs end of line) ──
+  result = varyEmojiPosition(result, index + 5);
+
+  // ── Layer 4: Opening greeting variation ──
   const opening = index % 5 === 0
     ? getTimeGreeting()
     : OPENING_VARIANTS[index % OPENING_VARIANTS.length];
@@ -335,16 +452,20 @@ function varyMessage(
     result = result.replace(/^(Halo|Hai|Hei|Permisi|Salam kenal)/, opening);
   }
 
-  // ── Layer 4: Personalized opener (question or stat hook) ──
-  // Injected right after the greeting line, before the main body
+  // ── Layer 5: Personalized opener (question or stat hook with varied number format) ──
   const firstNewline = result.indexOf("\n");
   const personalOpener = buildPersonalizedOpener(lead, index);
   if (firstNewline !== -1) {
     result = result.slice(0, firstNewline) + "\n\n" + personalOpener + result.slice(firstNewline);
   }
 
-  // ── Layer 5: Category-specific context + website acknowledgment ──
-  const contextLine = buildWebsiteContext(lead, index);
+  // ── Layer 6: Bullet line order shuffle ──
+  result = shuffleBulletLines(result, index * 13 + 3);
+
+  // ── Layer 7: Category-specific context + website acknowledgment ──
+  // Use varied business name in context line
+  const contextLine = buildWebsiteContext(lead, index)
+    .replace(lead.businessName, varyBusinessName(lead.businessName, index + 9));
   const footerIdx = result.lastIndexOf("\n\n_MFWEB");
   if (footerIdx !== -1) {
     result = result.slice(0, footerIdx) + "\n\n" + contextLine + result.slice(footerIdx);
@@ -352,7 +473,7 @@ function varyMessage(
     result += "\n\n" + contextLine;
   }
 
-  // ── Layer 6: CTA variation (10% no CTA, 90% varied CTA) ──
+  // ── Layer 8: CTA variation (10% no CTA, 90% varied CTA) ──
   const cta = CTA_VARIANTS[index % CTA_VARIANTS.length];
   if (cta) {
     const fi = result.lastIndexOf("\n\n_MFWEB");
@@ -362,15 +483,20 @@ function varyMessage(
       : result + ctaLine;
   }
 
-  // ── Layer 7: Footer variation — replace entire footer string ──
+  // ── Layer 9: Footer variation — replace entire footer string ──
   const footerVariant = FOOTER_VARIANTS[index % FOOTER_VARIANTS.length];
-  // Match the full footer pattern: "\n\n_MFWEB..._" (with or without URL)
   result = result.replace(/\n\n_MFWEB[^_]*_/g, footerVariant);
 
-  // ── Layer 8: Punctuation humanization ──
+  // ── Layer 10: Paragraph spacing variation ──
+  result = varyParagraphSpacing(result, index + 17);
+
+  // ── Layer 11: Light typo / informal substitution ──
+  result = applyLightTypo(result, index + 23);
+
+  // ── Layer 12: Punctuation humanization ──
   result = humanizePunctuation(result, index * 3 + 11);
 
-  // ── Layer 9: Invisible fingerprint ──
+  // ── Layer 13: Invisible fingerprint ──
   result = injectZeroWidth(result, index);
 
   return result;
