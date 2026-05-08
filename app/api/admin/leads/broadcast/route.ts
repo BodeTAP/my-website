@@ -321,6 +321,8 @@ function applyLightTypo(text: string, seed: number): string {
 
 // ── CTA variants ──────────────────────────────────────────────────────────────
 
+const WA_GROUP_LINK = "https://chat.whatsapp.com/FVyttpr28LQ4lOUJyuGTMU";
+
 const CTA_VARIANTS = [
   "Balas pesan ini kalau tertarik, ya!",
   "Ketik *INFO* untuk tahu lebih lanjut.",
@@ -329,6 +331,9 @@ const CTA_VARIANTS = [
   "Kalau ada pertanyaan, langsung tanya aja ya!",
   "Yuk ngobrol dulu, tanpa komitmen apa pun.",
   "Balas *YA* kalau mau kami kirimkan contoh desainnya.",
+  `Gabung grup WA kami untuk info & promo eksklusif:\n${WA_GROUP_LINK}`,
+  `Mau lihat contoh website yang sudah kami buat? Gabung di sini:\n${WA_GROUP_LINK}`,
+  `Join grup WA kami — ada tips bisnis online gratis setiap minggu:\n${WA_GROUP_LINK}`,
   "", // no CTA — feels most natural
   "", // weighted toward no CTA
 ];
