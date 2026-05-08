@@ -350,6 +350,19 @@ const PLANS = [
   { value: 7, label: "Ultra" },
 ];
 
+// Harga per bulan dalam IDR (estimasi — cek fonnte.com untuk harga terkini)
+const PLAN_PRICES: Record<number, { monthly: number; quota: number }> = {
+  1: { monthly: 15000,  quota: 1000  },  // Lite
+  2: { monthly: 25000,  quota: 10000 },  // Regular
+  3: { monthly: 50000,  quota: 25000 },  // Regular Pro
+  4: { monthly: 75000,  quota: 50000 },  // Master
+  5: { monthly: 100000, quota: 100000 }, // Super
+  6: { monthly: 150000, quota: 200000 }, // Advanced
+  7: { monthly: 200000, quota: 500000 }, // Ultra
+};
+
+const AI_QUOTA_PRICE_PER_100 = 1000; // Rp 1.000 per 100 AI quota (estimasi)
+
 function OrderModal({ device, onClose }: { device: Device; onClose: () => void }) {
   const [plan, setPlan]               = useState<number>(2);
   const [duration, setDuration]       = useState<number>(1);
@@ -358,6 +371,16 @@ function OrderModal({ device, onClose }: { device: Device; onClose: () => void }
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
   const [success, setSuccess]         = useState("");
+
+  // Price calculation
+  const planInfo = PLAN_PRICES[plan];
+  const multiplier = duration === 10 ? 12 : 1; // year = 12x monthly
+  const planTotal = planInfo ? planInfo.monthly * multiplier * durationValue : 0;
+  const aiTotal   = aiQuota >= 500 ? Math.floor(aiQuota / 100) * AI_QUOTA_PRICE_PER_100 : 0;
+  const grandTotal = planTotal + aiTotal;
+  const durationLabel = duration === 10 ? "tahun" : "bulan";
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
 
   const handleOrder = async () => {
     setLoading(true); setError(""); setSuccess("");
@@ -429,6 +452,36 @@ function OrderModal({ device, onClose }: { device: Device; onClose: () => void }
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/20 text-sm focus:outline-none" />
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
+
+              {/* Price summary */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+                <p className="text-blue-200/50 text-xs font-medium uppercase tracking-wider">Estimasi Total</p>
+                {planInfo && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-blue-200/60">
+                      {PLANS.find(p => p.value === plan)?.label} × {durationValue} {durationLabel}
+                    </span>
+                    <span className="text-white font-medium">{fmt(planTotal)}</span>
+                  </div>
+                )}
+                {aiQuota >= 500 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-blue-200/60">AI Quota {aiQuota.toLocaleString("id-ID")}</span>
+                    <span className="text-white font-medium">{fmt(aiTotal)}</span>
+                  </div>
+                )}
+                <div className="border-t border-white/10 pt-2 flex justify-between">
+                  <span className="text-white font-semibold text-sm">Total</span>
+                  <span className="text-amber-400 font-bold text-lg">{fmt(grandTotal)}</span>
+                </div>
+                <p className="text-blue-200/30 text-[10px]">
+                  * Estimasi berdasarkan harga referensi. Cek{" "}
+                  <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer"
+                    className="text-blue-400/60 hover:text-blue-300 underline">fonnte.com</a>{" "}
+                  untuk harga resmi terkini.
+                </p>
+              </div>
+
               <div className="flex gap-3 pt-1">
                 <button onClick={onClose}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 text-sm font-medium transition-all">Batal</button>
