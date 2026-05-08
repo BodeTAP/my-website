@@ -157,6 +157,83 @@ export async function fonnteDisconnectDevice(deviceToken: string): Promise<{
 }
 
 /**
+ * Delete a device from the account permanently.
+ * Requires: device token
+ */
+export async function fonnteDeleteDevice(deviceToken: string): Promise<{
+  detail: string;
+  status: boolean;
+  reason?: string;
+}> {
+  return fonntePost("/delete-device", deviceToken);
+}
+
+/**
+ * Update device settings (name, webhook URLs, autoread, etc.)
+ * Requires: device token
+ */
+export async function fonnteUpdateDevice(
+  deviceToken: string,
+  params: {
+    name: string;
+    device: string;
+    webhook?: string;
+    webhookconnect?: string;
+    webhookstatus?: string;
+    webhookchaining?: string;
+    autoread?: boolean;
+    personal?: boolean;
+    group?: boolean;
+    quick?: boolean;
+    resend?: boolean;
+    target?: string;
+    countryCode?: string;
+  },
+): Promise<{ detail: string; status: boolean; reason?: string }> {
+  const body: Record<string, string> = {
+    name:   params.name,
+    device: params.device,
+  };
+  if (params.webhook)         body.webhook         = params.webhook;
+  if (params.webhookconnect)  body.webhookconnect  = params.webhookconnect;
+  if (params.webhookstatus)   body.webhookstatus   = params.webhookstatus;
+  if (params.webhookchaining) body.webhookchaining = params.webhookchaining;
+  if (params.autoread  !== undefined) body.autoread  = String(params.autoread);
+  if (params.personal  !== undefined) body.personal  = String(params.personal);
+  if (params.group     !== undefined) body.group     = String(params.group);
+  if (params.quick     !== undefined) body.quick     = String(params.quick);
+  if (params.resend    !== undefined) body.resend    = String(params.resend);
+  if (params.target)      body.target      = params.target;
+  if (params.countryCode) body.countryCode = params.countryCode;
+  return fonntePost("/update-device", deviceToken, body);
+}
+
+/**
+ * Order a Fonnte package for a device.
+ * Requires: device token
+ * plan: 1=Lite, 2=Regular, 3=Regular Pro, 4=Master, 5=Super, 6=Advanced, 7=Ultra
+ * duration: 1=Month, 10=Year
+ */
+export async function fonnteOrderPackage(
+  deviceToken: string,
+  params: {
+    plan?: number;
+    duration?: number;
+    durationValue?: number;
+    aiQuota?: number;
+    aiData?: number;
+  },
+): Promise<{ status: boolean; detail?: string; reason?: string }> {
+  const body: Record<string, string> = {};
+  if (params.plan          !== undefined) body.plan             = String(params.plan);
+  if (params.duration      !== undefined) body.duration         = String(params.duration);
+  if (params.durationValue !== undefined) body["duration-value"] = String(params.durationValue);
+  if (params.aiQuota       !== undefined) body["ai-quota"]      = String(params.aiQuota);
+  if (params.aiData        !== undefined) body["ai-data"]       = String(params.aiData);
+  return fonntePost("/order", deviceToken, body);
+}
+
+/**
  * Get QR code or pairing code to connect a device.
  * Requires: device token
  * type: "qr" (default) | "code"

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { fonnteGetDeviceProfile, fonnteDisconnectDevice, fonnteGetQR } from "@/lib/fonnte";
+import { fonnteGetDeviceProfile, fonnteDisconnectDevice, fonnteGetQR, fonnteDeleteDevice, fonnteUpdateDevice } from "@/lib/fonnte";
 
 type Params = { params: Promise<{ token: string }> };
 
@@ -17,6 +17,25 @@ export async function GET(_req: Request, { params }: Params) {
   return NextResponse.json(result);
 }
 
+// PATCH /api/admin/fonnte/devices/[token] — update device
+export async function PATCH(req: Request, { params }: Params) {
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { token } = await params;
+  const body = await req.json();
+
+  if (!body.name?.trim() || !body.device?.trim()) {
+    return NextResponse.json({ error: "Nama dan nomor device wajib diisi." }, { status: 400 });
+  }
+
+  const result = await fonnteUpdateDevice(decodeURIComponent(token), body);
+  if (!result.status) {
+    return NextResponse.json({ error: result.reason ?? "Gagal update device." }, { status: 400 });
+  }
+
+  return NextResponse.json({ ok: true, detail: result.detail });
+}
+
 // DELETE /api/admin/fonnte/devices/[token] — disconnect device
 export async function DELETE(_req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +49,7 @@ export async function DELETE(_req: Request, { params }: Params) {
   return NextResponse.json({ ok: true, detail: result.detail });
 }
 
-// POST /api/admin/fonnte/devices/[token]/qr — get QR or pairing code
+// POST /api/admin/fonnte/devices/[token] — get QR or pairing code
 export async function POST(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

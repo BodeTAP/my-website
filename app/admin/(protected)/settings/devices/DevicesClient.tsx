@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   Smartphone, Plus, RefreshCw, Loader2, X, Wifi, WifiOff,
-  QrCode, AlertTriangle, Check, Trash2, Info, Save, Key, Zap,
+  QrCode, AlertTriangle, Check, Trash2, Info, Save, Key, Zap, Edit2, ShoppingCart,
 } from "lucide-react";
 import { FadeUp } from "@/components/public/motion";
 
@@ -189,6 +189,265 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
   return createPortal(content, document.body);
 }
 
+// ── Edit Device Modal ─────────────────────────────────────────────────────────
+
+function EditDeviceModal({ device, onClose, onSuccess }: { device: Device; onClose: () => void; onSuccess: () => void }) {
+  const [name, setName]           = useState(device.name);
+  const [webhookStatus, setWebhookStatus] = useState("");
+  const [autoread, setAutoread]   = useState(device.autoread === "on");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) { setError("Nama wajib diisi."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(`/api/admin/fonnte/devices/${encodeURIComponent(device.token)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          device: device.device,
+          autoread,
+          ...(webhookStatus ? { webhookstatus: webhookStatus } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal update device.");
+      onSuccess();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally { setLoading(false); }
+  };
+
+  const content = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative glass rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+              <Edit2 className="w-4 h-4 text-blue-400" />
+            </div>
+            <h2 className="text-white font-semibold">Edit Device — {device.name}</h2>
+          </div>
+          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-blue-200/70 text-xs font-medium">Nama Device *</label>
+            <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-all" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-blue-200/70 text-xs font-medium">Webhook Status URL (opsional)</label>
+            <input type="url" value={webhookStatus} onChange={(e) => setWebhookStatus(e.target.value)}
+              placeholder="https://yourdomain.com/api/webhooks/fonnte/device-status"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/20 text-sm focus:outline-none focus:border-blue-500/50 transition-all font-mono" />
+          </div>
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
+            <div>
+              <p className="text-white text-sm font-medium">Autoread</p>
+              <p className="text-blue-200/40 text-xs">Baca pesan masuk otomatis</p>
+            </div>
+            <button type="button" onClick={() => setAutoread(!autoread)}
+              className={`relative w-11 h-6 rounded-full border transition-all ${autoread ? "bg-green-600 border-green-500/50" : "bg-white/10 border-white/10"}`}>
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoread ? "translate-x-5" : "translate-x-0"}`} />
+            </button>
+          </div>
+          {error && (
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 text-sm font-medium transition-all">Batal</button>
+            <button type="submit" disabled={loading}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+  if (typeof document === "undefined") return null;
+  return createPortal(content, document.body);
+}
+
+// ── Delete Device Modal ───────────────────────────────────────────────────────
+
+function DeleteDeviceModal({ device, onClose, onSuccess }: { device: Device; onClose: () => void; onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  const handleDelete = async () => {
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(`/api/admin/fonnte/devices/${encodeURIComponent(device.token)}/delete`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal menghapus device.");
+      onSuccess();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally { setLoading(false); }
+  };
+
+  const content = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative glass rounded-2xl w-full max-w-sm border border-white/10 shadow-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+              <Trash2 className="w-4 h-4 text-red-400" />
+            </div>
+            <h2 className="text-white font-semibold text-sm">Hapus Device</h2>
+          </div>
+          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-300 text-sm font-medium">Hapus "{device.name}" secara permanen?</p>
+              <p className="text-red-200/60 text-xs mt-1">Device akan dihapus dari akun Fonnte. Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div className="flex gap-3">
+            <button onClick={onClose}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 text-sm font-medium transition-all">Batal</button>
+            <button onClick={handleDelete} disabled={loading}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              Hapus Permanen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  if (typeof document === "undefined") return null;
+  return createPortal(content, document.body);
+}
+
+// ── Order Package Modal ───────────────────────────────────────────────────────
+
+const PLANS = [
+  { value: 1, label: "Lite" },
+  { value: 2, label: "Regular" },
+  { value: 3, label: "Regular Pro" },
+  { value: 4, label: "Master" },
+  { value: 5, label: "Super" },
+  { value: 6, label: "Advanced" },
+  { value: 7, label: "Ultra" },
+];
+
+function OrderModal({ device, onClose }: { device: Device; onClose: () => void }) {
+  const [plan, setPlan]               = useState<number>(2);
+  const [duration, setDuration]       = useState<number>(1);
+  const [durationValue, setDurationValue] = useState<number>(1);
+  const [aiQuota, setAiQuota]         = useState<number>(0);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
+  const [success, setSuccess]         = useState("");
+
+  const handleOrder = async () => {
+    setLoading(true); setError(""); setSuccess("");
+    try {
+      const res = await fetch(`/api/admin/fonnte/devices/${encodeURIComponent(device.token)}/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, duration, durationValue, ...(aiQuota > 0 ? { aiQuota } : {}) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal melakukan pemesanan.");
+      setSuccess(data.detail ?? "Pemesanan berhasil!");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally { setLoading(false); }
+  };
+
+  const content = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative glass rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <ShoppingCart className="w-4 h-4 text-amber-400" />
+            </div>
+            <h2 className="text-white font-semibold">Order Paket — {device.name}</h2>
+          </div>
+          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="p-6 space-y-4">
+          {success ? (
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+              <Check className="w-5 h-5 text-green-400 shrink-0" />
+              <p className="text-green-300 text-sm">{success}</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-blue-200/70 text-xs font-medium">Paket</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {PLANS.map((p) => (
+                    <button key={p.value} type="button" onClick={() => setPlan(p.value)}
+                      className={`px-2 py-2 rounded-xl text-xs font-medium border transition-all ${plan === p.value ? "bg-amber-500/20 border-amber-500/40 text-amber-300" : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"}`}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-blue-200/70 text-xs font-medium">Durasi</label>
+                  <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none appearance-none">
+                    <option value={1} className="bg-[#030914]">Bulan</option>
+                    <option value={10} className="bg-[#030914]">Tahun</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-blue-200/70 text-xs font-medium">Jumlah</label>
+                  <input type="number" min={1} max={24} value={durationValue} onChange={(e) => setDurationValue(Number(e.target.value))}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-blue-200/70 text-xs font-medium">AI Quota (opsional, min 500)</label>
+                <input type="number" min={0} step={100} value={aiQuota} onChange={(e) => setAiQuota(Number(e.target.value))}
+                  placeholder="0 = tidak pesan AI quota"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/20 text-sm focus:outline-none" />
+              </div>
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+              <div className="flex gap-3 pt-1">
+                <button onClick={onClose}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 text-sm font-medium transition-all">Batal</button>
+                <button onClick={handleOrder} disabled={loading}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
+                  Pesan Sekarang
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  if (typeof document === "undefined") return null;
+  return createPortal(content, document.body);
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function DevicesClient({
@@ -208,6 +467,9 @@ export default function DevicesClient({
   const [qrDevice, setQrDevice]   = useState<Device | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [accountInfo, setAccountInfo] = useState<{ connected: number; devices: number; messages: number } | null>(null);
+  const [editDevice, setEditDevice]   = useState<Device | null>(null);
+  const [deleteDevice, setDeleteDevice] = useState<Device | null>(null);
+  const [orderDevice, setOrderDevice] = useState<Device | null>(null);
 
   // API Keys state
   const [apiKey, setApiKey]   = useState(initialApiKey);
@@ -518,9 +780,14 @@ export default function DevicesClient({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => setEditDevice(dev)}
+                          className="p-2 rounded-lg text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all"
+                          title="Edit device">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
                         {dev.status === "disconnect" && (
                           <button onClick={() => setQrDevice(dev)}
-                            className="p-2 rounded-lg text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all"
+                            className="p-2 rounded-lg text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition-all"
                             title="Scan QR untuk connect">
                             <QrCode className="w-3.5 h-3.5" />
                           </button>
@@ -529,13 +796,23 @@ export default function DevicesClient({
                           <button
                             onClick={() => handleDisconnect(dev)}
                             disabled={disconnecting === dev.token}
-                            className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                            className="p-2 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-all disabled:opacity-50"
                             title="Disconnect device">
                             {disconnecting === dev.token
                               ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              : <Trash2 className="w-3.5 h-3.5" />}
+                              : <WifiOff className="w-3.5 h-3.5" />}
                           </button>
                         )}
+                        <button onClick={() => setOrderDevice(dev)}
+                          className="p-2 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-all"
+                          title="Order paket">
+                          <ShoppingCart className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => setDeleteDevice(dev)}
+                          className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                          title="Hapus device permanen">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -563,6 +840,9 @@ export default function DevicesClient({
 
       {showAdd && <AddDeviceModal onClose={() => setShowAdd(false)} onSuccess={() => fetchDevices(true)} />}
       {qrDevice && <QRModal device={qrDevice} onClose={() => setQrDevice(null)} />}
+      {editDevice && <EditDeviceModal device={editDevice} onClose={() => setEditDevice(null)} onSuccess={() => fetchDevices(true)} />}
+      {deleteDevice && <DeleteDeviceModal device={deleteDevice} onClose={() => setDeleteDevice(null)} onSuccess={() => fetchDevices(true)} />}
+      {orderDevice && <OrderModal device={orderDevice} onClose={() => setOrderDevice(null)} />}
     </div>
   );
 }
