@@ -3,7 +3,8 @@ import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendWABatchRotated } from "@/lib/whatsapp";
-import { getFonnteKeys } from "@/lib/getFonnteKey";
+import { getFonnteKeys, getFonnteKey } from "@/lib/getFonnteKey";
+import { fonnteValidateNumbers } from "@/lib/fonnte";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -556,7 +557,7 @@ export async function POST(req: NextRequest) {
       select: { id: true, name: true, businessName: true, whatsapp: true, lastContactedAt: true, currentWebsite: true, message: true, notes: true },
     });
 
-    // 3. Filter invalid phone numbers
+    // 3. Filter invalid phone format
     const invalidPhones: string[] = [];
     const validLeads = leads.filter((lead) => {
       if (!isValidIndonesianPhone(lead.whatsapp)) {
@@ -566,12 +567,37 @@ export async function POST(req: NextRequest) {
       return true;
     });
 
+    // 3b. Validate numbers are actually registered on WhatsApp (best-effort)
+    // Skip if no device token available — don't block broadcast
+    let notOnWA: Set<string> = new Set();
+    try {
+      const deviceToken = await getFonnteKey();
+      if (deviceToken && validLeads.length > 0) {
+        const phones = validLeads.map((l) => l.whatsapp);
+        const validation = await fonnteValidateNumbers(deviceToken, phones);
+        if (validation.status && validation.not_registered.length > 0) {
+          notOnWA = new Set(validation.not_registered);
+          // Add unregistered names to invalidPhones list for reporting
+          validLeads.forEach((l) => {
+            if (notOnWA.has(l.whatsapp)) invalidPhones.push(`${l.name} (tidak di WA)`);
+          });
+        }
+      }
+    } catch {
+      // Validation failed — proceed without it, don't block broadcast
+    }
+
+    // Filter out numbers not on WhatsApp
+    const waValidLeads = notOnWA.size > 0
+      ? validLeads.filter((l) => !notOnWA.has(l.whatsapp))
+      : validLeads;
+
     // 4. Cooldown check
     const now         = new Date();
     const cooldownMs  = COOLDOWN_HOURS * 60 * 60 * 1000;
     const cooldownLeads: string[] = [];
 
-    const eligibleLeads = validLeads.filter((lead) => {
+    const eligibleLeads = waValidLeads.filter((lead) => {
       if (skipCooldown) return true;
       if (!lead.lastContactedAt) return true;
       const elapsed = now.getTime() - new Date(lead.lastContactedAt).getTime();

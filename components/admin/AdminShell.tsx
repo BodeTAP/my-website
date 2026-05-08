@@ -7,7 +7,7 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server, Shield
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server, Shield, Smartphone
 } from "lucide-react";
 import type { AdminModule } from "@/lib/permissions";
 
@@ -64,6 +64,7 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
     title: "Sistem",
     items: [
       { label: "Pengaturan", href: "/admin/settings", icon: Settings },
+      { label: "Device WA", href: "/admin/settings/devices", icon: Smartphone, module: "ai_settings" },
       { label: "Team Settings", href: "/admin/settings/team", icon: Shield, module: "team" },
     ]
   }
