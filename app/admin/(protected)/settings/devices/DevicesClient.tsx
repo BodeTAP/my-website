@@ -316,7 +316,7 @@ function DeleteDeviceModal({ device, onClose, onSuccess }: { device: Device; onC
           <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
             <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-red-300 text-sm font-medium">Hapus "{device.name}" secara permanen?</p>
+              <p className="text-red-300 text-sm font-medium">Hapus &ldquo;{device.name}&rdquo; secara permanen?</p>
               <p className="text-red-200/60 text-xs mt-1">Device akan dihapus dari akun Fonnte. Tindakan ini tidak dapat dibatalkan.</p>
             </div>
           </div>
