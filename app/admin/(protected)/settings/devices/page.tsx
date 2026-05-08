@@ -1,10 +1,27 @@
 import { requireModule } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
+import { AI_DEFAULTS } from "@/lib/aiSettings";
 import DevicesClient from "./DevicesClient";
 
 export default async function DevicesPage() {
-  await requireModule("ai_settings"); // reuse ai_settings permission for device management
+  await requireModule("ai_settings");
 
   const hasAccountToken = !!process.env.FONNTE_ACCOUNT_TOKEN;
 
-  return <DevicesClient hasAccountToken={hasAccountToken} />;
+  const rows = await prisma.siteSetting.findMany({
+    where: { key: { in: ["fonnte_api_key", "fonnte_api_keys"] } },
+  });
+  const settingsMap = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+
+  const defaults = { ...AI_DEFAULTS };
+  const initialApiKey  = settingsMap["fonnte_api_key"]  ?? "";
+  const initialApiKeys = settingsMap["fonnte_api_keys"] ?? "";
+
+  return (
+    <DevicesClient
+      hasAccountToken={hasAccountToken}
+      initialApiKey={initialApiKey}
+      initialApiKeys={initialApiKeys}
+    />
+  );
 }

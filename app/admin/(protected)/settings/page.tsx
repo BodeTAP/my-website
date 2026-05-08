@@ -10,8 +10,6 @@ const DEFAULTS = {
   hero_stat_3_num: "3 hari", hero_stat_3_label: "Rata-rata delivery",
   facebook_pixel_id:   "",
   google_analytics_id: "",
-  fonnte_api_key:      "",
-  fonnte_api_keys:     "",
   ...AI_DEFAULTS,
 };
 

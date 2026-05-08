@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   Smartphone, Plus, RefreshCw, Loader2, X, Wifi, WifiOff,
-  QrCode, AlertTriangle, Check, Trash2, Info,
+  QrCode, AlertTriangle, Check, Trash2, Info, Save, Key,
 } from "lucide-react";
 import { FadeUp } from "@/components/public/motion";
 
@@ -191,7 +191,15 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function DevicesClient({ hasAccountToken }: { hasAccountToken: boolean }) {
+export default function DevicesClient({
+  hasAccountToken,
+  initialApiKey,
+  initialApiKeys,
+}: {
+  hasAccountToken: boolean;
+  initialApiKey: string;
+  initialApiKeys: string;
+}) {
   const [devices, setDevices]     = useState<Device[]>([]);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -200,6 +208,13 @@ export default function DevicesClient({ hasAccountToken }: { hasAccountToken: bo
   const [qrDevice, setQrDevice]   = useState<Device | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [accountInfo, setAccountInfo] = useState<{ connected: number; devices: number; messages: number } | null>(null);
+
+  // API Keys state
+  const [apiKey, setApiKey]   = useState(initialApiKey);
+  const [apiKeys, setApiKeys] = useState(initialApiKeys);
+  const [saving, setSaving]   = useState(false);
+  const [saved, setSaved]     = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const fetchDevices = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -218,6 +233,22 @@ export default function DevicesClient({ hasAccountToken }: { hasAccountToken: bo
       setRefreshing(false);
     }
   }, []);
+
+  const saveApiKeys = async () => {
+    setSaving(true); setSaveError(""); setSaved(false);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fonnte_api_key: apiKey, fonnte_api_keys: apiKeys }),
+      });
+      if (!res.ok) throw new Error("Gagal menyimpan.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally { setSaving(false); }
+  };
 
   useEffect(() => { if (hasAccountToken) fetchDevices(); else setLoading(false); }, [fetchDevices, hasAccountToken]);
 
@@ -303,6 +334,75 @@ export default function DevicesClient({ hasAccountToken }: { hasAccountToken: bo
           </div>
         </FadeUp>
       )}
+
+      {/* API Keys section */}
+      <FadeUp delay={0.08}>
+        <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+              <Key className="w-4 h-4 text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold">Konfigurasi API Key</h2>
+              <p className="text-blue-200/40 text-xs mt-0.5">Token device untuk notifikasi WA dan broadcast</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-blue-200/70 text-xs font-medium">Fonnte API Key (1 Device)</label>
+              <input
+                type="text"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Masukkan API key Fonnte..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/30 text-sm focus:outline-none focus:border-indigo-500/50 transition-all font-mono"
+              />
+              <p className="text-blue-200/30 text-[11px]">Digunakan untuk kirim pesan WA notifikasi (invoice, tiket, dll).</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-blue-200/70 text-xs font-medium flex items-center gap-2">
+                Fonnte API Keys — Rotator Broadcast
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 font-medium">🔄 Multi-Device</span>
+              </label>
+              <input
+                type="text"
+                value={apiKeys}
+                onChange={(e) => setApiKeys(e.target.value)}
+                placeholder="TOKEN_1,TOKEN_2,TOKEN_3,TOKEN_4"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/30 text-sm focus:outline-none focus:border-indigo-500/50 transition-all font-mono"
+              />
+              <p className="text-blue-200/30 text-[11px]">
+                Pisahkan dengan koma. Semua token <strong className="text-blue-200/50">harus dari akun Fonnte yang sama</strong>.
+                Digunakan untuk Broadcast WA — Fonnte menggilir device otomatis.
+              </p>
+            </div>
+
+            {apiKeys && (
+              <div className="flex items-center gap-2 text-green-400/70 text-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                {apiKeys.split(",").filter(Boolean).length} device rotator terdaftar
+              </div>
+            )}
+
+            {saveError && <p className="text-red-400 text-sm">{saveError}</p>}
+
+            <div className="flex items-center gap-4">
+              <button onClick={saveApiKeys} disabled={saving}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all disabled:opacity-50">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Simpan API Keys
+              </button>
+              {saved && (
+                <span className="text-green-400 text-sm font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </FadeUp>
 
       {/* Device list */}
       <FadeUp delay={0.1}>
