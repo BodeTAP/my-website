@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   Smartphone, Plus, RefreshCw, Loader2, X, Wifi, WifiOff,
-  QrCode, AlertTriangle, Check, Trash2, Info, Save, Key,
+  QrCode, AlertTriangle, Check, Trash2, Info, Save, Key, Zap,
 } from "lucide-react";
 import { FadeUp } from "@/components/public/motion";
 
@@ -215,6 +215,7 @@ export default function DevicesClient({
   const [saving, setSaving]   = useState(false);
   const [saved, setSaved]     = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [syncing, setSyncing] = useState(false);
 
   const fetchDevices = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -248,6 +249,46 @@ export default function DevicesClient({
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Terjadi kesalahan.");
     } finally { setSaving(false); }
+  };
+
+  // Sync API keys automatically from connected devices
+  const syncFromDevices = async () => {
+    setSyncing(true); setSaveError("");
+    try {
+      const res = await fetch("/api/admin/fonnte/devices");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal mengambil device.");
+
+      const allDevices: Device[] = data.data ?? [];
+      const connectedTokens = allDevices
+        .filter((d) => d.status === "connect")
+        .map((d) => d.token);
+
+      if (connectedTokens.length === 0) {
+        setSaveError("Tidak ada device yang sedang connect.");
+        return;
+      }
+
+      // Use first connected device as single key, all as rotator
+      const newApiKey  = connectedTokens[0];
+      const newApiKeys = connectedTokens.join(",");
+
+      setApiKey(newApiKey);
+      setApiKeys(newApiKeys);
+
+      // Auto-save
+      const saveRes = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fonnte_api_key: newApiKey, fonnte_api_keys: newApiKeys }),
+      });
+      if (!saveRes.ok) throw new Error("Gagal menyimpan.");
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally { setSyncing(false); }
   };
 
   useEffect(() => { if (hasAccountToken) fetchDevices(); else setLoading(false); }, [fetchDevices, hasAccountToken]);
@@ -388,12 +429,19 @@ export default function DevicesClient({
 
             {saveError && <p className="text-red-400 text-sm">{saveError}</p>}
 
-            <div className="flex items-center gap-4">
-              <button onClick={saveApiKeys} disabled={saving}
+            <div className="flex items-center gap-3 flex-wrap">
+              <button onClick={saveApiKeys} disabled={saving || syncing}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Simpan API Keys
               </button>
+              {hasAccountToken && (
+                <button onClick={syncFromDevices} disabled={syncing || saving}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600/20 hover:bg-green-600 border border-green-500/30 hover:border-green-500 text-green-400 hover:text-white text-sm font-medium transition-all disabled:opacity-50">
+                  {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  Sinkronisasi dari Device
+                </button>
+              )}
               {saved && (
                 <span className="text-green-400 text-sm font-medium flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan
