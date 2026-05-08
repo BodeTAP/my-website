@@ -56,12 +56,12 @@ const authMock = vi.mocked(auth);
  * Sets up prisma mocks so that `adminId` is a Super Admin.
  */
 function mockSuperAdmin(adminId: string) {
-  adminPermission.findUnique.mockImplementation(async ({ where }) => {
+  adminPermission.findUnique.mockImplementation((async ({ where }: { where: { adminId?: string } }) => {
     if (where.adminId === adminId) {
-      return { isSuperAdmin: true, roleId: null, role: null } as never;
+      return { isSuperAdmin: true, roleId: null, role: null };
     }
     return null;
-  });
+  }) as never);
   // findFirst for "any super admin" check — return the super admin record
   adminPermission.findFirst.mockResolvedValue({ adminId, isSuperAdmin: true } as never);
   userMock.findFirst.mockResolvedValue(null);
@@ -72,12 +72,12 @@ function mockSuperAdmin(adminId: string) {
  * `otherAdminId` is used as the "earliest admin" fallback (different from adminId).
  */
 function mockNoRole(adminId: string, otherAdminId: string) {
-  adminPermission.findUnique.mockImplementation(async ({ where }) => {
+  adminPermission.findUnique.mockImplementation((async ({ where }: { where: { adminId?: string } }) => {
     if (where.adminId === adminId) {
-      return { isSuperAdmin: false, roleId: null, role: null } as never;
+      return { isSuperAdmin: false, roleId: null, role: null };
     }
     return null;
-  });
+  }) as never);
   // No explicit super admin in the system
   adminPermission.findFirst.mockResolvedValue(null);
   // Earliest admin is a different user (not adminId)
@@ -89,16 +89,12 @@ function mockNoRole(adminId: string, otherAdminId: string) {
  */
 function mockWithRole(adminId: string, roleId: string, modules: string[]) {
   const permissions = modules.map((m) => ({ module: m }));
-  adminPermission.findUnique.mockImplementation(async ({ where }) => {
+  adminPermission.findUnique.mockImplementation((async ({ where }: { where: { adminId?: string } }) => {
     if (where.adminId === adminId) {
-      return {
-        isSuperAdmin: false,
-        roleId,
-        role: { permissions },
-      } as never;
+      return { isSuperAdmin: false, roleId, role: { permissions } };
     }
     return null;
-  });
+  }) as never);
   // There IS an explicit super admin (different user), so fallback won't trigger
   adminPermission.findFirst.mockResolvedValue({ adminId: "super-admin-id", isSuperAdmin: true } as never);
   userMock.findFirst.mockResolvedValue(null);

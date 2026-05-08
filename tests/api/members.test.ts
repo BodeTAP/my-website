@@ -343,7 +343,7 @@ describe("Property 9: Setiap admin hanya memiliki satu role", () => {
             updatedAt: new Date(),
           } as never);
 
-          vi.mocked(prisma.adminPermission.upsert).mockImplementation(async (args) => {
+          vi.mocked(prisma.adminPermission.upsert).mockImplementation((async (args: { update: { roleId: string | null } }) => {
             upsertCalls.push(args as never);
             return {
               id: "perm-1",
@@ -352,8 +352,8 @@ describe("Property 9: Setiap admin hanya memiliki satu role", () => {
               isSuperAdmin: false,
               createdAt: new Date(),
               updatedAt: new Date(),
-            } as never;
-          });
+            };
+          }) as never);
 
           // Execute each role assignment in sequence
           for (const roleId of roleAssignments) {
