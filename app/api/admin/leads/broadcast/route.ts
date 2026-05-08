@@ -538,11 +538,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { leadIds, message, skipCooldown = false, forceOutsideHours = false } = await req.json() as {
-      leadIds:            string[];
-      message:            string;
-      skipCooldown?:      boolean;
-      forceOutsideHours?: boolean;
+    const { leadIds, message, skipCooldown = false, sessionLimit } = await req.json() as {
+      leadIds:       string[];
+      message:       string;
+      skipCooldown?: boolean;
+      sessionLimit?: number;
     };
 
     if (!leadIds?.length) return NextResponse.json({ error: "Pilih minimal 1 lead" }, { status: 400 });
@@ -591,12 +591,16 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // 5. Build items with personalization + variation
-    // FIX #1: Generate a random session salt so each broadcast run produces unique messages
-    // even for the same lead at index 0
+    // 5. Apply session limit — cap how many leads are sent in this run
+    const limitedLeads = sessionLimit && sessionLimit > 0
+      ? eligibleLeads.slice(0, sessionLimit)
+      : eligibleLeads;
+
+    // 6. Build items with personalization + variation
+    // Generate a random session salt so each broadcast run produces unique messages
     const sessionSalt = Math.floor(Math.random() * 0xFFFF);
 
-    const items = eligibleLeads.map((lead, idx) => ({
+    const items = limitedLeads.map((lead, idx) => ({
       phone:  lead.whatsapp,
       message: varyMessage(
         message.replace(/\{name\}/g, lead.name).replace(/\{businessName\}/g, lead.businessName),
@@ -653,7 +657,7 @@ export async function POST(req: NextRequest) {
         : Promise.resolve(),
       prisma.broadcastLog.create({
         data: {
-          totalLeads:     eligibleLeads.length,
+          totalLeads:     limitedLeads.length,
           sent,
           failed,
           skipped:        cooldownLeads.length + invalidPhones.length,

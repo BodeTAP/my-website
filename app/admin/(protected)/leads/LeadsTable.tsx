@@ -60,6 +60,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
   const [message, setMessage]           = useState(DEFAULT_TEMPLATE);
   const [status, setStatus]             = useState<"idle" | "sending" | "done">("idle");
   const [skipCooldown, setSkipCooldown] = useState(false);
+  const [sessionLimit, setSessionLimit] = useState<number>(30); // configurable per-session limit
   const [countdown, setCountdown]       = useState<number | null>(null);
   const [result, setResult]             = useState<{
     sent: number; failed: number; devices: number; skipped: number;
@@ -68,7 +69,8 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
   } | null>(null);
 
   const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt));
-  const eligibleCount = skipCooldown ? leads.length : leads.length - coolingLeads.length;
+  const eligibleRaw   = skipCooldown ? leads.length : leads.length - coolingLeads.length;
+  const eligibleCount = Math.min(eligibleRaw, sessionLimit);
 
   // Estimate completion time for display
   const estimateSeconds = (count: number, delayRange: string) => {
@@ -91,7 +93,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
       const res = await fetch("/api/admin/leads/broadcast", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ leadIds: leads.map((l) => l.id), message, skipCooldown }),
+        body:    JSON.stringify({ leadIds: leads.map((l) => l.id), message, skipCooldown, sessionLimit }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -138,6 +140,35 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
                 <li>Pesan otomatis divariasikan agar tidak identik satu sama lain</li>
               </ul>
+            </div>
+
+            {/* Session limit control */}
+            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-blue-200/70 text-xs font-medium">Batas per sesi</span>
+                <span className="text-white text-xs font-bold tabular-nums">
+                  {eligibleCount} dari {eligibleRaw} lead
+                  {eligibleRaw > sessionLimit && (
+                    <span className="ml-1.5 text-amber-400/70 font-normal">
+                      ({eligibleRaw - sessionLimit} dilewati)
+                    </span>
+                  )}
+                </span>
+              </div>
+              <input
+                type="range"
+                min={5}
+                max={Math.max(eligibleRaw, 5)}
+                step={5}
+                value={Math.min(sessionLimit, Math.max(eligibleRaw, 5))}
+                onChange={(e) => setSessionLimit(Number(e.target.value))}
+                className="w-full accent-indigo-500 h-1.5"
+              />
+              <div className="flex justify-between text-[10px] text-blue-200/30">
+                <span>5 (aman)</span>
+                <span className="text-blue-200/50">Rekomendasi: 15–30/sesi</span>
+                <span>{Math.max(eligibleRaw, 5)} (semua)</span>
+              </div>
             </div>
 
             {/* ETA preview */}
