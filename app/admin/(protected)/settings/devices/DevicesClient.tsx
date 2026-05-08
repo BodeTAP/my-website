@@ -352,13 +352,13 @@ const PLANS = [
 
 // Harga per bulan dalam IDR (estimasi — cek fonnte.com untuk harga terkini)
 const PLAN_PRICES: Record<number, { monthly: number; quota: number }> = {
-  1: { monthly: 15000,  quota: 1000  },  // Lite
-  2: { monthly: 25000,  quota: 10000 },  // Regular
-  3: { monthly: 50000,  quota: 25000 },  // Regular Pro
-  4: { monthly: 75000,  quota: 50000 },  // Master
-  5: { monthly: 100000, quota: 100000 }, // Super
-  6: { monthly: 150000, quota: 200000 }, // Advanced
-  7: { monthly: 200000, quota: 500000 }, // Ultra
+  1: { monthly: 25000,  quota: 1000  },  // Lite
+  2: { monthly: 66000,  quota: 10000 },  // Regular
+  3: { monthly: 110000,  quota: 25000 },  // Regular Pro
+  4: { monthly: 175000,  quota: 9999999 },  // Master
+  5: { monthly: 165000, quota: 10000 }, // Super
+  6: { monthly: 225000, quota: 25000 }, // Advanced
+  7: { monthly: 335000, quota: 9999999 }, // Ultra
 };
 
 const AI_QUOTA_PRICE_PER_100 = 1000; // Rp 1.000 per 100 AI quota (estimasi)
