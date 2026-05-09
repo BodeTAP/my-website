@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, type ReactNode } from "react";
+import { useState, useCallback, useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { AnimatePresence } from "framer-motion";
 
@@ -18,6 +19,9 @@ type State = {
 
 export function useConfirm() {
   const [state, setState] = useState<State | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const confirm = useCallback(
     (message: string, options: Options = {}): Promise<boolean> =>
@@ -25,7 +29,7 @@ export function useConfirm() {
     [],
   );
 
-  const node: ReactNode = (
+  const dialog = (
     <AnimatePresence>
       {state && (
         <ConfirmDialog
@@ -39,6 +43,9 @@ export function useConfirm() {
       )}
     </AnimatePresence>
   );
+
+  // Render via portal to document.body to escape any stacking context / overflow:hidden
+  const node: ReactNode = mounted ? createPortal(dialog, document.body) : null;
 
   return { confirm, node };
 }
