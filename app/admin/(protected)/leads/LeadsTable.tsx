@@ -431,6 +431,32 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     }
   };
 
+  const handleExportWati = () => {
+    const rows = selectedLeads;
+    // Wati format: Name, CountryCode, Phone (no country prefix), AllowCampaign, AllowSMS, Attribute 1
+    const headers = ["Name", "CountryCode", "Phone", "AllowCampaign", "AllowSMS", "Attribute 1"];
+    const csvRows = rows.map((l) => {
+      // Strip "62" prefix → Wati sends with CountryCode separately
+      const phone = l.whatsapp.replace(/\D/g, "").replace(/^62/, "");
+      return [
+        `"${l.businessName.replace(/"/g, '""')}"`,
+        "62",
+        phone,
+        "TRUE",
+        "TRUE",
+        `"${l.businessName.replace(/"/g, '""')}"`, // {{1}} variable in template
+      ].join(",");
+    });
+    const csv = [headers.join(","), ...csvRows].join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `leads-wati-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportCSV = () => {
     const rows = selectedLeads;
     const headers = ["Nama", "Nama Bisnis", "WhatsApp", "Domain", "Website", "Status", "Catatan", "Tanggal Masuk"];
@@ -564,6 +590,11 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
               <Button size="sm" onClick={() => setShowBroadcast(true)}
                 className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
                 <Send className="w-3 h-3" /> Broadcast WA
+              </Button>
+              <Button size="sm" onClick={handleExportWati}
+                title="Export format Wati untuk broadcast WhatsApp API"
+                className="bg-green-600/20 hover:bg-green-600 text-green-300 hover:text-white border border-green-500/30 gap-1.5 h-8 text-xs shadow-none">
+                <Download className="w-3 h-3" /> Export Wati
               </Button>
               <Button size="sm" onClick={handleExportCSV}
                 className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 gap-1.5 h-8 text-xs shadow-none">
