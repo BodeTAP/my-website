@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download, Pencil, History, Clock } from "lucide-react";
@@ -378,6 +379,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const [deleting, setDeleting]           = useState(false);
   const [bulkUpdating, setBulkUpdating]   = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const statusBtnRef = useRef<HTMLButtonElement>(null);
 
   // Close status dropdown when clicking outside
   useEffect(() => {
@@ -626,7 +628,9 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
             <div className="flex items-center gap-2 flex-wrap">
               {/* Bulk status change */}
               <div className="relative">
-                <Button size="sm"
+                <Button
+                  ref={statusBtnRef}
+                  size="sm"
                   disabled={bulkUpdating}
                   onClick={(e) => { e.stopPropagation(); setShowStatusMenu((v) => !v); }}
                   className="bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-1.5 h-8 text-xs shadow-none">
@@ -635,15 +639,24 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                     : <ChevronDown className="w-3 h-3" />}
                   Ubah Status
                 </Button>
-                {showStatusMenu && (
-                  <div className="absolute top-full mt-1 left-0 glass rounded-xl border border-white/10 shadow-2xl z-50 min-w-[140px] overflow-hidden">
+                {showStatusMenu && typeof document !== "undefined" && createPortal(
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: (statusBtnRef.current?.getBoundingClientRect().bottom ?? 0) + 4,
+                      left: statusBtnRef.current?.getBoundingClientRect().left ?? 0,
+                      zIndex: 9999,
+                    }}
+                    className="glass rounded-xl border border-white/10 shadow-2xl min-w-[140px] overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {(["NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleBulkStatus(s)}
                         className="w-full text-left px-4 py-2.5 text-xs hover:bg-white/10 transition-colors flex items-center gap-2"
                       >
-                        <span className={`w-2 h-2 rounded-full ${
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${
                           s === "NEW"      ? "bg-indigo-400" :
                           s === "FOLLOWUP" ? "bg-amber-400"  :
                           s === "DEAL"     ? "bg-green-400"  :
@@ -652,7 +665,8 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                         <span className="text-white">{STATUS_LABELS[s]}</span>
                       </button>
                     ))}
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
 
