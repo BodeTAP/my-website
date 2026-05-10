@@ -376,6 +376,16 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [showHistory, setShowHistory]     = useState(false);
   const [deleting, setDeleting]           = useState(false);
+  const [bulkUpdating, setBulkUpdating]   = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+
+  // Close status dropdown when clicking outside
+  useEffect(() => {
+    if (!showStatusMenu) return;
+    const handler = () => setShowStatusMenu(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [showStatusMenu]);
   const [waTemplate, setWaTemplate]       = useState<string>(() =>
     (typeof window !== "undefined" && localStorage.getItem(WA_TEMPLATE_KEY)) || DEFAULT_WA_MANUAL
   );
@@ -428,6 +438,33 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
       alert((err as Error).message);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleBulkStatus = async (status: Lead["status"]) => {
+    setShowStatusMenu(false);
+    setBulkUpdating(true);
+    try {
+      await Promise.all(
+        [...selected].map((id) =>
+          fetch(`/api/admin/leads/${id}`, {
+            method:  "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ status }),
+          })
+        )
+      );
+      // Update local statusMap immediately for instant feedback
+      setStatusMap((prev) => {
+        const next = { ...prev };
+        for (const id of selected) next[id] = status;
+        return next;
+      });
+      setSelected(new Set());
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setBulkUpdating(false);
     }
   };
 
@@ -587,6 +624,38 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20 relative z-10">
             <span className="text-indigo-300 text-sm font-medium">{selected.size} lead dipilih</span>
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Bulk status change */}
+              <div className="relative">
+                <Button size="sm"
+                  disabled={bulkUpdating}
+                  onClick={(e) => { e.stopPropagation(); setShowStatusMenu((v) => !v); }}
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-1.5 h-8 text-xs shadow-none">
+                  {bulkUpdating
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : <ChevronDown className="w-3 h-3" />}
+                  Ubah Status
+                </Button>
+                {showStatusMenu && (
+                  <div className="absolute top-full mt-1 left-0 glass rounded-xl border border-white/10 shadow-2xl z-50 min-w-[140px] overflow-hidden">
+                    {(["NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => handleBulkStatus(s)}
+                        className="w-full text-left px-4 py-2.5 text-xs hover:bg-white/10 transition-colors flex items-center gap-2"
+                      >
+                        <span className={`w-2 h-2 rounded-full ${
+                          s === "NEW"      ? "bg-indigo-400" :
+                          s === "FOLLOWUP" ? "bg-amber-400"  :
+                          s === "DEAL"     ? "bg-green-400"  :
+                          "bg-white/30"
+                        }`} />
+                        <span className="text-white">{STATUS_LABELS[s]}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Button size="sm" onClick={() => setShowBroadcast(true)}
                 className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
                 <Send className="w-3 h-3" /> Broadcast WA
