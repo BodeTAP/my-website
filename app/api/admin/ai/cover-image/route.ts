@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
-import { translateToVisualKeyword, uploadPhotoToBlob } from "@/lib/ai";
+import { logAiUsage, translateToVisualKeyword, uploadPhotoToBlob } from "@/lib/ai";
 import { getEnabledAiSettings } from "@/lib/aiSettings";
 import { rateLimit } from "@/lib/rateLimit";
 
-// In-memory cache for Pexels search results — 1 hour TTL
 const pexelsCache = new Map<string, { data: unknown; expiresAt: number }>();
 function getPexelsCache(key: string) {
   const entry = pexelsCache.get(key);
@@ -23,36 +22,45 @@ export async function POST(req: NextRequest) {
   const denied = await requireApiPermission("ai_settings");
   if (denied) return denied;
   const session = await auth();
-  const { allowed } = await rateLimit(`ai-cover:${session!.user!.email}`, 30, 60 * 60 * 1000);
-  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
-  const aiGate = await getEnabledAiSettings("featureArticle");
-  if (!aiGate.enabled) return aiGate.response;
+  const aiGate = await getEnabledAiSettings("coverImage");
+  if (!aiGate.enabled) {
+    logAiUsage({
+      feature: "cover_image",
+      model: aiGate.settings.features.coverImage.model,
+      status: "blocked",
+      actor: session!.user!.email,
+      logging: aiGate.settings.usageLogging,
+    });
+    return aiGate.response;
+  }
+
+  const aiSettings = aiGate.settings;
+  const aiConfig = aiSettings.features.coverImage;
+  const { allowed } = await rateLimit(`ai-cover:${session!.user!.email}`, aiConfig.rateLimit, aiConfig.rateWindowMs);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi nanti." }, { status: 429 });
 
   try {
     const body = await req.json();
     const { title, query, photoUrl } = body;
 
-    // Mode Upload: upload photoUrl ke Vercel Blob
     if (photoUrl) {
-      const url = await uploadPhotoToBlob(photoUrl, "covers");
+      const url = await uploadPhotoToBlob(photoUrl, aiSettings.coverBlobPrefix);
       if (!url) return NextResponse.json({ error: "Gagal mengupload gambar" }, { status: 500 });
       return NextResponse.json({ url });
     }
 
-    // Mode Cari: terjemahkan topik ke keyword Inggris visual, lalu query Pexels
-    if (!photoUrl && !title && !query) return NextResponse.json({ error: "Query atau judul diperlukan." }, { status: 400 });
-    const rawKeyword = (query || title || "").slice(0, 300);
+    if (!title && !query) return NextResponse.json({ error: "Query atau judul diperlukan." }, { status: 400 });
+    const rawKeyword = String(query || title || "").slice(0, 300);
+    const englishKeyword = await translateToVisualKeyword(rawKeyword, aiSettings);
+    console.log(`[AI-Cover] "${rawKeyword}" -> "${englishKeyword}"`);
 
-    const englishKeyword = await translateToVisualKeyword(rawKeyword);
-    console.log(`[AI-Cover] "${rawKeyword}" → "${englishKeyword}"`);
-
-    const cacheKey = `pexels:${englishKeyword}`;
+    const cacheKey = `pexels:${englishKeyword}:${aiSettings.coverPexelsPerPage}:${aiSettings.coverOrientation}`;
     const cached = getPexelsCache(cacheKey);
     if (cached) return NextResponse.json(cached);
 
     const pexelsRes = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(englishKeyword)}&per_page=9&orientation=landscape`,
-      { headers: { Authorization: process.env.PEXELS_API_KEY || "" } }
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(englishKeyword)}&per_page=${aiSettings.coverPexelsPerPage}&orientation=${encodeURIComponent(aiSettings.coverOrientation)}`,
+      { headers: { Authorization: process.env.PEXELS_API_KEY || "" } },
     );
 
     const data = await pexelsRes.json();
@@ -65,9 +73,25 @@ export async function POST(req: NextRequest) {
     }));
 
     setPexelsCache(cacheKey, photos);
+    logAiUsage({
+      feature: "cover_image",
+      model: aiConfig.model,
+      status: "success",
+      actor: session!.user!.email,
+      metadata: { resultCount: photos.length },
+      logging: aiSettings.usageLogging,
+    });
     return NextResponse.json(photos);
   } catch (err) {
     console.error("[AI-Cover]", err);
+    logAiUsage({
+      feature: "cover_image",
+      model: aiConfig.model,
+      status: "error",
+      actor: session!.user!.email,
+      error: err instanceof Error ? err.message : "Unknown error",
+      logging: aiSettings.usageLogging,
+    });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

@@ -5,7 +5,7 @@ import { Loader2, Save, Bot, Settings as SettingsIcon, MessageCircle } from "luc
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AI_MODEL_OPTIONS } from "@/lib/aiConfig";
+import { AI_FEATURE_ORDER, AI_FEATURE_SPECS, AI_MODEL_OPTIONS } from "@/lib/aiConfig";
 
 export default function SettingsClient({ 
   initial, 
@@ -210,6 +210,199 @@ export default function SettingsClient({
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Konfigurasi Per Fitur</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Atur model, token maksimum, dan rate limit untuk setiap workflow AI.</p>
+            <div className="space-y-5">
+              {AI_FEATURE_ORDER.map((feature) => {
+                const spec = AI_FEATURE_SPECS[feature];
+                return (
+                  <div key={feature} className="bg-black/20 rounded-2xl border border-white/5 p-4 space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-white text-sm font-semibold">{spec.label}</p>
+                        <p className="text-blue-200/40 text-xs mt-0.5">{spec.desc}</p>
+                      </div>
+                      <button type="button"
+                        onClick={() => setForm((f) => ({ ...f, [spec.featureKey]: f[spec.featureKey] === "false" ? "true" : "false" }))}
+                        className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                          form[spec.featureKey] !== "false"
+                            ? "bg-purple-600 border-purple-500/50"
+                            : "bg-white/10 border-white/10"
+                        }`}>
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                          form[spec.featureKey] !== "false" ? "translate-x-5" : "translate-x-0"
+                        }`} />
+                      </button>
+                    </div>
+                    <div className="grid sm:grid-cols-4 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-blue-200/70 text-xs">Model</Label>
+                        <select
+                          value={form[spec.modelKey] ?? ""}
+                          onChange={(e) => setForm((f) => ({ ...f, [spec.modelKey]: e.target.value }))}
+                          className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-xs"
+                        >
+                          <option value="" className="bg-[#030914]">Ikuti global</option>
+                          {AI_MODEL_OPTIONS.map((model) => (
+                            <option key={model.value} value={model.value} className="bg-[#030914]">{model.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-blue-200/70 text-xs">Max Token</Label>
+                        <Input type="number" value={form[spec.maxTokensKey] ?? ""} onChange={set(spec.maxTokensKey)} className="bg-white/5 border-white/10 text-white" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-blue-200/70 text-xs">Limit</Label>
+                        <Input type="number" value={form[spec.rateLimitKey] ?? ""} onChange={set(spec.rateLimitKey)} className="bg-white/5 border-white/10 text-white" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-blue-200/70 text-xs">Window (menit)</Label>
+                        <Input type="number" value={form[spec.rateWindowKey] ?? ""} onChange={set(spec.rateWindowKey)} className="bg-white/5 border-white/10 text-white" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-blue-200/70 text-xs">System Prompt</Label>
+                      <textarea
+                        value={form[spec.promptKey] ?? ""}
+                        onChange={setText(spec.promptKey)}
+                        rows={feature === "portalChat" || feature === "draftReply" || feature === "coverImage" ? 5 : 8}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-blue-200/20 outline-none focus:border-purple-500/50 resize-y font-mono"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Behavior Umum</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Default input artikel, retry JSON, dan logging penggunaan AI.</p>
+            <div className="grid sm:grid-cols-3 gap-5">
+              {[
+                ["ai_article_default_tone", "Tone Artikel Default"],
+                ["ai_article_default_length", "Panjang Artikel Default"],
+                ["ai_article_max_topic_chars", "Maks Karakter Topik"],
+                ["ai_article_max_keywords", "Maks Keyword"],
+              ].map(([key, label]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Input value={form[key] ?? ""} onChange={set(key)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+              ))}
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Usage Logging</Label>
+                <select
+                  value={form.ai_usage_logging ?? "database"}
+                  onChange={(e) => setForm((f) => ({ ...f, ai_usage_logging: e.target.value }))}
+                  className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-sm"
+                >
+                  <option value="database" className="bg-[#030914]">Database + Console</option>
+                  <option value="console" className="bg-[#030914]">Console only</option>
+                  <option value="off" className="bg-[#030914]">Off</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                <span className="text-white text-sm font-medium">Retry JSON invalid</span>
+                <button type="button"
+                  onClick={() => setForm((f) => ({ ...f, ai_json_retry_enabled: f.ai_json_retry_enabled === "false" ? "true" : "false" }))}
+                  className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                    form.ai_json_retry_enabled !== "false" ? "bg-purple-600 border-purple-500/50" : "bg-white/10 border-white/10"
+                  }`}>
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    form.ai_json_retry_enabled !== "false" ? "translate-x-5" : "translate-x-0"
+                  }`} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Auto Publish & Cover</h2>
+            <div className="grid sm:grid-cols-3 gap-5 mt-6">
+              {[
+                ["ai_auto_publish_topic_max_tokens", "Token Topik Auto Publish"],
+                ["ai_auto_publish_recent_article_count", "Cek Artikel Terakhir"],
+                ["ai_auto_publish_existing_topic_count", "Judul Existing di Prompt"],
+                ["ai_auto_publish_blob_prefix", "Blob Prefix Auto Cover"],
+                ["ai_cover_pexels_per_page", "Pexels per Page"],
+                ["ai_cover_auto_pexels_per_page", "Pexels Auto Cover"],
+                ["ai_cover_orientation", "Orientasi Cover"],
+                ["ai_cover_blob_prefix", "Blob Prefix Cover"],
+                ["ai_cover_fallback_keyword", "Fallback Keyword"],
+              ].map(([key, label]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Input value={form[key] ?? ""} onChange={set(key)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+              ))}
+              {[
+                ["ai_auto_publish_cover_enabled", "Auto-generate cover"],
+                ["ai_auto_publish_notify_wa", "Notifikasi WA"],
+                ["ai_cover_translate_keywords", "Translate keyword cover"],
+              ].map(([key, label]) => (
+                <div key={key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <span className="text-white text-sm font-medium">{label}</span>
+                  <button type="button"
+                    onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
+                    className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                      form[key] !== "false" ? "bg-purple-600 border-purple-500/50" : "bg-white/10 border-white/10"
+                    }`}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      form[key] !== "false" ? "translate-x-5" : "translate-x-0"
+                    }`} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-1.5 mt-5">
+              <Label className="text-blue-200/70 text-xs">Prompt Topik Auto Publish</Label>
+              <textarea value={form.ai_prompt_auto_publish_topic ?? ""} onChange={setText("ai_prompt_auto_publish_topic")} rows={7}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Estimator & Portal Chat</h2>
+            <div className="grid sm:grid-cols-3 gap-5 mt-6">
+              {[
+                ["ai_portal_max_question_chars", "Maks Karakter Pertanyaan"],
+                ["ai_portal_max_session_messages", "Maks Pesan Sesi"],
+                ["ai_portal_fallback_answer", "Fallback Jawaban"],
+              ].map(([key, label]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Input value={form[key] ?? ""} onChange={set(key)} className="bg-white/5 border-white/10 text-white" />
+                </div>
+              ))}
+              {[
+                ["ai_portal_include_projects", "Context proyek"],
+                ["ai_portal_include_invoices", "Context invoice"],
+                ["ai_portal_include_tickets", "Context tiket"],
+              ].map(([key, label]) => (
+                <div key={key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <span className="text-white text-sm font-medium">{label}</span>
+                  <button type="button"
+                    onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
+                    className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                      form[key] !== "false" ? "bg-purple-600 border-purple-500/50" : "bg-white/10 border-white/10"
+                    }`}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      form[key] !== "false" ? "translate-x-5" : "translate-x-0"
+                    }`} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-1.5 mt-5">
+              <Label className="text-blue-200/70 text-xs">Pricing Guide Estimator</Label>
+              <textarea value={form.ai_pricing_guide ?? ""} onChange={setText("ai_pricing_guide")} rows={8}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
             </div>
           </div>
 

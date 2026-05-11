@@ -1,50 +1,39 @@
 import { NextRequest } from "next/server";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
 import { getEnabledAiSettings } from "@/lib/aiSettings";
-import { getAnthropic, logAiUsage } from "@/lib/ai";
+import { getAnthropic, logAiUsage, renderAiPrompt } from "@/lib/ai";
 
 export async function POST(req: NextRequest) {
   const ip = getClientIP(req);
-  const { allowed } = await rateLimit(`estimasi-harga:${ip}`, 5, 60 * 60 * 1000);
-  if (!allowed) {
-    return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Coba lagi dalam 1 jam." }), { status: 429 });
-  }
-
-  const aiGate = await getEnabledAiSettings("featurePricingEstimator");
+  const aiGate = await getEnabledAiSettings("pricingEstimator");
   if (!aiGate.enabled) {
-    logAiUsage({ feature: "pricing_estimator", model: aiGate.settings.model, status: "blocked", actor: ip });
+    logAiUsage({
+      feature: "pricing_estimator",
+      model: aiGate.settings.features.pricingEstimator.model,
+      status: "blocked",
+      actor: ip,
+      logging: aiGate.settings.usageLogging,
+    });
     return aiGate.response;
   }
+
   const aiSettings = aiGate.settings;
+  const aiConfig = aiSettings.features.pricingEstimator;
+  const { allowed } = await rateLimit(`estimasi-harga:${ip}`, aiConfig.rateLimit, aiConfig.rateWindowMs);
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Coba lagi nanti." }), { status: 429 });
+  }
 
   try {
     const { bisnisType, websiteType, fitur, halaman, timeline } = await req.json();
 
-    // Sanitize inputs — limit length to prevent prompt injection
     const safe = (v: unknown, max = 200) => typeof v === "string" ? v.slice(0, max).replace(/[<>]/g, "") : "";
     const safeList = (v: unknown, max = 10) =>
       Array.isArray(v) ? v.slice(0, max).map((i) => safe(i, 100)) : [];
 
-    const system = `Kamu adalah konsultan web agency MFWEB yang bertugas memberikan estimasi harga pembuatan website untuk calon klien.
-
-Panduan harga MFWEB (gunakan sebagai acuan realistis):
-- Landing Page (1-3 halaman): Rp 800.000 - Rp 2.500.000
-- Company Profile (4-8 halaman): Rp 2.500.000 - Rp 6.000.000
-- Website Toko Online (WooCommerce/custom): Rp 5.000.000 - Rp 15.000.000
-- Portal / Aplikasi Web Custom: Rp 15.000.000 - Rp 50.000.000+
-- Blog / News Portal: Rp 3.000.000 - Rp 8.000.000
-
-Fitur tambahan:
-- Payment gateway: +Rp 1.000.000 - Rp 2.500.000
-- Sistem booking/reservasi: +Rp 1.500.000 - Rp 3.000.000
-- Live chat/WhatsApp integration: +Rp 300.000 - Rp 800.000
-- Multi bahasa: +Rp 500.000 - Rp 1.500.000
-- Blog/CMS: +Rp 500.000 - Rp 1.500.000
-- SEO setup: +Rp 500.000 - Rp 2.000.000
-
-Berikan estimasi yang jujur dan realistis. Tampilkan dalam format yang mudah dibaca.
-Gunakan Bahasa Indonesia yang ramah dan profesional.
-Di akhir, selalu sarankan konsultasi gratis untuk estimasi lebih akurat.`;
+    const system = renderAiPrompt(aiConfig.prompt, {
+      pricingGuide: aiSettings.pricingGuide,
+    });
 
     const prompt = `Tolong berikan estimasi harga website dengan detail berikut:
 - Jenis bisnis: ${safe(bisnisType)}
@@ -67,8 +56,8 @@ Berikan:
         const encoder = new TextEncoder();
         try {
           const response = anthropic.messages.stream({
-            model:      aiSettings.model,
-            max_tokens: 1000,
+            model:      aiConfig.model,
+            max_tokens: aiConfig.maxTokens,
             system,
             messages:   [{ role: "user", content: prompt }],
           });
@@ -80,7 +69,7 @@ Berikan:
               controller.enqueue(encoder.encode(chunk.delta.text));
             }
           }
-          logAiUsage({ feature: "pricing_estimator", model: aiSettings.model, status: "success", actor: ip });
+          logAiUsage({ feature: "pricing_estimator", model: aiConfig.model, status: "success", actor: ip, logging: aiSettings.usageLogging });
         } finally {
           controller.close();
         }
@@ -98,10 +87,11 @@ Berikan:
     console.error("[Estimasi-Harga]", err);
     logAiUsage({
       feature: "pricing_estimator",
-      model:   aiSettings.model,
+      model:   aiConfig.model,
       status:  "error",
       actor:   ip,
       error:   err instanceof Error ? err.message : "Unknown error",
+      logging: aiSettings.usageLogging,
     });
     return new Response(JSON.stringify({ error: "Gagal memproses estimasi" }), { status: 500 });
   }

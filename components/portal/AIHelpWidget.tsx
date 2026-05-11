@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 type Message = { role: "user" | "ai"; content: string };
 
-export default function AIHelpWidget() {
+export default function AIHelpWidget({ maxMessages = 20 }: { maxMessages?: number }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -20,7 +20,7 @@ export default function AIHelpWidget() {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || loading || messages.length >= 20) return;
+    if (!input.trim() || loading || messages.length >= maxMessages) return;
 
     const userMsg = input.trim();
     setInput("");
@@ -123,7 +123,7 @@ export default function AIHelpWidget() {
             </div>
           </div>
         )}
-        {messages.length >= 20 && (
+        {messages.length >= maxMessages && (
           <p className="text-[10px] text-amber-400/60 text-center italic">
             Hubungi admin untuk pertanyaan lebih lanjut.
           </p>
@@ -138,13 +138,13 @@ export default function AIHelpWidget() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="Tanyakan sesuatu..."
-            disabled={loading || messages.length >= 20}
+            disabled={loading || messages.length >= maxMessages}
             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-blue-200/30 outline-none focus:border-blue-500/50 disabled:opacity-50"
           />
           <Button
             size="icon"
             onClick={handleSend}
-            disabled={loading || !input.trim() || messages.length >= 20}
+            disabled={loading || !input.trim() || messages.length >= maxMessages}
             className="bg-blue-600 shrink-0 h-8 w-8 rounded-lg"
           >
             <Send className="w-3.5 h-3.5" />

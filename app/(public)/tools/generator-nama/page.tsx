@@ -29,7 +29,7 @@ export default async function GeneratorNamaPage() {
             Pilih industri dan gaya, langsung generate.
           </p>
         </div>
-        {aiSettings.featureNameGenerator ? (
+        {aiSettings.features.nameGenerator.enabled ? (
           <NameGenerator />
         ) : (
           <div className="glass rounded-2xl p-8 border border-white/10 text-center">

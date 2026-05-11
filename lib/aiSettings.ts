@@ -20,10 +20,15 @@ export {
 } from "@/lib/aiConfig";
 
 const AI_FEATURE_DISABLED_MESSAGES: Record<AiFeature, string> = {
-  featureArticle:          "Fitur AI artikel sedang nonaktif.",
-  featurePortalChat:       "Fitur AI portal sedang nonaktif.",
-  featureNameGenerator:    "Fitur generator nama sedang nonaktif.",
-  featurePricingEstimator: "Fitur estimasi harga sedang nonaktif.",
+  draftArticle:      "Fitur draft artikel sedang nonaktif.",
+  suggestTopics:     "Fitur saran topik sedang nonaktif.",
+  seoAnalyze:        "Fitur analisis SEO sedang nonaktif.",
+  draftReply:        "Fitur draft balasan tiket sedang nonaktif.",
+  coverImage:        "Fitur cover image AI sedang nonaktif.",
+  autoPublish:       "Fitur auto-publish AI sedang nonaktif.",
+  portalChat:        "Fitur AI portal sedang nonaktif.",
+  pricingEstimator:  "Fitur estimasi harga sedang nonaktif.",
+  nameGenerator:     "Fitur generator nama sedang nonaktif.",
 };
 
 export async function getAiSettings(): Promise<AiSettings> {
@@ -31,7 +36,7 @@ export async function getAiSettings(): Promise<AiSettings> {
     const rows = await prisma.siteSetting.findMany({
       where: { key: { in: Object.keys(AI_DEFAULTS) } },
     });
-    const map: Record<string, string> = { ...AI_DEFAULTS };
+    const map: Record<string, string> = {};
     for (const row of rows) map[row.key] = row.value;
     return parseAiSettings(map);
   } catch (err) {
@@ -46,7 +51,7 @@ export async function getEnabledAiSettings(feature: AiFeature): Promise<
 > {
   const settings = await getAiSettings();
 
-  if (!settings[feature]) {
+  if (!settings.features[feature].enabled) {
     return {
       enabled:  false,
       settings,

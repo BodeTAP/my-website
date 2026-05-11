@@ -597,3 +597,19 @@ model PermissionAuditLog {
 
   @@map("permission_audit_logs")
 }
+
+model AiUsageLog {
+  id        String   @id @default(cuid())
+  feature   String
+  model     String
+  status    String
+  actor     String?
+  error     String?  @db.Text
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([feature])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_usage_logs")
+}

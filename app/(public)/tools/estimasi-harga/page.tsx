@@ -30,7 +30,7 @@ export default async function EstimasiHargaPage() {
           </p>
         </div>
 
-        {aiSettings.featurePricingEstimator ? (
+        {aiSettings.features.pricingEstimator.enabled ? (
           <PricingEstimator />
         ) : (
           <div className="glass rounded-2xl p-8 border border-white/10 text-center">

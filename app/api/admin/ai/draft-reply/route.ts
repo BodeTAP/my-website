@@ -11,14 +11,22 @@ export async function POST(req: NextRequest) {
   const denied = await requireApiPermission("ai_settings");
   if (denied) return denied;
   const session = await auth();
-  const { allowed } = await rateLimit(`ai-reply:${session!.user!.email}`, 20, 60 * 60 * 1000);
-  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
-  const aiGate = await getEnabledAiSettings("featureArticle");
+  const aiGate = await getEnabledAiSettings("draftReply");
   if (!aiGate.enabled) {
-    logAiUsage({ feature: "draft_reply", model: aiGate.settings.model, status: "blocked", actor: session!.user!.email });
+    logAiUsage({
+      feature: "draft_reply",
+      model: aiGate.settings.features.draftReply.model,
+      status: "blocked",
+      actor: session!.user!.email,
+      logging: aiGate.settings.usageLogging,
+    });
     return aiGate.response;
   }
+
   const aiSettings = aiGate.settings;
+  const aiConfig = aiSettings.features.draftReply;
+  const { allowed } = await rateLimit(`ai-reply:${session!.user!.email}`, aiConfig.rateLimit, aiConfig.rateWindowMs);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi nanti." }, { status: 429 });
 
   try {
     const { ticketId } = await req.json();
@@ -39,8 +47,6 @@ export async function POST(req: NextRequest) {
 
     if (!ticket) return NextResponse.json({ error: "Tiket tidak ditemukan" }, { status: 404 });
 
-    const anthropic = getAnthropic();
-
     const context = `
 Client: ${ticket.client.businessName}
 Subject: ${ticket.subject}
@@ -51,30 +57,31 @@ Active Project: ${ticket.client.projects[0]?.name || "None"} (${ticket.client.pr
 Unpaid Invoices: ${ticket.client.invoices.map(i => i.invoiceNo).join(", ") || "None"}
     `.trim();
 
-    const system = `You are a customer support agent for MFWEB web agency. 
-Friendly but professional. Write in Bahasa Indonesia. 
-Respond specifically to the client's issue based on the provided context.
-Do NOT make promises about deadlines or prices.
-Keep the response helpful and concise.`;
-
-    const response = await anthropic.messages.create({
-      model: aiSettings.model,
-      max_tokens: 1000,
-      system,
+    const response = await getAnthropic().messages.create({
+      model: aiConfig.model,
+      max_tokens: aiConfig.maxTokens,
+      system: aiConfig.prompt,
       messages: [{ role: "user", content: context }],
     });
 
-    const draft = response.content[0].type === "text" ? response.content[0].text : "";
-    logAiUsage({ feature: "draft_reply", model: aiSettings.model, status: "success", actor: session!.user!.email });
+    const draft = response.content[0]?.type === "text" ? response.content[0].text : "";
+    logAiUsage({
+      feature: "draft_reply",
+      model: aiConfig.model,
+      status: "success",
+      actor: session!.user!.email,
+      logging: aiSettings.usageLogging,
+    });
     return NextResponse.json({ draft });
   } catch (err) {
     console.error("[AI-DraftReply]", err);
     logAiUsage({
       feature: "draft_reply",
-      model:   aiSettings.model,
-      status:  "error",
-      actor:   session!.user!.email,
-      error:   err instanceof Error ? err.message : "Unknown error",
+      model: aiConfig.model,
+      status: "error",
+      actor: session!.user!.email,
+      error: err instanceof Error ? err.message : "Unknown error",
+      logging: aiSettings.usageLogging,
     });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

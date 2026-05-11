@@ -33,6 +33,25 @@ describe("aiConfig", () => {
     expect(settings.featurePortalChat).toBe(false);
     expect(settings.featureNameGenerator).toBe(false);
     expect(settings.featurePricingEstimator).toBe(false);
+    expect(settings.features.draftArticle.enabled).toBe(false);
+    expect(settings.features.portalChat.enabled).toBe(false);
+  });
+
+  it("keeps legacy article toggle as fallback for granular article features", () => {
+    const settings = parseAiSettings({ ai_feature_article: "false" });
+    expect(settings.features.draftArticle.enabled).toBe(false);
+    expect(settings.features.suggestTopics.enabled).toBe(false);
+    expect(settings.features.seoAnalyze.enabled).toBe(false);
+    expect(settings.features.autoPublish.enabled).toBe(false);
+  });
+
+  it("lets granular feature toggles override the legacy article toggle", () => {
+    const settings = parseAiSettings({
+      ai_feature_article: "false",
+      ai_feature_draft_article: "true",
+    });
+    expect(settings.features.draftArticle.enabled).toBe(true);
+    expect(settings.features.suggestTopics.enabled).toBe(false);
   });
 
   it("normalizes AI setting values before persisting", () => {

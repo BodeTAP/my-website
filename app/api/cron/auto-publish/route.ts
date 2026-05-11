@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { extractJsonObject, fetchAndUploadCoverImage, getAnthropic, logAiUsage } from "@/lib/ai";
+import {
+  createJsonObjectWithRetry,
+  fetchAndUploadCoverImage,
+  logAiUsage,
+  renderAiPrompt,
+} from "@/lib/ai";
 import { getEnabledAiSettings } from "@/lib/aiSettings";
-import type { AiModel } from "@/lib/aiConfig";
-import type Anthropic from "@anthropic-ai/sdk";
+import type { AiModel, AiSettings } from "@/lib/aiConfig";
 import { sendWA } from "@/lib/whatsapp";
-
-// Konteks bisnis MFWEB yang diberikan ke Claude untuk generate topik
-const MFWEB_CONTEXT = `
-MFWEB adalah jasa pembuatan website profesional untuk bisnis lokal Indonesia.
-Layanan: website company profile, landing page, toko online, portofolio.
-Target klien: UMKM, pengusaha lokal, bisnis kuliner, klinik, salon, bengkel, properti.
-Harga mulai Rp 800.000. Platform: mfweb.maffisorp.id.
-`.trim();
 
 function generateSlug(title: string): string {
   let slug = title
@@ -21,7 +17,6 @@ function generateSlug(title: string): string {
     .trim()
     .replace(/\s+/g, "-");
 
-  // Potong di batas kata, bukan di tengah kata
   if (slug.length > 60) {
     slug = slug.slice(0, 60);
     const lastHyphen = slug.lastIndexOf("-");
@@ -31,10 +26,9 @@ function generateSlug(title: string): string {
   return slug;
 }
 
-/** Minta Claude memilih topik baru yang belum pernah ditulis */
 async function generateTopic(
-  anthropic: Anthropic,
   model: AiModel,
+  settings: AiSettings,
   existingTitles: string[],
   categories: { id: string; name: string }[],
 ): Promise<{ topic: string; categoryId: string | null }> {
@@ -43,37 +37,26 @@ async function generateTopic(
     : "Tidak ada kategori";
 
   const existingList = existingTitles.length > 0
-    ? `\nTopik yang SUDAH ditulis (jangan ulangi):\n${existingTitles.slice(0, 30).map(t => `- ${t}`).join("\n")}`
+    ? `\nTopik yang SUDAH ditulis (jangan ulangi):\n${existingTitles.slice(0, settings.autoPublishExistingTopicCount).map(t => `- ${t}`).join("\n")}`
     : "";
 
-  const response = await anthropic.messages.create({
-    model,
-    max_tokens: 200,
-    system: `Kamu adalah content strategist untuk ${MFWEB_CONTEXT}
-
-Pilih 1 topik artikel blog yang:
-- Belum pernah ditulis (lihat daftar existing)
-- Relevan dengan kebutuhan calon klien MFWEB
-- Berpotensi menarik traffic dari Google
-- Dalam Bahasa Indonesia
-
-Kategori yang tersedia:
-${categoryList}
-${existingList}
-
-Kembalikan JSON SAJA:
-{ "topic": "Judul artikel yang menarik", "categoryId": "id kategori paling sesuai atau null" }`,
-    messages: [{ role: "user", content: "Pilih 1 topik artikel terbaik untuk hari ini." }],
+  const system = renderAiPrompt(settings.autoPublishTopicPrompt, {
+    categoryList,
+    existingList,
   });
 
-  const text      = response.content[0].type === "text" ? response.content[0].text : "";
-  return extractJsonObject<{ topic: string; categoryId: string | null }>(text);
+  return createJsonObjectWithRetry<{ topic: string; categoryId: string | null }>({
+    model,
+    maxTokens: settings.autoPublishTopicMaxTokens,
+    system,
+    messages: [{ role: "user", content: "Pilih 1 topik artikel terbaik untuk hari ini." }],
+    retry: settings.jsonRetryEnabled,
+  });
 }
 
-/** Generate artikel lengkap dari topik yang diberikan */
 async function generateArticle(
-  anthropic: Anthropic,
   model: AiModel,
+  settings: AiSettings,
   topic: string,
   categories: { id: string; name: string }[],
 ): Promise<{
@@ -82,48 +65,21 @@ async function generateArticle(
   suggestedCategoryId: string | null;
 }> {
   const categoryList = categories.map(c => `- id: "${c.id}", name: "${c.name}"`).join("\n");
-
-  const response = await anthropic.messages.create({
-    model,
-    max_tokens: 4000,
-    system: `Kamu adalah content writer berpengalaman untuk ${MFWEB_CONTEXT}
-
-Tulis artikel blog dalam Bahasa Indonesia dengan gaya natural dan conversational.
-
-Aturan penulisan:
-- Mulai dengan cerita pendek atau skenario yang relatable bagi pemilik UMKM
-- Gunakan bahasa sehari-hari, hindari kata formal yang kaku
-- Sertakan contoh bisnis nyata: warung makan, bengkel, salon, klinik, toko kelontong
-- Gunakan angka spesifik bukan kata seperti "banyak" atau "sering"
-- Variasikan panjang kalimat — campurkan kalimat pendek dan panjang
-- HINDARI: "dalam era", "di tengah", "tentunya", "perlu diketahui", "sangat penting", "tidak dapat dipungkiri", "pada dasarnya"
-- Akhiri dengan 1 actionable step yang bisa langsung dilakukan pembaca
-- Panjang artikel: 900-1200 kata
-
-Kategori yang tersedia (pilih yang paling sesuai):
-${categoryList}
-
-Format output HARUS berupa JSON valid:
-{
-  "title": "judul artikel",
-  "content": "konten HTML (<h2>, <h3>, <p>, <ul>, <li>, <strong>)",
-  "excerpt": "ringkasan 1-2 kalimat",
-  "metaTitle": "meta title maks 60 karakter",
-  "metaDesc": "meta description 120-160 karakter",
-  "tags": ["tag1", "tag2", "tag3"],
-  "suggestedCategoryId": "id kategori yang paling sesuai atau null"
-}
-
-Jangan tambahkan teks apapun di luar JSON.`,
-    messages: [{ role: "user", content: `Tulis artikel tentang: ${topic}` }],
+  const system = renderAiPrompt(settings.features.autoPublish.prompt, {
+    categoryList,
   });
 
-  const text      = response.content[0].type === "text" ? response.content[0].text : "";
-  return extractJsonObject<{
+  return createJsonObjectWithRetry<{
     title: string; content: string; excerpt: string;
     metaTitle: string; metaDesc: string; tags: string[];
     suggestedCategoryId: string | null;
-  }>(text);
+  }>({
+    model,
+    maxTokens: settings.features.autoPublish.maxTokens,
+    system,
+    messages: [{ role: "user", content: `Tulis artikel tentang: ${topic}` }],
+    retry: settings.jsonRetryEnabled,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -135,44 +91,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const aiGate = await getEnabledAiSettings("featureArticle");
+  const aiGate = await getEnabledAiSettings("autoPublish");
   if (!aiGate.enabled) {
-    logAiUsage({ feature: "auto_publish", model: aiGate.settings.model, status: "blocked", actor: "cron" });
+    logAiUsage({
+      feature: "auto_publish",
+      model: aiGate.settings.features.autoPublish.model,
+      status: "blocked",
+      actor: "cron",
+      logging: aiGate.settings.usageLogging,
+    });
     return aiGate.response;
   }
   const aiSettings = aiGate.settings;
+  const aiConfig = aiSettings.features.autoPublish;
 
   try {
-    const anthropic = getAnthropic();
-
-    // 1. Ambil kategori dan judul artikel yang sudah ada secara paralel
     const [categories, existingArticles] = await Promise.all([
       prisma.category.findMany({ select: { id: true, name: true } }),
       prisma.article.findMany({
         select:  { title: true },
         orderBy: { createdAt: "desc" },
-        take:    50,
+        take:    aiSettings.autoPublishRecentArticleCount,
       }),
     ]);
 
     const existingTitles = existingArticles.map(a => a.title);
-
-    // 2. Minta Claude pilih topik baru yang belum pernah ditulis
-    const { topic, categoryId: suggestedId } = await generateTopic(anthropic, aiSettings.model, existingTitles, categories);
+    const { topic, categoryId: suggestedId } = await generateTopic(aiConfig.model, aiSettings, existingTitles, categories);
     console.log(`[AutoPublish] Topik dipilih AI: "${topic}"`);
 
-    // 3. Generate artikel lengkap
-    const parsed = await generateArticle(anthropic, aiSettings.model, topic, categories);
-
-    // 4. Tentukan categoryId final (dari generate article atau dari generate topic)
+    const parsed = await generateArticle(aiConfig.model, aiSettings, topic, categories);
     const finalCategoryId = parsed.suggestedCategoryId ?? suggestedId ?? null;
-
-    // 5. Cek apakah kategori valid
     const validCategoryId = finalCategoryId && categories.find(c => c.id === finalCategoryId)
       ? finalCategoryId
       : null;
 
-    // 6. Generate slug + cek duplikat (robust retry loop)
     let slug = generateSlug(parsed.title);
     let finalSlug = slug;
     let attempt = 0;
@@ -186,10 +138,10 @@ export async function POST(req: NextRequest) {
     }
     slug = finalSlug;
 
-    // 7. Fetch & upload cover image (dengan keyword auto-translated)
-    const coverImage = await fetchAndUploadCoverImage(topic, "articles");
+    const coverImage = aiSettings.autoPublishCoverEnabled
+      ? await fetchAndUploadCoverImage(topic, aiSettings.autoPublishBlobPrefix, aiSettings)
+      : null;
 
-    // 8. Simpan ke database
     const article = await prisma.article.create({
       data: {
         title:       parsed.title,
@@ -206,9 +158,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 9. Notifikasi WA ke admin (non-blocking)
     const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
-    if (adminPhone) {
+    if (adminPhone && aiSettings.autoPublishNotifyWa) {
       after(async () => {
         const categoryName = validCategoryId
           ? categories.find(c => c.id === validCategoryId)?.name ?? "-"
@@ -216,17 +167,24 @@ export async function POST(req: NextRequest) {
 
         await sendWA(
           adminPhone,
-          `🤖 *Artikel baru dipublish otomatis!*\n\n` +
-          `📝 *${parsed.title}*\n` +
-          `🏷 Kategori: ${categoryName}\n` +
-          `🖼 Cover: ${coverImage ? "✅ Ada" : "❌ Tidak ada"}\n\n` +
+          `Artikel baru dipublish otomatis!\n\n` +
+          `${parsed.title}\n` +
+          `Kategori: ${categoryName}\n` +
+          `Cover: ${coverImage ? "Ada" : "Tidak ada"}\n\n` +
           `Cek di admin panel untuk review.\n\n_MFWEB Auto-Publisher_`,
         ).catch(e => console.error("[AutoPublish] WA error:", e));
       });
     }
 
     console.log(`[AutoPublish] Artikel "${parsed.title}" (${slug}) berhasil dipublish. Kategori: ${validCategoryId ?? "none"}`);
-    logAiUsage({ feature: "auto_publish", model: aiSettings.model, status: "success", actor: "cron" });
+    logAiUsage({
+      feature: "auto_publish",
+      model: aiConfig.model,
+      status: "success",
+      actor: "cron",
+      metadata: { articleId: article.id, topic, slug, hasCover: !!coverImage },
+      logging: aiSettings.usageLogging,
+    });
 
     return NextResponse.json({
       success:    true,
@@ -240,10 +198,11 @@ export async function POST(req: NextRequest) {
     console.error("[AutoPublish] Error:", err);
     logAiUsage({
       feature: "auto_publish",
-      model:   aiSettings.model,
+      model:   aiConfig.model,
       status:  "error",
       actor:   "cron",
       error:   err instanceof Error ? err.message : "Unknown error",
+      logging: aiSettings.usageLogging,
     });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

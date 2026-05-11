@@ -3,7 +3,7 @@ import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getEnabledAiSettings } from "@/lib/aiSettings";
-import { extractJsonObject, getAnthropic, logAiUsage } from "@/lib/ai";
+import { createJsonObjectWithRetry, logAiUsage, renderAiPrompt } from "@/lib/ai";
 import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
@@ -11,22 +11,22 @@ export async function POST(req: NextRequest) {
   const denied = await requireApiPermission("ai_settings");
   if (denied) return denied;
   const session = await auth();
-  const { allowed } = await rateLimit(`ai-draft:${session!.user!.email}`, 20, 60 * 60 * 1000);
-  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
-  const aiGate = await getEnabledAiSettings("featureArticle");
+  const aiGate = await getEnabledAiSettings("draftArticle");
   if (!aiGate.enabled) {
-    logAiUsage({ feature: "draft_article", model: aiGate.settings.model, status: "blocked", actor: session!.user!.email });
+    logAiUsage({ feature: "draft_article", model: aiGate.settings.features.draftArticle.model, status: "blocked", actor: session!.user!.email, logging: aiGate.settings.usageLogging });
     return aiGate.response;
   }
   const aiSettings = aiGate.settings;
+  const aiConfig = aiSettings.features.draftArticle;
+  const { allowed } = await rateLimit(`ai-draft:${session!.user!.email}`, aiConfig.rateLimit, aiConfig.rateWindowMs);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi nanti." }, { status: 429 });
 
   try {
     const { topic, keywords, tone, length } = await req.json();
     // Input validation
     if (!topic?.trim()) return NextResponse.json({ error: "Topik wajib diisi." }, { status: 400 });
-    if (topic.length > 500) return NextResponse.json({ error: "Topik maksimal 500 karakter." }, { status: 400 });
-    const safeKeywords = Array.isArray(keywords) ? keywords.slice(0, 10).map((k: unknown) => String(k).slice(0, 100)) : [];
-    const anthropic = getAnthropic();
+    if (topic.length > aiSettings.articleMaxTopicChars) return NextResponse.json({ error: `Topik maksimal ${aiSettings.articleMaxTopicChars} karakter.` }, { status: 400 });
+    const safeKeywords = Array.isArray(keywords) ? keywords.slice(0, aiSettings.articleMaxKeywords).map((k: unknown) => String(k).slice(0, 100)) : [];
 
     // Ambil daftar kategori dari database
     const categories = await prisma.category.findMany({
@@ -38,42 +38,35 @@ export async function POST(req: NextRequest) {
       ? categories.map(c => `- id: "${c.id}", name: "${c.name}"`).join("\n")
       : "Tidak ada kategori tersedia";
 
-    const system = `You are an expert SEO content writer for Indonesian local businesses.
-Write in Bahasa Indonesia.
-Produce HTML compatible with Tiptap editor (use <h2>, <h3>, <p>, <ul>, <li>, <strong> tags).
-Return a JSON object with: title, content (HTML string), excerpt (1-2 sentences plain text summary for article listing), metaTitle, metaDescription, suggestedTags (array), suggestedCategoryId (string or null), and suggestedCategoryName (string or null).
-The tone should be ${tone || "informative"}.
-The length should be ${length || "medium"}.
-
-Available categories in the system (choose the MOST relevant one based on the article topic, use the exact id):
-${categoryList}
-
-If none of the available categories match, set suggestedCategoryId and suggestedCategoryName to null.`;
+    const system = renderAiPrompt(aiConfig.prompt, {
+      tone: tone || aiSettings.articleDefaultTone,
+      length: length || aiSettings.articleDefaultLength,
+      categoryList,
+    });
 
     const prompt = `Write a high-quality blog article about: ${topic}. 
 Keywords to include: ${safeKeywords.join(", ") || "relevant industry terms"}.`;
 
-    const response = await anthropic.messages.create({
-      model: aiSettings.model,
-      max_tokens: 4000,
+    const data = await createJsonObjectWithRetry<Record<string, unknown>>({
+      model:     aiConfig.model,
+      maxTokens: aiConfig.maxTokens,
       system,
-      messages: [{ role: "user", content: prompt }],
+      messages:  [{ role: "user", content: prompt }],
+      retry:     aiSettings.jsonRetryEnabled,
     });
 
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
-    const data = extractJsonObject<Record<string, unknown>>(text);
-
     // Sertakan daftar kategori lengkap dalam response agar frontend bisa sinkron
-    logAiUsage({ feature: "draft_article", model: aiSettings.model, status: "success", actor: session!.user!.email });
+    logAiUsage({ feature: "draft_article", model: aiConfig.model, status: "success", actor: session!.user!.email, logging: aiSettings.usageLogging });
     return NextResponse.json({ ...data, availableCategories: categories });
   } catch (err) {
     console.error("[AI-Draft]", err);
     logAiUsage({
       feature: "draft_article",
-      model:   aiSettings.model,
+      model:   aiConfig.model,
       status:  "error",
       actor:   session!.user!.email,
       error:   err instanceof Error ? err.message : "Unknown error",
+      logging: aiSettings.usageLogging,
     });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

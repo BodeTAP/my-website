@@ -8,135 +8,58 @@ import { Button } from "@/components/ui/button";
 const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
 
 const INDUSTRIES = [
-  { value: "teknologi", label: "🖥️ Teknologi / IT" },
-  { value: "kuliner",   label: "🍜 Kuliner / F&B" },
-  { value: "fashion",   label: "👗 Fashion / Pakaian" },
-  { value: "kesehatan", label: "💊 Kesehatan / Kecantikan" },
-  { value: "properti",  label: "🏠 Properti / Konstruksi" },
-  { value: "jasa",      label: "🔧 Jasa / Konsultasi" },
-  { value: "pendidikan",label: "📚 Pendidikan / Pelatihan" },
-  { value: "retail",    label: "🛍️ Retail / Toko" },
-  { value: "otomotif",  label: "🚗 Otomotif / Bengkel" },
-  { value: "hiburan",   label: "🎉 Hiburan / Event" },
+  { value: "teknologi", label: "Teknologi / IT" },
+  { value: "kuliner", label: "Kuliner / F&B" },
+  { value: "fashion", label: "Fashion / Pakaian" },
+  { value: "kesehatan", label: "Kesehatan / Kecantikan" },
+  { value: "properti", label: "Properti / Konstruksi" },
+  { value: "jasa", label: "Jasa / Konsultasi" },
+  { value: "pendidikan", label: "Pendidikan / Pelatihan" },
+  { value: "retail", label: "Retail / Toko" },
+  { value: "otomotif", label: "Otomotif / Bengkel" },
+  { value: "hiburan", label: "Hiburan / Event" },
 ];
 
 const STYLES = [
-  { value: "profesional",  label: "Profesional" },
-  { value: "modern",       label: "Modern & Tech" },
-  { value: "kreatif",      label: "Kreatif" },
-  { value: "tradisional",  label: "Lokal / Tradisional" },
-  { value: "internasional",label: "Internasional" },
+  { value: "profesional", label: "Profesional" },
+  { value: "modern", label: "Modern & Tech" },
+  { value: "kreatif", label: "Kreatif" },
+  { value: "tradisional", label: "Lokal / Tradisional" },
+  { value: "internasional", label: "Internasional" },
 ];
 
-const PREFIXES: Record<string, string[]> = {
-  profesional:   ["Prima", "Mitra", "Solusi", "Karya", "Mandiri", "Andalan", "Sentosa", "Utama"],
-  modern:        ["Neo", "Digi", "Smart", "Pro", "Inno", "Hyper", "Meta", "Ultra"],
-  kreatif:       ["Kreasi", "Cipta", "Idea", "Visio", "Gagas", "Reka", "Arta", "Imaji"],
-  tradisional:   ["Nusa", "Bumi", "Artha", "Bhakti", "Wahana", "Kusuma", "Cahaya", "Warna"],
-  internasional: ["Global", "Inter", "World", "Asia", "Trans", "Uni", "Infinity", "Era"],
+type NameSuggestion = {
+  name: string;
+  slogan: string;
 };
-
-const INDUSTRY_WORDS: Record<string, string[]> = {
-  teknologi: ["Tech", "Byte", "Code", "Data", "Net", "Soft", "App", "Logic"],
-  kuliner:   ["Rasa", "Sajian", "Dapur", "Selera", "Cita", "Boga", "Lezat", "Nikmati"],
-  fashion:   ["Mode", "Style", "Wear", "Trend", "Busana", "Look", "Gaya", "Kreasi"],
-  kesehatan: ["Sehat", "Medika", "Vita", "Care", "Prima", "Bugar", "Klinik", "Herba"],
-  properti:  ["Graha", "Land", "Property", "Hunian", "Realty", "Aset", "Kavling", "Villas"],
-  jasa:      ["Service", "Karya", "Solusi", "Prima", "Andal", "Expert", "Works", "Pro"],
-  pendidikan:["Edu", "Ilmu", "Pintar", "Learn", "Cerdas", "Skill", "Bright", "Genius"],
-  retail:    ["Mart", "Store", "Shop", "Trade", "Market", "Point", "Center", "Warung"],
-  otomotif:  ["Motor", "Auto", "Drive", "Speed", "Karbu", "Engine", "Wheels", "Turbo"],
-  hiburan:   ["Fun", "Event", "Show", "Stage", "Star", "Play", "Festa", "Gala"],
-};
-
-const SUFFIXES: Record<string, string[]> = {
-  profesional:   ["Consulting", "Solutions", "Group", "Partners", "Services", "Professional", "Associates"],
-  modern:        ["Tech", "Digital", "Labs", "Studio", "Hub", "Pro", "ID", "360"],
-  kreatif:       ["Creative", "Works", "Craft", "Design", "Vision", "Ideas", "Studio", "Space"],
-  tradisional:   ["Jaya", "Makmur", "Sejahtera", "Maju", "Berkah", "Mulia", "Sentosa", "Abadi"],
-  internasional: ["International", "Global", "Corp", "Enterprise", "Holdings", "Ventures", "Group", "Co."],
-};
-
-const SLOGANS: Record<string, string[]> = {
-  profesional:   [
-    "{name}: Layanan profesional yang bisa Anda andalkan.",
-    "Solusi bisnis terpercaya — {name}.",
-    "{name}. Profesional. Tepat. Terpercaya.",
-  ],
-  modern:        [
-    "{name} — Inovasi untuk masa depan bisnis Anda.",
-    "Bertumbuh lebih cepat bersama {name}.",
-    "{name}: Modern, Efisien, Menguntungkan.",
-  ],
-  kreatif:       [
-    "{name} — Di mana kreativitas bertemu solusi.",
-    "Bersama {name}, setiap ide jadi kenyataan.",
-    "{name}: Kreatif, Segar, Berkesan.",
-  ],
-  tradisional:   [
-    "{name} — Kepercayaan yang diwariskan generasi.",
-    "Bermitra dengan {name}, tumbuh bersama.",
-    "{name}: Lokal, Andal, Terpercaya.",
-  ],
-  internasional: [
-    "{name} — Standar global, sentuhan lokal.",
-    "Bersaing di pasar global bersama {name}.",
-    "{name}: Beyond Borders.",
-  ],
-};
-
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function cap(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
-}
-
-function generateNames(
-  industry: string,
-  style: string,
-  keyword: string,
-): { name: string; slogan: string }[] {
-  const prefixes  = PREFIXES[style]       ?? PREFIXES.profesional;
-  const indWords  = INDUSTRY_WORDS[industry] ?? INDUSTRY_WORDS.jasa;
-  const suffixes  = SUFFIXES[style]       ?? SUFFIXES.profesional;
-  const slogans   = SLOGANS[style]        ?? SLOGANS.profesional;
-  const kw = keyword.trim();
-  const kwCap = kw ? cap(kw) : null;
-
-  const combos = [
-    `${pick(prefixes)} ${pick(indWords)}`,
-    kwCap ? `${kwCap} ${pick(suffixes)}` : `${pick(prefixes)} ${pick(suffixes)}`,
-    kwCap ? `${kwCap}${pick(indWords)}` : `${pick(prefixes)}${pick(indWords)}`,
-    `${pick(indWords)} ${pick(suffixes)}`,
-    kwCap ? `${pick(prefixes)} ${kwCap}` : `${pick(prefixes)} ${pick(prefixes)}`,
-    `${pick(prefixes)}${pick(suffixes).replace(/\s+/g, "")}`,
-    kwCap ? `${kwCap} ${pick(indWords)}` : `${pick(indWords)}${pick(prefixes)}`,
-    `${pick(prefixes)} ${pick(indWords)} ${pick(suffixes)}`,
-  ];
-
-  const seen = new Set<string>();
-  const unique: string[] = [];
-  for (const c of combos) {
-    if (!seen.has(c)) { seen.add(c); unique.push(c); }
-  }
-
-  return unique.slice(0, 6).map((name, i) => ({
-    name,
-    slogan: slogans[i % slogans.length].replace("{name}", name),
-  }));
-}
 
 export default function NameGenerator() {
   const [industry, setIndustry] = useState("teknologi");
   const [style, setStyle] = useState("profesional");
   const [keyword, setKeyword] = useState("");
-  const [results, setResults] = useState<{ name: string; slogan: string }[]>([]);
+  const [results, setResults] = useState<NameSuggestion[]>([]);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleGenerate() {
-    setResults(generateNames(industry, style, keyword));
+  async function handleGenerate() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/tools/generator-nama", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ industry, style, keyword }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Gagal generate nama bisnis");
+      setResults(Array.isArray(data.suggestions) ? data.suggestions : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal generate nama bisnis");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleCopy(idx: number, name: string, slogan: string) {
@@ -147,7 +70,6 @@ export default function NameGenerator() {
 
   return (
     <div className="space-y-6">
-      {/* Form */}
       <div className="glass rounded-2xl p-6">
         <h2 className="text-white font-semibold mb-1">
           <span className="text-purple-400 mr-2">01</span> Pilih Industri & Gaya
@@ -155,7 +77,6 @@ export default function NameGenerator() {
         <p className="text-blue-200/40 text-sm mb-5">Sesuaikan dengan karakter bisnis Anda.</p>
 
         <div className="space-y-5">
-          {/* Industry select */}
           <div>
             <label className="text-blue-200/60 text-xs mb-2 block">Industri / Bidang Bisnis</label>
             <select
@@ -171,7 +92,6 @@ export default function NameGenerator() {
             </select>
           </div>
 
-          {/* Style buttons */}
           <div>
             <label className="text-blue-200/60 text-xs mb-2 block">Gaya Nama</label>
             <div className="flex flex-wrap gap-2">
@@ -191,7 +111,6 @@ export default function NameGenerator() {
             </div>
           </div>
 
-          {/* Keyword */}
           <div>
             <label className="text-blue-200/60 text-xs mb-2 block">
               Kata Kunci <span className="text-blue-200/30">(opsional)</span>
@@ -200,7 +119,9 @@ export default function NameGenerator() {
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !loading) void handleGenerate();
+              }}
               placeholder="Contoh: nama pemilik, kota, atau kata unik"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-blue-200/30 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
             />
@@ -208,12 +129,18 @@ export default function NameGenerator() {
         </div>
 
         <div className="flex gap-3 mt-5">
-          <Button onClick={handleGenerate} className="bg-purple-600 hover:bg-purple-500 text-white h-11 px-8">
-            <Wand2 className="w-4 h-4 mr-2" /> Generate Nama
+          <Button
+            onClick={() => void handleGenerate()}
+            disabled={loading}
+            className="bg-purple-600 hover:bg-purple-500 text-white h-11 px-8"
+          >
+            {loading ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Wand2 className="w-4 h-4 mr-2" />}
+            {loading ? "Memproses..." : "Generate Nama"}
           </Button>
           {results.length > 0 && (
             <Button
-              onClick={handleGenerate}
+              onClick={() => void handleGenerate()}
+              disabled={loading}
               variant="outline"
               className="h-11 border-white/10 text-white hover:bg-white/5"
             >
@@ -221,9 +148,9 @@ export default function NameGenerator() {
             </Button>
           )}
         </div>
+        {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
       </div>
 
-      {/* Results */}
       <AnimatePresence>
         {results.length > 0 && (
           <motion.div
@@ -261,7 +188,7 @@ export default function NameGenerator() {
                     </button>
                     <a
                       href={`https://wa.me/${WA}?text=${encodeURIComponent(
-                        `Halo MFWEB, saya ingin membuat website untuk bisnis saya:\n\nNama Bisnis: ${r.name}\nSlogan: ${r.slogan}\n\nBoleh konsultasi pembuatan website?`
+                        `Halo MFWEB, saya ingin membuat website untuk bisnis saya:\n\nNama Bisnis: ${r.name}\nSlogan: ${r.slogan}\n\nBoleh konsultasi pembuatan website?`,
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -278,7 +205,8 @@ export default function NameGenerator() {
               <p className="text-blue-200/40 text-xs">
                 Tidak menemukan yang cocok?{" "}
                 <button
-                  onClick={handleGenerate}
+                  onClick={() => void handleGenerate()}
+                  disabled={loading}
                   className="text-purple-400 hover:text-purple-300 transition-colors"
                 >
                   Generate ulang
@@ -292,7 +220,7 @@ export default function NameGenerator() {
 
       {results.length === 0 && (
         <div className="text-center py-8 text-blue-200/25 text-sm">
-          ← Pilih industri dan gaya, lalu klik Generate Nama
+          Pilih industri dan gaya, lalu klik Generate Nama
         </div>
       )}
     </div>

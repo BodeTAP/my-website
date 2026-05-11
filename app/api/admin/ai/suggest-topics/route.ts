@@ -3,7 +3,7 @@ import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getEnabledAiSettings } from "@/lib/aiSettings";
-import { extractJsonArray, getAnthropic, logAiUsage } from "@/lib/ai";
+import { createJsonArrayWithRetry, logAiUsage, renderAiPrompt } from "@/lib/ai";
 import { rateLimit } from "@/lib/rateLimit";
 
 // POST /api/admin/ai/suggest-topics
@@ -12,30 +12,36 @@ export async function POST(req: NextRequest) {
   const denied = await requireApiPermission("ai_settings");
   if (denied) return denied;
   const session = await auth();
-  const { allowed } = await rateLimit(`ai-topics:${session!.user!.email}`, 20, 60 * 60 * 1000);
-  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
-  const aiGate = await getEnabledAiSettings("featureArticle");
+  const aiGate = await getEnabledAiSettings("suggestTopics");
   if (!aiGate.enabled) {
-    logAiUsage({ feature: "suggest_topics", model: aiGate.settings.model, status: "blocked", actor: session!.user!.email });
+    logAiUsage({
+      feature: "suggest_topics",
+      model: aiGate.settings.features.suggestTopics.model,
+      status: "blocked",
+      actor: session!.user!.email,
+      logging: aiGate.settings.usageLogging,
+    });
     return aiGate.response;
   }
+
   const aiSettings = aiGate.settings;
+  const aiConfig = aiSettings.features.suggestTopics;
+  const { allowed } = await rateLimit(`ai-topics:${session!.user!.email}`, aiConfig.rateLimit, aiConfig.rateWindowMs);
+  if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi nanti." }, { status: 429 });
 
   try {
     const { categoryId, count = 6 } = await req.json();
     const safeCount = Math.min(Math.max(1, Number(count) || 6), 10);
 
-    // Ambil konteks dari database secara paralel
     const [categories, recentArticles] = await Promise.all([
       prisma.category.findMany({ select: { id: true, name: true } }),
       prisma.article.findMany({
         select: { title: true, categoryId: true },
         orderBy: { createdAt: "desc" },
-        take: 50, // 50 artikel terakhir sebagai konteks "topik yang sudah ditulis"
+        take: aiSettings.autoPublishRecentArticleCount,
       }),
     ]);
 
-    // Filter berdasarkan kategori jika diberikan
     const filteredCategory = categoryId
       ? categories.find(c => c.id === categoryId)
       : null;
@@ -48,63 +54,43 @@ export async function POST(req: NextRequest) {
       ? `\n\nTopik yang SUDAH ditulis (JANGAN ulangi atau buat yang terlalu mirip):\n${recentArticles.map(a => `- ${a.title}`).join("\n")}`
       : "";
 
-    const anthropic = getAnthropic();
-
-    const response = await anthropic.messages.create({
-      model:      aiSettings.model,
-      max_tokens: 2000,
-      system: `Kamu adalah content strategist untuk MFWEB, sebuah jasa pembuatan website profesional untuk bisnis lokal Indonesia.
-
-Profil bisnis MFWEB:
-- Layanan: Pembuatan website, landing page, toko online, company profile
-- Target klien: UMKM, bisnis lokal, pengusaha kecil-menengah Indonesia
-- Harga: mulai Rp 800.000
-- Keunggulan: desain premium, SEO-friendly, mobile-friendly, cepat
-- Platform: mfweb.maffisorp.id
-
-Tugasmu: Buat ${safeCount} ide topik artikel blog yang:
-1. Relevan dengan kebutuhan/masalah target klien MFWEB
-2. Berpotensi menarik traffic dari Google (search intent jelas)
-3. Membangun kepercayaan calon klien untuk menggunakan jasa MFWEB
-4. Variatif — campurkan topik educational, how-to, dan comparison
-5. Dalam Bahasa Indonesia
-
-${categoryContext}${existingTitles}
-
-Kembalikan JSON array SAJA (tanpa teks lain):
-[
-  {
-    "title": "Judul artikel yang menarik dan spesifik",
-    "categoryName": "Nama kategori yang paling sesuai dari daftar yang tersedia",
-    "categoryId": "id kategori yang sesuai (gunakan id persis dari daftar, atau null jika tidak ada yang cocok)",
-    "keywords": ["keyword1", "keyword2", "keyword3"],
-    "searchIntent": "informational | commercial | how-to",
-    "difficulty": "mudah | sedang | sulit",
-    "description": "Alasan kenapa topik ini relevan dan potensial (1 kalimat)"
-  }
-]`,
-      messages: [{ role: "user", content: `Berikan ${safeCount} ide topik artikel blog terbaik untuk MFWEB.` }],
+    const system = renderAiPrompt(aiConfig.prompt, {
+      count: safeCount,
+      categoryContext,
+      existingTitles,
     });
 
-    const text      = response.content[0].type === "text" ? response.content[0].text : "";
-    const topics = extractJsonArray<unknown[]>(text);
+    const topics = await createJsonArrayWithRetry<unknown[]>({
+      model: aiConfig.model,
+      maxTokens: aiConfig.maxTokens,
+      system,
+      messages: [{ role: "user", content: `Berikan ${safeCount} ide topik artikel blog terbaik untuk MFWEB.` }],
+      retry: aiSettings.jsonRetryEnabled,
+    });
 
-    logAiUsage({ feature: "suggest_topics", model: aiSettings.model, status: "success", actor: session!.user!.email });
+    logAiUsage({
+      feature: "suggest_topics",
+      model: aiConfig.model,
+      status: "success",
+      actor: session!.user!.email,
+      logging: aiSettings.usageLogging,
+    });
     return NextResponse.json({
       topics,
       meta: {
         categoriesAvailable: categories.length,
-        existingArticles:    recentArticles.length,
+        existingArticles: recentArticles.length,
       },
     });
   } catch (err) {
     console.error("[AI-SuggestTopics]", err);
     logAiUsage({
       feature: "suggest_topics",
-      model:   aiSettings.model,
-      status:  "error",
-      actor:   session!.user!.email,
-      error:   err instanceof Error ? err.message : "Unknown error",
+      model: aiConfig.model,
+      status: "error",
+      actor: session!.user!.email,
+      error: err instanceof Error ? err.message : "Unknown error",
+      logging: aiSettings.usageLogging,
     });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
