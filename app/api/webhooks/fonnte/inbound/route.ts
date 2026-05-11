@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { normalizePhone } from "@/lib/whatsapp";
-
-const OPT_OUT_RE = /^(stop|batal|berhenti|unsubscribe|jangan\s+kirim|jangan\s+dihubungi|hapus\s+nomor|keluar)\b/i;
-const OPT_IN_RE = /^(ya|iya|y|yes|setuju|boleh|ok|oke|lanjut|info)\b/i;
+import { normalizePhone, sendWA } from "@/lib/whatsapp";
+import { loadBroadcastSettings } from "@/lib/broadcastSettings.server";
+import { buildKeywordRegex, renderBroadcastTemplate, type BroadcastRuntimeSettings } from "@/lib/broadcastSettings";
 
 type WebhookPayload = Record<string, unknown>;
+type MatchedLead = {
+  id: string;
+  name: string;
+  businessName: string;
+  whatsapp: string;
+  waOptInStatus: "UNKNOWN" | "OPTED_IN" | "OPTED_OUT";
+  doNotContact: boolean;
+};
 
 function pickString(payload: WebhookPayload, keys: string[]): string | null {
   for (const key of keys) {
@@ -40,7 +47,25 @@ function webhookSecretMatches(req: NextRequest): boolean {
   return provided === expected;
 }
 
-async function findLeadIdsBySender(sender: string): Promise<string[]> {
+function buildOptInPromoMessage(lead: MatchedLead, settings: BroadcastRuntimeSettings): string {
+  return renderBroadcastTemplate(settings.optInPromoTemplate, lead, settings);
+}
+
+function buildOptOutReplyMessage(lead: MatchedLead, settings: BroadcastRuntimeSettings): string {
+  return renderBroadcastTemplate(settings.optOutReplyTemplate, lead, settings);
+}
+
+function uniqueByPhone(leads: MatchedLead[]): MatchedLead[] {
+  const seen = new Set<string>();
+  return leads.filter((lead) => {
+    const phone = normalizePhone(lead.whatsapp);
+    if (seen.has(phone)) return false;
+    seen.add(phone);
+    return true;
+  });
+}
+
+async function findLeadsBySender(sender: string): Promise<MatchedLead[]> {
   const candidates = phoneCandidates(sender);
   const normalizedSender = normalizePhone(sender);
   const lastDigits = normalizedSender.slice(-8);
@@ -51,7 +76,14 @@ async function findLeadIdsBySender(sender: string): Promise<string[]> {
         ...(lastDigits ? [{ whatsapp: { contains: lastDigits } }] : []),
       ],
     },
-    select: { id: true, whatsapp: true },
+    select: {
+      id: true,
+      name: true,
+      businessName: true,
+      whatsapp: true,
+      waOptInStatus: true,
+      doNotContact: true,
+    },
   });
 
   return possibleLeads
@@ -63,7 +95,6 @@ async function findLeadIdsBySender(sender: string): Promise<string[]> {
         (lastDigits.length > 0 && normalizedLead.endsWith(lastDigits))
       );
     })
-    .map((lead) => lead.id);
 }
 
 export async function POST(req: NextRequest) {
@@ -81,19 +112,23 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedText = text.trim();
-    const isOptOut = OPT_OUT_RE.test(normalizedText);
-    const isOptIn = OPT_IN_RE.test(normalizedText);
+    const settings = await loadBroadcastSettings();
+    const isOptOut = buildKeywordRegex(settings.optOutKeywords).test(normalizedText);
+    const isOptIn = buildKeywordRegex(settings.optInKeywords).test(normalizedText);
     if (!isOptOut && !isOptIn) {
       return NextResponse.json({ ok: true, optedIn: false, optedOut: false });
     }
 
-    const leadIds = await findLeadIdsBySender(sender);
+    const leads = await findLeadsBySender(sender);
+    const leadIds = leads.map((lead) => lead.id);
 
     if (leadIds.length === 0) {
       return NextResponse.json({ ok: true, optedIn: false, optedOut: false, reason: "lead_not_found" });
     }
 
     if (isOptOut) {
+      const leadsToAutoReply = uniqueByPhone(leads);
+
       await prisma.lead.updateMany({
         where: { id: { in: leadIds } },
         data: {
@@ -104,8 +139,31 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return NextResponse.json({ ok: true, optedOut: true, count: leadIds.length });
+      const autoReplies = settings.autoReplyOptOut
+        ? await Promise.all(
+            leadsToAutoReply.map(async (lead) => ({
+              leadId: lead.id,
+              sent:   await sendWA(lead.whatsapp, buildOptOutReplyMessage(lead, settings)),
+            })),
+          )
+        : [];
+      const autoReplySent = autoReplies.filter((reply) => reply.sent).length;
+
+      return NextResponse.json({
+        ok: true,
+        optedOut: true,
+        count: leadIds.length,
+        autoReply: {
+          attempted: autoReplies.length,
+          sent:      autoReplySent,
+          failed:    autoReplies.length - autoReplySent,
+        },
+      });
     }
+
+    const leadsToAutoReply = uniqueByPhone(
+      leads.filter((lead) => lead.waOptInStatus !== "OPTED_IN" || lead.doNotContact),
+    );
 
     await prisma.lead.updateMany({
       where: { id: { in: leadIds } },
@@ -119,7 +177,27 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ ok: true, optedIn: true, count: leadIds.length });
+    const autoReplies = settings.autoReplyOptIn
+      ? await Promise.all(
+          leadsToAutoReply.map(async (lead) => ({
+            leadId: lead.id,
+            sent:   await sendWA(lead.whatsapp, buildOptInPromoMessage(lead, settings)),
+          })),
+        )
+      : [];
+
+    const autoReplySent = autoReplies.filter((reply) => reply.sent).length;
+
+    return NextResponse.json({
+      ok: true,
+      optedIn: true,
+      count: leadIds.length,
+      autoReply: {
+        attempted: autoReplies.length,
+        sent:      autoReplySent,
+        failed:    autoReplies.length - autoReplySent,
+      },
+    });
   } catch (err) {
     console.error("[Fonnte Inbound Webhook]", err);
     return NextResponse.json({ ok: false }, { status: 500 });

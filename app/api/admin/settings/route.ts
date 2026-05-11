@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { AI_DEFAULTS } from "@/lib/aiSettings";
+import { BROADCAST_SETTING_DEFAULTS } from "@/lib/broadcastSettings";
 
 const DEFAULTS: Record<string, string> = {
   hero_stat_1_num:   "50+",
@@ -17,6 +18,7 @@ const DEFAULTS: Record<string, string> = {
   fonnte_api_key:      "",
   fonnte_api_keys:     "",
   ...AI_DEFAULTS,
+  ...BROADCAST_SETTING_DEFAULTS,
 };
 
 export async function GET() {

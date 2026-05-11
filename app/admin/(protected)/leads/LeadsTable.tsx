@@ -10,6 +10,7 @@ import { FadeUp } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
 import LeadsSearch from "./LeadsSearch";
 import LeadsPagination from "./LeadsPagination";
+import type { BroadcastRuntimeSettings, DelayRange } from "@/lib/broadcastSettings";
 
 type Lead = {
   id: string;
@@ -38,11 +39,11 @@ const STATUS_COLORS: Record<Lead["status"], string> = {
   CLOSED:   "bg-white/5 text-blue-200/50 border-white/10",
 };
 
-const DEFAULT_TEMPLATE = "Halo, apakah ini *{businessName}*?\n\nSaya dari *MFWEB*. Boleh kami kirim info singkat tentang opsi website untuk bisnis Anda?\n\nBalas *YA* jika berkenan, atau *STOP* jika tidak ingin dihubungi.";
 const WA_TEMPLATE_KEY  = "mfweb_wa_manual_template";
-const DEFAULT_WA_MANUAL = DEFAULT_TEMPLATE;
 
-const COOLDOWN_HOURS = 24;
+function formatRange(range: DelayRange): string {
+  return `${range.min}-${range.max}`;
+}
 
 const CONSENT_LABELS: Record<Lead["waOptInStatus"], string> = {
   UNKNOWN:   "Belum opt-in",
@@ -56,45 +57,45 @@ const CONSENT_COLORS: Record<Lead["waOptInStatus"], string> = {
   OPTED_OUT: "bg-red-500/10 text-red-300 border-red-500/25",
 };
 
-function isCoolingDown(lastContactedAt: Date | null): boolean {
+function isCoolingDown(lastContactedAt: Date | null, cooldownHours: number): boolean {
   if (!lastContactedAt) return false;
-  return Date.now() - new Date(lastContactedAt).getTime() < COOLDOWN_HOURS * 60 * 60 * 1000;
+  return Date.now() - new Date(lastContactedAt).getTime() < cooldownHours * 60 * 60 * 1000;
 }
 
-function cooldownRemaining(lastContactedAt: Date | null): string {
+function cooldownRemaining(lastContactedAt: Date | null, cooldownHours: number): string {
   if (!lastContactedAt) return "";
-  const ms = COOLDOWN_HOURS * 60 * 60 * 1000 - (Date.now() - new Date(lastContactedAt).getTime());
+  const ms = cooldownHours * 60 * 60 * 1000 - (Date.now() - new Date(lastContactedAt).getTime());
   if (ms <= 0) return "";
   const h = Math.floor(ms / 3600000);
   const m = Math.floor((ms % 3600000) / 60000);
   return h > 0 ? `${h}j ${m}m` : `${m}m`;
 }
 
-function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: () => void; onDone: () => void }) {
-  const [message, setMessage]           = useState(DEFAULT_TEMPLATE);
+function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; settings: BroadcastRuntimeSettings; onClose: () => void; onDone: () => void }) {
+  const [message, setMessage]           = useState(settings.consentTemplate);
   const [status, setStatus]             = useState<"idle" | "sending" | "done">("idle");
   const [skipCooldown, setSkipCooldown] = useState(false);
-  const [sessionLimit, setSessionLimit] = useState<number>(30); // configurable per-session limit
+  const [sessionLimit, setSessionLimit] = useState<number>(settings.defaultSessionLimit);
   const [countdown, setCountdown]       = useState<number | null>(null);
   const [result, setResult]             = useState<{
     sent: number; failed: number; devices: number; skipped: number;
     cooldownLeads?: string[]; invalidPhones?: string[]; consentSkippedLeads?: string[];
-    consentSkipped?: number; sessionSkipped?: number;
+    consentSkipped?: number; sessionSkipped?: number; dailyLimitSkipped?: number;
     delayRange: string; estimatedSeconds: number;
   } | null>(null);
 
-  const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt));
+  const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt, settings.cooldownHours));
   const consentBlocked = leads.filter((l) => l.doNotContact || l.waOptInStatus !== "OPTED_IN");
   const consentEligible = leads.filter((l) => !l.doNotContact && l.waOptInStatus === "OPTED_IN");
-  const eligibleRaw   = skipCooldown ? consentEligible.length : consentEligible.length - consentEligible.filter((l) => isCoolingDown(l.lastContactedAt)).length;
-  const eligibleCount = Math.min(eligibleRaw, sessionLimit);
+  const eligibleRaw   = skipCooldown ? consentEligible.length : consentEligible.length - consentEligible.filter((l) => isCoolingDown(l.lastContactedAt, settings.cooldownHours)).length;
+  const eligibleCount = Math.min(eligibleRaw, sessionLimit, settings.maxSessionLimit);
 
   // Estimate completion time for display
   const estimateSeconds = (count: number, delayRange: string) => {
     const [min, max] = delayRange.split("-").map(Number);
     return Math.round(count * (min + max) / 2);
   };
-  const previewDelay = eligibleCount <= 5 ? "15-30" : eligibleCount <= 10 ? "20-40" : "30-60";
+  const previewDelay = eligibleCount <= 5 ? formatRange(settings.delaySmall) : eligibleCount <= 10 ? formatRange(settings.delayMedium) : formatRange(settings.delayLarge);
   const previewEta   = estimateSeconds(eligibleCount, previewDelay);
 
   // Countdown timer after send
@@ -121,6 +122,7 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
         skipped:          data.skipped ?? 0,
         consentSkipped:   data.consentSkipped ?? 0,
         sessionSkipped:   data.sessionSkipped ?? 0,
+        dailyLimitSkipped: data.dailyLimitSkipped ?? 0,
         consentSkippedLeads: data.consentSkippedLeads,
         cooldownLeads:    data.cooldownLeads,
         invalidPhones:    data.invalidPhones,
@@ -156,10 +158,10 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
               <p className="text-amber-400 text-xs font-semibold">⚠️ Peringatan Risiko Blokir WhatsApp</p>
               <ul className="text-amber-300/70 text-[11px] space-y-1 list-disc ml-4">
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
-                <li>Broadcast hanya diizinkan <strong>08.00–20.00 WIB</strong></li>
+                <li>Broadcast hanya diizinkan <strong>{String(settings.allowedStartHour).padStart(2, "0")}.00-{String(settings.allowedEndHour).padStart(2, "0")}.00 WIB</strong></li>
                 <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
                 <li>Hanya lead berstatus <strong>Opt-in</strong> yang bisa dibroadcast</li>
-                <li>Setiap pesan menyertakan instruksi opt-out STOP</li>
+                <li>Setiap pesan menyertakan instruksi opt-out {settings.optOutKeywords[0]?.toUpperCase() ?? "STOP"}</li>
               </ul>
             </div>
 
@@ -189,9 +191,9 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <span className="text-blue-200/70 text-xs font-medium">Batas per sesi</span>
                 <span className="text-white text-xs font-bold tabular-nums">
                   {eligibleCount} dari {eligibleRaw} lead
-                  {eligibleRaw > sessionLimit && (
+                  {eligibleRaw > eligibleCount && (
                     <span className="ml-1.5 text-amber-400/70 font-normal">
-                      ({eligibleRaw - sessionLimit} dilewati)
+                      ({eligibleRaw - eligibleCount} dilewati)
                     </span>
                   )}
                 </span>
@@ -199,16 +201,16 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
               <input
                 type="range"
                 min={5}
-                max={Math.max(eligibleRaw, 5)}
+                max={Math.max(Math.min(eligibleRaw, settings.maxSessionLimit), 5)}
                 step={5}
-                value={Math.min(sessionLimit, Math.max(eligibleRaw, 5))}
+                value={Math.min(sessionLimit, Math.max(Math.min(eligibleRaw, settings.maxSessionLimit), 5))}
                 onChange={(e) => setSessionLimit(Number(e.target.value))}
                 className="w-full accent-indigo-500 h-1.5"
               />
               <div className="flex justify-between text-[10px] text-blue-200/30">
                 <span>5 (aman)</span>
-                <span className="text-blue-200/50">Rekomendasi: 15–30/sesi</span>
-                <span>{Math.max(eligibleRaw, 5)} (semua)</span>
+                <span className="text-blue-200/50">Default: {settings.defaultSessionLimit}/sesi</span>
+                <span>{Math.max(Math.min(eligibleRaw, settings.maxSessionLimit), 5)} (maks)</span>
               </div>
             </div>
 
@@ -228,12 +230,12 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
             {coolingLeads.length > 0 && (
               <div className="bg-orange-500/10 border border-orange-500/25 rounded-xl px-4 py-3 space-y-2">
                 <p className="text-orange-400 text-xs font-semibold flex items-center gap-1.5">
-                  🕐 {coolingLeads.length} lead masih dalam cooldown {COOLDOWN_HOURS} jam
+                  🕐 {coolingLeads.length} lead masih dalam cooldown {settings.cooldownHours} jam
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {coolingLeads.map((l) => (
                     <span key={l.id} className="text-[10px] bg-orange-500/10 border border-orange-500/20 text-orange-300/70 px-2 py-0.5 rounded-full">
-                      {l.businessName} · {cooldownRemaining(l.lastContactedAt)}
+                      {l.businessName} · {cooldownRemaining(l.lastContactedAt, settings.cooldownHours)}
                     </span>
                   ))}
                 </div>
@@ -325,6 +327,11 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 Nomor tidak valid: {result.invalidPhones.join(", ")}
               </p>
             )}
+            {(result?.dailyLimitSkipped ?? 0) > 0 && (
+              <p className="text-amber-300/70 text-xs">
+                Limit harian: {result?.dailyLimitSkipped} lead dilewati
+              </p>
+            )}
 
             <Button onClick={onDone} variant="outline"
               className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
@@ -405,7 +412,7 @@ function BroadcastHistoryModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default function LeadsTable({ leads }: { leads: Lead[] }) {
+export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]; broadcastSettings: BroadcastRuntimeSettings }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const q    = searchParams.get("q") ?? "";
@@ -438,7 +445,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     return () => document.removeEventListener("click", handler);
   }, [showStatusMenu]);
   const [waTemplate, setWaTemplate]       = useState<string>(() =>
-    (typeof window !== "undefined" && localStorage.getItem(WA_TEMPLATE_KEY)) || DEFAULT_WA_MANUAL
+    (typeof window !== "undefined" && localStorage.getItem(WA_TEMPLATE_KEY)) || broadcastSettings.consentTemplate
   );
   const [showTemplateEditor, setShowTemplateEditor] = useState(false);
   const [draftTemplate, setDraftTemplate] = useState(waTemplate);
@@ -652,7 +659,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-green-500/50 resize-none font-mono"
               />
               <div className="flex gap-3">
-                <button onClick={() => setDraftTemplate(DEFAULT_WA_MANUAL)}
+                <button onClick={() => setDraftTemplate(broadcastSettings.consentTemplate)}
                   className="text-xs text-blue-200/40 hover:text-white transition-colors underline">
                   Reset ke default
                 </button>
@@ -677,6 +684,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
       {showBroadcast && (
         <BroadcastModal
           leads={selectedLeads}
+          settings={broadcastSettings}
           onClose={() => setShowBroadcast(false)}
           onDone={() => { setShowBroadcast(false); setSelected(new Set()); router.refresh(); }}
         />
@@ -876,10 +884,10 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                       <div className="space-y-0.5">
                         <p>{new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(l.createdAt))}</p>
                         {l.lastContactedAt && (
-                          <p className={`text-[10px] flex items-center gap-1 ${isCoolingDown(l.lastContactedAt) ? "text-orange-400/70" : "text-blue-200/30"}`}>
-                            {isCoolingDown(l.lastContactedAt) ? "🕐" : "✉️"}
-                            {isCoolingDown(l.lastContactedAt)
-                              ? `Cooldown ${cooldownRemaining(l.lastContactedAt)}`
+                          <p className={`text-[10px] flex items-center gap-1 ${isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours) ? "text-orange-400/70" : "text-blue-200/30"}`}>
+                            {isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours) ? "🕐" : "✉️"}
+                            {isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours)
+                              ? `Cooldown ${cooldownRemaining(l.lastContactedAt, broadcastSettings.cooldownHours)}`
                               : `Terkirim ${new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short" }).format(new Date(l.lastContactedAt))}`}
                           </p>
                         )}

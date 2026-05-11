@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Save, Bot, Settings as SettingsIcon } from "lucide-react";
+import { Loader2, Save, Bot, Settings as SettingsIcon, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ export default function SettingsClient({
 }: { 
   initial: Record<string, string>; 
 }) {
-  const [activeTab, setActiveTab] = useState<"umum" | "ai">("umum");
+  const [activeTab, setActiveTab] = useState<"umum" | "ai" | "broadcast">("umum");
   
   // Settings State
   const [form, setForm] = useState(initial);
@@ -20,6 +20,8 @@ export default function SettingsClient({
   const [error, setError] = useState("");
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const setText = (key: string) => (e: React.ChangeEvent<HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleSave = async (e: React.FormEvent) => {
@@ -51,7 +53,7 @@ export default function SettingsClient({
           </div>
           Pengaturan & Konfigurasi
         </h1>
-        <p className="text-blue-200/50 text-sm mt-2">Kelola konten situs, statistik hero, dan konfigurasi AI.</p>
+        <p className="text-blue-200/50 text-sm mt-2">Kelola konten situs, statistik hero, konfigurasi AI, dan perilaku broadcast WhatsApp.</p>
       </div>
 
       {/* Tabs */}
@@ -67,6 +69,12 @@ export default function SettingsClient({
           className={`pb-3 text-sm font-medium transition-all border-b-2 flex items-center gap-2 ${activeTab === "ai" ? "border-purple-500 text-white" : "border-transparent text-blue-200/50 hover:text-white"}`}
         >
           <Bot className="w-3.5 h-3.5" /> Konfigurasi AI
+        </button>
+        <button
+          onClick={() => setActiveTab("broadcast")}
+          className={`pb-3 text-sm font-medium transition-all border-b-2 flex items-center gap-2 ${activeTab === "broadcast" ? "border-green-500 text-white" : "border-transparent text-blue-200/50 hover:text-white"}`}
+        >
+          <MessageCircle className="w-3.5 h-3.5" /> Broadcast WA
         </button>
       </div>
 
@@ -213,6 +221,161 @@ export default function SettingsClient({
             <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(147,51,234,0.3)]">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Pengaturan AI
+            </Button>
+            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+          </div>
+        </form>
+      )}
+
+      {/* Tab: Broadcast WhatsApp */}
+      {activeTab === "broadcast" && (
+        <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Identitas Pesan</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Variabel ini bisa dipakai di template: {"{brandName}"}, {"{websiteUrl}"}, {"{groupLink}"}, dan {"{footer}"}.</p>
+            <div className="grid sm:grid-cols-2 gap-5">
+              {[
+                ["broadcast_brand_name", "Nama Brand", "MFWEB"],
+                ["broadcast_website_url", "Website", "mfweb.maffisorp.id"],
+                ["broadcast_group_link", "Link Grup / Komunitas", "https://chat.whatsapp.com/..."],
+                ["broadcast_footer_text", "Footer Pesan", "{brandName} - {websiteUrl}"],
+              ].map(([key, label, placeholder]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Template Pesan</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Gunakan {"{name}"}, {"{businessName}"}, {"{brandName}"}, {"{websiteUrl}"}, {"{groupLink}"}, atau {"{footer}"}.</p>
+            <div className="space-y-5">
+              {[
+                ["broadcast_consent_template", "Template Consent Awal", 6],
+                ["broadcast_opt_in_promo_template", "Template Promo Setelah Balas YA", 8],
+                ["broadcast_opt_out_reply_template", "Auto-reply Setelah STOP", 4],
+              ].map(([key, label, rows]) => (
+                <div key={key as string} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <textarea
+                    value={form[key as string] ?? ""}
+                    onChange={setText(key as string)}
+                    rows={rows as number}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 outline-none focus:border-green-500/50 resize-y font-mono"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Consent & Keyword</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Pisahkan keyword dengan koma. Sistem mencocokkan keyword dari awal balasan lead.</p>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Keyword Opt-in</Label>
+                <Input
+                  value={form.broadcast_opt_in_keywords ?? ""}
+                  onChange={set("broadcast_opt_in_keywords")}
+                  placeholder="ya,setuju,boleh,info"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-blue-200/70 text-xs">Keyword Opt-out</Label>
+                <Input
+                  value={form.broadcast_opt_out_keywords ?? ""}
+                  onChange={set("broadcast_opt_out_keywords")}
+                  placeholder="stop,berhenti,batal"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                />
+              </div>
+              {[
+                ["broadcast_auto_reply_opt_in", "Kirim promo otomatis setelah opt-in"],
+                ["broadcast_auto_reply_opt_out", "Kirim konfirmasi setelah opt-out"],
+              ].map(([key, label]) => (
+                <div key={key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <span className="text-white text-sm font-medium">{label}</span>
+                  <button type="button"
+                    onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
+                    className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                      form[key] !== "false"
+                        ? "bg-green-600 border-green-500/50"
+                        : "bg-white/10 border-white/10"
+                    }`}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      form[key] !== "false" ? "translate-x-5" : "translate-x-0"
+                    }`} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Guardrail Pengiriman</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Batas ini menjaga broadcast tetap pelan, terukur, dan tidak terlalu agresif.</p>
+            <div className="grid sm:grid-cols-3 gap-5">
+              {[
+                ["broadcast_allowed_start_hour", "Jam Mulai WIB", "8"],
+                ["broadcast_allowed_end_hour", "Jam Selesai WIB", "20"],
+                ["broadcast_cooldown_hours", "Cooldown per Lead (jam)", "24"],
+                ["broadcast_default_session_limit", "Default Limit per Sesi", "30"],
+                ["broadcast_max_session_limit", "Maks Limit per Sesi", "100"],
+                ["broadcast_daily_limit_per_device", "Limit Harian per Device", "50"],
+                ["broadcast_burst_pause_every", "Pause Setiap N Pesan", "5"],
+                ["broadcast_burst_pause_min_seconds", "Pause Minimum (detik)", "90"],
+                ["broadcast_burst_pause_max_seconds", "Pause Maksimum (detik)", "180"],
+              ].map(([key, label, placeholder]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Input
+                    type="number"
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass rounded-3xl p-6 border border-white/5">
+            <h2 className="text-white font-semibold text-lg mb-1">Delay Antar Pesan</h2>
+            <p className="text-blue-200/40 text-sm mb-6">Format rentang detik: <code className="text-blue-300">min-max</code>. Contoh: <code className="text-blue-300">20-50</code>.</p>
+            <div className="grid sm:grid-cols-3 gap-5">
+              {[
+                ["broadcast_delay_small", "1-5 Lead", "15-35"],
+                ["broadcast_delay_medium", "6-10 Lead", "20-50"],
+                ["broadcast_delay_large", "11+ Lead", "30-70"],
+              ].map(([key, label, placeholder]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+
+          <div className="flex items-center gap-4 pt-2">
+            <Button type="submit" disabled={loading} className="bg-green-600 hover:bg-green-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(22,163,74,0.3)]">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              Simpan Pengaturan Broadcast
             </Button>
             {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
           </div>

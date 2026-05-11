@@ -6,13 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { sendWABatchRotated } from "@/lib/whatsapp";
 import { getFonnteKeys, getFonnteKey } from "@/lib/getFonnteKey";
 import { fonnteValidateNumbers } from "@/lib/fonnte";
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const COOLDOWN_HOURS    = 24;
-const ALLOWED_HOURS_WIB = { start: 8, end: 20 }; // 08:00–20:00 WIB (UTC+7)
-const BURST_PAUSE_EVERY = 5;    // pause after every N messages
-const BURST_PAUSE_RANGE = { min: 90, max: 180 }; // seconds (1.5–3 min burst pause)
+import { loadBroadcastSettings } from "@/lib/broadcastSettings.server";
+import { renderBroadcastTemplate, type BroadcastRuntimeSettings, type DelayRange } from "@/lib/broadcastSettings";
 
 // ── Phone validation ──────────────────────────────────────────────────────────
 
@@ -31,9 +26,13 @@ function getWIBHour(): number {
   return (new Date().getUTCHours() + 7) % 24;
 }
 
-function isWithinAllowedHours(): boolean {
+function isWithinAllowedHours(settings: BroadcastRuntimeSettings): boolean {
   const h = getWIBHour();
-  return h >= ALLOWED_HOURS_WIB.start && h < ALLOWED_HOURS_WIB.end;
+  if (settings.allowedStartHour === settings.allowedEndHour) return true;
+  if (settings.allowedStartHour < settings.allowedEndHour) {
+    return h >= settings.allowedStartHour && h < settings.allowedEndHour;
+  }
+  return h >= settings.allowedStartHour || h < settings.allowedEndHour;
 }
 
 // ── Non-linear delay ──────────────────────────────────────────────────────────
@@ -43,11 +42,15 @@ function isWithinAllowedHours(): boolean {
  * Most delays cluster around the midpoint; extremes are rare.
  * Returns a delay string like "25-35" for Fonnte's `delay` param.
  */
-function humanDelay(index: number, totalCount: number): string {
+function pickDelayRange(settings: BroadcastRuntimeSettings, totalCount: number): DelayRange {
+  if (totalCount <= 5) return settings.delaySmall;
+  if (totalCount <= 10) return settings.delayMedium;
+  return settings.delayLarge;
+}
+
+function humanDelay(index: number, totalCount: number, settings: BroadcastRuntimeSettings): string {
   // Base range scales with batch size
-  const base = totalCount <= 5 ? { min: 15, max: 35 }
-             : totalCount <= 10 ? { min: 20, max: 50 }
-             : { min: 30, max: 70 };
+  const base = pickDelayRange(settings, totalCount);
 
   // Bell-curve: average of two random numbers clusters toward center
   const rand = () => Math.random() * 0.5 + Math.random() * 0.5; // 0–1, bell-shaped
@@ -56,9 +59,13 @@ function humanDelay(index: number, totalCount: number): string {
   const hi = Math.round(lo + 8 + rand() * 15); // 8–23s window above lo
 
   // Every BURST_PAUSE_EVERY messages: inject a longer pause
-  if (index > 0 && index % BURST_PAUSE_EVERY === 0) {
-    const pauseLo = BURST_PAUSE_RANGE.min + Math.round(Math.random() * 30);
-    const pauseHi = pauseLo + Math.round(Math.random() * 60);
+  if (settings.burstPauseEvery > 0 && index > 0 && index % settings.burstPauseEvery === 0) {
+    const spread = settings.burstPauseMaxSeconds - settings.burstPauseMinSeconds;
+    const pauseLo = settings.burstPauseMinSeconds + Math.round(Math.random() * Math.max(0, Math.min(30, spread)));
+    const pauseHi = Math.min(
+      settings.burstPauseMaxSeconds,
+      pauseLo + Math.round(Math.random() * Math.max(0, Math.min(60, spread))),
+    );
     return `${pauseLo}-${pauseHi}`;
   }
 
@@ -357,6 +364,25 @@ const FOOTER_VARIANTS = [
 
 // ── Punctuation humanizer ─────────────────────────────────────────────────────
 
+function getCtaVariants(settings: BroadcastRuntimeSettings): string[] {
+  return CTA_VARIANTS.map((cta) => {
+    if (cta.includes(WA_GROUP_LINK) && !settings.groupLink) return "";
+    return cta.replaceAll(WA_GROUP_LINK, settings.groupLink);
+  });
+}
+
+function getFooterVariants(settings: BroadcastRuntimeSettings): string[] {
+  const configuredFooter = renderBroadcastTemplate(settings.footerText, { name: "", businessName: "" }, settings);
+  const generated = FOOTER_VARIANTS.map((footer) =>
+    footer
+      .replaceAll("MFWEB", settings.brandName)
+      .replaceAll("mfweb.maffisorp.id", settings.websiteUrl)
+      .replaceAll("Jasa Website Profesional", settings.brandName)
+  );
+
+  return configuredFooter ? [`\n\n_${configuredFooter}_`, ...generated] : generated;
+}
+
 function humanizePunctuation(text: string, seed: number): string {
   let result = text;
   // Occasionally drop trailing period on last sentence (feels more casual)
@@ -453,6 +479,7 @@ function varyMessage(
   index: number,
   lead: LeadContext,
   sessionSalt: number,
+  settings: BroadcastRuntimeSettings,
 ): string {
   // Mix index with session salt — different every broadcast run
   const s = (index * 31 + sessionSalt) >>> 0; // unsigned 32-bit for stability
@@ -490,7 +517,7 @@ function varyMessage(
   // ── Layer 7: Category-specific context + website acknowledgment ──
   const contextLine = buildWebsiteContext(lead, s)
     .replace(lead.businessName, varyBusinessName(lead.businessName, s + 9));
-  const footerIdx = result.lastIndexOf("\n\n_MFWEB");
+  const footerIdx = result.lastIndexOf(`\n\n_${settings.brandName}`);
   if (footerIdx !== -1) {
     result = result.slice(0, footerIdx) + "\n\n" + contextLine + result.slice(footerIdx);
   } else {
@@ -498,9 +525,10 @@ function varyMessage(
   }
 
   // ── Layer 8: CTA variation ──
-  const cta = CTA_VARIANTS[s % CTA_VARIANTS.length];
+  const ctaVariants = getCtaVariants(settings);
+  const cta = ctaVariants[s % ctaVariants.length];
   if (cta) {
-    const fi = result.lastIndexOf("\n\n_MFWEB");
+    const fi = result.lastIndexOf(`\n\n_${settings.brandName}`);
     const ctaLine = "\n\n" + cta;
     result = fi !== -1
       ? result.slice(0, fi) + ctaLine + result.slice(fi)
@@ -508,8 +536,10 @@ function varyMessage(
   }
 
   // ── Layer 9: Footer variation ──
-  const footerVariant = FOOTER_VARIANTS[s % FOOTER_VARIANTS.length];
-  result = result.replace(/\n\n_MFWEB[^_]*_/g, footerVariant);
+  const footerVariants = getFooterVariants(settings);
+  const footerVariant = footerVariants[s % footerVariants.length];
+  const escapedBrand = settings.brandName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  result = result.replace(new RegExp(`\\n\\n_${escapedBrand}[^_]*_`, "g"), footerVariant);
 
   // ── Layer 10: Paragraph spacing variation ──
   result = varyParagraphSpacing(result, s + 17);
@@ -523,9 +553,12 @@ function varyMessage(
   return result;
 }
 
-function appendOptOutInstruction(message: string): string {
-  if (/\b(STOP|BERHENTI|BATAL|UNSUBSCRIBE)\b/i.test(message)) return message;
-  return `${message}\n\nBalas STOP jika tidak ingin menerima pesan lagi.`;
+function appendOptOutInstruction(message: string, settings: BroadcastRuntimeSettings): string {
+  const optOutWord = settings.optOutKeywords[0]?.toUpperCase() ?? "STOP";
+  if (settings.optOutKeywords.some((keyword) => message.toLowerCase().includes(keyword.toLowerCase()))) {
+    return message;
+  }
+  return `${message}\n\nBalas ${optOutWord} jika tidak ingin menerima pesan lagi.`;
 }
 
 function snippet(message: string): string {
@@ -538,12 +571,13 @@ export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const denied = await requireApiPermission("broadcast");
   if (denied) return denied;
+  const settings = await loadBroadcastSettings();
 
   // 1. Time restriction — only allow 08:00–20:00 WIB
-  if (!isWithinAllowedHours()) {
+  if (!isWithinAllowedHours(settings)) {
     const h = getWIBHour();
     return NextResponse.json({
-      error: `Broadcast hanya diizinkan pukul 08.00–20.00 WIB. Sekarang pukul ${h.toString().padStart(2, "0")}:xx WIB.`,
+      error: `Broadcast hanya diizinkan pukul ${settings.allowedStartHour.toString().padStart(2, "0")}.00-${settings.allowedEndHour.toString().padStart(2, "0")}.00 WIB. Sekarang pukul ${h.toString().padStart(2, "0")}:xx WIB.`,
       code:  "OUTSIDE_HOURS",
     }, { status: 400 });
   }
@@ -617,7 +651,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Cooldown check
     const now         = new Date();
-    const cooldownMs  = COOLDOWN_HOURS * 60 * 60 * 1000;
+    const cooldownMs  = settings.cooldownHours * 60 * 60 * 1000;
     const cooldownLeads: BroadcastLead[] = [];
 
     const eligibleLeads = waValidLeads.filter((lead) => {
@@ -642,12 +676,40 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Apply session limit — cap how many leads are sent in this run
-    const limitedLeads = sessionLimit && sessionLimit > 0
-      ? eligibleLeads.slice(0, sessionLimit)
-      : eligibleLeads;
-    const sessionSkippedLeads = sessionLimit && sessionLimit > 0
-      ? eligibleLeads.slice(sessionLimit)
-      : [];
+    const sentToday = await prisma.broadcastLog.aggregate({
+      where: { sentAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) } },
+      _sum:  { sent: true },
+    });
+    const dailyCapacity = settings.dailyLimitPerDevice > 0
+      ? settings.dailyLimitPerDevice * waKeys.length
+      : Number.MAX_SAFE_INTEGER;
+    const remainingDailySlots = Math.max(0, dailyCapacity - (sentToday._sum.sent ?? 0));
+
+    if (remainingDailySlots <= 0) {
+      return NextResponse.json({
+        error: `Limit broadcast 24 jam sudah tercapai (${settings.dailyLimitPerDevice} lead per device). Coba lagi nanti.`,
+        code:  "DAILY_LIMIT_REACHED",
+      }, { status: 400 });
+    }
+
+    const requestedSessionLimit = Number.isFinite(sessionLimit)
+      ? Math.floor(Number(sessionLimit))
+      : settings.defaultSessionLimit;
+    const effectiveSessionLimit = Math.min(
+      Math.max(requestedSessionLimit, 1),
+      settings.maxSessionLimit,
+    );
+    const sessionLimitedLeads = eligibleLeads.slice(0, effectiveSessionLimit);
+    const sessionSkippedLeads = eligibleLeads.slice(effectiveSessionLimit);
+    const limitedLeads = sessionLimitedLeads.slice(0, remainingDailySlots);
+    const dailyLimitSkippedLeads = sessionLimitedLeads.slice(remainingDailySlots);
+
+    if (limitedLeads.length === 0) {
+      return NextResponse.json({
+        error: "Tidak ada slot broadcast harian tersisa untuk device yang aktif.",
+        code:  "DAILY_LIMIT_REACHED",
+      }, { status: 400 });
+    }
 
     // 6. Build items with personalization + variation
     // Generate a random session salt so each broadcast run produces unique messages
@@ -657,7 +719,7 @@ export async function POST(req: NextRequest) {
       phone:  lead.whatsapp,
       message: appendOptOutInstruction(
         varyMessage(
-          message.replace(/\{name\}/g, lead.name).replace(/\{businessName\}/g, lead.businessName),
+          renderBroadcastTemplate(message, lead, settings),
           idx,
           {
             name:           lead.name,
@@ -667,17 +729,19 @@ export async function POST(req: NextRequest) {
             notes:          lead.notes,
           },
           sessionSalt,
+          settings,
         ),
+        settings,
       ),
       leadId: lead.id,
       name:   lead.name,
     }));
 
     // 6. Build per-message delay schedule (non-linear + burst pause)
-    const delaySchedule = items.map((_, idx) => humanDelay(idx, items.length));
+    const delaySchedule = items.map((_, idx) => humanDelay(idx, items.length, settings));
 
     // Representative delay range for logging/UI (median of schedule)
-    const delayRange = delaySchedule[Math.floor(delaySchedule.length / 2)] ?? "20-40";
+    const delayRange = delaySchedule[Math.floor(delaySchedule.length / 2)] ?? `${settings.delayMedium.min}-${settings.delayMedium.max}`;
 
     // 7. Estimate completion time (sum of midpoints)
     const estimatedSeconds = delaySchedule.reduce((sum, range) => {
@@ -712,6 +776,7 @@ export async function POST(req: NextRequest) {
       ...invalidLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: lead.skipReason })),
       ...cooldownLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: "COOLDOWN" })),
       ...sessionSkippedLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: "SESSION_LIMIT" })),
+      ...dailyLimitSkippedLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: "DAILY_LIMIT" })),
     ];
     const skipped = skippedRecipients.length;
 
@@ -764,7 +829,7 @@ export async function POST(req: NextRequest) {
 
     console.log(
       `[Broadcast] ${sent} queued, ${failed} failed` +
-      ` | no consent: ${consentSkippedLeads.length}, cooldown: ${cooldownLeads.length}, invalid: ${invalidLeads.length}, session skipped: ${sessionSkippedLeads.length}` +
+      ` | no consent: ${consentSkippedLeads.length}, cooldown: ${cooldownLeads.length}, invalid: ${invalidLeads.length}, session skipped: ${sessionSkippedLeads.length}, daily skipped: ${dailyLimitSkippedLeads.length}` +
       ` | ${waKeys.length} device(s) | delay: ${delayRange}s`,
     );
 
@@ -779,6 +844,7 @@ export async function POST(req: NextRequest) {
       invalidPhones:    invalidLeads.length > 0 ? invalidLeads.map((l) => l.name) : undefined,
       cooldownLeads:    cooldownLeads.length > 0 ? cooldownLeads.map((l) => l.name) : undefined,
       sessionSkipped:   sessionSkippedLeads.length,
+      dailyLimitSkipped: dailyLimitSkippedLeads.length,
       delayRange,
       estimatedSeconds,
     });

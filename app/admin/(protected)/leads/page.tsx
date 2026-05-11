@@ -5,10 +5,14 @@ import { FadeUp } from "@/components/public/motion";
 import { Magnet, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { requireModule } from "@/lib/permissions";
+import { loadBroadcastSettings } from "@/lib/broadcastSettings.server";
 
 export default async function LeadsPage() {
   await requireModule("leads");
-  const leads = await prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
+  const [leads, broadcastSettings] = await Promise.all([
+    prisma.lead.findMany({ orderBy: { createdAt: "desc" } }),
+    loadBroadcastSettings(),
+  ]);
 
   const newLeadsCount = leads.filter(l => l.status === "NEW").length;
 
@@ -35,7 +39,7 @@ export default async function LeadsPage() {
       </FadeUp>
 
       <div className="relative z-10">
-        <LeadsTable leads={leads} />
+        <LeadsTable leads={leads} broadcastSettings={broadcastSettings} />
       </div>
     </div>
   );

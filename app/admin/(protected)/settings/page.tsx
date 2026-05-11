@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { AI_DEFAULTS } from "@/lib/aiSettings";
+import { BROADCAST_SETTING_DEFAULTS } from "@/lib/broadcastSettings";
 import { requireModule } from "@/lib/permissions";
 import SettingsClient from "./SettingsClient";
 
@@ -10,6 +11,7 @@ const DEFAULTS = {
   facebook_pixel_id:   "",
   google_analytics_id: "",
   ...AI_DEFAULTS,
+  ...BROADCAST_SETTING_DEFAULTS,
 };
 
 export default async function SettingsPage() {
