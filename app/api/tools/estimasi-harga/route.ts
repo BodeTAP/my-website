@@ -47,7 +47,14 @@ Berikan:
 2. Breakdown komponen biaya
 3. Estimasi waktu pengerjaan
 4. Rekomendasi paket yang paling sesuai
-5. Tips menghemat biaya (jika ada)`;
+5. Tips menghemat biaya (jika ada)
+
+Format wajib:
+- Gunakan heading markdown level 2 atau 3.
+- Gunakan bullet list pendek.
+- Jangan gunakan tabel markdown, karakter pipe (|), garis ASCII, atau code block.
+- Jawaban total maksimal 650 kata.
+- Pastikan semua bagian selesai, jangan berhenti di tengah kalimat.`;
 
     const anthropic = getAnthropic();
 

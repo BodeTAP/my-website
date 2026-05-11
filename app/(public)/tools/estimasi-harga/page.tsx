@@ -15,7 +15,7 @@ export default async function EstimasiHargaPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Estimasi Harga Website" }]} />
 
         <div className="text-center mb-10">

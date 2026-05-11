@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, Sparkles, ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const BISNIS_TYPES = [
@@ -28,29 +28,85 @@ const TIMELINE_OPTIONS = [
   "Cepat (< 1 minggu)", "Normal (2-3 minggu)", "Santai (> 1 bulan)",
 ];
 
-function renderLine(line: string, i: number) {
-  if (line.startsWith("## ")) {
-    return <h3 key={i} className="text-white font-bold text-base mt-5 mb-2 first:mt-0">{line.slice(3)}</h3>;
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={j} className="text-white font-semibold">{part.slice(2, -2)}</strong>
+      : part,
+  );
+}
+
+function cleanLine(line: string) {
+  return line
+    .replace(/^`{3,}\w*/, "")
+    .replace(/`{3,}$/g, "")
+    .trim();
+}
+
+function renderLine(rawLine: string, i: number) {
+  const line = cleanLine(rawLine);
+  if (!line) return <div key={i} className="h-2" />;
+  if (/^-{3,}$/.test(line) || /^\|?\s*:?-{3,}/.test(line) || /^[|\-\s:]+$/.test(line)) {
+    return null;
   }
+
+  const heading = line.match(/^#{1,6}\s+(.+)$/);
+  if (heading) {
+    return (
+      <h3 key={i} className="text-white font-bold text-base sm:text-lg mt-6 mb-3 first:mt-0 flex items-start gap-2 break-words">
+        <span className="mt-1 size-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)] shrink-0" />
+        <span>{heading[1].replace(/\*\*/g, "")}</span>
+      </h3>
+    );
+  }
+
+  const cells = line.startsWith("|")
+    ? line.split("|").map((cell) => cell.trim()).filter(Boolean)
+    : [];
+  if (cells.length >= 2) {
+    return (
+      <div key={i} className="grid gap-2 sm:grid-cols-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm">
+        {cells.map((cell, j) => (
+          <span key={j} className={j === 0 ? "text-white font-semibold break-words" : "text-blue-100/75 break-words"}>
+            {renderInline(cell)}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
   if (line.startsWith("**") && line.endsWith("**")) {
-    return <p key={i} className="text-blue-300 font-semibold">{line.slice(2, -2)}</p>;
+    return <p key={i} className="text-blue-100 font-semibold break-words">{line.slice(2, -2)}</p>;
   }
+
   if (line.startsWith("- ")) {
-    return <li key={i} className="text-blue-100/80 ml-4 list-disc">{line.slice(2)}</li>;
+    return (
+      <div key={i} className="flex items-start gap-2 text-blue-100/75 leading-relaxed">
+        <CheckCircle2 className="mt-0.5 size-4 text-emerald-300 shrink-0" />
+        <p className="min-w-0 break-words">{renderInline(line.slice(2))}</p>
+      </div>
+    );
   }
+
   if (line.match(/^\d+\./)) {
-    return <li key={i} className="text-blue-100/80 ml-4 list-decimal">{line.replace(/^\d+\.\s*/, "")}</li>;
+    return (
+      <div key={i} className="rounded-xl border border-blue-400/10 bg-blue-400/[0.04] px-4 py-3 text-blue-100/80 leading-relaxed break-words">
+        {renderInline(line.replace(/^\d+\.\s*/, ""))}
+      </div>
+    );
   }
-  if (line === "") return <div key={i} className="h-1" />;
-  // inline bold
-  const parts = line.split(/(\*\*[^*]+\*\*)/g);
+
+  const isPriceLine = /rp\s?\d|harga|estimasi|total|range/i.test(line);
   return (
-    <p key={i} className="text-blue-100/70 leading-relaxed">
-      {parts.map((part, j) =>
-        part.startsWith("**") && part.endsWith("**")
-          ? <strong key={j} className="text-white font-semibold">{part.slice(2, -2)}</strong>
-          : part
-      )}
+    <p
+      key={i}
+      className={`leading-relaxed break-words ${
+        isPriceLine
+          ? "rounded-xl bg-orange-400/[0.07] border border-orange-300/10 px-4 py-3 text-orange-100"
+          : "text-blue-100/72"
+      }`}
+    >
+      {renderInline(line)}
     </p>
   );
 }
@@ -121,7 +177,7 @@ export default function PricingEstimator() {
   return (
     <div className="space-y-6">
       {!result && !loading && (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
           {/* Jenis Bisnis */}
           <div className="glass rounded-2xl p-5 border border-white/5 space-y-3">
             <label className="text-white font-semibold text-sm">Jenis Bisnis Anda *</label>
@@ -227,10 +283,19 @@ export default function PricingEstimator() {
                 <span className="text-sm">AI sedang menghitung estimasi...</span>
               </div>
             )}
-            <div className="prose prose-sm max-w-none space-y-1">
-              {result.split("\n").map((line, i) => renderLine(line, i))}
+            <div className="rounded-2xl border border-white/10 bg-[#071327]/80 overflow-hidden shadow-[0_20px_80px_rgba(0,0,0,0.25)]">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-white/[0.03] px-5 py-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Sparkles className="size-4 text-orange-300 shrink-0" />
+                  <p className="text-sm font-semibold text-white">Hasil estimasi website</p>
+                </div>
+                {done && <span className="text-xs text-emerald-300">Selesai</span>}
+              </div>
+              <div className="space-y-2 p-5 sm:p-6 text-sm">
+                {result.split("\n").map((line, i) => renderLine(line, i))}
+              </div>
               {loading && (
-                <span className="inline-block w-1.5 h-4 bg-blue-400 animate-pulse ml-0.5 align-middle" />
+                <span className="mx-6 mb-5 inline-block h-4 w-1.5 bg-blue-400 align-middle animate-pulse" />
               )}
             </div>
           </div>

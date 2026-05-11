@@ -124,7 +124,7 @@ export const AI_FEATURE_SPECS = {
     rateLimitKey: "ai_rate_limit_pricing_estimator",
     rateWindowKey: "ai_rate_window_pricing_estimator_minutes",
     promptKey: "ai_prompt_pricing_estimator",
-    defaultMaxTokens: 1000,
+    defaultMaxTokens: 1800,
     defaultRateLimit: 5,
     defaultRateWindowMinutes: 60,
   },
@@ -256,6 +256,7 @@ Panduan harga MFWEB:
 
 Berikan estimasi yang jujur dan realistis. Tampilkan dalam format yang mudah dibaca.
 Gunakan Bahasa Indonesia yang ramah dan profesional.
+Jangan gunakan tabel markdown, garis ASCII, atau karakter pipe (|). Gunakan heading pendek, bullet list, dan teks ringkas.
 Di akhir, selalu sarankan konsultasi gratis untuk estimasi lebih akurat.`,
   nameGenerator: `Kamu adalah brand naming specialist untuk bisnis lokal Indonesia.
 Buat ide nama bisnis berdasarkan industri, gaya, dan kata kunci pengguna.
