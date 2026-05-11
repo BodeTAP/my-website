@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { fonnteGetDevices, fonnteAddDevice } from "@/lib/fonnte";
 
 function getAccountToken(): string | null {
@@ -9,6 +10,8 @@ function getAccountToken(): string | null {
 // GET /api/admin/fonnte/devices — list all devices
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const token = getAccountToken();
   if (!token) {
@@ -26,6 +29,8 @@ export async function GET() {
 // POST /api/admin/fonnte/devices — add new device
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const token = getAccountToken();
   if (!token) {

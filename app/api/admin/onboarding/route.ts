@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
 
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("clients");
+  if (denied) return denied;
+
   const forms = await prisma.onboardingForm.findMany({
     orderBy: { createdAt: "desc" },
     include: { client: { select: { businessName: true } } },
@@ -19,6 +18,9 @@ export async function GET() {
 /** Generate a new onboarding link — optionally linked to a client */
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("clients");
+  if (denied) return denied;
+
   const { clientId } = await req.json();
 
   const client = clientId

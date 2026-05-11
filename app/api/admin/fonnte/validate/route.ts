@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { fonnteValidateNumbers } from "@/lib/fonnte";
 import { getFonnteKey } from "@/lib/getFonnteKey";
 
 // POST /api/admin/fonnte/validate — validate WA numbers
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const { numbers } = await req.json() as { numbers: string[] };
   if (!numbers?.length) {

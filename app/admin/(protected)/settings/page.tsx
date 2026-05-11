@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AI_DEFAULTS } from "@/lib/aiSettings";
+import { requireModule } from "@/lib/permissions";
 import SettingsClient from "./SettingsClient";
 
 const DEFAULTS = {
@@ -14,8 +13,7 @@ const DEFAULTS = {
 };
 
 export default async function SettingsPage() {
-  const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") redirect("/admin/login");
+  await requireModule("ai_settings");
 
   const rows = await prisma.siteSetting.findMany();
 

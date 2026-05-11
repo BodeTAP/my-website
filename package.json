@@ -8,7 +8,7 @@
     "postbuild": "next-sitemap",
     "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint app/ components/ lib/ hooks/ tests/",
     "test": "vitest",
     "test:run": "vitest run"
   },
@@ -69,6 +69,8 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "fast-check": "^3.23.2",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

@@ -38,7 +38,7 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
       { label: "Inbox Leads", href: "/admin/leads", icon: Users, module: "leads" },
       { label: "Klien & Kontak", href: "/admin/clients", icon: UserCheck, module: "clients" },
       { label: "Proposal", href: "/admin/proposals", icon: ScrollText, module: "proposals" },
-      { label: "Onboarding", href: "/admin/onboarding", icon: ClipboardList },
+      { label: "Onboarding", href: "/admin/onboarding", icon: ClipboardList, module: "clients" },
     ]
   },
   {
@@ -55,7 +55,7 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
     title: "Konten Publik",
     items: [
       { label: "Artikel Blog", href: "/admin/articles", icon: FileText, module: "articles" },
-      { label: "Kategori Artikel", href: "/admin/categories", icon: Tag },
+      { label: "Kategori Artikel", href: "/admin/categories", icon: Tag, module: "articles" },
       { label: "Portofolio", href: "/admin/portfolio", icon: Globe, module: "portfolio" },
       { label: "Testimoni", href: "/admin/testimonials", icon: Star, module: "testimonials" },
     ]
@@ -63,7 +63,7 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
   {
     title: "Sistem",
     items: [
-      { label: "Pengaturan", href: "/admin/settings", icon: Settings },
+      { label: "Pengaturan", href: "/admin/settings", icon: Settings, module: "ai_settings" },
       { label: "Device WA", href: "/admin/settings/devices", icon: Smartphone, module: "ai_settings" },
       { label: "Team Settings", href: "/admin/settings/team", icon: Shield, module: "team" },
     ]

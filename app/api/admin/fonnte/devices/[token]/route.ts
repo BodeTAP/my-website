@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { fonnteGetDeviceProfile, fonnteDisconnectDevice, fonnteGetQR, fonnteDeleteDevice, fonnteUpdateDevice } from "@/lib/fonnte";
+import { requireApiPermission } from "@/lib/permissions";
+import { fonnteGetDeviceProfile, fonnteDisconnectDevice, fonnteGetQR, fonnteUpdateDevice } from "@/lib/fonnte";
 
 type Params = { params: Promise<{ token: string }> };
 
 // GET /api/admin/fonnte/devices/[token] — device profile
 export async function GET(_req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const { token } = await params;
   const result = await fonnteGetDeviceProfile(decodeURIComponent(token));
@@ -20,6 +23,8 @@ export async function GET(_req: Request, { params }: Params) {
 // PATCH /api/admin/fonnte/devices/[token] — update device
 export async function PATCH(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const { token } = await params;
   const body = await req.json();
@@ -39,6 +44,8 @@ export async function PATCH(req: Request, { params }: Params) {
 // DELETE /api/admin/fonnte/devices/[token] — disconnect device
 export async function DELETE(_req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const { token } = await params;
   const result = await fonnteDisconnectDevice(decodeURIComponent(token));
@@ -52,6 +59,8 @@ export async function DELETE(_req: Request, { params }: Params) {
 // POST /api/admin/fonnte/devices/[token] — get QR or pairing code
 export async function POST(req: Request, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const { token } = await params;
   const body = await req.json().catch(() => ({}));

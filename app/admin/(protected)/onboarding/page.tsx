@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import { requireModule } from "@/lib/permissions";
 import OnboardingAdmin from "./OnboardingAdmin";
 
 export default async function OnboardingPage() {
+  await requireModule("clients");
+
   const [forms, clients] = await Promise.all([
     prisma.onboardingForm.findMany({
       orderBy: { createdAt: "desc" },

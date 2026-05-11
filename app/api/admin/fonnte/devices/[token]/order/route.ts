@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { fonnteOrderPackage } from "@/lib/fonnte";
 
 type Params = { params: Promise<{ token: string }> };
@@ -20,6 +21,8 @@ type Params = { params: Promise<{ token: string }> };
  */
 export async function POST(req: NextRequest, { params }: Params) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("ai_settings");
+  if (denied) return denied;
 
   const { token } = await params;
   const body = await req.json().catch(() => ({}));

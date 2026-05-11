@@ -77,12 +77,12 @@ describe("POST /api/contact", () => {
     vi.mocked(prisma.lead.create).mockResolvedValue(mockLead as never);
 
     await POST(
-      makeRequest({ name: "  Budi  ", businessName: "  Toko  ", whatsapp: "  0812  " })
+      makeRequest({ name: "  Budi  ", businessName: "  Toko  ", whatsapp: "  08123456789  " })
     );
 
     expect(prisma.lead.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ name: "Budi", businessName: "Toko", whatsapp: "0812" }),
+        data: expect.objectContaining({ name: "Budi", businessName: "Toko", whatsapp: "08123456789" }),
       })
     );
   });
@@ -91,7 +91,7 @@ describe("POST /api/contact", () => {
     vi.mocked(rateLimit).mockResolvedValue({ allowed: false, remaining: 0, retryAfterMs: 3_600_000 });
 
     const res = await POST(
-      makeRequest({ name: "Budi", businessName: "Toko", whatsapp: "0812" })
+      makeRequest({ name: "Budi", businessName: "Toko", whatsapp: "08123456789" })
     );
     expect(res.status).toBe(429);
     expect(res.headers.get("Retry-After")).toBeDefined();
@@ -101,7 +101,7 @@ describe("POST /api/contact", () => {
     vi.mocked(prisma.lead.create).mockRejectedValue(new Error("DB down"));
 
     const res = await POST(
-      makeRequest({ name: "Budi", businessName: "Toko", whatsapp: "0812" })
+      makeRequest({ name: "Budi", businessName: "Toko", whatsapp: "08123456789" })
     );
     expect(res.status).toBe(500);
   });

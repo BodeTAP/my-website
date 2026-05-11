@@ -34,7 +34,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint, typecheck]
+    needs: [lint, typecheck, test]
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       AUTH_SECRET: ci-secret-for-build-only
@@ -43,13 +43,28 @@ jobs:
       GOOGLE_CLIENT_SECRET: dummy-client-secret
       AUTH_RESEND_KEY: re_dummy_key
       EMAIL_FROM: noreply@example.com
+      ADMIN_WHATSAPP_NUMBER: "6280000000000"
+      WHATSAPP_NUMBER: "6280000000000"
+      NEXT_PUBLIC_WHATSAPP_NUMBER: "6280000000000"
       TRIPAY_API_KEY: dummy-tripay-key
+      TRIPAY_PRIVATE_KEY: dummy-tripay-private-key
       TRIPAY_MERCHANT_CODE: dummy-merchant
       TRIPAY_SANDBOX: "true"
+      TRIPAY_PROXY_URL: https://tripay-proxy.example.com/api
+      TRIPAY_PROXY_SECRET: dummy-proxy-secret
       BLOB_READ_WRITE_TOKEN: vercel_blob_rw_dummy
       ANTHROPIC_API_KEY: sk-ant-dummy
       PEXELS_API_KEY: dummy-pexels-key
+      GOOGLE_PLACES_API_KEY: dummy-google-places-key
+      GOOGLE_PAGESPEED_API_KEY: dummy-google-pagespeed-key
+      FONNTE_API_KEY: dummy-fonnte-key
+      FONNTE_API_KEYS: dummy-fonnte-key
+      FONNTE_ACCOUNT_TOKEN: dummy-fonnte-account-token
+      KV_REST_API_URL: https://dummy-upstash.example.com
+      KV_REST_API_TOKEN: dummy-upstash-token
       NEXT_PUBLIC_SENTRY_DSN: https://dummy@sentry.io/0
+      NEXT_PUBLIC_CLARITY_PROJECT_ID: dummy-clarity-project
+      CRON_SECRET: dummy-cron-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -64,3 +79,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
       - run: npm run build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:run

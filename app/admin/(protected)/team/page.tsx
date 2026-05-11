@@ -1,11 +1,12 @@
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireModule } from "@/lib/permissions";
 import TeamClient from "./TeamClient";
 
 export default async function TeamPage() {
+  await requireModule("team");
+
   const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") redirect("/admin/login");
 
   const admins = await prisma.user.findMany({
     where: { role: "ADMIN" },
@@ -14,7 +15,7 @@ export default async function TeamPage() {
   });
 
   const serialized = admins.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }));
-  const currentUserId = (session.user as { id?: string })?.id ?? "";
+  const currentUserId = session?.user?.id ?? "";
 
   return <TeamClient initialAdmins={serialized} currentUserId={currentUserId} />;
 }

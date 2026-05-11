@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isSuperAdmin } from "@/lib/permissions";
 import bcrypt from "bcryptjs";
 
 async function getAdminSession() {
   const session = await auth();
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") return null;
+  const userId = session?.user?.id;
+  if (!session || !userId || (session.user as { role?: string })?.role !== "ADMIN") return null;
+  if (!(await isSuperAdmin(userId))) return null;
   return session;
 }
 

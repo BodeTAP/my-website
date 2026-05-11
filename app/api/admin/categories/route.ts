@@ -1,20 +1,22 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-
-async function requireAdmin() {
-  const s = await auth();
-  return !s || (s.user as { role?: string })?.role !== "ADMIN";
-}
 
 export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("articles");
+  if (denied) return denied;
+
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
   return NextResponse.json(categories);
 }
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("articles");
+  if (denied) return denied;
+
   const { name } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "Nama kategori wajib diisi." }, { status: 400 });
 
