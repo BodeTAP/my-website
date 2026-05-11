@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -379,6 +380,14 @@ type LeadContext = {
   notes?: string | null;
 };
 
+type BroadcastLead = LeadContext & {
+  id: string;
+  whatsapp: string;
+  lastContactedAt: Date | null;
+  waOptInStatus: "UNKNOWN" | "OPTED_IN" | "OPTED_OUT";
+  doNotContact: boolean;
+};
+
 function buildPersonalizedOpener(lead: LeadContext, index: number): string {
   const bizName = varyBusinessName(lead.businessName, index + 2);
   // 30% of messages: start with a question hook (conversational)
@@ -425,16 +434,6 @@ const OPENING_VARIANTS = [
   "Halo, selamat",
 ];
 
-// Subtle unicode variations — invisible to reader, unique to spam filter hash
-const ZERO_WIDTH_CHARS = ["\u200B", "\u200C", "\u200D", "\uFEFF"];
-
-function injectZeroWidth(text: string, index: number): string {
-  const zwc = ZERO_WIDTH_CHARS[index % ZERO_WIDTH_CHARS.length];
-  const spaceIdx = text.indexOf(" ");
-  if (spaceIdx === -1) return text;
-  return text.slice(0, spaceIdx) + zwc + text.slice(spaceIdx);
-}
-
 function getTimeGreeting(): string {
   const h = getWIBHour();
   if (h >= 4  && h < 11) return "Selamat pagi";
@@ -447,7 +446,7 @@ function getTimeGreeting(): string {
  * Core message variation engine.
  * FIX #1: Uses sessionSalt (random per broadcast session) mixed with index
  * so two different broadcast sessions never produce the same message for index 0.
- * Applies all 13 humanization layers to the admin-written template.
+ * Applies message variation to the admin-written template.
  */
 function varyMessage(
   message: string,
@@ -521,10 +520,16 @@ function varyMessage(
   // ── Layer 12: Punctuation humanization ──
   result = humanizePunctuation(result, s * 3 + 11);
 
-  // ── Layer 13: Invisible fingerprint (unique per message + session) ──
-  result = injectZeroWidth(result, s);
-
   return result;
+}
+
+function appendOptOutInstruction(message: string): string {
+  if (/\b(STOP|BERHENTI|BATAL|UNSUBSCRIBE)\b/i.test(message)) return message;
+  return `${message}\n\nBalas STOP jika tidak ingin menerima pesan lagi.`;
+}
+
+function snippet(message: string): string {
+  return message.slice(0, 250);
 }
 
 // ── Route ─────────────────────────────────────────────────────────────────────
@@ -559,14 +564,25 @@ export async function POST(req: NextRequest) {
 
     const leads = await prisma.lead.findMany({
       where:  { id: { in: leadIds } },
-      select: { id: true, name: true, businessName: true, whatsapp: true, lastContactedAt: true, currentWebsite: true, message: true, notes: true },
-    });
+      select: {
+        id: true, name: true, businessName: true, whatsapp: true,
+        lastContactedAt: true, currentWebsite: true, message: true, notes: true,
+        waOptInStatus: true, doNotContact: true,
+      },
+    }) as BroadcastLead[];
+
+    const consentSkippedLeads = leads.filter((lead) =>
+      lead.doNotContact || lead.waOptInStatus !== "OPTED_IN"
+    );
+    const consentEligibleLeads = leads.filter((lead) =>
+      !lead.doNotContact && lead.waOptInStatus === "OPTED_IN"
+    );
 
     // 3. Filter invalid phone format
-    const invalidPhones: string[] = [];
-    const validLeads = leads.filter((lead) => {
+    const invalidLeads: Array<BroadcastLead & { skipReason: string }> = [];
+    const validLeads = consentEligibleLeads.filter((lead) => {
       if (!isValidIndonesianPhone(lead.whatsapp)) {
-        invalidPhones.push(lead.name);
+        invalidLeads.push({ ...lead, skipReason: "INVALID_PHONE" });
         return false;
       }
       return true;
@@ -582,9 +598,11 @@ export async function POST(req: NextRequest) {
         const validation = await fonnteValidateNumbers(deviceToken, phones);
         if (validation.status && validation.not_registered.length > 0) {
           notOnWA = new Set(validation.not_registered);
-          // Add unregistered names to invalidPhones list for reporting
+          // Add unregistered numbers to invalid list for reporting
           validLeads.forEach((l) => {
-            if (notOnWA.has(l.whatsapp)) invalidPhones.push(`${l.name} (tidak di WA)`);
+            if (notOnWA.has(l.whatsapp)) {
+              invalidLeads.push({ ...l, skipReason: "NOT_REGISTERED_ON_WHATSAPP" });
+            }
           });
         }
       }
@@ -600,14 +618,14 @@ export async function POST(req: NextRequest) {
     // 4. Cooldown check
     const now         = new Date();
     const cooldownMs  = COOLDOWN_HOURS * 60 * 60 * 1000;
-    const cooldownLeads: string[] = [];
+    const cooldownLeads: BroadcastLead[] = [];
 
     const eligibleLeads = waValidLeads.filter((lead) => {
       if (skipCooldown) return true;
       if (!lead.lastContactedAt) return true;
       const elapsed = now.getTime() - new Date(lead.lastContactedAt).getTime();
       if (elapsed < cooldownMs) {
-        cooldownLeads.push(lead.name);
+        cooldownLeads.push(lead);
         return false;
       }
       return true;
@@ -615,9 +633,10 @@ export async function POST(req: NextRequest) {
 
     if (eligibleLeads.length === 0) {
       return NextResponse.json({
-        error: `Tidak ada lead yang bisa dikirim. ${cooldownLeads.length} dalam cooldown, ${invalidPhones.length} nomor tidak valid.`,
-        cooldownLeads,
-        invalidPhones,
+        error: `Tidak ada lead yang bisa dikirim. ${consentSkippedLeads.length} belum opt-in/opt-out, ${cooldownLeads.length} dalam cooldown, ${invalidLeads.length} nomor tidak valid.`,
+        consentSkippedLeads: consentSkippedLeads.map((l) => l.name),
+        cooldownLeads:      cooldownLeads.map((l) => l.name),
+        invalidPhones:      invalidLeads.map((l) => l.name),
         code: "NO_ELIGIBLE",
       }, { status: 400 });
     }
@@ -626,6 +645,9 @@ export async function POST(req: NextRequest) {
     const limitedLeads = sessionLimit && sessionLimit > 0
       ? eligibleLeads.slice(0, sessionLimit)
       : eligibleLeads;
+    const sessionSkippedLeads = sessionLimit && sessionLimit > 0
+      ? eligibleLeads.slice(sessionLimit)
+      : [];
 
     // 6. Build items with personalization + variation
     // Generate a random session salt so each broadcast run produces unique messages
@@ -633,17 +655,19 @@ export async function POST(req: NextRequest) {
 
     const items = limitedLeads.map((lead, idx) => ({
       phone:  lead.whatsapp,
-      message: varyMessage(
-        message.replace(/\{name\}/g, lead.name).replace(/\{businessName\}/g, lead.businessName),
-        idx,
-        {
-          name:           lead.name,
-          businessName:   lead.businessName,
-          currentWebsite: lead.currentWebsite,
-          message:        lead.message,
-          notes:          lead.notes,
-        },
-        sessionSalt,
+      message: appendOptOutInstruction(
+        varyMessage(
+          message.replace(/\{name\}/g, lead.name).replace(/\{businessName\}/g, lead.businessName),
+          idx,
+          {
+            name:           lead.name,
+            businessName:   lead.businessName,
+            currentWebsite: lead.currentWebsite,
+            message:        lead.message,
+            notes:          lead.notes,
+          },
+          sessionSalt,
+        ),
       ),
       leadId: lead.id,
       name:   lead.name,
@@ -679,29 +703,68 @@ export async function POST(req: NextRequest) {
 
     // 9. Update leads + save broadcast log
     const sentIds = results.filter((r) => r.ok).map((r) => r.id);
-    await Promise.all([
-      sentIds.length > 0
-        ? prisma.lead.updateMany({
-            where: { id: { in: sentIds } },
-            data:  { status: "FOLLOWUP", lastContactedAt: now },
-          })
-        : Promise.resolve(),
-      prisma.broadcastLog.create({
+    const skippedRecipients = [
+      ...consentSkippedLeads.map((lead) => ({
+        lead,
+        status: (lead.waOptInStatus === "OPTED_OUT" || lead.doNotContact ? "OPTED_OUT" : "SKIPPED") as "OPTED_OUT" | "SKIPPED",
+        reason: lead.waOptInStatus === "OPTED_OUT" || lead.doNotContact ? "OPTED_OUT" : "NO_WHATSAPP_OPT_IN",
+      })),
+      ...invalidLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: lead.skipReason })),
+      ...cooldownLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: "COOLDOWN" })),
+      ...sessionSkippedLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: "SESSION_LIMIT" })),
+    ];
+    const skipped = skippedRecipients.length;
+
+    await prisma.$transaction(async (tx) => {
+      if (sentIds.length > 0) {
+        await tx.lead.updateMany({
+          where: { id: { in: sentIds } },
+          data:  { status: "FOLLOWUP", lastContactedAt: now },
+        });
+      }
+
+      const log = await tx.broadcastLog.create({
         data: {
-          totalLeads:     limitedLeads.length,
+          totalLeads:     leads.length,
           sent,
           failed,
-          skipped:        cooldownLeads.length + invalidPhones.length,
+          skipped,
           devices:        waKeys.length,
           delayRange,
           messageSnippet: message.slice(0, 100),
         },
-      }),
-    ]);
+      });
+
+      await tx.broadcastRecipient.createMany({
+        data: [
+          ...items.map((item, idx) => ({
+            id:               randomUUID(),
+            broadcastId:      log.id,
+            leadId:           item.leadId,
+            phone:            item.phone,
+            status:           (batchResults[idx]?.ok ? "QUEUED" : "FAILED") as "QUEUED" | "FAILED",
+            providerResponse: null,
+            messageSnippet:   snippet(item.message),
+            sentAt:           batchResults[idx]?.ok ? now : null,
+          })),
+          ...skippedRecipients.map(({ lead, status, reason }) => ({
+            id:               randomUUID(),
+            broadcastId:      log.id,
+            leadId:           lead.id,
+            phone:            lead.whatsapp,
+            status,
+            skipReason:       reason,
+            providerResponse: null,
+            messageSnippet:   snippet(message),
+            sentAt:           null,
+          })),
+        ],
+      });
+    });
 
     console.log(
       `[Broadcast] ${sent} queued, ${failed} failed` +
-      ` | cooldown: ${cooldownLeads.length}, invalid: ${invalidPhones.length}` +
+      ` | no consent: ${consentSkippedLeads.length}, cooldown: ${cooldownLeads.length}, invalid: ${invalidLeads.length}, session skipped: ${sessionSkippedLeads.length}` +
       ` | ${waKeys.length} device(s) | delay: ${delayRange}s`,
     );
 
@@ -710,9 +773,12 @@ export async function POST(req: NextRequest) {
       failed,
       results,
       devices:          waKeys.length,
-      skipped:          cooldownLeads.length,
-      invalidPhones:    invalidPhones.length > 0 ? invalidPhones : undefined,
-      cooldownLeads:    cooldownLeads.length > 0 ? cooldownLeads : undefined,
+      skipped,
+      consentSkipped:   consentSkippedLeads.length,
+      consentSkippedLeads: consentSkippedLeads.length > 0 ? consentSkippedLeads.map((l) => l.name) : undefined,
+      invalidPhones:    invalidLeads.length > 0 ? invalidLeads.map((l) => l.name) : undefined,
+      cooldownLeads:    cooldownLeads.length > 0 ? cooldownLeads.map((l) => l.name) : undefined,
+      sessionSkipped:   sessionSkippedLeads.length,
       delayRange,
       estimatedSeconds,
     });

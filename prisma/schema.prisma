@@ -234,10 +234,17 @@ model Lead {
   status         LeadStatus @default(NEW)
   notes          String?
   lastContactedAt DateTime? // Kapan terakhir dikirim WA broadcast
+  waOptInStatus  WhatsAppOptInStatus @default(UNKNOWN)
+  waOptInAt      DateTime?
+  waOptInSource  String?
+  waOptOutAt     DateTime?
+  waOptOutReason String?
+  doNotContact   Boolean    @default(false)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
   proposals Proposal[]
+  broadcastRecipients BroadcastRecipient[]
 
   @@map("leads")
 }
@@ -378,6 +385,12 @@ enum LeadStatus {
   CLOSED
 }
 
+enum WhatsAppOptInStatus {
+  UNKNOWN
+  OPTED_IN
+  OPTED_OUT
+}
+
 enum ProjectStatus {
   DRAFTING
   DEVELOPMENT
@@ -493,7 +506,38 @@ model BroadcastLog {
   messageSnippet String  // first 100 chars of message
   createdAt   DateTime @default(now())
 
+  recipients BroadcastRecipient[]
+
   @@map("broadcast_logs")
+}
+
+model BroadcastRecipient {
+  id          String                   @id @default(cuid())
+  broadcastId String
+  leadId      String?
+  phone       String
+  status      BroadcastRecipientStatus @default(QUEUED)
+  skipReason  String?
+  providerResponse String?             @db.Text
+  messageSnippet String                @db.Text
+  sentAt      DateTime?
+  createdAt   DateTime                 @default(now())
+
+  broadcast BroadcastLog @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  lead      Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([broadcastId])
+  @@index([leadId])
+  @@index([phone])
+  @@map("broadcast_recipients")
+}
+
+enum BroadcastRecipientStatus {
+  QUEUED
+  SENT
+  FAILED
+  SKIPPED
+  OPTED_OUT
 }
 
 enum HostingStatus {

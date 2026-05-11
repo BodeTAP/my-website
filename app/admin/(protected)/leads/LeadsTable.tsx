@@ -10,7 +10,6 @@ import { FadeUp } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
 import LeadsSearch from "./LeadsSearch";
 import LeadsPagination from "./LeadsPagination";
-import { waMsg } from "@/lib/waTemplates";
 
 type Lead = {
   id: string;
@@ -23,6 +22,8 @@ type Lead = {
   status: "NEW" | "FOLLOWUP" | "DEAL" | "CLOSED";
   notes: string | null;
   lastContactedAt: Date | null;
+  waOptInStatus: "UNKNOWN" | "OPTED_IN" | "OPTED_OUT";
+  doNotContact: boolean;
   createdAt: Date;
 };
 
@@ -37,11 +38,23 @@ const STATUS_COLORS: Record<Lead["status"], string> = {
   CLOSED:   "bg-white/5 text-blue-200/50 border-white/10",
 };
 
-const DEFAULT_TEMPLATE = waMsg.prospectCold("{businessName}");
+const DEFAULT_TEMPLATE = "Halo, apakah ini *{businessName}*?\n\nSaya dari *MFWEB*. Boleh kami kirim info singkat tentang opsi website untuk bisnis Anda?\n\nBalas *YA* jika berkenan, atau *STOP* jika tidak ingin dihubungi.";
 const WA_TEMPLATE_KEY  = "mfweb_wa_manual_template";
-const DEFAULT_WA_MANUAL = "Halo, apakah ini *{businessName}*? 👋\n\nSaya dari *MFWEB*, jasa pembuatan website profesional untuk bisnis lokal.\n\nBoleh saya kirimkan info lengkapnya? 🙏";
+const DEFAULT_WA_MANUAL = DEFAULT_TEMPLATE;
 
 const COOLDOWN_HOURS = 24;
+
+const CONSENT_LABELS: Record<Lead["waOptInStatus"], string> = {
+  UNKNOWN:   "Belum opt-in",
+  OPTED_IN:  "Opt-in",
+  OPTED_OUT: "Opt-out",
+};
+
+const CONSENT_COLORS: Record<Lead["waOptInStatus"], string> = {
+  UNKNOWN:   "bg-slate-500/10 text-slate-300 border-slate-500/20",
+  OPTED_IN:  "bg-emerald-500/10 text-emerald-300 border-emerald-500/25",
+  OPTED_OUT: "bg-red-500/10 text-red-300 border-red-500/25",
+};
 
 function isCoolingDown(lastContactedAt: Date | null): boolean {
   if (!lastContactedAt) return false;
@@ -65,12 +78,15 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
   const [countdown, setCountdown]       = useState<number | null>(null);
   const [result, setResult]             = useState<{
     sent: number; failed: number; devices: number; skipped: number;
-    cooldownLeads?: string[]; invalidPhones?: string[];
+    cooldownLeads?: string[]; invalidPhones?: string[]; consentSkippedLeads?: string[];
+    consentSkipped?: number; sessionSkipped?: number;
     delayRange: string; estimatedSeconds: number;
   } | null>(null);
 
   const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt));
-  const eligibleRaw   = skipCooldown ? leads.length : leads.length - coolingLeads.length;
+  const consentBlocked = leads.filter((l) => l.doNotContact || l.waOptInStatus !== "OPTED_IN");
+  const consentEligible = leads.filter((l) => !l.doNotContact && l.waOptInStatus === "OPTED_IN");
+  const eligibleRaw   = skipCooldown ? consentEligible.length : consentEligible.length - consentEligible.filter((l) => isCoolingDown(l.lastContactedAt)).length;
   const eligibleCount = Math.min(eligibleRaw, sessionLimit);
 
   // Estimate completion time for display
@@ -103,6 +119,9 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
         failed:           data.failed,
         devices:          data.devices ?? 1,
         skipped:          data.skipped ?? 0,
+        consentSkipped:   data.consentSkipped ?? 0,
+        sessionSkipped:   data.sessionSkipped ?? 0,
+        consentSkippedLeads: data.consentSkippedLeads,
         cooldownLeads:    data.cooldownLeads,
         invalidPhones:    data.invalidPhones,
         delayRange:       data.delayRange ?? "20-40",
@@ -139,9 +158,30 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Broadcast hanya diizinkan <strong>08.00–20.00 WIB</strong></li>
                 <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
-                <li>Pesan otomatis divariasikan agar tidak identik satu sama lain</li>
+                <li>Hanya lead berstatus <strong>Opt-in</strong> yang bisa dibroadcast</li>
+                <li>Setiap pesan menyertakan instruksi opt-out STOP</li>
               </ul>
             </div>
+
+            {consentBlocked.length > 0 && (
+              <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-3 space-y-2">
+                <p className="text-red-300 text-xs font-semibold">
+                  {consentBlocked.length} lead belum opt-in atau sudah opt-out
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {consentBlocked.slice(0, 12).map((l) => (
+                    <span key={l.id} className="text-[10px] bg-red-500/10 border border-red-500/20 text-red-200/70 px-2 py-0.5 rounded-full">
+                      {l.businessName} · {CONSENT_LABELS[l.waOptInStatus]}
+                    </span>
+                  ))}
+                  {consentBlocked.length > 12 && (
+                    <span className="text-[10px] text-red-200/50 px-2 py-0.5">
+                      +{consentBlocked.length - 12} lainnya
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Session limit control */}
             <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 space-y-2">
@@ -275,6 +315,11 @@ function BroadcastModal({ leads, onClose, onDone }: { leads: Lead[]; onClose: ()
                 Cooldown: {result.cooldownLeads.join(", ")}
               </p>
             )}
+            {result?.consentSkippedLeads && result.consentSkippedLeads.length > 0 && (
+              <p className="text-red-300/70 text-xs">
+                Belum opt-in/opt-out: {result.consentSkippedLeads.join(", ")}
+              </p>
+            )}
             {result?.invalidPhones && result.invalidPhones.length > 0 && (
               <p className="text-red-400/60 text-xs">
                 Nomor tidak valid: {result.invalidPhones.join(", ")}
@@ -373,12 +418,16 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
   const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
     Object.fromEntries(leads.map((l) => [l.id, l.status])),
   );
+  const [consentMap, setConsentMap] = useState<Record<string, Lead["waOptInStatus"]>>(
+    Object.fromEntries(leads.map((l) => [l.id, l.waOptInStatus])),
+  );
   const [selected, setSelected]           = useState<Set<string>>(new Set());
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [showHistory, setShowHistory]     = useState(false);
   const [deleting, setDeleting]           = useState(false);
   const [bulkUpdating, setBulkUpdating]   = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [statusMenuPos, setStatusMenuPos] = useState({ top: 0, left: 0 });
   const statusBtnRef = useRef<HTMLButtonElement>(null);
 
   // Close status dropdown when clicking outside
@@ -417,12 +466,35 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
     });
   };
 
+  const updateConsent = async (id: string, waOptInStatus: Lead["waOptInStatus"]) => {
+    setConsentMap((m) => ({ ...m, [id]: waOptInStatus }));
+    await fetch(`/api/admin/leads/${id}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ waOptInStatus }),
+    });
+  };
+
   const toggleSelect = (id: string) =>
-    setSelected((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+    setSelected((prev) => {
+      const s = new Set(prev);
+      if (s.has(id)) s.delete(id);
+      else s.add(id);
+      return s;
+    });
   const toggleAll = () =>
     setSelected(selected.size === paginated.length ? new Set() : new Set(paginated.map((l) => l.id)));
 
-  const selectedLeads = leads.filter((l) => selected.has(l.id));
+  const selectedLeads = leads
+    .filter((l) => selected.has(l.id))
+    .map((l) => {
+      const localStatus = consentMap[l.id];
+      const waOptInStatus = localStatus ?? l.waOptInStatus;
+      const doNotContact = localStatus
+        ? waOptInStatus === "OPTED_OUT"
+        : l.doNotContact || waOptInStatus === "OPTED_OUT";
+      return { ...l, waOptInStatus, doNotContact };
+    });
 
   const handleDelete = async () => {
     if (!window.confirm(`Hapus ${selected.size} lead yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return;
@@ -463,6 +535,30 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
         return next;
       });
       setSelected(new Set());
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setBulkUpdating(false);
+    }
+  };
+
+  const handleBulkConsent = async (waOptInStatus: Lead["waOptInStatus"]) => {
+    setBulkUpdating(true);
+    try {
+      await Promise.all(
+        [...selected].map((id) =>
+          fetch(`/api/admin/leads/${id}`, {
+            method:  "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ waOptInStatus }),
+          })
+        )
+      );
+      setConsentMap((prev) => {
+        const next = { ...prev };
+        for (const id of selected) next[id] = waOptInStatus;
+        return next;
+      });
     } catch (err) {
       alert((err as Error).message);
     } finally {
@@ -632,7 +728,12 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                   ref={statusBtnRef}
                   size="sm"
                   disabled={bulkUpdating}
-                  onClick={(e) => { e.stopPropagation(); setShowStatusMenu((v) => !v); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setStatusMenuPos({ top: rect.bottom + 4, left: rect.left });
+                    setShowStatusMenu((v) => !v);
+                  }}
                   className="bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-1.5 h-8 text-xs shadow-none">
                   {bulkUpdating
                     ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -643,8 +744,8 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                   <div
                     style={{
                       position: "fixed",
-                      top: (statusBtnRef.current?.getBoundingClientRect().bottom ?? 0) + 4,
-                      left: statusBtnRef.current?.getBoundingClientRect().left ?? 0,
+                      top: statusMenuPos.top,
+                      left: statusMenuPos.left,
                       zIndex: 9999,
                     }}
                     className="glass rounded-xl border border-white/10 shadow-2xl min-w-[140px] overflow-hidden"
@@ -669,6 +770,17 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                   document.body
                 )}
               </div>
+
+              <Button size="sm" onClick={() => handleBulkConsent("OPTED_IN")} disabled={bulkUpdating}
+                title="Tandai lead terpilih sudah memberi izin WhatsApp"
+                className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 gap-1.5 h-8 text-xs shadow-none">
+                Opt-in
+              </Button>
+              <Button size="sm" onClick={() => handleBulkConsent("OPTED_OUT")} disabled={bulkUpdating}
+                title="Jangan hubungi lead terpilih via WhatsApp"
+                className="bg-red-600/10 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/25 gap-1.5 h-8 text-xs shadow-none">
+                Opt-out
+              </Button>
 
               <Button size="sm" onClick={() => setShowBroadcast(true)}
                 className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
@@ -746,6 +858,16 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                         className="text-blue-200/70 hover:text-green-400 transition-colors font-mono text-xs flex items-center gap-1.5 w-fit">
                         {l.whatsapp}
                       </a>
+                      <select
+                        value={consentMap[l.id] ?? l.waOptInStatus}
+                        onChange={(e) => updateConsent(l.id, e.target.value as Lead["waOptInStatus"])}
+                        className={`mt-2 appearance-none px-2 py-1 rounded-md text-[10px] font-bold border outline-none ${CONSENT_COLORS[consentMap[l.id] ?? l.waOptInStatus]}`}
+                        title="Status izin broadcast WhatsApp"
+                      >
+                        {(Object.keys(CONSENT_LABELS) as Lead["waOptInStatus"][]).map((s) => (
+                          <option key={s} value={s} className="bg-[#0d1b35] text-white">{CONSENT_LABELS[s]}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-5 text-blue-200/50 text-xs font-mono hidden md:table-cell">
                       {l.domain ? <span className="px-2.5 py-1 bg-white/5 rounded-md border border-white/5 text-blue-200/70">{l.domain}</span> : "—"}
