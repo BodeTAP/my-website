@@ -19,27 +19,220 @@ type CityGroup = { label: string; cities: string[] };
 
 const CITY_GROUPS: CityGroup[] = [
   {
-    label: "Jawa",
-    cities: ["Jakarta", "Jakarta Selatan", "Jakarta Utara", "Jakarta Barat", "Jakarta Timur", "Jakarta Pusat",
-             "Bandung", "Surabaya", "Semarang", "Yogyakarta", "Solo", "Malang",
-             "Tangerang", "Depok", "Bekasi", "Bogor", "Cirebon", "Serang", "Cilegon"],
+    label: "DKI Jakarta",
+    cities: ["Jakarta", "Jakarta Selatan", "Jakarta Utara", "Jakarta Barat", "Jakarta Timur", "Jakarta Pusat"],
   },
   {
-    label: "Bali & Nusa Tenggara",
+    label: "Jawa Barat",
+    cities: ["Bandung", "Kota Bandung", "Kabupaten Bandung", "Bogor", "Kota Bogor", "Kabupaten Bogor",
+             "Bekasi", "Kota Bekasi", "Kabupaten Bekasi", "Depok", "Cimahi", "Tasikmalaya",
+             "Cirebon", "Kota Cirebon", "Kabupaten Cirebon", "Sukabumi", "Kota Sukabumi",
+             "Karawang", "Purwakarta", "Subang", "Indramayu", "Majalengka", "Kuningan",
+             "Garut", "Ciamis", "Banjar", "Pangandaran", "Sumedang"],
+  },
+  {
+    label: "Jawa Tengah",
+    cities: ["Semarang", "Kota Semarang", "Solo", "Kota Surakarta", "Yogyakarta",
+             "Magelang", "Kota Magelang", "Kabupaten Magelang", "Salatiga", "Pekalongan",
+             "Kota Pekalongan", "Tegal", "Kota Tegal", "Kabupaten Tegal", "Purwokerto",
+             "Banyumas", "Cilacap", "Kebumen", "Purworejo", "Wonosobo", "Temanggung",
+             "Kendal", "Demak", "Kudus", "Jepara", "Pati", "Rembang", "Blora",
+             "Grobogan", "Sragen", "Karanganyar", "Wonogiri", "Klaten", "Boyolali",
+             "Brebes", "Pemalang", "Batang", "Banjarnegara"],
+  },
+  {
+    label: "DI Yogyakarta",
+    cities: ["Yogyakarta", "Sleman", "Bantul", "Gunungkidul", "Kulonprogo", "Wates"],
+  },
+  {
+    label: "Jawa Timur",
+    cities: ["Surabaya", "Malang", "Kota Malang", "Kabupaten Malang", "Sidoarjo", "Gresik",
+             "Mojokerto", "Kota Mojokerto", "Pasuruan", "Kota Pasuruan", "Probolinggo",
+             "Kota Probolinggo", "Batu", "Blitar", "Kota Blitar", "Kediri", "Kota Kediri",
+             "Madiun", "Kota Madiun", "Jember", "Banyuwangi", "Situbondo", "Bondowoso",
+             "Lumajang", "Jombang", "Nganjuk", "Tulungagung", "Trenggalek", "Ponorogo",
+             "Magetan", "Ngawi", "Bojonegoro", "Tuban", "Lamongan", "Bangkalan",
+             "Sampang", "Pamekasan", "Sumenep", "Pacitan"],
+  },
+  {
+    label: "Banten",
+    cities: ["Tangerang", "Kota Tangerang", "Kabupaten Tangerang", "Tangerang Selatan",
+             "Serang", "Kota Serang", "Kabupaten Serang", "Cilegon", "Lebak", "Pandeglang"],
+  },
+  {
+    label: "Bali",
     cities: ["Denpasar", "Kuta", "Seminyak", "Ubud", "Canggu", "Sanur", "Nusa Dua",
-             "Gianyar", "Tabanan", "Singaraja", "Karangasem", "Jimbaran"],
+             "Jimbaran", "Kerobokan", "Legian", "Gianyar", "Tabanan", "Singaraja",
+             "Karangasem", "Klungkung", "Bangli", "Badung", "Buleleng", "Negara"],
   },
   {
-    label: "Sumatera",
-    cities: ["Medan", "Palembang", "Pekanbaru", "Batam", "Padang", "Lampung"],
+    label: "Nusa Tenggara Barat",
+    cities: ["Mataram", "Lombok", "Lombok Barat", "Lombok Tengah", "Lombok Timur",
+             "Lombok Utara", "Sumbawa", "Sumbawa Besar", "Bima", "Kota Bima", "Dompu"],
   },
   {
-    label: "Kalimantan",
-    cities: ["Balikpapan", "Samarinda", "Pontianak", "Banjarmasin"],
+    label: "Nusa Tenggara Timur",
+    cities: ["Kupang", "Kota Kupang", "Ende", "Maumere", "Labuan Bajo", "Ruteng",
+             "Bajawa", "Waingapu", "Waikabubak", "Atambua", "Kefamenanu", "Soe"],
   },
   {
-    label: "Sulawesi & Timur",
-    cities: ["Makassar", "Manado"],
+    label: "Sumatera Utara",
+    cities: ["Medan", "Binjai", "Tebing Tinggi", "Pematangsiantar", "Tanjungbalai",
+             "Sibolga", "Padangsidimpuan", "Gunungsitoli", "Deli Serdang", "Langkat",
+             "Karo", "Simalungun", "Asahan", "Labuhanbatu", "Tapanuli Utara",
+             "Tapanuli Tengah", "Tapanuli Selatan", "Nias", "Mandailing Natal"],
+  },
+  {
+    label: "Sumatera Barat",
+    cities: ["Padang", "Bukittinggi", "Payakumbuh", "Solok", "Kota Solok", "Sawahlunto",
+             "Padang Panjang", "Pariaman", "Agam", "Tanah Datar", "Pesisir Selatan",
+             "Sijunjung", "Dharmasraya", "Pasaman", "Pasaman Barat", "Lima Puluh Kota",
+             "Padang Pariaman", "Kepulauan Mentawai"],
+  },
+  {
+    label: "Riau",
+    cities: ["Pekanbaru", "Dumai", "Bengkalis", "Siak", "Kampar", "Rokan Hulu",
+             "Rokan Hilir", "Pelalawan", "Indragiri Hulu", "Indragiri Hilir",
+             "Kuantan Singingi", "Kepulauan Meranti"],
+  },
+  {
+    label: "Kepulauan Riau",
+    cities: ["Batam", "Tanjungpinang", "Bintan", "Karimun", "Natuna", "Lingga",
+             "Kepulauan Anambas"],
+  },
+  {
+    label: "Jambi",
+    cities: ["Jambi", "Kota Jambi", "Sungai Penuh", "Batanghari", "Muaro Jambi",
+             "Tanjung Jabung Barat", "Tanjung Jabung Timur", "Tebo", "Bungo",
+             "Sarolangun", "Merangin", "Kerinci"],
+  },
+  {
+    label: "Sumatera Selatan",
+    cities: ["Palembang", "Prabumulih", "Pagar Alam", "Lubuklinggau", "Lahat",
+             "Muara Enim", "Musi Banyuasin", "Banyuasin", "Ogan Komering Ilir",
+             "Ogan Komering Ulu", "Ogan Ilir", "Empat Lawang", "Musi Rawas"],
+  },
+  {
+    label: "Bengkulu",
+    cities: ["Bengkulu", "Kota Bengkulu", "Rejang Lebong", "Kepahiang", "Lebong",
+             "Bengkulu Utara", "Bengkulu Tengah", "Bengkulu Selatan", "Seluma",
+             "Kaur", "Muko-Muko"],
+  },
+  {
+    label: "Lampung",
+    cities: ["Bandar Lampung", "Metro", "Lampung Selatan", "Lampung Tengah",
+             "Lampung Utara", "Lampung Barat", "Lampung Timur", "Tanggamus",
+             "Pringsewu", "Mesuji", "Tulang Bawang", "Tulang Bawang Barat",
+             "Pesawaran", "Way Kanan", "Pesisir Barat"],
+  },
+  {
+    label: "Bangka Belitung",
+    cities: ["Pangkalpinang", "Bangka", "Bangka Barat", "Bangka Tengah", "Bangka Selatan",
+             "Belitung", "Belitung Timur"],
+  },
+  {
+    label: "Kalimantan Barat",
+    cities: ["Pontianak", "Singkawang", "Sambas", "Bengkayang", "Landak", "Mempawah",
+             "Sanggau", "Sekadau", "Sintang", "Melawi", "Kapuas Hulu", "Ketapang",
+             "Kayong Utara", "Kubu Raya"],
+  },
+  {
+    label: "Kalimantan Tengah",
+    cities: ["Palangka Raya", "Kotawaringin Barat", "Kotawaringin Timur", "Kapuas",
+             "Barito Selatan", "Barito Utara", "Barito Timur", "Murung Raya",
+             "Pulang Pisau", "Gunung Mas", "Katingan", "Seruyan", "Sukamara",
+             "Lamandau"],
+  },
+  {
+    label: "Kalimantan Selatan",
+    cities: ["Banjarmasin", "Banjarbaru", "Banjar", "Barito Kuala", "Tapin",
+             "Hulu Sungai Selatan", "Hulu Sungai Tengah", "Hulu Sungai Utara",
+             "Balangan", "Tabalong", "Tanah Laut", "Tanah Bumbu", "Kotabaru"],
+  },
+  {
+    label: "Kalimantan Timur",
+    cities: ["Samarinda", "Balikpapan", "Bontang", "Kutai Kartanegara", "Kutai Barat",
+             "Kutai Timur", "Berau", "Paser", "Penajam Paser Utara", "Mahakam Ulu"],
+  },
+  {
+    label: "Kalimantan Utara",
+    cities: ["Tarakan", "Bulungan", "Malinau", "Nunukan", "Tana Tidung"],
+  },
+  {
+    label: "Sulawesi Utara",
+    cities: ["Manado", "Bitung", "Tomohon", "Kotamobagu", "Minahasa", "Minahasa Utara",
+             "Minahasa Selatan", "Minahasa Tenggara", "Bolaang Mongondow",
+             "Bolaang Mongondow Utara", "Bolaang Mongondow Selatan",
+             "Bolaang Mongondow Timur", "Kepulauan Sangihe", "Kepulauan Talaud",
+             "Kepulauan Siau Tagulandang Biaro"],
+  },
+  {
+    label: "Sulawesi Tengah",
+    cities: ["Palu", "Donggala", "Sigi", "Parigi Moutong", "Poso", "Tojo Una-Una",
+             "Morowali", "Morowali Utara", "Banggai", "Banggai Kepulauan",
+             "Banggai Laut", "Buol", "Toli-Toli"],
+  },
+  {
+    label: "Sulawesi Selatan",
+    cities: ["Makassar", "Parepare", "Palopo", "Gowa", "Maros", "Pangkajene",
+             "Barru", "Bone", "Soppeng", "Wajo", "Sinjai", "Bulukumba",
+             "Bantaeng", "Jeneponto", "Takalar", "Selayar", "Luwu", "Luwu Utara",
+             "Luwu Timur", "Toraja Utara", "Tana Toraja", "Enrekang", "Pinrang",
+             "Sidenreng Rappang"],
+  },
+  {
+    label: "Sulawesi Tenggara",
+    cities: ["Kendari", "Bau-Bau", "Konawe", "Konawe Selatan", "Konawe Utara",
+             "Konawe Kepulauan", "Kolaka", "Kolaka Utara", "Kolaka Timur",
+             "Bombana", "Muna", "Muna Barat", "Buton", "Buton Utara",
+             "Buton Tengah", "Buton Selatan", "Wakatobi"],
+  },
+  {
+    label: "Gorontalo",
+    cities: ["Gorontalo", "Kota Gorontalo", "Kabupaten Gorontalo", "Gorontalo Utara",
+             "Boalemo", "Pohuwato", "Bone Bolango"],
+  },
+  {
+    label: "Sulawesi Barat",
+    cities: ["Mamuju", "Majene", "Polewali Mandar", "Mamasa", "Pasangkayu",
+             "Mamuju Tengah"],
+  },
+  {
+    label: "Maluku",
+    cities: ["Ambon", "Tual", "Maluku Tengah", "Maluku Tenggara", "Maluku Tenggara Barat",
+             "Kepulauan Aru", "Seram Bagian Barat", "Seram Bagian Timur",
+             "Maluku Barat Daya", "Buru", "Buru Selatan"],
+  },
+  {
+    label: "Maluku Utara",
+    cities: ["Ternate", "Tidore Kepulauan", "Halmahera Barat", "Halmahera Tengah",
+             "Halmahera Utara", "Halmahera Selatan", "Halmahera Timur",
+             "Kepulauan Sula", "Pulau Taliabu", "Pulau Morotai"],
+  },
+  {
+    label: "Papua",
+    cities: ["Jayapura", "Kota Jayapura", "Biak", "Merauke", "Timika", "Nabire",
+             "Sorong", "Manokwari", "Fakfak", "Kaimana", "Teluk Bintuni",
+             "Teluk Wondama", "Manokwari Selatan", "Pegunungan Arfak",
+             "Sarmi", "Keerom", "Jayawijaya", "Puncak Jaya", "Puncak",
+             "Pegunungan Bintang", "Yahukimo", "Tolikara", "Mamberamo Raya",
+             "Mamberamo Tengah", "Yalimo", "Lanny Jaya", "Nduga", "Intan Jaya",
+             "Deiyai", "Dogiyai", "Paniai", "Waropen", "Supiori", "Kepulauan Yapen",
+             "Asmat", "Mappi", "Boven Digoel", "Merauke"],
+  },
+  {
+    label: "Papua Barat",
+    cities: ["Manokwari", "Sorong", "Kota Sorong", "Fakfak", "Kaimana",
+             "Teluk Bintuni", "Teluk Wondama", "Manokwari Selatan",
+             "Pegunungan Arfak", "Maybrat", "Tambrauw", "Raja Ampat"],
+  },
+  {
+    label: "Aceh",
+    cities: ["Banda Aceh", "Sabang", "Langsa", "Lhokseumawe", "Subulussalam",
+             "Aceh Besar", "Pidie", "Pidie Jaya", "Bireuen", "Aceh Utara",
+             "Aceh Timur", "Aceh Tamiang", "Aceh Tengah", "Bener Meriah",
+             "Gayo Lues", "Aceh Tenggara", "Aceh Selatan", "Aceh Barat",
+             "Aceh Barat Daya", "Nagan Raya", "Aceh Jaya", "Simeulue"],
   },
 ];
 
@@ -86,10 +279,11 @@ function BusinessStatusBadge({ status }: { status: PlaceLead["businessStatus"] }
 
 // ── Custom City Dropdown ───────────────────────────────────────────────────────
 function CityDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [open, setOpen]       = useState(false);
-  const [search, setSearch]   = useState("");
-  const containerRef          = useRef<HTMLDivElement>(null);
-  const searchRef             = useRef<HTMLInputElement>(null);
+  const [open, setOpen]             = useState(false);
+  const [search, setSearch]         = useState("");
+  const [activeProvince, setActiveProvince] = useState<string | null>(null);
+  const containerRef                = useRef<HTMLDivElement>(null);
+  const searchRef                   = useRef<HTMLInputElement>(null);
 
   // Close on outside click
   useEffect(() => {
@@ -97,6 +291,7 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (v: string
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
         setSearch("");
+        setActiveProvince(null);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -108,21 +303,33 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (v: string
     if (open) setTimeout(() => searchRef.current?.focus(), 50);
   }, [open]);
 
-  const filtered = search.trim()
-    ? ALL_CITIES.filter((c) => c.toLowerCase().includes(search.toLowerCase()))
-    : null; // null = show grouped
+  // Search results — flat, across all provinces
+  const searchResults = search.trim()
+    ? ALL_CITIES.filter((c) => c.toLowerCase().includes(search.toLowerCase())).slice(0, 30)
+    : null;
+
+  // Cities to show when a province is selected
+  const provinceCities = activeProvince
+    ? CITY_GROUPS.find((g) => g.label === activeProvince)?.cities ?? []
+    : null;
 
   const select = (city: string) => {
     onChange(city);
     setOpen(false);
     setSearch("");
+    setActiveProvince(null);
   };
 
   const clear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange("");
     setSearch("");
+    setActiveProvince(null);
   };
+
+  // Popular cities for quick access
+  const POPULAR = ["Jakarta", "Surabaya", "Bandung", "Medan", "Semarang", "Makassar",
+                   "Yogyakarta", "Denpasar", "Palembang", "Batam"];
 
   return (
     <div ref={containerRef} className="relative">
@@ -157,16 +364,23 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (v: string
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute z-50 top-full mt-2 w-full rounded-2xl border border-white/10 bg-[#0f1629]/95 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden">
-          {/* Search inside dropdown */}
-          <div className="p-2 border-b border-white/5">
+        <div className="absolute z-50 top-full mt-2 w-full rounded-2xl border border-white/10 bg-[#0f1629]/98 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden"
+          style={{ minWidth: "320px" }}>
+
+          {/* Search bar */}
+          <div className="p-2.5 border-b border-white/5">
             <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
               <Search className="w-3.5 h-3.5 text-blue-200/40 shrink-0" />
               <input
                 ref={searchRef}
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari kota..."
+                onChange={(e) => { setSearch(e.target.value); setActiveProvince(null); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && search.trim()) {
+                    select(search.trim());
+                  }
+                }}
+                placeholder="Cari kota atau kabupaten..."
                 className="flex-1 bg-transparent text-white text-sm placeholder:text-blue-200/30 outline-none"
               />
               {search && (
@@ -177,54 +391,113 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (v: string
             </div>
           </div>
 
-          {/* Options */}
-          <div className="max-h-64 overflow-y-auto py-1.5 scrollbar-thin">
-            {filtered ? (
-              // Search results — flat list
-              filtered.length === 0 ? (
-                <p className="text-blue-200/30 text-xs text-center py-4">Tidak ditemukan</p>
-              ) : (
-                filtered.map((city) => (
-                  <button key={city} type="button" onClick={() => select(city)}
-                    className={`w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left transition-colors ${
-                      value === city
-                        ? "bg-indigo-500/20 text-indigo-300"
-                        : "text-blue-100/70 hover:bg-white/5 hover:text-white"
-                    }`}>
-                    <MapPin className="w-3.5 h-3.5 text-indigo-400/50 shrink-0" />
-                    {city}
+          {/* Content area */}
+          <div className="flex" style={{ height: "320px" }}>
+
+            {/* Left: Province list */}
+            {!search.trim() && (
+              <div className="w-36 border-r border-white/5 overflow-y-auto py-1 shrink-0">
+                {/* Popular shortcut */}
+                <button
+                  type="button"
+                  onClick={() => setActiveProvince(null)}
+                  className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                    !activeProvince ? "bg-indigo-500/20 text-indigo-300 font-medium" : "text-blue-200/50 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  ⭐ Populer
+                </button>
+                <div className="h-px bg-white/5 my-1" />
+                {CITY_GROUPS.map((g) => (
+                  <button
+                    key={g.label}
+                    type="button"
+                    onClick={() => setActiveProvince(g.label)}
+                    className={`w-full text-left px-3 py-2 text-xs transition-colors leading-tight ${
+                      activeProvince === g.label
+                        ? "bg-indigo-500/20 text-indigo-300 font-medium"
+                        : "text-blue-200/50 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    {g.label}
                   </button>
-                ))
-              )
-            ) : (
-              // Grouped list
-              CITY_GROUPS.map((group) => (
-                <div key={group.label}>
-                  <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-blue-200/30">
-                    {group.label}
+                ))}
+              </div>
+            )}
+
+            {/* Right: City list */}
+            <div className="flex-1 overflow-y-auto py-1.5">
+              {search.trim() ? (
+                // Search results
+                searchResults!.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-2">
+                    <p className="text-blue-200/30 text-xs">Tidak ditemukan</p>
+                    <button type="button" onClick={() => select(search.trim())}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                      Gunakan &quot;{search}&quot; langsung
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="px-3 pt-1 pb-1.5 text-[10px] text-blue-200/30">{searchResults!.length} hasil</p>
+                    {searchResults!.map((city) => (
+                      <button key={city} type="button" onClick={() => select(city)}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors ${
+                          value === city ? "bg-indigo-500/20 text-indigo-300" : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                        }`}>
+                        <MapPin className="w-3 h-3 text-indigo-400/50 shrink-0" />
+                        {city}
+                      </button>
+                    ))}
+                  </>
+                )
+              ) : activeProvince ? (
+                // Province cities
+                <>
+                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-blue-200/30">
+                    {activeProvince}
                   </p>
-                  {group.cities.map((city) => (
+                  {provinceCities!.map((city) => (
                     <button key={city} type="button" onClick={() => select(city)}
-                      className={`w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left transition-colors ${
-                        value === city
-                          ? "bg-indigo-500/20 text-indigo-300"
-                          : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors ${
+                        value === city ? "bg-indigo-500/20 text-indigo-300" : "text-blue-100/70 hover:bg-white/5 hover:text-white"
                       }`}>
-                      <MapPin className="w-3.5 h-3.5 text-indigo-400/50 shrink-0" />
+                      <MapPin className="w-3 h-3 text-indigo-400/50 shrink-0" />
                       {city}
                     </button>
                   ))}
-                </div>
-              ))
-            )}
+                </>
+              ) : (
+                // Popular cities
+                <>
+                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-blue-200/30">
+                    Kota Populer
+                  </p>
+                  {POPULAR.map((city) => (
+                    <button key={city} type="button" onClick={() => select(city)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors ${
+                        value === city ? "bg-indigo-500/20 text-indigo-300" : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                      }`}>
+                      <MapPin className="w-3 h-3 text-indigo-400/50 shrink-0" />
+                      {city}
+                    </button>
+                  ))}
+                  <div className="h-px bg-white/5 my-1.5 mx-3" />
+                  <p className="px-3 pb-1.5 text-[10px] text-blue-200/30">
+                    Pilih provinsi di kiri untuk lihat semua kota
+                  </p>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Or type manually */}
-          <div className="p-2 border-t border-white/5">
+          {/* Footer */}
+          <div className="px-3 py-2 border-t border-white/5 flex items-center justify-between">
+            <span className="text-[10px] text-blue-200/30">{ALL_CITIES.length} kota/kabupaten tersedia</span>
             <button type="button"
-              onClick={() => { onChange(search || value); setOpen(false); setSearch(""); }}
-              className="w-full text-center text-[11px] text-blue-200/30 hover:text-blue-200/60 py-1 transition-colors">
-              atau ketik manual lalu tekan Enter
+              onClick={() => { if (search.trim()) select(search.trim()); }}
+              className="text-[10px] text-indigo-400/60 hover:text-indigo-300 transition-colors">
+              Tekan Enter untuk input manual
             </button>
           </div>
         </div>
