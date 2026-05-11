@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
-import { getAiSettings } from "@/lib/aiSettings";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
+import { extractJsonObject, getAnthropic, logAiUsage } from "@/lib/ai";
 import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
@@ -13,6 +13,12 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   const { allowed } = await rateLimit(`ai-draft:${session!.user!.email}`, 20, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
+  const aiGate = await getEnabledAiSettings("featureArticle");
+  if (!aiGate.enabled) {
+    logAiUsage({ feature: "draft_article", model: aiGate.settings.model, status: "blocked", actor: session!.user!.email });
+    return aiGate.response;
+  }
+  const aiSettings = aiGate.settings;
 
   try {
     const { topic, keywords, tone, length } = await req.json();
@@ -20,10 +26,7 @@ export async function POST(req: NextRequest) {
     if (!topic?.trim()) return NextResponse.json({ error: "Topik wajib diisi." }, { status: 400 });
     if (topic.length > 500) return NextResponse.json({ error: "Topik maksimal 500 karakter." }, { status: 400 });
     const safeKeywords = Array.isArray(keywords) ? keywords.slice(0, 10).map((k: unknown) => String(k).slice(0, 100)) : [];
-    const [anthropic, aiSettings] = [
-      new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-      await getAiSettings(),
-    ];
+    const anthropic = getAnthropic();
 
     // Ambil daftar kategori dari database
     const categories = await prisma.category.findMany({
@@ -58,15 +61,20 @@ Keywords to include: ${safeKeywords.join(", ") || "relevant industry terms"}.`;
     });
 
     const text = response.content[0].type === "text" ? response.content[0].text : "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Gagal mengurai respons AI");
-    
-    const data = JSON.parse(jsonMatch[0]);
+    const data = extractJsonObject<Record<string, unknown>>(text);
 
     // Sertakan daftar kategori lengkap dalam response agar frontend bisa sinkron
+    logAiUsage({ feature: "draft_article", model: aiSettings.model, status: "success", actor: session!.user!.email });
     return NextResponse.json({ ...data, availableCategories: categories });
   } catch (err) {
     console.error("[AI-Draft]", err);
+    logAiUsage({
+      feature: "draft_article",
+      model:   aiSettings.model,
+      status:  "error",
+      actor:   session!.user!.email,
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

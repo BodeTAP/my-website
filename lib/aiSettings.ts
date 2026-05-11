@@ -1,19 +1,29 @@
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import {
+  AI_DEFAULTS,
+  parseAiSettings,
+  type AiFeature,
+  type AiSettings,
+} from "@/lib/aiConfig";
 
-export const AI_DEFAULTS = {
-  ai_model:                     "claude-haiku-4-5-20251001",
-  ai_feature_article:           "true",
-  ai_feature_portal_chat:       "true",
-  ai_feature_name_generator:    "true",
-  ai_feature_pricing_estimator: "true",
-};
+export {
+  AI_DEFAULTS,
+  AI_MODEL_OPTIONS,
+  normalizeAiSettingValue,
+  parseAiBoolean,
+  parseAiModel,
+  parseAiSettings,
+  type AiFeature,
+  type AiModel,
+  type AiSettings,
+} from "@/lib/aiConfig";
 
-export type AiSettings = {
-  model:                    string;
-  featureArticle:           boolean;
-  featurePortalChat:        boolean;
-  featureNameGenerator:     boolean;
-  featurePricingEstimator:  boolean;
+const AI_FEATURE_DISABLED_MESSAGES: Record<AiFeature, string> = {
+  featureArticle:          "Fitur AI artikel sedang nonaktif.",
+  featurePortalChat:       "Fitur AI portal sedang nonaktif.",
+  featureNameGenerator:    "Fitur generator nama sedang nonaktif.",
+  featurePricingEstimator: "Fitur estimasi harga sedang nonaktif.",
 };
 
 export async function getAiSettings(): Promise<AiSettings> {
@@ -23,20 +33,29 @@ export async function getAiSettings(): Promise<AiSettings> {
     });
     const map: Record<string, string> = { ...AI_DEFAULTS };
     for (const row of rows) map[row.key] = row.value;
+    return parseAiSettings(map);
+  } catch (err) {
+    console.error("[AI-Settings] Failed to load settings:", err);
+    return parseAiSettings({}, { failClosed: true });
+  }
+}
+
+export async function getEnabledAiSettings(feature: AiFeature): Promise<
+  | { enabled: true; settings: AiSettings }
+  | { enabled: false; settings: AiSettings; response: NextResponse }
+> {
+  const settings = await getAiSettings();
+
+  if (!settings[feature]) {
     return {
-      model:                   map.ai_model,
-      featureArticle:          map.ai_feature_article          !== "false",
-      featurePortalChat:       map.ai_feature_portal_chat      !== "false",
-      featureNameGenerator:    map.ai_feature_name_generator   !== "false",
-      featurePricingEstimator: map.ai_feature_pricing_estimator !== "false",
-    };
-  } catch {
-    return {
-      model:                   AI_DEFAULTS.ai_model,
-      featureArticle:          true,
-      featurePortalChat:       true,
-      featureNameGenerator:    true,
-      featurePricingEstimator: true,
+      enabled:  false,
+      settings,
+      response: NextResponse.json(
+        { error: AI_FEATURE_DISABLED_MESSAGES[feature] },
+        { status: 503 },
+      ),
     };
   }
+
+  return { enabled: true, settings };
 }

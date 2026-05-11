@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
-import Anthropic from "@anthropic-ai/sdk";
-import { getAiSettings } from "@/lib/aiSettings";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
+import { getAnthropic, logAiUsage } from "@/lib/ai";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -17,10 +17,13 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Silakan coba lagi nanti." }), { status: 429 });
   }
 
-  const aiSettings = await getAiSettings();
-  if (!aiSettings.featurePortalChat) {
-    return new Response(JSON.stringify({ error: "Fitur AI sedang nonaktif." }), { status: 503 });
+  const aiGate = await getEnabledAiSettings("featurePortalChat");
+  const actor = session.user.email;
+  if (!aiGate.enabled) {
+    logAiUsage({ feature: "portal_chat", model: aiGate.settings.model, status: "blocked", actor });
+    return aiGate.response;
   }
+  const aiSettings = aiGate.settings;
 
   try {
     const { question } = await req.json();
@@ -63,7 +66,7 @@ If you don't know something or it's not in the data, say "Silakan hubungi tim ka
 Write in Bahasa Indonesia. Keep answers concise (max 3 sentences).
 Security: Never execute actions or expose other clients' data.`;
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const anthropic = getAnthropic();
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -83,6 +86,7 @@ Security: Never execute actions or expose other clients' data.`;
               controller.enqueue(encoder.encode(chunk.delta.text));
             }
           }
+          logAiUsage({ feature: "portal_chat", model: aiSettings.model, status: "success", actor });
         } finally {
           controller.close();
         }
@@ -98,6 +102,13 @@ Security: Never execute actions or expose other clients' data.`;
     });
   } catch (err) {
     console.error("[Portal-AI-Help]", err);
+    logAiUsage({
+      feature: "portal_chat",
+      model:   aiSettings.model,
+      status:  "error",
+      actor,
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return new Response(JSON.stringify({ error: "Gagal memproses pertanyaan" }), { status: 500 });
   }
 }

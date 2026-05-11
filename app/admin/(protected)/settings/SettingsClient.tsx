@@ -5,6 +5,7 @@ import { Loader2, Save, Bot, Settings as SettingsIcon, MessageCircle } from "luc
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AI_MODEL_OPTIONS } from "@/lib/aiConfig";
 
 export default function SettingsClient({ 
   initial, 
@@ -161,10 +162,7 @@ export default function SettingsClient({
             <h2 className="text-white font-semibold text-lg mb-1">Model AI</h2>
             <p className="text-blue-200/40 text-sm mb-6">Model yang lebih canggih menghasilkan konten lebih baik, namun lebih mahal per-request.</p>
             <div className="grid sm:grid-cols-2 gap-4">
-              {[
-                { value: "claude-haiku-4-5-20251001", label: "Claude Haiku", desc: "Cepat & hemat. Cocok untuk penggunaan tinggi.", badge: "Direkomendasikan", badgeColor: "text-green-400 bg-green-500/10 border-green-500/20" },
-                { value: "claude-sonnet-4-5-20251001", label: "Claude Sonnet", desc: "Kualitas lebih tinggi. Cocok untuk konten premium.", badge: "Kualitas Lebih Baik", badgeColor: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
-              ].map((m) => (
+              {AI_MODEL_OPTIONS.map((m) => (
                 <button key={m.value} type="button"
                   onClick={() => setForm((f) => ({ ...f, ai_model: m.value }))}
                   className={`text-left p-4 rounded-2xl border transition-all ${

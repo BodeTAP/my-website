@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchAndUploadCoverImage } from "@/lib/ai";
-import Anthropic from "@anthropic-ai/sdk";
+import { extractJsonObject, fetchAndUploadCoverImage, getAnthropic, logAiUsage } from "@/lib/ai";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
+import type { AiModel } from "@/lib/aiConfig";
+import type Anthropic from "@anthropic-ai/sdk";
 import { sendWA } from "@/lib/whatsapp";
 
 // Konteks bisnis MFWEB yang diberikan ke Claude untuk generate topik
@@ -32,6 +34,7 @@ function generateSlug(title: string): string {
 /** Minta Claude memilih topik baru yang belum pernah ditulis */
 async function generateTopic(
   anthropic: Anthropic,
+  model: AiModel,
   existingTitles: string[],
   categories: { id: string; name: string }[],
 ): Promise<{ topic: string; categoryId: string | null }> {
@@ -44,7 +47,7 @@ async function generateTopic(
     : "";
 
   const response = await anthropic.messages.create({
-    model:      "claude-haiku-4-5-20251001",
+    model,
     max_tokens: 200,
     system: `Kamu adalah content strategist untuk ${MFWEB_CONTEXT}
 
@@ -64,15 +67,13 @@ Kembalikan JSON SAJA:
   });
 
   const text      = response.content[0].type === "text" ? response.content[0].text : "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Gagal mengurai topik dari AI");
-
-  return JSON.parse(jsonMatch[0]);
+  return extractJsonObject<{ topic: string; categoryId: string | null }>(text);
 }
 
 /** Generate artikel lengkap dari topik yang diberikan */
 async function generateArticle(
   anthropic: Anthropic,
+  model: AiModel,
   topic: string,
   categories: { id: string; name: string }[],
 ): Promise<{
@@ -83,7 +84,7 @@ async function generateArticle(
   const categoryList = categories.map(c => `- id: "${c.id}", name: "${c.name}"`).join("\n");
 
   const response = await anthropic.messages.create({
-    model:      "claude-haiku-4-5-20251001",
+    model,
     max_tokens: 4000,
     system: `Kamu adalah content writer berpengalaman untuk ${MFWEB_CONTEXT}
 
@@ -118,10 +119,11 @@ Jangan tambahkan teks apapun di luar JSON.`,
   });
 
   const text      = response.content[0].type === "text" ? response.content[0].text : "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Respons AI tidak mengandung JSON valid");
-
-  return JSON.parse(jsonMatch[0]);
+  return extractJsonObject<{
+    title: string; content: string; excerpt: string;
+    metaTitle: string; metaDesc: string; tags: string[];
+    suggestedCategoryId: string | null;
+  }>(text);
 }
 
 export async function POST(req: NextRequest) {
@@ -133,8 +135,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const aiGate = await getEnabledAiSettings("featureArticle");
+  if (!aiGate.enabled) {
+    logAiUsage({ feature: "auto_publish", model: aiGate.settings.model, status: "blocked", actor: "cron" });
+    return aiGate.response;
+  }
+  const aiSettings = aiGate.settings;
+
   try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const anthropic = getAnthropic();
 
     // 1. Ambil kategori dan judul artikel yang sudah ada secara paralel
     const [categories, existingArticles] = await Promise.all([
@@ -149,11 +158,11 @@ export async function POST(req: NextRequest) {
     const existingTitles = existingArticles.map(a => a.title);
 
     // 2. Minta Claude pilih topik baru yang belum pernah ditulis
-    const { topic, categoryId: suggestedId } = await generateTopic(anthropic, existingTitles, categories);
+    const { topic, categoryId: suggestedId } = await generateTopic(anthropic, aiSettings.model, existingTitles, categories);
     console.log(`[AutoPublish] Topik dipilih AI: "${topic}"`);
 
     // 3. Generate artikel lengkap
-    const parsed = await generateArticle(anthropic, topic, categories);
+    const parsed = await generateArticle(anthropic, aiSettings.model, topic, categories);
 
     // 4. Tentukan categoryId final (dari generate article atau dari generate topic)
     const finalCategoryId = parsed.suggestedCategoryId ?? suggestedId ?? null;
@@ -217,6 +226,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[AutoPublish] Artikel "${parsed.title}" (${slug}) berhasil dipublish. Kategori: ${validCategoryId ?? "none"}`);
+    logAiUsage({ feature: "auto_publish", model: aiSettings.model, status: "success", actor: "cron" });
 
     return NextResponse.json({
       success:    true,
@@ -228,6 +238,13 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[AutoPublish] Error:", err);
+    logAiUsage({
+      feature: "auto_publish",
+      model:   aiSettings.model,
+      status:  "error",
+      actor:   "cron",
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

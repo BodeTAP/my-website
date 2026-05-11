@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
-import { getAiSettings } from "@/lib/aiSettings";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
+import { getAnthropic, logAiUsage } from "@/lib/ai";
 
 export async function POST(req: NextRequest) {
   const ip = getClientIP(req);
@@ -10,10 +10,12 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Coba lagi dalam 1 jam." }), { status: 429 });
   }
 
-  const aiSettings = await getAiSettings();
-  if (!aiSettings.featurePricingEstimator) {
-    return new Response(JSON.stringify({ error: "Fitur estimasi harga sedang nonaktif." }), { status: 503 });
+  const aiGate = await getEnabledAiSettings("featurePricingEstimator");
+  if (!aiGate.enabled) {
+    logAiUsage({ feature: "pricing_estimator", model: aiGate.settings.model, status: "blocked", actor: ip });
+    return aiGate.response;
   }
+  const aiSettings = aiGate.settings;
 
   try {
     const { bisnisType, websiteType, fitur, halaman, timeline } = await req.json();
@@ -58,7 +60,7 @@ Berikan:
 4. Rekomendasi paket yang paling sesuai
 5. Tips menghemat biaya (jika ada)`;
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const anthropic = getAnthropic();
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -78,6 +80,7 @@ Berikan:
               controller.enqueue(encoder.encode(chunk.delta.text));
             }
           }
+          logAiUsage({ feature: "pricing_estimator", model: aiSettings.model, status: "success", actor: ip });
         } finally {
           controller.close();
         }
@@ -93,6 +96,13 @@ Berikan:
     });
   } catch (err) {
     console.error("[Estimasi-Harga]", err);
+    logAiUsage({
+      feature: "pricing_estimator",
+      model:   aiSettings.model,
+      status:  "error",
+      actor:   ip,
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return new Response(JSON.stringify({ error: "Gagal memproses estimasi" }), { status: 500 });
   }
 }

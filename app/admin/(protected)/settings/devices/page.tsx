@@ -1,6 +1,5 @@
 import { requireModule } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { AI_DEFAULTS } from "@/lib/aiSettings";
 import DevicesClient from "./DevicesClient";
 
 export default async function DevicesPage() {
@@ -13,7 +12,6 @@ export default async function DevicesPage() {
   });
   const settingsMap = Object.fromEntries(rows.map((r) => [r.key, r.value]));
 
-  const defaults = { ...AI_DEFAULTS };
   const initialApiKey  = settingsMap["fonnte_api_key"]  ?? "";
   const initialApiKeys = settingsMap["fonnte_api_keys"] ?? "";
 

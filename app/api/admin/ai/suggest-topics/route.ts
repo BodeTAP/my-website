@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
-import { getAiSettings } from "@/lib/aiSettings";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
+import { extractJsonArray, getAnthropic, logAiUsage } from "@/lib/ai";
 import { rateLimit } from "@/lib/rateLimit";
 
 // POST /api/admin/ai/suggest-topics
@@ -14,6 +14,12 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   const { allowed } = await rateLimit(`ai-topics:${session!.user!.email}`, 20, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
+  const aiGate = await getEnabledAiSettings("featureArticle");
+  if (!aiGate.enabled) {
+    logAiUsage({ feature: "suggest_topics", model: aiGate.settings.model, status: "blocked", actor: session!.user!.email });
+    return aiGate.response;
+  }
+  const aiSettings = aiGate.settings;
 
   try {
     const { categoryId, count = 6 } = await req.json();
@@ -42,10 +48,7 @@ export async function POST(req: NextRequest) {
       ? `\n\nTopik yang SUDAH ditulis (JANGAN ulangi atau buat yang terlalu mirip):\n${recentArticles.map(a => `- ${a.title}`).join("\n")}`
       : "";
 
-    const [anthropic, aiSettings] = [
-      new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-      await getAiSettings(),
-    ];
+    const anthropic = getAnthropic();
 
     const response = await anthropic.messages.create({
       model:      aiSettings.model,
@@ -84,11 +87,9 @@ Kembalikan JSON array SAJA (tanpa teks lain):
     });
 
     const text      = response.content[0].type === "text" ? response.content[0].text : "";
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) throw new Error("Gagal mengurai respons AI");
+    const topics = extractJsonArray<unknown[]>(text);
 
-    const topics = JSON.parse(jsonMatch[0]);
-
+    logAiUsage({ feature: "suggest_topics", model: aiSettings.model, status: "success", actor: session!.user!.email });
     return NextResponse.json({
       topics,
       meta: {
@@ -98,6 +99,13 @@ Kembalikan JSON array SAJA (tanpa teks lain):
     });
   } catch (err) {
     console.error("[AI-SuggestTopics]", err);
+    logAiUsage({
+      feature: "suggest_topics",
+      model:   aiSettings.model,
+      status:  "error",
+      actor:   session!.user!.email,
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

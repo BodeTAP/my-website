@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { AI_DEFAULTS } from "@/lib/aiSettings";
+import { AI_DEFAULTS, normalizeAiSettingValue } from "@/lib/aiSettings";
 import { BROADCAST_SETTING_DEFAULTS } from "@/lib/broadcastSettings";
 
 const DEFAULTS: Record<string, string> = {
@@ -34,13 +34,21 @@ export async function GET() {
 
 const ALLOWED_KEYS = new Set(Object.keys(DEFAULTS));
 
+function normalizeSettingValue(key: string, value: unknown): string {
+  const aiValue = normalizeAiSettingValue(key, value);
+  if (aiValue !== null) return aiValue;
+  return String(value ?? "");
+}
+
 export async function PATCH(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const denied = await requireApiPermission("ai_settings");
   if (denied) return denied;
 
   const updates: Record<string, string> = await req.json();
-  const filtered = Object.entries(updates).filter(([key]) => ALLOWED_KEYS.has(key));
+  const filtered = Object.entries(updates)
+    .filter(([key]) => ALLOWED_KEYS.has(key))
+    .map(([key, value]) => [key, normalizeSettingValue(key, value)] as const);
 
   if (filtered.length === 0) {
     return NextResponse.json({ error: "Tidak ada key yang valid" }, { status: 400 });

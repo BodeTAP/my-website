@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { translateToVisualKeyword, uploadPhotoToBlob } from "@/lib/ai";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
 import { rateLimit } from "@/lib/rateLimit";
 
 // In-memory cache for Pexels search results — 1 hour TTL
@@ -24,6 +25,8 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   const { allowed } = await rateLimit(`ai-cover:${session!.user!.email}`, 30, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
+  const aiGate = await getEnabledAiSettings("featureArticle");
+  if (!aiGate.enabled) return aiGate.response;
 
   try {
     const body = await req.json();

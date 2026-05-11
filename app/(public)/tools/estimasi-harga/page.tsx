@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import PricingEstimator from "./PricingEstimator";
+import { getAiSettings } from "@/lib/aiSettings";
 
 export const metadata: Metadata = {
   title: "Estimasi Harga Pembuatan Website Gratis | MFWEB",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/estimasi-harga" },
 };
 
-export default function EstimasiHargaPage() {
+export default async function EstimasiHargaPage() {
+  const aiSettings = await getAiSettings();
+
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
@@ -27,7 +30,16 @@ export default function EstimasiHargaPage() {
           </p>
         </div>
 
-        <PricingEstimator />
+        {aiSettings.featurePricingEstimator ? (
+          <PricingEstimator />
+        ) : (
+          <div className="glass rounded-2xl p-8 border border-white/10 text-center">
+            <h2 className="text-white font-semibold mb-2">Estimasi harga sedang nonaktif</h2>
+            <p className="text-blue-200/50 text-sm">
+              Tool ini sedang dimatikan sementara oleh admin.
+            </p>
+          </div>
+        )}
 
         <p className="text-center text-blue-200/30 text-xs mt-8">
           Estimasi bersifat indikatif. Harga final ditentukan setelah konsultasi dan analisis kebutuhan lengkap.

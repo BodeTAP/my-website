@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
-import { getAiSettings } from "@/lib/aiSettings";
+import { getEnabledAiSettings } from "@/lib/aiSettings";
+import { getAnthropic, logAiUsage } from "@/lib/ai";
 import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
@@ -13,6 +13,12 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   const { allowed } = await rateLimit(`ai-reply:${session!.user!.email}`, 20, 60 * 60 * 1000);
   if (!allowed) return NextResponse.json({ error: "Terlalu banyak request AI. Coba lagi dalam 1 jam." }, { status: 429 });
+  const aiGate = await getEnabledAiSettings("featureArticle");
+  if (!aiGate.enabled) {
+    logAiUsage({ feature: "draft_reply", model: aiGate.settings.model, status: "blocked", actor: session!.user!.email });
+    return aiGate.response;
+  }
+  const aiSettings = aiGate.settings;
 
   try {
     const { ticketId } = await req.json();
@@ -33,10 +39,7 @@ export async function POST(req: NextRequest) {
 
     if (!ticket) return NextResponse.json({ error: "Tiket tidak ditemukan" }, { status: 404 });
 
-    const [anthropic, aiSettings] = [
-      new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }),
-      await getAiSettings(),
-    ];
+    const anthropic = getAnthropic();
 
     const context = `
 Client: ${ticket.client.businessName}
@@ -62,9 +65,17 @@ Keep the response helpful and concise.`;
     });
 
     const draft = response.content[0].type === "text" ? response.content[0].text : "";
+    logAiUsage({ feature: "draft_reply", model: aiSettings.model, status: "success", actor: session!.user!.email });
     return NextResponse.json({ draft });
   } catch (err) {
     console.error("[AI-DraftReply]", err);
+    logAiUsage({
+      feature: "draft_reply",
+      model:   aiSettings.model,
+      status:  "error",
+      actor:   session!.user!.email,
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

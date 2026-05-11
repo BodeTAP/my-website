@@ -1,9 +1,48 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { getAiSettings } from "@/lib/aiSettings";
+import type { AiModel } from "@/lib/aiConfig";
 
 let _anthropic: Anthropic | null = null;
-function getAnthropic() {
+export function getAnthropic() {
   if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   return _anthropic;
+}
+
+export async function getConfiguredAiModel(): Promise<AiModel> {
+  const settings = await getAiSettings();
+  return settings.model;
+}
+
+function stripJsonFence(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return (fenced?.[1] ?? text).trim();
+}
+
+export function extractJsonObject<T>(text: string): T {
+  const cleaned = stripJsonFence(text);
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("Respons AI tidak mengandung JSON object valid");
+  return JSON.parse(jsonMatch[0]) as T;
+}
+
+export function extractJsonArray<T>(text: string): T {
+  const cleaned = stripJsonFence(text);
+  const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error("Respons AI tidak mengandung JSON array valid");
+  return JSON.parse(jsonMatch[0]) as T;
+}
+
+export function logAiUsage(details: {
+  feature: string;
+  model: string;
+  status: "success" | "error" | "blocked";
+  actor?: string | null;
+  error?: string;
+}) {
+  console.info("[AI-Usage]", JSON.stringify({
+    at: new Date().toISOString(),
+    ...details,
+  }));
 }
 
 /**
@@ -11,9 +50,11 @@ function getAnthropic() {
  * visual-friendly untuk query ke Pexels stock photo API.
  */
 export async function translateToVisualKeyword(topic: string): Promise<string> {
+  let model = "unknown";
   try {
+    model = await getConfiguredAiModel();
     const response = await getAnthropic().messages.create({
-      model:      "claude-haiku-4-5-20251001",
+      model,
       max_tokens: 60,
       system: `You are a visual keyword specialist.
 Given an Indonesian article topic, return ONLY 2-3 short English keywords that best represent a relevant stock photo.
@@ -23,8 +64,15 @@ Return ONLY the keywords, nothing else.`,
       messages: [{ role: "user", content: topic }],
     });
     const text = response.content[0].type === "text" ? response.content[0].text.trim() : "";
+    logAiUsage({ feature: "cover_keyword", model, status: "success" });
     return text || topic;
-  } catch {
+  } catch (err) {
+    logAiUsage({
+      feature: "cover_keyword",
+      model,
+      status:  "error",
+      error:   err instanceof Error ? err.message : "Unknown error",
+    });
     return topic; // Fallback ke topik asli jika Claude gagal
   }
 }
