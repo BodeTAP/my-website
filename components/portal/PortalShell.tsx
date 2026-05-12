@@ -7,7 +7,7 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
-import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle, ChevronRight, Server, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle, ChevronRight, Server, PanelLeftClose, PanelLeftOpen, Wrench, Coins } from "lucide-react";
 import NotificationBell from "@/components/portal/NotificationBell";
 
 const SIDEBAR_STORAGE_KEY = "portal-sidebar-collapsed";
@@ -21,6 +21,8 @@ const navItems = [
   { label: "Tagihan",     href: "/portal/invoices",  icon: Receipt },
   { label: "Hosting",     href: "/portal/hosting",   icon: Server },
   { label: "Bantuan",     href: "/portal/tickets",   icon: MessageSquare },
+  { label: "Tools",       href: "/portal/tools",     icon: Wrench },
+  { label: "Kredit",      href: "/portal/credits",   icon: Coins },
   { label: "Pengaturan",  href: "/portal/profile",   icon: UserCircle },
 ];
 

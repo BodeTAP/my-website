@@ -3,6 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/tripay";
 import { sendWA, waMsg } from "@/lib/whatsapp";
 
+type InvoiceLineItem = {
+  type?: string;
+  packageId?: string;
+};
+
 /**
  * POST /api/webhooks/tripay
  *
@@ -70,6 +75,29 @@ export async function POST(req: NextRequest) {
     });
 
     console.log(`[Tripay Webhook] Invoice ${reference} ditandai LUNAS`);
+
+    if (invoice && invoice.status !== "PAID") {
+      const lineItems = Array.isArray(invoice.lineItems)
+        ? (invoice.lineItems as unknown as InvoiceLineItem[])
+        : [];
+      const creditItem = lineItems.find((item) => item.type === "credit_package");
+
+      if (creditItem?.packageId) {
+        const pkg = await prisma.creditPackage.findUnique({
+          where: { id: String(creditItem.packageId) },
+        });
+
+        if (pkg) {
+          const { topupCredits } = await import("@/lib/credits");
+          await topupCredits(
+            invoice.clientId,
+            pkg.credits + pkg.bonusCredit,
+            `Pembelian Paket ${pkg.name}`,
+            pkg.id,
+          );
+        }
+      }
+    }
 
     // Send WA notifications after response via after()
     if (invoice) {

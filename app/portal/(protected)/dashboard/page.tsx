@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check, Sparkles, AlertCircle, LayoutDashboard, PhoneCall } from "lucide-react";
+import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check, Sparkles, AlertCircle, LayoutDashboard, PhoneCall, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, CountUp } from "@/components/public/motion";
 
@@ -65,6 +65,10 @@ export default async function PortalDashboardPage() {
   }
 
   const activeProject = client.projects[0];
+  const creditBalance = await prisma.clientCredit.findUnique({
+    where: { clientId: client.id },
+    select: { balance: true },
+  });
   const hour = (new Date().getUTCHours() + 7) % 24; // WIB = UTC+7
   const greeting = hour < 11 ? "Selamat Pagi" : hour < 15 ? "Selamat Siang" : hour < 18 ? "Selamat Sore" : "Selamat Malam";
 
@@ -280,6 +284,18 @@ export default async function PortalDashboardPage() {
                 <div className="text-3xl font-black text-white mb-1"><CountUp from={0} to={client.projects.length} /></div>
                 <div className="text-blue-200/50 text-[11px] uppercase tracking-wider font-bold">Total Proyek</div>
               </div>
+            </StaggerItem>
+            <StaggerItem>
+              <Link href="/portal/credits" className="block h-full">
+                <div className="glass rounded-3xl p-6 border border-amber-500/15 relative overflow-hidden group h-full hover:border-amber-500/35 transition-colors">
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-500/10 blur-[30px] rounded-full pointer-events-none group-hover:bg-amber-500/20 transition-all" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center mb-4 ring-1 ring-amber-500/20">
+                    <Coins className="w-6 h-6 text-amber-300" />
+                  </div>
+                  <div className="text-3xl font-black text-white mb-1"><CountUp from={0} to={creditBalance?.balance ?? 0} /></div>
+                  <div className="text-blue-200/50 text-[11px] uppercase tracking-wider font-bold">Kredit Tools</div>
+                </div>
+              </Link>
             </StaggerItem>
           </StaggerChildren>
 

@@ -26,6 +26,32 @@ async function main() {
 
   // Seed permissions — buat role "Full Access" dan migrasi admin yang ada
   await seedPermissions();
+
+  const creditPackages = [
+    { name: "Starter", credits: 50, price: 39000, bonusCredit: 0 },
+    { name: "Growth", credits: 150, price: 99000, bonusCredit: 10 },
+    { name: "Pro", credits: 300, price: 179000, bonusCredit: 30 },
+  ];
+
+  for (const pkg of creditPackages) {
+    const existing = await prisma.creditPackage.findFirst({
+      where: { name: pkg.name },
+      select: { id: true },
+    });
+
+    if (existing) {
+      await prisma.creditPackage.update({
+        where: { id: existing.id },
+        data: { ...pkg, isActive: true },
+      });
+    } else {
+      await prisma.creditPackage.create({
+        data: { ...pkg, isActive: true },
+      });
+    }
+  }
+
+  console.log("Credit packages seeded:", creditPackages.map((pkg) => pkg.name).join(", "));
 }
 
 main()
