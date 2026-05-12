@@ -13,7 +13,16 @@ export default async function PortalLayout({ children }: { children: React.React
   const [dbUser, aiSettings] = await Promise.all([
     prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { name: true, image: true, email: true },
+      select: {
+        name: true,
+        image: true,
+        email: true,
+        client: {
+          select: {
+            credit: { select: { balance: true } },
+          },
+        },
+      },
     }),
     getAiSettings(),
   ]);
@@ -23,6 +32,7 @@ export default async function PortalLayout({ children }: { children: React.React
       userName={dbUser?.name ?? session.user?.name ?? "Klien"}
       userEmail={dbUser?.email ?? session.user?.email ?? ""}
       userImage={dbUser?.image ?? session.user?.image ?? null}
+      creditBalance={dbUser?.client?.credit?.balance ?? 0}
     >
       {children}
       {aiSettings.features.portalChat.enabled && (

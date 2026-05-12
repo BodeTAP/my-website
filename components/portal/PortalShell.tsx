@@ -26,6 +26,8 @@ const navItems = [
   { label: "Pengaturan",  href: "/portal/profile",   icon: UserCircle },
 ];
 
+const mobileNavLabels = new Set(["Dashboard", "Proyek Saya", "Tagihan", "Tools"]);
+
 function getSidebarCollapsedSnapshot() {
   if (typeof window === "undefined") return "false";
   return localStorage.getItem(SIDEBAR_STORAGE_KEY) ?? "false";
@@ -113,6 +115,7 @@ interface SidebarContentProps {
   userEmail: string;
   userImage?: string | null;
   userName: string;
+  creditBalance: number;
 }
 
 function SidebarContent({
@@ -123,6 +126,7 @@ function SidebarContent({
   userEmail,
   userImage,
   userName,
+  creditBalance,
 }: SidebarContentProps) {
   return (
     <aside className="flex flex-col h-full bg-[#030914]/80 backdrop-blur-xl relative overflow-hidden">
@@ -221,6 +225,44 @@ function SidebarContent({
           <p className="text-white text-sm font-bold line-clamp-1">{userName}</p>
           <p className="text-blue-200/40 text-[10px] line-clamp-1 mt-0.5">{userEmail}</p>
         </motion.div>
+        <Link
+          href="/portal/credits"
+          className={`mt-4 flex items-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15 hover:border-amber-400/35 transition-colors ${
+            collapsed ? "w-12 h-12 justify-center mx-auto" : "justify-between gap-3 px-3 py-2.5"
+          }`}
+          aria-label={`Saldo kredit ${creditBalance} kredit`}
+          title={`Saldo kredit: ${creditBalance} kredit`}
+        >
+          <span className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-2"}`}>
+            <Coins className="w-4 h-4 text-amber-300 shrink-0" />
+            <motion.span
+              aria-hidden={collapsed}
+              className="overflow-hidden whitespace-nowrap text-[11px] font-black uppercase tracking-widest text-amber-200/65"
+              animate={{
+                opacity: collapsed ? 0 : 1,
+                width: collapsed ? 0 : "auto",
+                x: collapsed ? -6 : 0,
+                filter: collapsed ? "blur(2px)" : "blur(0px)",
+              }}
+              transition={SIDEBAR_FADE}
+            >
+              Kredit Tools
+            </motion.span>
+          </span>
+          <motion.span
+            aria-hidden={collapsed}
+            className="overflow-hidden whitespace-nowrap text-sm font-black text-amber-300 tabular-nums"
+            animate={{
+              opacity: collapsed ? 0 : 1,
+              width: collapsed ? 0 : "auto",
+              x: collapsed ? -6 : 0,
+              filter: collapsed ? "blur(2px)" : "blur(0px)",
+            }}
+            transition={SIDEBAR_FADE}
+          >
+            {creditBalance}
+          </motion.span>
+        </Link>
       </motion.div>
 
       {/* Nav */}
@@ -340,11 +382,13 @@ export default function PortalShell({
   userName,
   userEmail,
   userImage,
+  creditBalance,
 }: {
   children: React.ReactNode;
   userName: string;
   userEmail: string;
   userImage?: string | null;
+  creditBalance: number;
 }) {
   const [open, setOpen] = useState(false);
   const sidebarCollapsed = useSyncExternalStore(
@@ -386,6 +430,7 @@ export default function PortalShell({
           userEmail={userEmail}
           userImage={userImage}
           userName={userName}
+          creditBalance={creditBalance}
         />
       </div>
 
@@ -419,6 +464,7 @@ export default function PortalShell({
           userEmail={userEmail}
           userImage={userImage}
           userName={userName}
+          creditBalance={creditBalance}
         />
       </div>
 
@@ -456,7 +502,7 @@ export default function PortalShell({
 
         {/* Mobile bottom tab bar */}
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#030914]/90 backdrop-blur-xl border-t border-white/10 flex pb-safe">
-          {navItems.filter(item => !['Hosting', 'Pengaturan'].includes(item.label)).map((item) => {
+          {navItems.filter((item) => mobileNavLabels.has(item.label)).map((item) => {
             const active = isActive(item.href);
             return (
               <Link
