@@ -10,7 +10,11 @@ import {
 describe("aiConfig", () => {
   it("falls back to the default model for unknown values", () => {
     expect(parseAiModel("unknown-model")).toBe(AI_DEFAULTS.ai_model);
-    expect(parseAiModel("claude-sonnet-4-5-20251001")).toBe("claude-sonnet-4-5-20251001");
+    expect(parseAiModel("claude-sonnet-4-5-20250929")).toBe("claude-sonnet-4-5-20250929");
+  });
+
+  it("maps legacy invalid Sonnet snapshot to the current valid model id", () => {
+    expect(parseAiModel("claude-sonnet-4-5-20251001")).toBe("claude-sonnet-4-5-20250929");
   });
 
   it("parses common boolean forms", () => {

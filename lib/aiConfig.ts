@@ -7,7 +7,7 @@ export const AI_MODEL_OPTIONS = [
     badgeColor: "text-green-400 bg-green-500/10 border-green-500/20",
   },
   {
-    value: "claude-sonnet-4-5-20251001",
+    value: "claude-sonnet-4-5-20250929",
     label: "Claude Sonnet",
     desc: "Kualitas lebih tinggi. Cocok untuk konten premium.",
     badge: "Kualitas Lebih Baik",
@@ -386,6 +386,9 @@ export type AiSettings = {
 };
 
 const AI_MODEL_VALUES = new Set<string>(AI_MODEL_OPTIONS.map((model) => model.value));
+const AI_MODEL_ALIASES = new Map<string, AiModel>([
+  ["claude-sonnet-4-5-20251001", "claude-sonnet-4-5-20250929"],
+]);
 const TRUE_VALUES = new Set(["true", "1", "yes", "y", "on", "enabled"]);
 const FALSE_VALUES = new Set(["false", "0", "no", "n", "off", "disabled"]);
 const BOOLEAN_KEYS = new Set<string>([
@@ -425,7 +428,8 @@ const INTEGER_KEYS = new Set<string>([
 
 export function parseAiModel(raw: string | undefined, fallback: AiModel = DEFAULT_AI_MODEL): AiModel {
   const model = raw?.trim();
-  return AI_MODEL_VALUES.has(model ?? "") ? (model as AiModel) : fallback;
+  const aliased = model ? AI_MODEL_ALIASES.get(model) ?? model : model;
+  return AI_MODEL_VALUES.has(aliased ?? "") ? (aliased as AiModel) : fallback;
 }
 
 export function parseAiBoolean(raw: string | undefined, fallback: boolean): boolean {
@@ -532,7 +536,10 @@ export function normalizeAiSettingValue(key: string, value: unknown): string | n
   const raw = String(value ?? "");
 
   if (MODEL_KEYS.has(key)) {
-    return key === "ai_model" ? parseAiModel(raw) : (AI_MODEL_VALUES.has(raw.trim()) ? raw.trim() : "");
+    if (key === "ai_model") return parseAiModel(raw);
+    const trimmed = raw.trim();
+    const normalized = AI_MODEL_ALIASES.get(trimmed) ?? trimmed;
+    return AI_MODEL_VALUES.has(normalized) ? normalized : "";
   }
 
   if (BOOLEAN_KEYS.has(key)) {

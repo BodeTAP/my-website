@@ -82,10 +82,18 @@ async function generateArticle(
   });
 }
 
-export async function POST(req: NextRequest) {
+function getCronSecret(req: NextRequest) {
+  const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  return req.headers.get("x-cron-secret")
+    ?? bearer
+    ?? req.nextUrl.searchParams.get("secret")
+    ?? req.nextUrl.searchParams.get("cron_secret")
+    ?? req.nextUrl.searchParams.get("token");
+}
+
+async function handleAutoPublish(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
-  const given  = req.headers.get("x-cron-secret")
-    ?? req.headers.get("authorization")?.replace("Bearer ", "");
+  const given  = getCronSecret(req);
 
   if (!secret || given !== secret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -206,4 +214,12 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
+}
+
+export async function GET(req: NextRequest) {
+  return handleAutoPublish(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handleAutoPublish(req);
 }
