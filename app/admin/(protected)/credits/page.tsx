@@ -4,6 +4,8 @@ import { requireModule } from "@/lib/permissions";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import AdminCreditAdjustForm from "./AdminCreditAdjustForm";
 import AdminCreditPackageManager from "./AdminCreditPackageManager";
+import AdminCreditsPagination from "./AdminCreditsPagination";
+import AdminCreditsSearch from "./AdminCreditsSearch";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
@@ -15,23 +17,75 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-export default async function AdminCreditsPage() {
+const CLIENTS_PER_PAGE = 8;
+const TRANSACTIONS_PER_PAGE = 10;
+
+function clampPage(value: string | undefined, totalPages: number) {
+  const page = Number(value ?? "1");
+  if (!Number.isFinite(page) || page < 1) return 1;
+  return Math.min(Math.trunc(page), Math.max(totalPages, 1));
+}
+
+export default async function AdminCreditsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ clientQ?: string; clientPage?: string; txQ?: string; txPage?: string }>;
+}) {
   await requireModule("clients");
+  const params = await searchParams;
+  const clientQ = (params.clientQ ?? "").trim();
+  const txQ = (params.txQ ?? "").trim();
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [clients, transactions, usageThisMonth, packages] = await Promise.all([
+  const clientWhere = clientQ
+    ? {
+        OR: [
+          { businessName: { contains: clientQ, mode: "insensitive" as const } },
+          { phone: { contains: clientQ, mode: "insensitive" as const } },
+          { user: { name: { contains: clientQ, mode: "insensitive" as const } } },
+          { user: { email: { contains: clientQ, mode: "insensitive" as const } } },
+        ],
+      }
+    : {};
+  const txWhere = txQ
+    ? {
+        OR: [
+          { description: { contains: txQ, mode: "insensitive" as const } },
+          { tool: { contains: txQ, mode: "insensitive" as const } },
+          { client: { businessName: { contains: txQ, mode: "insensitive" as const } } },
+          { client: { user: { name: { contains: txQ, mode: "insensitive" as const } } } },
+          { client: { user: { email: { contains: txQ, mode: "insensitive" as const } } } },
+        ],
+      }
+    : {};
+
+  const [clientTotal, txTotal] = await Promise.all([
+    prisma.client.count({ where: clientWhere }),
+    prisma.creditTransaction.count({ where: txWhere }),
+  ]);
+  const clientTotalPages = Math.max(1, Math.ceil(clientTotal / CLIENTS_PER_PAGE));
+  const txTotalPages = Math.max(1, Math.ceil(txTotal / TRANSACTIONS_PER_PAGE));
+  const clientPage = clampPage(params.clientPage, clientTotalPages);
+  const txPage = clampPage(params.txPage, txTotalPages);
+
+  const [clients, transactions, usageThisMonth, packages, totalCreditBalance, activeCreditClients, totalClients] = await Promise.all([
     prisma.client.findMany({
+      where: clientWhere,
       orderBy: { createdAt: "desc" },
+      skip: (clientPage - 1) * CLIENTS_PER_PAGE,
+      take: CLIENTS_PER_PAGE,
       include: {
         user: { select: { name: true, email: true } },
         credit: { select: { balance: true, updatedAt: true } },
       },
     }),
     prisma.creditTransaction.findMany({
+      where: txWhere,
       orderBy: { createdAt: "desc" },
-      take: 40,
+      skip: (txPage - 1) * TRANSACTIONS_PER_PAGE,
+      take: TRANSACTIONS_PER_PAGE,
       include: {
         client: {
           select: {
@@ -51,11 +105,17 @@ export default async function AdminCreditsPage() {
     prisma.creditPackage.findMany({
       orderBy: [{ isActive: "desc" }, { price: "asc" }],
     }),
+    prisma.clientCredit.aggregate({ _sum: { balance: true } }),
+    prisma.clientCredit.count({ where: { balance: { gt: 0 } } }),
+    prisma.client.count(),
   ]);
 
-  const totalBalance = clients.reduce((sum, client) => sum + (client.credit?.balance ?? 0), 0);
-  const activeCreditClients = clients.filter((client) => (client.credit?.balance ?? 0) > 0).length;
+  const totalBalance = totalCreditBalance._sum.balance ?? 0;
   const usedThisMonth = Math.abs(usageThisMonth._sum.amount ?? 0);
+  const clientStartIdx = clientTotal > 0 ? (clientPage - 1) * CLIENTS_PER_PAGE + 1 : 0;
+  const clientEndIdx = Math.min(clientPage * CLIENTS_PER_PAGE, clientTotal);
+  const txStartIdx = txTotal > 0 ? (txPage - 1) * TRANSACTIONS_PER_PAGE + 1 : 0;
+  const txEndIdx = Math.min(txPage * TRANSACTIONS_PER_PAGE, txTotal);
 
   return (
     <div className="space-y-8">
@@ -86,7 +146,7 @@ export default async function AdminCreditsPage() {
           <div className="glass rounded-2xl p-6 border border-blue-500/15">
             <p className="text-blue-200/45 text-xs uppercase tracking-widest font-black mb-2">Klien Ber-saldo</p>
             <p className="text-4xl font-black text-white">{activeCreditClients}</p>
-            <p className="text-blue-300/80 text-sm mt-1">dari {clients.length} klien</p>
+            <p className="text-blue-300/80 text-sm mt-1">dari {totalClients} klien</p>
           </div>
         </StaggerItem>
         <StaggerItem>
@@ -114,8 +174,16 @@ export default async function AdminCreditsPage() {
         <FadeUp delay={0.1}>
           <div className="glass rounded-3xl border border-white/5 overflow-hidden">
             <div className="px-6 py-5 border-b border-white/5 flex items-center gap-3">
-              <PlusCircle className="w-5 h-5 text-amber-300" />
-              <h2 className="text-white font-bold text-lg">Saldo per Klien</h2>
+              <div className="flex items-center gap-3 flex-1">
+                <PlusCircle className="w-5 h-5 text-amber-300" />
+                <div>
+                  <h2 className="text-white font-bold text-lg">Saldo per Klien</h2>
+                  <p className="text-blue-200/35 text-xs mt-1">
+                    Menampilkan {clientStartIdx}-{clientEndIdx} dari {clientTotal} klien
+                  </p>
+                </div>
+              </div>
+              <AdminCreditsSearch paramName="clientQ" pageParamName="clientPage" placeholder="Cari klien / email..." />
             </div>
             <div className="md:hidden divide-y divide-white/5">
               {clients.map((client) => (
@@ -167,14 +235,30 @@ export default async function AdminCreditsPage() {
                 </tbody>
               </table>
             </div>
+            {clientTotal > 0 && (
+              <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-xs text-blue-200/40 font-medium">
+                  Halaman <span className="text-blue-200">{clientPage}</span> dari <span className="text-blue-200">{clientTotalPages}</span>
+                </p>
+                <AdminCreditsPagination pageParamName="clientPage" totalPages={clientTotalPages} />
+              </div>
+            )}
           </div>
         </FadeUp>
 
         <FadeUp delay={0.15}>
           <div className="glass rounded-3xl border border-white/5 overflow-hidden">
-            <div className="px-6 py-5 border-b border-white/5 flex items-center gap-3">
-              <History className="w-5 h-5 text-blue-300" />
-              <h2 className="text-white font-bold text-lg">Riwayat Terbaru</h2>
+            <div className="px-6 py-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <History className="w-5 h-5 text-blue-300" />
+                <div>
+                  <h2 className="text-white font-bold text-lg">Riwayat Terbaru</h2>
+                  <p className="text-blue-200/35 text-xs mt-1">
+                    Menampilkan {txStartIdx}-{txEndIdx} dari {txTotal} transaksi
+                  </p>
+                </div>
+              </div>
+              <AdminCreditsSearch paramName="txQ" pageParamName="txPage" placeholder="Cari transaksi / klien..." />
             </div>
             <div className="divide-y divide-white/5 max-h-[720px] overflow-y-auto custom-scrollbar">
               {transactions.length === 0 ? (
@@ -204,6 +288,14 @@ export default async function AdminCreditsPage() {
                 })
               )}
             </div>
+            {txTotal > 0 && (
+              <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-xs text-blue-200/40 font-medium">
+                  Halaman <span className="text-blue-200">{txPage}</span> dari <span className="text-blue-200">{txTotalPages}</span>
+                </p>
+                <AdminCreditsPagination pageParamName="txPage" totalPages={txTotalPages} />
+              </div>
+            )}
           </div>
         </FadeUp>
       </div>
