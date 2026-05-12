@@ -23,6 +23,8 @@ user confirms a lasting preference, project decision, or important current state
   memory mechanism before adding a database-backed memory system.
 - Admin desktop sidebar supports a persisted collapsed icon-rail mode via
   `localStorage` key `admin-sidebar-collapsed`.
+- Admin sidebar collapse/expand animation uses CSS width transitions plus Framer
+  Motion detail animations.
 
 ## Current Focus
 

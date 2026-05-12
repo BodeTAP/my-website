@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { FacebookPixel } from "@/components/public/FacebookPixel";
 import { GoogleAnalytics } from "@/components/public/GoogleAnalytics";
@@ -125,21 +126,6 @@ export default async function RootLayout({
 
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
-      <head>
-        {process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: [
-                "(function(c,l,a,r,i,t,y){",
-                "c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};",
-                "t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;",
-                "y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);",
-                `})(window,document,'clarity','script','${process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID}');`,
-              ].join("\n"),
-            }}
-          />
-        )}
-      </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <script
           type="application/ld+json"
@@ -150,6 +136,21 @@ export default async function RootLayout({
         <FacebookPixel pixelId={settings.facebook_pixel_id ?? ""} />
         <GoogleAnalytics gaId={settings.google_analytics_id ?? ""} />
       </body>
+      {process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID && (
+        <Script
+          id="microsoft-clarity"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: [
+              "(function(c,l,a,r,i,t,y){",
+              "c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};",
+              "t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;",
+              "y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);",
+              `})(window,document,'clarity','script','${process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID}');`,
+            ].join("\n"),
+          }}
+        />
+      )}
     </html>
   );
 }
