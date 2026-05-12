@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle, ArrowRight, ClipboardList, Coins, FileText, Search, Wrench } from "lucide-react";
+import { AlertTriangle, ArrowRight, ClipboardList, Coins, FileText, ReceiptText, Search, Wrench } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getClientBalance } from "@/lib/credits";
@@ -57,7 +57,7 @@ export default async function PortalToolsPage() {
         </FadeUp>
       )}
 
-      <StaggerChildren stagger={0.08} className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <StaggerChildren stagger={0.08} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         <StaggerItem>
           <div className="glass rounded-2xl p-6 border border-blue-500/20 h-full flex flex-col hover:border-blue-400/40 transition-colors">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
@@ -92,6 +92,17 @@ export default async function PortalToolsPage() {
             </div>
             <h2 className="text-white font-black text-xl">Brief Generator</h2>
             <p className="text-blue-200/40 text-sm mt-2 leading-relaxed">Susun brief proyek dari kebutuhan bisnis.</p>
+            <span className="mt-auto w-fit rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-bold text-blue-200/45">Segera Hadir</span>
+          </div>
+        </StaggerItem>
+
+        <StaggerItem>
+          <div className="glass rounded-2xl p-6 border border-white/5 h-full flex flex-col opacity-70">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5">
+              <ReceiptText className="w-6 h-6 text-blue-200/45" />
+            </div>
+            <h2 className="text-white font-black text-xl">Invoice Generator</h2>
+            <p className="text-blue-200/40 text-sm mt-2 leading-relaxed">Buat invoice cepat dari detail layanan dan tagihan.</p>
             <span className="mt-auto w-fit rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-bold text-blue-200/45">Segera Hadir</span>
           </div>
         </StaggerItem>
