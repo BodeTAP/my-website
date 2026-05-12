@@ -1,18 +1,79 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
-import { Loader2, Save, Bot, Settings as SettingsIcon, MessageCircle, Mail, CreditCard, Search } from "lucide-react";
+import { ChevronDown, Loader2, Save, Bot, Settings as SettingsIcon, MessageCircle, Mail, CreditCard, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AI_FEATURE_ORDER, AI_FEATURE_SPECS, AI_MODEL_OPTIONS } from "@/lib/aiConfig";
+
+type SettingsTab = "umum" | "seo" | "komunikasi" | "payment" | "ai" | "broadcast";
+
+const SECTIONS_BY_TAB: Record<SettingsTab, string[]> = {
+  umum: ["brand", "homepage", "heroStats"],
+  seo: ["seoDefaults", "analytics"],
+  komunikasi: ["emailTemplates", "messageTemplates"],
+  payment: ["paymentBehavior"],
+  ai: ["aiModel", "aiFeatures", "aiFeatureConfig", "aiBehavior", "aiAutoPublish", "aiPortal"],
+  broadcast: ["broadcastIdentity", "broadcastTemplates", "broadcastConsent", "broadcastGuardrail", "broadcastDelay"],
+};
+
+const DEFAULT_OPEN_SECTIONS = Object.values(SECTIONS_BY_TAB).reduce<Record<string, boolean>>((acc, sections) => {
+  sections.forEach((id, index) => {
+    acc[id] = index === 0;
+  });
+  return acc;
+}, {});
+
+function CollapsibleSection({
+  id,
+  title,
+  description,
+  open,
+  onToggle,
+  children,
+}: {
+  id: string;
+  title: string;
+  description?: ReactNode;
+  open: boolean;
+  onToggle: (id: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className="glass rounded-2xl border border-white/5 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => onToggle(id)}
+        className="w-full flex items-start justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition-colors"
+        aria-expanded={open}
+        aria-controls={`${id}-panel`}
+      >
+        <span>
+          <span className="block text-white font-semibold text-base">{title}</span>
+          {description && <span className="block text-blue-200/40 text-sm mt-1 leading-relaxed">{description}</span>}
+        </span>
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5">
+          <ChevronDown className={`h-4 w-4 text-blue-200/70 transition-transform ${open ? "rotate-180" : ""}`} />
+        </span>
+      </button>
+      {open && (
+        <div id={`${id}-panel`} className="border-t border-white/5 px-5 py-5">
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default function SettingsClient({ 
   initial, 
 }: { 
   initial: Record<string, string>; 
 }) {
-  const [activeTab, setActiveTab] = useState<"umum" | "seo" | "komunikasi" | "payment" | "ai" | "broadcast">("umum");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("umum");
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(DEFAULT_OPEN_SECTIONS);
   
   // Settings State
   const [form, setForm] = useState(initial);
@@ -24,6 +85,13 @@ export default function SettingsClient({
     setForm((f) => ({ ...f, [key]: e.target.value }));
   const setText = (key: string) => (e: React.ChangeEvent<HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
+  const activeSections = SECTIONS_BY_TAB[activeTab];
+  const toggleSection = (id: string) => setOpenSections((current) => ({ ...current, [id]: !current[id] }));
+  const setActiveSectionsOpen = (open: boolean) =>
+    setOpenSections((current) => ({
+      ...current,
+      ...Object.fromEntries(activeSections.map((id) => [id, open])),
+    }));
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +165,30 @@ export default function SettingsClient({
         </button>
       </div>
 
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3">
+        <p className="text-blue-200/45 text-xs sm:text-sm">
+          Section bisa dibuka-tutup agar halaman lebih pendek. Buka hanya bagian yang sedang diedit.
+        </p>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => setActiveSectionsOpen(true)} className="h-8 px-3 text-xs border-white/10 bg-white/5 text-blue-100 hover:bg-white/10">
+            Buka semua
+          </Button>
+          <Button type="button" variant="outline" onClick={() => setActiveSectionsOpen(false)} className="h-8 px-3 text-xs border-white/10 bg-white/5 text-blue-100 hover:bg-white/10">
+            Tutup semua
+          </Button>
+        </div>
+      </div>
+
       {/* Tab: Umum */}
       {activeTab === "umum" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Identitas Brand</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Identitas utama yang dipakai di public site, footer, metadata, dan template pesan.</p>
+          <CollapsibleSection
+            id="brand"
+            title="Identitas Brand"
+            description="Identitas utama yang dipakai di public site, footer, metadata, dan template pesan."
+            open={openSections.brand}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-5">
               {[
                 ["brand_name", "Nama Brand", "MFWEB"],
@@ -126,11 +212,15 @@ export default function SettingsClient({
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 outline-none focus:border-blue-500/50 resize-y" />
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Konten Homepage</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Headline, subheadline, CTA, link sosial, dan asset default public site.</p>
+          <CollapsibleSection
+            id="homepage"
+            title="Konten Homepage"
+            description="Headline, subheadline, CTA, link sosial, dan asset default public site."
+            open={openSections.homepage}
+            onToggle={toggleSection}
+          >
             <div className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-5">
                 {[
@@ -164,12 +254,15 @@ export default function SettingsClient({
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500/50 resize-y" />
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Statistik Hero</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Angka yang tampil di bawah tombol &quot;Mulai Proyek&quot; di beranda situs.</p>
-            
+          <CollapsibleSection
+            id="heroStats"
+            title="Statistik Hero"
+            description="Angka yang tampil di bawah tombol &quot;Mulai Proyek&quot; di beranda situs."
+            open={openSections.heroStats}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-3 gap-6">
               {stats.map((s, idx) => (
                 <div key={s.numKey} className="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-4">
@@ -198,7 +291,7 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
 
@@ -214,9 +307,13 @@ export default function SettingsClient({
 
       {activeTab === "seo" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">SEO Default</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Default metadata untuk halaman yang tidak punya override khusus.</p>
+          <CollapsibleSection
+            id="seoDefaults"
+            title="SEO Default"
+            description="Default metadata untuk halaman yang tidak punya override khusus."
+            open={openSections.seoDefaults}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-5">
               {[
                 ["seo_default_title", "Default Meta Title", "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB"],
@@ -236,11 +333,15 @@ export default function SettingsClient({
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-sky-500/50 resize-y" />
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Analytics</h2>
-            <p className="text-blue-200/40 text-sm mb-6">ID tracking untuk public site. Kosongkan untuk menonaktifkan.</p>
+          <CollapsibleSection
+            id="analytics"
+            title="Analytics"
+            description="ID tracking untuk public site. Kosongkan untuk menonaktifkan."
+            open={openSections.analytics}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <Label className="text-blue-200/70 text-xs">Facebook Pixel ID</Label>
@@ -253,7 +354,7 @@ export default function SettingsClient({
                   className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
           <div className="flex items-center gap-4 pt-2">
@@ -268,9 +369,13 @@ export default function SettingsClient({
 
       {activeTab === "komunikasi" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Template Email</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Variabel umum: {"{brandName}"}, {"{clientName}"}, {"{invoiceNo}"}, {"{amount}"}, {"{dueDate}"}, {"{invoiceUrl}"}, {"{url}"}.</p>
+          <CollapsibleSection
+            id="emailTemplates"
+            title="Template Email"
+            description={<>Variabel umum: {"{brandName}"}, {"{clientName}"}, {"{invoiceNo}"}, {"{amount}"}, {"{dueDate}"}, {"{invoiceUrl}"}, {"{url}"}.</>}
+            open={openSections.emailTemplates}
+            onToggle={toggleSection}
+          >
             <div className="space-y-5">
               {[
                 ["template_email_invoice_subject", "Subject Email Invoice", 1],
@@ -289,11 +394,15 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Template WhatsApp & Admin</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Variabel mengikuti konteks pesan: invoice, tiket, hosting, maintenance, dan notifikasi admin.</p>
+          <CollapsibleSection
+            id="messageTemplates"
+            title="Template WhatsApp & Admin"
+            description="Variabel mengikuti konteks pesan: invoice, tiket, hosting, maintenance, dan notifikasi admin."
+            open={openSections.messageTemplates}
+            onToggle={toggleSection}
+          >
             <div className="space-y-5">
               {[
                 ["template_wa_invoice_reminder", "WhatsApp Invoice Reminder"],
@@ -309,7 +418,7 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
           <div className="flex items-center gap-4 pt-2">
@@ -324,9 +433,13 @@ export default function SettingsClient({
 
       {activeTab === "payment" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Invoice & Payment Behavior</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Default pembuatan invoice, reminder, mode gateway, biaya, dan instruksi pembayaran.</p>
+          <CollapsibleSection
+            id="paymentBehavior"
+            title="Invoice & Payment Behavior"
+            description="Default pembuatan invoice, reminder, mode gateway, biaya, dan instruksi pembayaran."
+            open={openSections.paymentBehavior}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-5">
               {[
                 ["invoice_prefix", "Prefix Nomor Invoice", "INV"],
@@ -362,7 +475,7 @@ export default function SettingsClient({
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-orange-500/50 resize-y" />
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
           <div className="flex items-center gap-4 pt-2">
@@ -379,9 +492,13 @@ export default function SettingsClient({
       {activeTab === "ai" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           {/* Model Selector */}
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Model AI</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Model yang lebih canggih menghasilkan konten lebih baik, namun lebih mahal per-request.</p>
+          <CollapsibleSection
+            id="aiModel"
+            title="Model AI"
+            description="Model yang lebih canggih menghasilkan konten lebih baik, namun lebih mahal per-request."
+            open={openSections.aiModel}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-4">
               {AI_MODEL_OPTIONS.map((m) => (
                 <button key={m.value} type="button"
@@ -400,12 +517,16 @@ export default function SettingsClient({
                 </button>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Feature Toggles */}
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Fitur AI Aktif</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Nonaktifkan fitur untuk menghentikan konsumsi token AI secara sementara.</p>
+          <CollapsibleSection
+            id="aiFeatures"
+            title="Fitur AI Aktif"
+            description="Nonaktifkan fitur untuk menghentikan konsumsi token AI secara sementara."
+            open={openSections.aiFeatures}
+            onToggle={toggleSection}
+          >
             <div className="space-y-4">
               {[
                 { key: "ai_feature_article",           label: "Pembuatan & Analisis Artikel",  desc: "Draft artikel, saran topik, analisis SEO, dan draft balasan tiket." },
@@ -432,11 +553,15 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Konfigurasi Per Fitur</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Atur model, token maksimum, dan rate limit untuk setiap workflow AI.</p>
+          <CollapsibleSection
+            id="aiFeatureConfig"
+            title="Konfigurasi Per Fitur"
+            description="Atur model, token maksimum, dan rate limit untuk setiap workflow AI."
+            open={openSections.aiFeatureConfig}
+            onToggle={toggleSection}
+          >
             <div className="space-y-5">
               {AI_FEATURE_ORDER.map((feature) => {
                 const spec = AI_FEATURE_SPECS[feature];
@@ -499,11 +624,15 @@ export default function SettingsClient({
                 );
               })}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Behavior Umum</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Default input artikel, retry JSON, dan logging penggunaan AI.</p>
+          <CollapsibleSection
+            id="aiBehavior"
+            title="Behavior Umum"
+            description="Default input artikel, retry JSON, dan logging penggunaan AI."
+            open={openSections.aiBehavior}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-3 gap-5">
               {[
                 ["ai_article_default_tone", "Tone Artikel Default"],
@@ -541,10 +670,15 @@ export default function SettingsClient({
                 </button>
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Auto Publish & Cover</h2>
+          <CollapsibleSection
+            id="aiAutoPublish"
+            title="Auto Publish & Cover"
+            description="Token topik, cover otomatis, Pexels, dan prompt topik auto publish."
+            open={openSections.aiAutoPublish}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-3 gap-5 mt-6">
               {[
                 ["ai_auto_publish_topic_max_tokens", "Token Topik Auto Publish"],
@@ -586,10 +720,15 @@ export default function SettingsClient({
               <textarea value={form.ai_prompt_auto_publish_topic ?? ""} onChange={setText("ai_prompt_auto_publish_topic")} rows={7}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Estimator & Portal Chat</h2>
+          <CollapsibleSection
+            id="aiPortal"
+            title="Estimator & Portal Chat"
+            description="Batas pertanyaan, konteks portal, fallback jawaban, dan pricing guide estimator."
+            open={openSections.aiPortal}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-3 gap-5 mt-6">
               {[
                 ["ai_portal_max_question_chars", "Maks Karakter Pertanyaan"],
@@ -625,7 +764,7 @@ export default function SettingsClient({
               <textarea value={form.ai_pricing_guide ?? ""} onChange={setText("ai_pricing_guide")} rows={8}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
             </div>
-          </div>
+          </CollapsibleSection>
 
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
 
@@ -642,9 +781,13 @@ export default function SettingsClient({
       {/* Tab: Broadcast WhatsApp */}
       {activeTab === "broadcast" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Identitas Pesan</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Variabel ini bisa dipakai di template: {"{brandName}"}, {"{websiteUrl}"}, {"{groupLink}"}, dan {"{footer}"}.</p>
+          <CollapsibleSection
+            id="broadcastIdentity"
+            title="Identitas Pesan"
+            description={<>Variabel ini bisa dipakai di template: {"{brandName}"}, {"{websiteUrl}"}, {"{groupLink}"}, dan {"{footer}"}.</>}
+            open={openSections.broadcastIdentity}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-5">
               {[
                 ["broadcast_brand_name", "Nama Brand", "MFWEB"],
@@ -663,11 +806,15 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Template Pesan</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Gunakan {"{name}"}, {"{businessName}"}, {"{brandName}"}, {"{websiteUrl}"}, {"{groupLink}"}, atau {"{footer}"}.</p>
+          <CollapsibleSection
+            id="broadcastTemplates"
+            title="Template Pesan"
+            description={<>Gunakan {"{name}"}, {"{businessName}"}, {"{brandName}"}, {"{websiteUrl}"}, {"{groupLink}"}, atau {"{footer}"}.</>}
+            open={openSections.broadcastTemplates}
+            onToggle={toggleSection}
+          >
             <div className="space-y-5">
               {[
                 ["broadcast_consent_template", "Template Consent Awal", 6],
@@ -685,11 +832,15 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Consent & Keyword</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Pisahkan keyword dengan koma. Sistem mencocokkan keyword dari awal balasan lead.</p>
+          <CollapsibleSection
+            id="broadcastConsent"
+            title="Consent & Keyword"
+            description="Pisahkan keyword dengan koma. Sistem mencocokkan keyword dari awal balasan lead."
+            open={openSections.broadcastConsent}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <Label className="text-blue-200/70 text-xs">Keyword Opt-in</Label>
@@ -729,11 +880,15 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Guardrail Pengiriman</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Batas ini menjaga broadcast tetap pelan, terukur, dan tidak terlalu agresif.</p>
+          <CollapsibleSection
+            id="broadcastGuardrail"
+            title="Guardrail Pengiriman"
+            description="Batas ini menjaga broadcast tetap pelan, terukur, dan tidak terlalu agresif."
+            open={openSections.broadcastGuardrail}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-3 gap-5">
               {[
                 ["broadcast_allowed_start_hour", "Jam Mulai WIB", "8"],
@@ -758,11 +913,15 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
-          <div className="glass rounded-3xl p-6 border border-white/5">
-            <h2 className="text-white font-semibold text-lg mb-1">Delay Antar Pesan</h2>
-            <p className="text-blue-200/40 text-sm mb-6">Format rentang detik: <code className="text-blue-300">min-max</code>. Contoh: <code className="text-blue-300">20-50</code>.</p>
+          <CollapsibleSection
+            id="broadcastDelay"
+            title="Delay Antar Pesan"
+            description={<>Format rentang detik: <code className="text-blue-300">min-max</code>. Contoh: <code className="text-blue-300">20-50</code>.</>}
+            open={openSections.broadcastDelay}
+            onToggle={toggleSection}
+          >
             <div className="grid sm:grid-cols-3 gap-5">
               {[
                 ["broadcast_delay_small", "1-5 Lead", "15-35"],
@@ -780,7 +939,7 @@ export default function SettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
 
