@@ -19,10 +19,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
-  client           Client?
-  adminPermission  AdminPermission?
+  accounts        Account[]
+  sessions        Session[]
+  client          Client?
+  adminPermission AdminPermission?
 
   @@map("users")
 }
@@ -70,10 +70,10 @@ model VerificationToken {
 // ─── Content ──────────────────────────────────────────────────────────────────
 
 model Category {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
-  slug      String    @unique
-  createdAt DateTime  @default(now())
+  slug      String   @unique
+  createdAt DateTime @default(now())
 
   articles Article[]
 
@@ -125,35 +125,35 @@ model Portfolio {
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
 model OnboardingForm {
-  id        String           @id @default(cuid())
-  clientId  String?
-  token     String           @unique @default(cuid())
-  status    OnboardingStatus @default(PENDING)
+  id       String           @id @default(cuid())
+  clientId String?
+  token    String           @unique @default(cuid())
+  status   OnboardingStatus @default(PENDING)
 
   // Step 1 — Bisnis
-  businessName    String?
-  industryType    String?
-  businessDesc    String?  @db.Text
-  targetAudience  String?
+  businessName   String?
+  industryType   String?
+  businessDesc   String? @db.Text
+  targetAudience String?
 
   // Step 2 — Website
-  websiteType     String?
-  referenceUrls   String[]
-  featuresWanted  String[]
-  colorStyle      String?
+  websiteType    String?
+  referenceUrls  String[]
+  featuresWanted String[]
+  colorStyle     String?
 
   // Step 3 — Aset
-  logoUrl         String?
-  driveLink       String?
-  instagram       String?
-  facebook        String?
-  tiktok          String?
-  hasDomain       Boolean  @default(false)
-  domainName      String?
+  logoUrl    String?
+  driveLink  String?
+  instagram  String?
+  facebook   String?
+  tiktok     String?
+  hasDomain  Boolean @default(false)
+  domainName String?
 
   // Step 4 — Timeline
-  deadline        DateTime?
-  notes           String?   @db.Text
+  deadline DateTime?
+  notes    String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -224,26 +224,26 @@ model SiteSetting {
 // ─── Leads / CRM ──────────────────────────────────────────────────────────────
 
 model Lead {
-  id             String     @id @default(cuid())
-  name           String
-  businessName   String
-  whatsapp       String
-  domain         String?
-  currentWebsite String?
-  message        String?
-  status         LeadStatus @default(NEW)
-  notes          String?
+  id              String              @id @default(cuid())
+  name            String
+  businessName    String
+  whatsapp        String
+  domain          String?
+  currentWebsite  String?
+  message         String?
+  status          LeadStatus          @default(NEW)
+  notes           String?
   lastContactedAt DateTime? // Kapan terakhir dikirim WA broadcast
-  waOptInStatus  WhatsAppOptInStatus @default(UNKNOWN)
-  waOptInAt      DateTime?
-  waOptInSource  String?
-  waOptOutAt     DateTime?
-  waOptOutReason String?
-  doNotContact   Boolean    @default(false)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  waOptInStatus   WhatsAppOptInStatus @default(UNKNOWN)
+  waOptInAt       DateTime?
+  waOptInSource   String?
+  waOptOutAt      DateTime?
+  waOptOutReason  String?
+  doNotContact    Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
-  proposals Proposal[]
+  proposals           Proposal[]
   broadcastRecipients BroadcastRecipient[]
 
   @@map("leads")
@@ -287,16 +287,56 @@ model Client {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projects      Project[]
-  invoices      Invoice[]
-  tickets       Ticket[]
-  subscriptions Subscription[]
-  onboardings   OnboardingForm[]
-  notifications Notification[]
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects       Project[]
+  invoices       Invoice[]
+  tickets        Ticket[]
+  subscriptions  Subscription[]
+  onboardings    OnboardingForm[]
+  notifications  Notification[]
   hostingRecords HostingRecord[]
+  credit         ClientCredit?
+  creditTxs      CreditTransaction[]
 
   @@map("clients")
+}
+
+model ClientCredit {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("client_credits")
+}
+
+model CreditTransaction {
+  id          String       @id @default(cuid())
+  clientId    String
+  amount      Int
+  type        CreditTxType
+  tool        String?
+  description String
+  meta        Json?
+  createdAt   DateTime     @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("credit_transactions")
+}
+
+model CreditPackage {
+  id          String   @id @default(cuid())
+  name        String
+  credits     Int
+  price       Int
+  bonusCredit Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("credit_packages")
 }
 
 model Project {
@@ -318,21 +358,21 @@ model Project {
 }
 
 model Invoice {
-  id          String        @id @default(cuid())
-  clientId    String
-  invoiceNo   String        @unique
-  description String?
-  amount      Int
-  lineItems   Json          @default("[]")
-  dueDate     DateTime?
-  status      InvoiceStatus @default(UNPAID)
-  whatsappMsg String?
-  tripayRef   String?       @unique
-  paymentUrl  String?
-  paidAt      DateTime?
+  id             String        @id @default(cuid())
+  clientId       String
+  invoiceNo      String        @unique
+  description    String?
+  amount         Int
+  lineItems      Json          @default("[]")
+  dueDate        DateTime?
+  status         InvoiceStatus @default(UNPAID)
+  whatsappMsg    String?
+  tripayRef      String?       @unique
+  paymentUrl     String?
+  paidAt         DateTime?
   reminderSentAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
@@ -430,6 +470,13 @@ enum ProposalStatus {
   DECLINED
 }
 
+enum CreditTxType {
+  TOPUP
+  USE
+  REFUND
+  BONUS
+}
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 
 model Notification {
@@ -459,13 +506,13 @@ enum NotificationType {
 // ─── Hosting & Domain Management ──────────────────────────────────────────────
 
 model HostingRecord {
-  id              String        @id @default(cuid())
-  clientId        String
+  id       String @id @default(cuid())
+  clientId String
 
   // Domain
-  domainName      String
-  domainProvider  String?
-  domainExpiry    DateTime?
+  domainName     String
+  domainProvider String?
+  domainExpiry   DateTime?
 
   // Hosting
   hostingProvider String?
@@ -473,19 +520,19 @@ model HostingRecord {
   hostingExpiry   DateTime?
 
   // SSL
-  sslExpiry       DateTime?
+  sslExpiry DateTime?
 
   // Status
-  status          HostingStatus @default(ACTIVE)
-  notes           String?       @db.Text
+  status HostingStatus @default(ACTIVE)
+  notes  String?       @db.Text
 
   // Notif tracking (cegah spam — 1x per milestone)
-  notif30SentAt   DateTime?
-  notif14SentAt   DateTime?
-  notif7SentAt    DateTime?
+  notif30SentAt DateTime?
+  notif14SentAt DateTime?
+  notif7SentAt  DateTime?
 
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
@@ -495,16 +542,16 @@ model HostingRecord {
 // ─── Broadcast Log ────────────────────────────────────────────────────────────
 
 model BroadcastLog {
-  id          String   @id @default(cuid())
-  sentAt      DateTime @default(now())
-  totalLeads  Int
-  sent        Int
-  failed      Int
-  skipped     Int      @default(0)
-  devices     Int      @default(1)
-  delayRange  String
-  messageSnippet String  // first 100 chars of message
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  sentAt         DateTime @default(now())
+  totalLeads     Int
+  sent           Int
+  failed         Int
+  skipped        Int      @default(0)
+  devices        Int      @default(1)
+  delayRange     String
+  messageSnippet String // first 100 chars of message
+  createdAt      DateTime @default(now())
 
   recipients BroadcastRecipient[]
 
@@ -512,16 +559,16 @@ model BroadcastLog {
 }
 
 model BroadcastRecipient {
-  id          String                   @id @default(cuid())
-  broadcastId String
-  leadId      String?
-  phone       String
-  status      BroadcastRecipientStatus @default(QUEUED)
-  skipReason  String?
-  providerResponse String?             @db.Text
-  messageSnippet String                @db.Text
-  sentAt      DateTime?
-  createdAt   DateTime                 @default(now())
+  id               String                   @id @default(cuid())
+  broadcastId      String
+  leadId           String?
+  phone            String
+  status           BroadcastRecipientStatus @default(QUEUED)
+  skipReason       String?
+  providerResponse String?                  @db.Text
+  messageSnippet   String                   @db.Text
+  sentAt           DateTime?
+  createdAt        DateTime                 @default(now())
 
   broadcast BroadcastLog @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
   lead      Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
@@ -587,10 +634,10 @@ model AdminPermission {
 
 model PermissionAuditLog {
   id            String   @id @default(cuid())
-  changedBy     String   // userId Super Admin
+  changedBy     String // userId Super Admin
   targetAdminId String?
   targetRoleId  String?
-  action        String   // ROLE_CREATED, ROLE_UPDATED, dll.
+  action        String // ROLE_CREATED, ROLE_UPDATED, dll.
   before        Json
   after         Json
   createdAt     DateTime @default(now())
