@@ -42,27 +42,47 @@ function CollapsibleSection({
   children: ReactNode;
 }) {
   return (
-    <section className="glass rounded-2xl border border-white/5 overflow-hidden">
+    <section
+      className={`glass group rounded-2xl border overflow-hidden transition-[border-color,box-shadow,background-color,transform] duration-300 ease-out ${
+        open
+          ? "border-blue-400/20 bg-white/[0.035] shadow-[0_18px_60px_rgba(37,99,235,0.10)]"
+          : "border-white/5 hover:border-white/10"
+      }`}
+    >
       <button
         type="button"
         onClick={() => onToggle(id)}
-        className="w-full flex items-start justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition-colors"
+        className="relative w-full flex items-start justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition-colors duration-300"
         aria-expanded={open}
         aria-controls={`${id}-panel`}
       >
+        <span className={`absolute left-0 top-4 h-8 w-1 rounded-r-full bg-blue-400 transition-all duration-300 ${open ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50"}`} />
         <span>
-          <span className="block text-white font-semibold text-base">{title}</span>
-          {description && <span className="block text-blue-200/40 text-sm mt-1 leading-relaxed">{description}</span>}
+          <span className={`block font-semibold text-base transition-colors duration-300 ${open ? "text-white" : "text-blue-50/90"}`}>{title}</span>
+          {description && <span className={`block text-sm mt-1 leading-relaxed transition-colors duration-300 ${open ? "text-blue-100/55" : "text-blue-200/40"}`}>{description}</span>}
         </span>
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5">
-          <ChevronDown className={`h-4 w-4 text-blue-200/70 transition-transform ${open ? "rotate-180" : ""}`} />
+        <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ${
+          open ? "border-blue-400/30 bg-blue-500/15 shadow-[0_0_18px_rgba(59,130,246,0.20)]" : "border-white/10 bg-white/5 group-hover:bg-white/10"
+        }`}>
+          <ChevronDown className={`h-4 w-4 text-blue-100/80 transition-transform duration-300 ease-out ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
-      {open && (
-        <div id={`${id}-panel`} className="border-t border-white/5 px-5 py-5">
-          {children}
+      <div
+        id={`${id}-panel`}
+        aria-hidden={!open}
+        inert={!open}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className={`border-t border-white/5 px-5 py-5 transition-[transform,filter] duration-300 ease-out ${
+            open ? "translate-y-0 blur-0" : "-translate-y-2 blur-[1px]"
+          }`}>
+            {children}
+          </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }
