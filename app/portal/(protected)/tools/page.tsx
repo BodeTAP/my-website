@@ -66,9 +66,9 @@ export default async function PortalToolsPage() {
             <h2 className="text-white font-black text-xl">Lead Finder</h2>
             <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Temukan bisnis lokal dari Google Maps</p>
             <p className="text-amber-300 text-sm font-bold mt-5">5 kredit/pencarian</p>
-            <Link href="/portal/tools/lead-finder" className="mt-auto pt-6">
-              <Button className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold">
-                Gunakan <ArrowRight className="w-4 h-4 ml-1" />
+            <Link href={balance < 5 ? "/portal/credits" : "/portal/tools/lead-finder"} className="mt-auto pt-6">
+              <Button className={`w-full h-11 rounded-xl font-bold ${balance < 5 ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}>
+                {balance < 5 ? "Beli Kredit" : "Gunakan"} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>

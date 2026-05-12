@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -94,6 +95,7 @@ function Rating({ rating, count }: { rating: number | null; count: number | null
 }
 
 export default function PortalLeadFinder({ initialBalance }: { initialBalance: number }) {
+  const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
@@ -135,6 +137,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
 
       setPlaces(Array.isArray(data.places) ? data.places : []);
       setFullQuery(typeof data.fullQuery === "string" ? data.fullQuery : "");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Pencarian gagal");
     } finally {

@@ -1,10 +1,8 @@
-import { revalidatePath } from "next/cache";
 import { ArrowDownLeft, ArrowUpRight, Coins, History, PlusCircle, RotateCcw } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { refundCredits, topupCredits } from "@/lib/credits";
 import { requireModule } from "@/lib/permissions";
-import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import AdminCreditAdjustForm from "./AdminCreditAdjustForm";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
@@ -14,32 +12,6 @@ function formatDate(date: Date) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
-}
-
-async function adjustCredits(formData: FormData) {
-  "use server";
-
-  await requireModule("clients");
-
-  const clientId = String(formData.get("clientId") ?? "");
-  const type = String(formData.get("type") ?? "TOPUP");
-  const amount = Number(formData.get("amount") ?? 0);
-  const description = String(formData.get("description") ?? "").trim();
-
-  if (!clientId || !Number.isInteger(amount) || amount <= 0) return;
-
-  const safeDescription = description || (type === "REFUND" ? "Refund manual admin" : "Topup manual admin");
-  const meta = { source: "admin_manual", type };
-
-  if (type === "REFUND") {
-    await refundCredits(clientId, amount, safeDescription, meta);
-  } else {
-    await topupCredits(clientId, amount, safeDescription, undefined, meta);
-  }
-
-  revalidatePath("/admin/credits");
-  revalidatePath("/portal/credits");
-  revalidatePath("/portal/dashboard");
 }
 
 export default async function AdminCreditsPage() {
@@ -129,7 +101,27 @@ export default async function AdminCreditsPage() {
               <PlusCircle className="w-5 h-5 text-amber-300" />
               <h2 className="text-white font-bold text-lg">Saldo per Klien</h2>
             </div>
-            <div className="overflow-x-auto">
+            <div className="md:hidden divide-y divide-white/5">
+              {clients.map((client) => (
+                <div key={client.id} className="p-5 space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-white font-bold truncate">{client.businessName}</p>
+                      <p className="text-blue-200/40 text-xs mt-1 truncate">{client.user.email}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-2xl font-black text-amber-300">{client.credit?.balance ?? 0}</p>
+                      <p className="text-blue-200/35 text-[11px]">kredit</p>
+                    </div>
+                  </div>
+                  <p className="text-blue-200/35 text-xs">
+                    {client.credit?.updatedAt ? `Update: ${formatDate(client.credit.updatedAt)}` : "Belum ada record"}
+                  </p>
+                  <AdminCreditAdjustForm clientId={client.id} clientName={client.businessName} mobile />
+                </div>
+              ))}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-blue-200/40 border-b border-white/5">
@@ -152,29 +144,7 @@ export default async function AdminCreditsPage() {
                         </p>
                       </td>
                       <td className="px-6 py-5 min-w-[520px]">
-                        <form action={adjustCredits} className="grid grid-cols-[92px_92px_1fr_auto] gap-2">
-                          <input type="hidden" name="clientId" value={client.id} />
-                          <select name="type" className="h-10 rounded-xl bg-black/35 border border-white/10 px-3 text-blue-100 outline-none focus:border-amber-500/40">
-                            <option value="TOPUP">Topup</option>
-                            <option value="REFUND">Refund</option>
-                          </select>
-                          <input
-                            name="amount"
-                            type="number"
-                            min="1"
-                            required
-                            placeholder="Kredit"
-                            className="h-10 rounded-xl bg-black/35 border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-amber-500/40"
-                          />
-                          <input
-                            name="description"
-                            placeholder="Catatan"
-                            className="h-10 rounded-xl bg-black/35 border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-amber-500/40"
-                          />
-                          <Button type="submit" className="h-10 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-bold px-4">
-                            Simpan
-                          </Button>
-                        </form>
+                        <AdminCreditAdjustForm clientId={client.id} clientName={client.businessName} />
                       </td>
                     </tr>
                   ))}

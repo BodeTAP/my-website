@@ -133,7 +133,7 @@ export default async function PortalCreditsPage() {
                   <tr className="text-left text-blue-200/40 border-b border-white/5">
                     <th className="px-6 py-3 font-bold">Tanggal</th>
                     <th className="px-6 py-3 font-bold">Deskripsi</th>
-                    <th className="px-6 py-3 font-bold text-right">Amount</th>
+                    <th className="px-6 py-3 font-bold text-right">Jumlah</th>
                   </tr>
                 </thead>
                 <tbody>

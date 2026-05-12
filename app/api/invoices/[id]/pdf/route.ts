@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 type Params = { params: Promise<{ id: string }> };
 
 function formatRupiah(amount: number) {
-  return "Rp " + amount.toLocaleString("id-ID");
+  return "Rp " + (Number.isFinite(amount) ? amount : 0).toLocaleString("id-ID");
 }
 
 function formatDate(date: Date | string) {
@@ -80,25 +80,26 @@ export async function GET(_req: Request, { params }: Params) {
 
   // Helper: draw text (Y measured from top)
   const txt = (
-    text: string,
+    text: unknown,
     x: number,
     topY: number,
     size: number,
     font = regular,
     color = C.text,
-  ) => page.drawText(text, { x, y: H_PAGE - topY, size, font, color });
+  ) => page.drawText(String(text ?? ""), { x, y: H_PAGE - topY, size, font, color });
 
   // Helper: right-aligned text
   const txtR = (
-    text: string,
+    text: unknown,
     rightX: number,
     topY: number,
     size: number,
     font = regular,
     color = C.text,
   ) => {
-    const w = font.widthOfTextAtSize(text, size);
-    page.drawText(text, { x: rightX - w, y: H_PAGE - topY, size, font, color });
+    const safeText = String(text ?? "");
+    const w = font.widthOfTextAtSize(safeText, size);
+    page.drawText(safeText, { x: rightX - w, y: H_PAGE - topY, size, font, color });
   };
 
   // Helper: filled rectangle (Y from top)
@@ -190,9 +191,35 @@ export async function GET(_req: Request, { params }: Params) {
 
   // Rows — dynamic line items if available, else single row
   type InvItem = { label: string; amount: number };
+  type RawInvItem = {
+    label?: unknown;
+    name?: unknown;
+    description?: unknown;
+    amount?: unknown;
+    price?: unknown;
+    qty?: unknown;
+  };
+  const normalizeItem = (item: RawInvItem, index: number): InvItem => {
+    const label =
+      typeof item.label === "string" && item.label.trim()
+        ? item.label.trim()
+        : typeof item.name === "string" && item.name.trim()
+        ? item.name.trim()
+        : typeof item.description === "string" && item.description.trim()
+        ? item.description.trim()
+        : invoice.description ?? `Item ${index + 1}`;
+    const directAmount = typeof item.amount === "number" ? item.amount : null;
+    const price = typeof item.price === "number" ? item.price : null;
+    const qty = typeof item.qty === "number" && item.qty > 0 ? item.qty : 1;
+
+    return {
+      label,
+      amount: directAmount ?? (price != null ? price * qty : invoice.amount),
+    };
+  };
   const rawItems = (invoice as { lineItems?: unknown }).lineItems;
   const lineItems: InvItem[] = Array.isArray(rawItems) && rawItems.length > 0
-    ? (rawItems as InvItem[])
+    ? (rawItems as RawInvItem[]).map(normalizeItem)
     : [{ label: invoice.description ?? "Jasa Pembuatan Website", amount: invoice.amount }];
 
   let rowCursor = TBL_TOP + TBL_HEAD_H;
