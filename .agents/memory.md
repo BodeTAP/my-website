@@ -21,6 +21,8 @@ user confirms a lasting preference, project decision, or important current state
 
 - Use this repository file, `.agents/memory.md`, as the first lightweight shared
   memory mechanism before adding a database-backed memory system.
+- Admin desktop sidebar supports a persisted collapsed icon-rail mode via
+  `localStorage` key `admin-sidebar-collapsed`.
 
 ## Current Focus
 
