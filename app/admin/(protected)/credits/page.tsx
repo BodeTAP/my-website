@@ -162,6 +162,7 @@ export default async function AdminCreditsPage() {
                             name="amount"
                             type="number"
                             min="1"
+                            required
                             placeholder="Kredit"
                             className="h-10 rounded-xl bg-black/35 border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-amber-500/40"
                           />
@@ -170,7 +171,7 @@ export default async function AdminCreditsPage() {
                             placeholder="Catatan"
                             className="h-10 rounded-xl bg-black/35 border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-amber-500/40"
                           />
-                          <Button className="h-10 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-bold px-4">
+                          <Button type="submit" className="h-10 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-bold px-4">
                             Simpan
                           </Button>
                         </form>
