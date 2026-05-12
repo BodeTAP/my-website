@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import AdminCreditAdjustForm from "./AdminCreditAdjustForm";
+import AdminCreditPackageManager from "./AdminCreditPackageManager";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
@@ -20,7 +21,7 @@ export default async function AdminCreditsPage() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [clients, transactions, usageThisMonth] = await Promise.all([
+  const [clients, transactions, usageThisMonth, packages] = await Promise.all([
     prisma.client.findMany({
       orderBy: { createdAt: "desc" },
       include: {
@@ -46,6 +47,9 @@ export default async function AdminCreditsPage() {
         createdAt: { gte: monthStart },
       },
       _sum: { amount: true },
+    }),
+    prisma.creditPackage.findMany({
+      orderBy: [{ isActive: "desc" }, { price: "asc" }],
     }),
   ]);
 
@@ -93,6 +97,18 @@ export default async function AdminCreditsPage() {
           </div>
         </StaggerItem>
       </StaggerChildren>
+
+      <AdminCreditPackageManager
+        packages={packages.map((pkg) => ({
+          id: pkg.id,
+          name: pkg.name,
+          credits: pkg.credits,
+          price: pkg.price,
+          bonusCredit: pkg.bonusCredit,
+          isActive: pkg.isActive,
+          createdAt: pkg.createdAt.toISOString(),
+        }))}
+      />
 
       <div className="grid grid-cols-1 2xl:grid-cols-[1.25fr_0.75fr] gap-6">
         <FadeUp delay={0.1}>
