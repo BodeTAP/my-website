@@ -42,10 +42,10 @@ export async function deductCredits(
       data: {
         clientId,
         amount: -amount,
-          type: "USE",
-          tool,
-          description,
-          meta: meta as Prisma.InputJsonValue | undefined,
+        type: "USE",
+        tool,
+        description,
+        meta: meta as Prisma.InputJsonValue | undefined,
       },
     });
 
@@ -58,6 +58,7 @@ export async function topupCredits(
   amount: number,
   description: string,
   packageId?: string,
+  meta?: Record<string, unknown>,
 ): Promise<number> {
   if (amount <= 0) return getClientBalance(clientId);
 
@@ -73,9 +74,41 @@ export async function topupCredits(
       data: {
         clientId,
         amount,
-          type: "TOPUP",
-          description,
-          meta: packageId ? { packageId } : undefined,
+        type: "TOPUP",
+        description,
+        meta: packageId || meta
+          ? ({ ...(packageId ? { packageId } : {}), ...(meta ?? {}) } as Prisma.InputJsonValue)
+          : undefined,
+      },
+    });
+
+    return updated.balance;
+  });
+}
+
+export async function refundCredits(
+  clientId: string,
+  amount: number,
+  description: string,
+  meta?: Record<string, unknown>,
+): Promise<number> {
+  if (amount <= 0) return getClientBalance(clientId);
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.clientCredit.upsert({
+      where: { clientId },
+      update: { balance: { increment: amount } },
+      create: { clientId, balance: amount },
+      select: { balance: true },
+    });
+
+    await tx.creditTransaction.create({
+      data: {
+        clientId,
+        amount,
+        type: "REFUND",
+        description,
+        meta: meta as Prisma.InputJsonValue | undefined,
       },
     });
 

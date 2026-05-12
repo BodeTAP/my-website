@@ -66,41 +66,56 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    await prisma.invoice.updateMany({
-      where: { tripayRef: reference },
+    const updateResult = await prisma.invoice.updateMany({
+      where: { tripayRef: reference, status: { not: "PAID" } },
       data:  {
         status: "PAID",
         paidAt: paid_at ? new Date(paid_at * 1000) : new Date(),
       },
     });
 
-    console.log(`[Tripay Webhook] Invoice ${reference} ditandai LUNAS`);
+    const newlyPaid = updateResult.count > 0;
+    console.log(
+      newlyPaid
+        ? `[Tripay Webhook] Invoice ${reference} ditandai LUNAS`
+        : `[Tripay Webhook] Invoice ${reference} sudah pernah ditandai LUNAS`,
+    );
 
-    if (invoice && invoice.status !== "PAID") {
+    if (invoice && newlyPaid) {
       const lineItems = Array.isArray(invoice.lineItems)
         ? (invoice.lineItems as unknown as InvoiceLineItem[])
         : [];
       const creditItem = lineItems.find((item) => item.type === "credit_package");
 
       if (creditItem?.packageId) {
+        const existingTopup = await prisma.creditTransaction.findFirst({
+          where: {
+            clientId: invoice.clientId,
+            type: "TOPUP",
+            meta: { path: ["invoiceId"], equals: invoice.id },
+          },
+          select: { id: true },
+        });
+
         const pkg = await prisma.creditPackage.findUnique({
           where: { id: String(creditItem.packageId) },
         });
 
-        if (pkg) {
+        if (pkg && !existingTopup) {
           const { topupCredits } = await import("@/lib/credits");
           await topupCredits(
             invoice.clientId,
             pkg.credits + pkg.bonusCredit,
             `Pembelian Paket ${pkg.name}`,
             pkg.id,
+            { invoiceId: invoice.id, invoiceNo: invoice.invoiceNo, tripayRef: reference },
           );
         }
       }
     }
 
     // Send WA notifications after response via after()
-    if (invoice) {
+    if (invoice && newlyPaid) {
       const clientName  = invoice.client.user.name ?? invoice.client.businessName;
       const adminPhone  = process.env.ADMIN_WHATSAPP_NUMBER ?? process.env.WHATSAPP_NUMBER;
 

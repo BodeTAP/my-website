@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import {
   LayoutDashboard, FileText, Users, Briefcase,
-  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server, Shield, PanelLeftClose, PanelLeftOpen
+  Receipt, MessageSquare, LogOut, Menu, X, Globe, Star, Settings, Tag, Wrench, ClipboardList, ScrollText, UserCheck, ChevronRight, Server, Shield, PanelLeftClose, PanelLeftOpen, Coins
 } from "lucide-react";
 import type { AdminModule } from "@/lib/permissions";
 
@@ -44,6 +44,7 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
     items: [
       { label: "Inbox Leads", href: "/admin/leads", icon: Users, module: "leads" },
       { label: "Klien & Kontak", href: "/admin/clients", icon: UserCheck, module: "clients" },
+      { label: "Kredit Klien", href: "/admin/credits", icon: Coins, module: "clients" },
       { label: "Proposal", href: "/admin/proposals", icon: ScrollText, module: "proposals" },
       { label: "Onboarding", href: "/admin/onboarding", icon: ClipboardList, module: "clients" },
     ]

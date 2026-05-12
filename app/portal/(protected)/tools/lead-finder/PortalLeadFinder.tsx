@@ -103,6 +103,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const [fullQuery, setFullQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const insufficient = balance < 5;
   const filteredPlaces = useMemo(() => {
@@ -110,8 +111,14 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
     return places;
   }, [filter, places]);
 
+  function requestSearch() {
+    if (!query.trim() || insufficient) return;
+    setConfirmOpen(true);
+  }
+
   async function runSearch() {
     if (!query.trim() || insufficient) return;
+    setConfirmOpen(false);
     setLoading(true);
     setError(null);
 
@@ -214,7 +221,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
           </div>
           <Button
             type="button"
-            onClick={runSearch}
+            onClick={requestSearch}
             disabled={loading || insufficient || !query.trim()}
             className="lg:self-end h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black px-6"
           >
@@ -239,6 +246,12 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
       {error && (
         <div className="rounded-2xl bg-red-500/10 border border-red-500/25 px-5 py-4 text-red-200 text-sm">
           {error}
+        </div>
+      )}
+
+      {fullQuery && !error && !loading && (
+        <div className="rounded-2xl bg-green-500/10 border border-green-500/25 px-5 py-4 text-green-100 text-sm">
+          Pencarian selesai. 5 kredit telah digunakan, saldo terbaru {balance} kredit.
         </div>
       )}
 
@@ -316,6 +329,37 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
       {!loading && places.length === 0 && (
         <div className="glass rounded-3xl p-10 border border-white/5 text-center text-blue-200/35 text-sm">
           Masukkan jenis bisnis dan kota untuk mulai mencari.
+        </div>
+      )}
+
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-[#07111f] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.55)] p-6">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-5">
+              <Coins className="w-6 h-6 text-amber-300" />
+            </div>
+            <h2 className="text-white font-black text-xl">Gunakan 5 kredit?</h2>
+            <p className="text-blue-200/55 text-sm mt-2 leading-relaxed">
+              Pencarian Lead Finder akan memotong 5 kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setConfirmOpen(false)}
+                className="h-11 rounded-xl border-white/10 bg-white/5 text-blue-100 hover:bg-white/10"
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                onClick={runSearch}
+                className="h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black flex-1"
+              >
+                Ya, Cari Lead
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

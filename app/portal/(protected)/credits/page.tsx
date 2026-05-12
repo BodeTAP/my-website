@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { ArrowDownLeft, ArrowUpRight, Coins, ReceiptText, Wallet } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Coins, ReceiptText, Wallet } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getClientBalance, getTransactionHistory } from "@/lib/credits";
@@ -69,6 +70,20 @@ export default async function PortalCreditsPage() {
           </div>
         </div>
       </FadeUp>
+
+      {balance < 10 && (
+        <FadeUp delay={0.05}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-300 shrink-0" />
+              <p className="text-amber-100 text-sm font-bold">Kredit hampir habis. Tambah saldo agar tools tetap bisa digunakan tanpa jeda.</p>
+            </div>
+            <Link href="/portal/tools" className="text-amber-300 hover:text-white text-sm font-bold transition-colors">
+              Lihat tools
+            </Link>
+          </div>
+        </FadeUp>
+      )}
 
       <StaggerChildren stagger={0.08} className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {packages.map((pkg) => {
