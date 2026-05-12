@@ -3,9 +3,10 @@ import Link from "next/link";
 import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Coins, ReceiptText, Wallet } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getClientBalance, getTransactionHistory } from "@/lib/credits";
+import { getClientBalance } from "@/lib/credits";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import BuyCreditButton from "./BuyCreditButton";
+import CreditHistoryPagination from "./CreditHistoryPagination";
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -25,7 +26,20 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-export default async function PortalCreditsPage() {
+const HISTORY_PER_PAGE = 10;
+
+function clampPage(value: string | undefined, totalPages: number) {
+  const page = Number(value ?? "1");
+  if (!Number.isFinite(page) || page < 1) return 1;
+  return Math.min(Math.trunc(page), Math.max(totalPages, 1));
+}
+
+export default async function PortalCreditsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
   const session = await auth();
   if (!session?.user?.email) redirect("/portal/login");
 
@@ -35,9 +49,22 @@ export default async function PortalCreditsPage() {
   });
   if (!user?.client) redirect("/portal/dashboard");
 
+  const transactionTotal = await prisma.creditTransaction.count({
+    where: { clientId: user.client.id },
+  });
+  const totalPages = Math.max(1, Math.ceil(transactionTotal / HISTORY_PER_PAGE));
+  const page = clampPage(params.page, totalPages);
+  const startIdx = transactionTotal > 0 ? (page - 1) * HISTORY_PER_PAGE + 1 : 0;
+  const endIdx = Math.min(page * HISTORY_PER_PAGE, transactionTotal);
+
   const [balance, transactions, packages] = await Promise.all([
     getClientBalance(user.client.id),
-    getTransactionHistory(user.client.id, 20),
+    prisma.creditTransaction.findMany({
+      where: { clientId: user.client.id },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * HISTORY_PER_PAGE,
+      take: HISTORY_PER_PAGE,
+    }),
     prisma.creditPackage.findMany({
       where: { isActive: true },
       orderBy: { price: "asc" },
@@ -114,13 +141,17 @@ export default async function PortalCreditsPage() {
 
       <FadeUp delay={0.15}>
         <div className="glass rounded-3xl border border-white/5 overflow-hidden">
-          <div className="flex items-center gap-3 px-6 py-5 border-b border-white/5">
+          <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-white/5">
+            <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
               <ReceiptText className="w-5 h-5 text-blue-300" />
             </div>
             <div>
               <h2 className="text-white font-bold text-lg">Riwayat Kredit</h2>
-              <p className="text-blue-200/45 text-xs">Transaksi kredit terbaru di akun Anda</p>
+              <p className="text-blue-200/45 text-xs">
+                Menampilkan {startIdx}-{endIdx} dari {transactionTotal} transaksi
+              </p>
+            </div>
             </div>
           </div>
 
@@ -161,6 +192,14 @@ export default async function PortalCreditsPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+          {transactionTotal > 0 && (
+            <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-xs text-blue-200/40 font-medium">
+                Halaman <span className="text-blue-200">{page}</span> dari <span className="text-blue-200">{totalPages}</span>
+              </p>
+              <CreditHistoryPagination totalPages={totalPages} />
             </div>
           )}
         </div>
