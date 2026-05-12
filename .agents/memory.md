@@ -25,6 +25,8 @@ user confirms a lasting preference, project decision, or important current state
   `localStorage` key `admin-sidebar-collapsed`.
 - Admin sidebar collapse/expand animation uses CSS width transitions plus Framer
   Motion detail animations.
+- Portal client desktop sidebar mirrors the admin sidebar collapse/expand pattern
+  using `localStorage` key `portal-sidebar-collapsed`.
 
 ## Current Focus
 

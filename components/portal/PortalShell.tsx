@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle, ChevronRight, Server } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import type { Transition } from "framer-motion";
+import { LayoutDashboard, Briefcase, Receipt, MessageSquare, LogOut, Menu, X, UserCircle, ChevronRight, Server, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import NotificationBell from "@/components/portal/NotificationBell";
+
+const SIDEBAR_STORAGE_KEY = "portal-sidebar-collapsed";
+const SIDEBAR_STORAGE_EVENT = "portal-sidebar-collapsed-change";
+const SIDEBAR_SPRING: Transition = { type: "spring", stiffness: 360, damping: 38, mass: 0.9 };
+const SIDEBAR_FADE: Transition = { duration: 0.18, ease: [0.22, 1, 0.36, 1] };
 
 const navItems = [
   { label: "Dashboard",   href: "/portal/dashboard", icon: LayoutDashboard },
@@ -17,17 +24,59 @@ const navItems = [
   { label: "Pengaturan",  href: "/portal/profile",   icon: UserCircle },
 ];
 
-const Logo = () => (
-  <Link href="/portal/dashboard" className="flex items-center gap-3 px-2 group">
-    <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 overflow-hidden shadow-[0_0_15px_rgba(37,99,235,0.2)] group-hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all">
-      <Image src="/logo.png" alt="MFWEB" width={24} height={24} className="shrink-0 relative z-10" />
+function getSidebarCollapsedSnapshot() {
+  if (typeof window === "undefined") return "false";
+  return localStorage.getItem(SIDEBAR_STORAGE_KEY) ?? "false";
+}
+
+function getSidebarCollapsedServerSnapshot() {
+  return "false";
+}
+
+function subscribeSidebarCollapsed(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(SIDEBAR_STORAGE_EVENT, onStoreChange);
+
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(SIDEBAR_STORAGE_EVENT, onStoreChange);
+  };
+}
+
+const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
+  <motion.div layout transition={SIDEBAR_SPRING}>
+    <Link
+      href="/portal/dashboard"
+      className={`flex items-center group ${collapsed ? "justify-center gap-0 px-0" : "gap-3 px-2"}`}
+      aria-label="MFWEB Portal Klien"
+    >
+    <motion.div
+      layout
+      className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 overflow-hidden shadow-[0_0_15px_rgba(37,99,235,0.2)] group-hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-shadow"
+      animate={{ rotate: collapsed ? -8 : 0, scale: collapsed ? 0.96 : 1 }}
+      transition={SIDEBAR_SPRING}
+    >
+      <Image src="/logo.png" alt="MFWEB" width={24} height={24} className="shrink-0 relative z-10" style={{ width: 24, height: 24 }} />
       <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent" />
-    </div>
-    <div>
+    </motion.div>
+    <motion.div
+      aria-hidden={collapsed}
+      className="overflow-hidden whitespace-nowrap"
+      animate={{
+        opacity: collapsed ? 0 : 1,
+        width: collapsed ? 0 : 96,
+        x: collapsed ? -8 : 0,
+        filter: collapsed ? "blur(3px)" : "blur(0px)",
+      }}
+      transition={SIDEBAR_FADE}
+    >
       <p className="text-white text-base font-black tracking-wide bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">MFWEB</p>
       <p className="text-blue-400/80 text-[10px] font-bold uppercase tracking-wider mt-0.5">Portal Klien</p>
-    </div>
-  </Link>
+    </motion.div>
+    </Link>
+  </motion.div>
 );
 
 function UserAvatar({ src, name, sizeClasses, imageClasses, fallbackClasses }: { src?: string | null, name: string, sizeClasses: string, imageClasses?: string, fallbackClasses?: string }) {
@@ -54,6 +103,236 @@ function UserAvatar({ src, name, sizeClasses, imageClasses, fallbackClasses }: {
   );
 }
 
+interface SidebarContentProps {
+  collapsed?: boolean;
+  isActive: (href: string) => boolean;
+  onToggleCollapse: () => void;
+  showCollapseToggle?: boolean;
+  userEmail: string;
+  userImage?: string | null;
+  userName: string;
+}
+
+function SidebarContent({
+  collapsed = false,
+  isActive,
+  onToggleCollapse,
+  showCollapseToggle = false,
+  userEmail,
+  userImage,
+  userName,
+}: SidebarContentProps) {
+  return (
+    <aside className="flex flex-col h-full bg-[#030914]/80 backdrop-blur-xl relative overflow-hidden">
+      {/* Glow Effects */}
+      <motion.div
+        className="absolute top-0 left-0 w-64 h-64 bg-blue-600/5 blur-[100px] pointer-events-none"
+        animate={{ x: collapsed ? -40 : 0, opacity: collapsed ? 0.35 : 1 }}
+        transition={SIDEBAR_SPRING}
+      />
+      <motion.div
+        className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-600/5 blur-[100px] pointer-events-none"
+        animate={{ x: collapsed ? 48 : 0, opacity: collapsed ? 0.35 : 1 }}
+        transition={SIDEBAR_SPRING}
+      />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={collapsed ? "portal-sidebar-contract" : "portal-sidebar-expand"}
+          className="absolute inset-y-0 -left-16 w-28 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent pointer-events-none"
+          initial={{ x: collapsed ? 230 : 40, opacity: 0 }}
+          animate={{ x: collapsed ? -40 : 290, opacity: [0, 1, 0] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </AnimatePresence>
+
+      {/* Logo */}
+      <motion.div
+        layout
+        className={`border-b border-white/5 relative z-10 ${collapsed ? "p-4" : "p-6"}`}
+        transition={SIDEBAR_SPRING}
+      >
+        <motion.div
+          layout
+          className={`flex items-center ${collapsed ? "flex-col gap-3" : "justify-between gap-3"}`}
+          transition={SIDEBAR_SPRING}
+        >
+          <Logo collapsed={collapsed} />
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-9 h-9 items-center justify-center rounded-xl text-blue-200/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_18px_rgba(37,99,235,0.22)]`}
+            aria-label={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
+            title={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={collapsed ? "open-portal-sidebar" : "close-portal-sidebar"}
+                initial={{ opacity: 0, rotate: collapsed ? -35 : 35, scale: 0.7 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: collapsed ? 35 : -35, scale: 0.7 }}
+                transition={SIDEBAR_FADE}
+              >
+                {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+              </motion.span>
+            </AnimatePresence>
+          </button>
+        </motion.div>
+      </motion.div>
+
+      {/* User info + Bell */}
+      <motion.div
+        layout
+        className={`border-b border-white/5 relative z-10 bg-black/20 ${collapsed ? "px-3 py-5" : "px-5 py-5"}`}
+        transition={SIDEBAR_SPRING}
+      >
+        <motion.div
+          layout
+          className={`flex items-center ${collapsed ? "flex-col gap-3" : "justify-between mb-3"}`}
+          transition={SIDEBAR_SPRING}
+        >
+          <Link href="/portal/profile" className={`relative ${collapsed ? "w-12 flex justify-center" : ""}`} aria-label="Profil klien">
+            <UserAvatar 
+              src={userImage} 
+              name={userName} 
+              sizeClasses="w-10 h-10" 
+              imageClasses="ring-2 ring-blue-500/30 hover:ring-blue-400/60 transition-all shadow-lg"
+              fallbackClasses="text-sm ring-2 ring-white/10 shadow-lg"
+            />
+            <div className="absolute bottom-0 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#030914]"></div>
+          </Link>
+          <div className={collapsed ? "w-12 flex justify-center" : ""}>
+            <NotificationBell />
+          </div>
+        </motion.div>
+        <motion.div
+          aria-hidden={collapsed}
+          className="overflow-hidden whitespace-nowrap"
+          animate={{
+            opacity: collapsed ? 0 : 1,
+            height: collapsed ? 0 : "auto",
+            x: collapsed ? -8 : 0,
+            filter: collapsed ? "blur(3px)" : "blur(0px)",
+          }}
+          transition={SIDEBAR_FADE}
+        >
+          <p className="text-white text-sm font-bold line-clamp-1">{userName}</p>
+          <p className="text-blue-200/40 text-[10px] line-clamp-1 mt-0.5">{userEmail}</p>
+        </motion.div>
+      </motion.div>
+
+      {/* Nav */}
+      <motion.nav
+        layout
+        className={`flex-1 py-6 overflow-y-auto custom-scrollbar relative z-10 ${collapsed ? "px-3 space-y-1.5" : "px-5 space-y-1.5"}`}
+        transition={SIDEBAR_SPRING}
+      >
+        <motion.h4
+          aria-hidden={collapsed}
+          className="px-3 text-[10px] font-black uppercase tracking-widest text-blue-200/40 overflow-hidden whitespace-nowrap"
+          animate={{
+            opacity: collapsed ? 0 : 1,
+            height: collapsed ? 0 : "auto",
+            marginBottom: collapsed ? 0 : 12,
+            x: collapsed ? -10 : 0,
+          }}
+          transition={SIDEBAR_FADE}
+        >
+          Menu Utama
+        </motion.h4>
+        {navItems.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`relative flex items-center rounded-xl transition-colors text-sm font-medium group overflow-hidden ${
+                collapsed ? "justify-center w-12 h-12 mx-auto px-0 py-0" : "justify-between px-3 py-3"
+              } ${
+                active
+                  ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 text-white border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
+                  : "text-blue-200/60 hover:text-white hover:bg-white/5 border border-transparent"
+              }`}
+              aria-label={collapsed ? item.label : undefined}
+              title={collapsed ? item.label : undefined}
+            >
+              {active && (
+                <motion.div
+                  layoutId="portal-sidebar-active-orb"
+                  className={`absolute ${collapsed ? "inset-1.5 rounded-lg" : "inset-y-1 left-1 w-1 rounded-full"} bg-blue-400/25`}
+                  transition={SIDEBAR_SPRING}
+                />
+              )}
+              <div className={`relative z-10 flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
+                <motion.span
+                  layout
+                  animate={{ scale: active ? 1.08 : 1, y: active && collapsed ? -1 : 0 }}
+                  transition={SIDEBAR_SPRING}
+                >
+                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${active ? "text-blue-400" : "text-blue-200/40 group-hover:text-blue-300"}`} />
+                </motion.span>
+                <motion.span
+                  aria-hidden={collapsed}
+                  className="overflow-hidden whitespace-nowrap"
+                  animate={{
+                    opacity: collapsed ? 0 : 1,
+                    width: collapsed ? 0 : "auto",
+                    x: collapsed ? -8 : 0,
+                    filter: collapsed ? "blur(3px)" : "blur(0px)",
+                  }}
+                  transition={SIDEBAR_FADE}
+                >
+                  {item.label}
+                </motion.span>
+              </div>
+              <AnimatePresence initial={false}>
+                {active && !collapsed && (
+                  <motion.span
+                    className="relative z-10"
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 0.6, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    transition={SIDEBAR_FADE}
+                  >
+                    <ChevronRight className="w-3.5 h-3.5 text-blue-500" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+          );
+        })}
+      </motion.nav>
+
+      {/* Logout */}
+      <motion.div
+        layout
+        className={`border-t border-white/5 relative z-10 bg-black/20 ${collapsed ? "p-3" : "p-5"}`}
+        transition={SIDEBAR_SPRING}
+      >
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className={`flex items-center justify-center rounded-xl text-red-400/80 hover:text-white bg-red-500/10 hover:bg-red-500/80 border border-red-500/20 transition-all text-sm font-bold group shadow-[0_0_10px_rgba(239,68,68,0)] hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] ${
+            collapsed ? "w-12 h-12 mx-auto px-0 py-0" : "w-full gap-2 px-3 py-3"
+          }`}
+          aria-label={collapsed ? "Keluar sesi" : undefined}
+          title={collapsed ? "Keluar sesi" : undefined}
+        >
+          <LogOut className={`w-4 h-4 shrink-0 transition-transform ${collapsed ? "" : "group-hover:-translate-x-1"}`} />
+          <motion.span
+            aria-hidden={collapsed}
+            className="overflow-hidden whitespace-nowrap"
+            animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "auto", x: collapsed ? -8 : 0 }}
+            transition={SIDEBAR_FADE}
+          >
+            Keluar Sesi
+          </motion.span>
+        </button>
+      </motion.div>
+    </aside>
+  );
+}
+
 export default function PortalShell({
   children,
   userName,
@@ -66,9 +345,17 @@ export default function PortalShell({
   userImage?: string | null;
 }) {
   const [open, setOpen] = useState(false);
+  const sidebarCollapsed = useSyncExternalStore(
+    subscribeSidebarCollapsed,
+    getSidebarCollapsedSnapshot,
+    getSidebarCollapsedServerSnapshot,
+  ) === "true";
   const pathname = usePathname();
 
-  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setOpen(false), 0);
+    return () => window.clearTimeout(timeout);
+  }, [pathname]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -76,82 +363,28 @@ export default function PortalShell({
   }, [open]);
 
   const isActive = (href: string) => pathname.startsWith(href);
-
-  const SidebarContent = () => (
-    <aside className="flex flex-col h-full bg-[#030914]/80 backdrop-blur-xl relative overflow-hidden">
-      {/* Glow Effects */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-blue-600/5 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-600/5 blur-[100px] pointer-events-none" />
-
-      {/* Logo */}
-      <div className="p-6 border-b border-white/5 relative z-10">
-        <Logo />
-      </div>
-
-      {/* User info + Bell */}
-      <div className="px-5 py-5 border-b border-white/5 relative z-10 bg-black/20">
-        <div className="flex items-center justify-between mb-3">
-          <Link href="/portal/profile" className="relative">
-            <UserAvatar 
-              src={userImage} 
-              name={userName} 
-              sizeClasses="w-10 h-10" 
-              imageClasses="ring-2 ring-blue-500/30 hover:ring-blue-400/60 transition-all shadow-lg"
-              fallbackClasses="text-sm ring-2 ring-white/10 shadow-lg"
-            />
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#030914]"></div>
-          </Link>
-          <NotificationBell />
-        </div>
-        <div>
-          <p className="text-white text-sm font-bold line-clamp-1">{userName}</p>
-          <p className="text-blue-200/40 text-[10px] line-clamp-1 mt-0.5">{userEmail}</p>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-5 py-6 space-y-1.5 overflow-y-auto custom-scrollbar relative z-10">
-        <h4 className="px-3 text-[10px] font-black uppercase tracking-widest text-blue-200/40 mb-3">Menu Utama</h4>
-        {navItems.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center justify-between px-3 py-3 rounded-xl transition-all text-sm font-medium group ${
-                active
-                  ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 text-white border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
-                  : "text-blue-200/60 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className={`w-4 h-4 shrink-0 transition-colors ${active ? "text-blue-400" : "text-blue-200/40 group-hover:text-blue-300"}`} />
-                {item.label}
-              </div>
-              {active && <ChevronRight className="w-3.5 h-3.5 text-blue-500 opacity-60" />}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Logout */}
-      <div className="p-5 border-t border-white/5 relative z-10 bg-black/20">
-        <button
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-red-400/80 hover:text-white bg-red-500/10 hover:bg-red-500/80 border border-red-500/20 transition-all text-sm font-bold w-full group shadow-[0_0_10px_rgba(239,68,68,0)] hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-        >
-          <LogOut className="w-4 h-4 shrink-0 group-hover:-translate-x-1 transition-transform" />
-          Keluar Sesi
-        </button>
-      </div>
-    </aside>
-  );
+  const toggleSidebarCollapsed = () => {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!sidebarCollapsed));
+    window.dispatchEvent(new Event(SIDEBAR_STORAGE_EVENT));
+  };
 
   return (
     <div className="min-h-screen flex bg-[#030914]">
       {/* ── Desktop sidebar ─────────────────────────────── */}
-      <div className="hidden lg:flex w-72 shrink-0 border-r border-white/5 flex-col z-20 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
-        <SidebarContent />
+      <div
+        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col z-20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          sidebarCollapsed ? "w-20" : "w-72"
+        }`}
+      >
+        <SidebarContent
+          collapsed={sidebarCollapsed}
+          isActive={isActive}
+          onToggleCollapse={toggleSidebarCollapsed}
+          showCollapseToggle
+          userEmail={userEmail}
+          userImage={userImage}
+          userName={userName}
+        />
       </div>
 
       {/* ── Mobile drawer backdrop ───────────────────────── */}
@@ -170,13 +403,21 @@ export default function PortalShell({
       >
         <div className="absolute top-5 right-5 z-50">
           <button
+            type="button"
             onClick={() => setOpen(false)}
             className="p-2.5 rounded-xl text-blue-200/50 hover:text-white bg-black/40 hover:bg-white/10 border border-white/5 transition-all backdrop-blur-md"
+            aria-label="Tutup menu"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <SidebarContent />
+        <SidebarContent
+          isActive={isActive}
+          onToggleCollapse={toggleSidebarCollapsed}
+          userEmail={userEmail}
+          userImage={userImage}
+          userName={userName}
+        />
       </div>
 
       {/* ── Main content ────────────────────────────────── */}
@@ -184,6 +425,7 @@ export default function PortalShell({
         {/* Mobile top bar */}
         <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#030914]/90 backdrop-blur-lg border-b border-white/5 sticky top-0 z-30 shadow-lg">
           <button
+            type="button"
             onClick={() => setOpen(true)}
             className="p-2.5 rounded-xl text-blue-200/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
             aria-label="Buka menu"
@@ -192,7 +434,7 @@ export default function PortalShell({
           </button>
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/portal/dashboard" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="MFWEB" width={24} height={24} />
+              <Image src="/logo.png" alt="MFWEB" width={24} height={24} style={{ width: 24, height: 24 }} />
               <span className="text-white font-black tracking-wide">Portal</span>
             </Link>
           </div>
