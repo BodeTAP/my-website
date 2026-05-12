@@ -6,6 +6,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
+## Shared agent memory
+
+- Read `.agents/memory.md` at the start of each session when it exists.
+- Update `.agents/memory.md` only with durable user preferences, project decisions, and important current state. Do not store secrets.
+
+---
+
 ## Stack versions (all bleeding-edge — verify APIs before use)
 
 - **Next.js 16.2.4** (App Router), **React 19.2.4**, **TypeScript** (strict)
