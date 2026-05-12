@@ -1320,7 +1320,7 @@ export default function SettingsClient({
         </main>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#030914]/85 px-4 py-3 backdrop-blur-xl">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#030914]/85 px-4 py-3 backdrop-blur-xl lg:left-72">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm">
             {error ? (
