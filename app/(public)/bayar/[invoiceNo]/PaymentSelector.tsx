@@ -9,6 +9,7 @@ type Props = {
   invoiceNo:  string;
   baseAmount: number;
   channels:   PaymentChannel[];
+  feeHandling: "customer" | "merchant" | "split";
 };
 
 // Group channels by their group label
@@ -33,8 +34,8 @@ function formatFee(ch: PaymentChannel): string | null {
   return null; // Tidak ada biaya untuk customer (dibebankan ke merchant)
 }
 
-function calculateAdminFee(ch: PaymentChannel | null, baseAmount: number): number {
-  if (!ch || !ch.fee_customer) return 0;
+function calculateAdminFee(ch: PaymentChannel | null, baseAmount: number, feeHandling: Props["feeHandling"]): number {
+  if (!ch || !ch.fee_customer || feeHandling !== "customer") return 0;
   const flat = ch.fee_customer.flat ?? 0;
   const percent = ch.fee_customer.percent ? parseFloat(ch.fee_customer.percent) : 0;
   return flat + Math.round((baseAmount * percent) / 100);
@@ -46,7 +47,7 @@ function formatRp(n: number) {
   }).format(n);
 }
 
-export default function PaymentSelector({ invoiceNo, baseAmount, channels }: Props) {
+export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHandling }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
@@ -55,11 +56,8 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels }: Pro
   const grouped  = groupChannels(channels);
   const groupKeys = [...grouped.keys()];
 
-  // Auto-open first group
-  const firstGroup = openGroup ?? groupKeys[0] ?? null;
-
   const selectedChannel = channels.find(ch => ch.code === selected) ?? null;
-  const adminFee = calculateAdminFee(selectedChannel, baseAmount);
+  const adminFee = calculateAdminFee(selectedChannel, baseAmount, feeHandling);
   const grandTotal = baseAmount + adminFee;
 
   async function handlePay() {
@@ -104,6 +102,16 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels }: Pro
             {adminFee > 0 && (
               <p className="text-[11px] text-amber-300/80 bg-amber-500/10 px-2 py-0.5 rounded-full inline-block mt-1">
                 Termasuk admin +{formatRp(adminFee)}
+              </p>
+            )}
+            {feeHandling === "merchant" && selectedChannel && (
+              <p className="text-[11px] text-emerald-300/80 bg-emerald-500/10 px-2 py-0.5 rounded-full inline-block mt-1">
+                Biaya admin ditanggung merchant
+              </p>
+            )}
+            {feeHandling === "split" && selectedChannel && (
+              <p className="text-[11px] text-blue-200/70 bg-white/5 px-2 py-0.5 rounded-full inline-block mt-1">
+                Biaya admin mengikuti pembagian internal
               </p>
             )}
           </div>
@@ -172,7 +180,7 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels }: Pro
                           <p className={`text-sm font-medium ${isSelected ? "text-white" : "text-blue-200/80"}`}>
                             {ch.name}
                           </p>
-                          {formatFee(ch) && (
+                          {feeHandling === "customer" && formatFee(ch) && (
                             <p className={`text-[10px] mt-0.5 ${isSelected ? "text-blue-200/60" : "text-blue-200/40"}`}>
                               Biaya Admin: {formatFee(ch)}
                             </p>

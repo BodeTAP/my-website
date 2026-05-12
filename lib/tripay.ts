@@ -1,11 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import { getSiteSettings } from "@/lib/siteSettings";
 
-const SANDBOX    = process.env.TRIPAY_SANDBOX === "true";
-const DIRECT_URL = SANDBOX ? "https://tripay.co.id/api-sandbox" : "https://tripay.co.id/api";
-// Sandbox bypasses the Cloudflare proxy (no IP whitelist restriction in sandbox)
-const BASE_URL   = (!SANDBOX && process.env.TRIPAY_PROXY_URL)
-  ? process.env.TRIPAY_PROXY_URL
-  : DIRECT_URL;
 const API_KEY    = () => process.env.TRIPAY_API_KEY       ?? "";
 const PRIV_KEY   = () => process.env.TRIPAY_PRIVATE_KEY   ?? "";
 const MERCH_CODE = () => process.env.TRIPAY_MERCHANT_CODE ?? "";
@@ -14,6 +9,13 @@ const PROXY_SEC  = () => process.env.TRIPAY_PROXY_SECRET  ?? "";
 function extraHeaders(): Record<string, string> {
   const s = PROXY_SEC();
   return s ? { "x-proxy-secret": s } : {};
+}
+
+async function getTripayBaseUrl() {
+  const settings = await getSiteSettings();
+  const sandbox = settings.payment_gateway_mode === "sandbox" || process.env.TRIPAY_SANDBOX === "true";
+  const directUrl = sandbox ? "https://tripay.co.id/api-sandbox" : "https://tripay.co.id/api";
+  return (!sandbox && process.env.TRIPAY_PROXY_URL) ? process.env.TRIPAY_PROXY_URL : directUrl;
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -67,7 +69,8 @@ export function verifyWebhookSignature(body: string, sig: string): boolean {
 /** Fetch available payment channels for this merchant */
 export async function fetchPaymentChannels(): Promise<PaymentChannel[]> {
   try {
-    const res = await fetch(`${BASE_URL}/merchant/payment-channel`, {
+    const baseUrl = await getTripayBaseUrl();
+    const res = await fetch(`${baseUrl}/merchant/payment-channel`, {
       headers: { Authorization: `Bearer ${API_KEY()}`, ...extraHeaders() },
       next: { revalidate: 300 }, // cache 5 minutes
     });
@@ -93,6 +96,7 @@ export async function fetchPaymentChannels(): Promise<PaymentChannel[]> {
 /** Create a closed payment transaction with a specific payment method */
 export async function createTransaction(payload: CreateTxPayload) {
   const expiredTime = payload.expiredTime ?? Math.floor(Date.now() / 1000) + 86_400;
+  const baseUrl = await getTripayBaseUrl();
 
   const body = {
     method:        payload.method,
@@ -110,7 +114,7 @@ export async function createTransaction(payload: CreateTxPayload) {
     signature:     sign(payload.merchantRef, payload.amount),
   };
 
-  const res = await fetch(`${BASE_URL}/transaction/create`, {
+  const res = await fetch(`${baseUrl}/transaction/create`, {
     method: "POST",
     headers: {
       Authorization:  `Bearer ${API_KEY()}`,
@@ -139,7 +143,8 @@ export async function createTransaction(payload: CreateTxPayload) {
 
 /** Get transaction detail by reference */
 export async function getTransaction(reference: string) {
-  const res = await fetch(`${BASE_URL}/transaction/detail?reference=${reference}`, {
+  const baseUrl = await getTripayBaseUrl();
+  const res = await fetch(`${baseUrl}/transaction/detail?reference=${reference}`, {
     headers: { Authorization: `Bearer ${API_KEY()}`, ...extraHeaders() },
   });
   const data = await res.json() as {

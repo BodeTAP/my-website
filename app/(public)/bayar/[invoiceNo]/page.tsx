@@ -4,6 +4,7 @@ import Image from "next/image";
 import { CheckCircle2, Clock, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { fetchPaymentChannels } from "@/lib/tripay";
+import { getSiteSettings } from "@/lib/siteSettings";
 import PaymentSelector from "./PaymentSelector";
 import { ScaleIn, FadeUp, StaggerChildren, SlideIn } from "@/components/public/motion";
 
@@ -30,12 +31,13 @@ export default async function PublicPayPage({ params }: Params) {
   const { invoiceNo } = await params;
   const decoded = decodeURIComponent(invoiceNo);
 
-  const [invoice, channels] = await Promise.all([
+  const [invoice, channels, settings] = await Promise.all([
     prisma.invoice.findUnique({
       where:   { invoiceNo: decoded },
       include: { client: { include: { user: { select: { name: true } } } } },
     }),
     fetchPaymentChannels(),
+    getSiteSettings(),
   ]);
 
   if (!invoice) notFound();
@@ -51,9 +53,9 @@ export default async function PublicPayPage({ params }: Params) {
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
-          <Image src="/logo.png" alt="MFWEB" width={36} height={36} />
+          <Image src={settings.brand_logo_url || "/logo.png"} alt={settings.brand_name} width={36} height={36} />
           <span className="font-bold text-white text-xl tracking-wide">
-            MF<span className="text-blue-400">WEB</span>
+            {settings.brand_name}
           </span>
         </div>
 
@@ -147,22 +149,37 @@ export default async function PublicPayPage({ params }: Params) {
                 </div>
               ) : (
                 <SlideIn delay={0.3}>
-                  <PaymentSelector invoiceNo={invoice.invoiceNo} baseAmount={invoice.amount} channels={channels} />
+                  <PaymentSelector
+                    invoiceNo={invoice.invoiceNo}
+                    baseAmount={invoice.amount}
+                    channels={channels}
+                    feeHandling={
+                      settings.payment_fee_handling === "merchant" || settings.payment_fee_handling === "split"
+                        ? settings.payment_fee_handling
+                        : "customer"
+                    }
+                  />
                 </SlideIn>
               )}
             </div>
           </div>
         </ScaleIn>
 
+        {settings.payment_default_instructions && (
+          <p className="text-center text-blue-200/40 text-xs leading-relaxed mt-5">
+            {settings.payment_default_instructions}
+          </p>
+        )}
+
         <p className="text-center text-blue-200/30 text-xs mt-6">
           Ada pertanyaan?{" "}
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}`}
+            href={`https://wa.me/${settings.brand_public_whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400/60 hover:text-blue-300 transition-colors"
           >
-            Hubungi MFWEB
+            Hubungi {settings.brand_name}
           </a>
         </p>
       </div>

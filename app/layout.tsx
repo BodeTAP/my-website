@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { prisma } from "@/lib/prisma";
 import { FacebookPixel } from "@/components/public/FacebookPixel";
 import { GoogleAnalytics } from "@/components/public/GoogleAnalytics";
+import { getSiteSettings } from "@/lib/siteSettings";
 import "./globals.css";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -15,105 +14,114 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
-    template: "%s | MFWEB",
-  },
-  description:
-    "MFWEB membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google. Mulai dari Rp 800K.",
-  keywords: [
-    "jasa pembuatan website",
-    "website profesional",
-    "jasa web developer",
-    "website bisnis lokal",
-    "jasa bikin website",
-    "web developer Indonesia",
-    "MFWEB",
-  ],
-  metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: "id_ID",
-    siteName: "MFWEB",
-    title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
-    description:
-      "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly. Mulai Rp 800K.",
-    // Tidak override images — biarkan Next.js pakai /opengraph-image (1200×630) dari opengraph-image.tsx
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
-    description:
-      "Kami membantu bisnis lokal tampil profesional di internet. Website cepat, menarik, SEO-friendly.",
-    // Next.js otomatis pakai /opengraph-image sebagai twitter:image
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.png", type: "image/png" },
-    ],
-    apple: "/icon.png",
-  },
-  robots: { index: true, follow: true },
-  verification: {
-    // Tambahkan Google Search Console verification code di sini nanti
-    // google: "your-verification-code",
-  },
-};
+function absoluteUrl(baseUrl: string, pathOrUrl: string) {
+  try {
+    return new URL(pathOrUrl, baseUrl).toString();
+  } catch {
+    return pathOrUrl;
+  }
+}
 
-// JSON-LD structured data for Organization + WebSite
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: "MFWEB",
-      url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/logo.png`,
-        width: 512,
-        height: 512,
-      },
-      description:
-        "MFWEB membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google.",
-      contactPoint: {
-        "@type": "ContactPoint",
-        telephone: process.env.WHATSAPP_NUMBER
-          ? `+${process.env.WHATSAPP_NUMBER}`
-          : "+6282221682343",
-        contactType: "customer service",
-        availableLanguage: ["Indonesian", "English"],
-      },
-      sameAs: [],
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const siteUrl = settings.seo_canonical_base_url || settings.brand_site_url || SITE_URL;
+  const title = settings.seo_default_title;
+  const description = settings.seo_default_description;
+  const ogImage = absoluteUrl(siteUrl, settings.seo_default_og_image || settings.brand_default_og_image);
+  const favicon = settings.brand_favicon_url || "/favicon.ico";
+  const logo = settings.brand_logo_url || "/icon.png";
+
+  return {
+    title: {
+      default: title,
+      template: settings.seo_default_title_template || `%s | ${settings.brand_name}`,
     },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: "MFWEB",
-      description: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal",
-      publisher: { "@id": `${SITE_URL}/#organization` },
-      inLanguage: "id-ID",
+    description,
+    keywords: [
+      "jasa pembuatan website",
+      "website profesional",
+      "jasa web developer",
+      "website bisnis lokal",
+      "jasa bikin website",
+      "web developer Indonesia",
+      settings.brand_name,
+    ],
+    metadataBase: new URL(siteUrl),
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      siteName: settings.brand_name,
+      title,
+      description,
+      images: [{ url: ogImage }],
     },
-  ],
-};
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+    icons: {
+      icon: [
+        { url: favicon, sizes: "any" },
+        { url: logo, type: "image/png" },
+      ],
+      apple: logo,
+    },
+    robots: { index: true, follow: true },
+  };
+}
+
+function buildJsonLd(settings: Record<string, string>) {
+  const siteUrl = settings.seo_canonical_base_url || settings.brand_site_url || SITE_URL;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: settings.brand_name,
+        url: siteUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: absoluteUrl(siteUrl, settings.brand_logo_url),
+          width: 512,
+          height: 512,
+        },
+        description: settings.seo_default_description,
+        contactPoint: {
+          "@type": "ContactPoint",
+          telephone: `+${settings.brand_public_whatsapp}`,
+          contactType: "customer service",
+          availableLanguage: ["Indonesian", "English"],
+        },
+        sameAs: [
+          settings.social_instagram_url,
+          settings.social_facebook_url,
+          settings.social_linkedin_url,
+        ].filter(Boolean),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: settings.brand_name,
+        description: settings.seo_default_description,
+        publisher: { "@id": `${siteUrl}/#organization` },
+        inLanguage: "id-ID",
+      },
+    ],
+  };
+}
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const trackingRows = await prisma.siteSetting.findMany({
-    where: { key: { in: ["facebook_pixel_id", "google_analytics_id"] } },
-  }).catch(() => []);
-  const fbPixelId = trackingRows.find((r) => r.key === "facebook_pixel_id")?.value ?? "";
-  const gaId      = trackingRows.find((r) => r.key === "google_analytics_id")?.value ?? "";
+  const settings = await getSiteSettings();
+  const jsonLd = buildJsonLd(settings);
 
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
@@ -139,8 +147,8 @@ export default async function RootLayout({
         />
         {children}
         <Analytics />
-        <FacebookPixel pixelId={fbPixelId} />
-        <GoogleAnalytics gaId={gaId} />
+        <FacebookPixel pixelId={settings.facebook_pixel_id ?? ""} />
+        <GoogleAnalytics gaId={settings.google_analytics_id ?? ""} />
       </body>
     </html>
   );

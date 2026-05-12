@@ -5,18 +5,12 @@ import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { AI_DEFAULTS, normalizeAiSettingValue } from "@/lib/aiSettings";
 import { BROADCAST_SETTING_DEFAULTS } from "@/lib/broadcastSettings";
+import { SITE_SETTING_DEFAULTS, normalizeSiteSettingValue } from "@/lib/siteSettings";
 
 const DEFAULTS: Record<string, string> = {
-  hero_stat_1_num:   "50+",
-  hero_stat_1_label: "Proyek selesai",
-  hero_stat_2_num:   "95%",
-  hero_stat_2_label: "Klien puas",
-  hero_stat_3_num:   "3 hari",
-  hero_stat_3_label: "Rata-rata delivery",
-  facebook_pixel_id:   "",
-  google_analytics_id: "",
   fonnte_api_key:      "",
   fonnte_api_keys:     "",
+  ...SITE_SETTING_DEFAULTS,
   ...AI_DEFAULTS,
   ...BROADCAST_SETTING_DEFAULTS,
 };
@@ -37,6 +31,8 @@ const ALLOWED_KEYS = new Set(Object.keys(DEFAULTS));
 function normalizeSettingValue(key: string, value: unknown): string {
   const aiValue = normalizeAiSettingValue(key, value);
   if (aiValue !== null) return aiValue;
+  const siteValue = normalizeSiteSettingValue(key, value);
+  if (siteValue !== null) return siteValue;
   return String(value ?? "");
 }
 

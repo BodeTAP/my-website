@@ -4,10 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { createTransaction, TripayItem } from "@/lib/tripay";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
 import { sendWA, waMsg, normalizePhone } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 type Params = { params: Promise<{ invoiceNo: string }> };
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
 
 export async function POST(req: NextRequest, { params }: Params) {
   const ip = getClientIP(req);
@@ -18,6 +17,8 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const { invoiceNo } = await params;
   const decoded = decodeURIComponent(invoiceNo);
+  const settings = await getSiteSettings();
+  const siteUrl = settings.brand_site_url || process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.id";
 
   // Payment method is required
   let method = "QRIS2";
@@ -70,8 +71,9 @@ export async function POST(req: NextRequest, { params }: Params) {
       customerEmail: clientEmail,
       customerPhone: clientPhone,
       orderItems,
-      returnUrl:     `${SITE}/bayar/${encodeURIComponent(invoice.invoiceNo)}`,
-      callbackUrl:   `${SITE}/api/webhooks/tripay`,
+      returnUrl:     `${siteUrl}/bayar/${encodeURIComponent(invoice.invoiceNo)}`,
+      callbackUrl:   `${siteUrl}/api/webhooks/tripay`,
+      expiredTime:   Math.floor(Date.now() / 1000) + Number.parseInt(settings.invoice_valid_days || "1", 10) * 86_400,
     });
 
     await prisma.invoice.update({

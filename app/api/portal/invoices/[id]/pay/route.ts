@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createTransaction, TripayItem } from "@/lib/tripay";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 type Params = { params: Promise<{ id: string }> };
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.id";
 
 export async function POST(_req: NextRequest, { params }: Params) {
   const session = await auth();
@@ -18,6 +17,8 @@ export async function POST(_req: NextRequest, { params }: Params) {
   if (!user?.client) return NextResponse.json({ error: "Klien tidak ditemukan" }, { status: 404 });
 
   const { id } = await params;
+  const settings = await getSiteSettings();
+  const siteUrl = settings.brand_site_url || process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.id";
   const invoice = await prisma.invoice.findUnique({
     where:   { id },
     include: { client: { include: { user: { select: { name: true, email: true } } } } },
@@ -52,8 +53,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
       customerEmail: clientEmail,
       customerPhone: clientPhone,
       orderItems,
-      returnUrl:     `${SITE}/portal/invoices?ref=${invoice.invoiceNo}`,
-      callbackUrl:   `${SITE}/api/webhooks/tripay`,
+      returnUrl:     `${siteUrl}/portal/invoices?ref=${invoice.invoiceNo}`,
+      callbackUrl:   `${siteUrl}/api/webhooks/tripay`,
+      expiredTime:   Math.floor(Date.now() / 1000) + Number.parseInt(settings.invoice_valid_days || "1", 10) * 86_400,
     });
 
     // Persist reference and payment URL

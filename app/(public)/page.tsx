@@ -9,8 +9,9 @@ import PricingSection from "@/components/public/PricingSection";
 import TestimonialCarousel from "@/components/public/TestimonialCarousel";
 import HeroStats from "@/components/public/HeroStats";
 import FAQSection from "@/components/public/FAQSection";
-import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard, StaggerWords } from "@/components/public/motion";
+import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
@@ -98,12 +99,14 @@ const benefits = [
 // Testimonials now managed from admin — fetched dynamically
 
 export default async function HomePage() {
-  const [articles, portfolios, testimonials, heroStats] = await Promise.all([
+  const [articles, portfolios, testimonials, heroStats, settings] = await Promise.all([
     getLatestArticles(),
     getFeaturedPortfolios(),
     getTestimonials(),
     getHeroStats(),
+    getSiteSettings(),
   ]);
+  const siteUrl = settings.seo_canonical_base_url || settings.brand_site_url || SITE_URL;
 
   // JSON-LD: FAQ Page + LocalBusiness + Service
   const faqJsonLd = {
@@ -180,14 +183,13 @@ export default async function HomePage() {
   const localBusinessJsonLd = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    "@id": `${SITE_URL}/#business`,
-    name: "MFWEB",
-    url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
-    image: `${SITE_URL}/og-image.png`,
-    description:
-      "Jasa pembuatan website profesional untuk bisnis lokal. Website cepat, menarik, dan SEO-friendly.",
-    telephone: "+62-822-2168-2343",
+    "@id": `${siteUrl}/#business`,
+    name: settings.brand_name,
+    url: siteUrl,
+    logo: new URL(settings.brand_logo_url, siteUrl).toString(),
+    image: new URL(settings.brand_default_og_image, siteUrl).toString(),
+    description: settings.seo_default_description,
+    telephone: `+${settings.brand_public_whatsapp}`,
     priceRange: "Rp 800K - Rp 5.4Jt",
     areaServed: {
       "@type": "Country",
@@ -254,30 +256,30 @@ export default async function HomePage() {
           <FadeUp delay={0}>
             <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-blue-300 mb-8 border border-blue-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              Tersedia untuk proyek baru
+              {settings.home_hero_badge}
             </div>
           </FadeUp>
 
           {/* Hero text is rendered immediately (no JS animation) to fix 5.9s LCP issue */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-            Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan
+            {settings.home_hero_headline}
           </h1>
 
           <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!
+            {settings.home_hero_subheadline}
           </p>
 
           <FadeUp delay={0.4}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 relative z-20">
-              <Link href="/contact">
+              <Link href={settings.home_primary_cta_url || settings.brand_consultation_url || "/contact"}>
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.6)] text-base font-semibold transition-all hover:scale-105 btn-shine">
-                  Mulai Buat Website Saya
+                  {settings.home_primary_cta_label}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Link href="/portfolio">
+              <Link href={settings.home_secondary_cta_url || "/portfolio"}>
                 <Button size="lg" variant="outline" className="glass border-white/10 text-white hover:bg-white/10 h-14 px-8 rounded-full text-base font-medium transition-all hover:scale-105">
-                  Lihat Hasil Kerja Kami
+                  {settings.home_secondary_cta_label}
                 </Button>
               </Link>
             </div>
@@ -568,7 +570,7 @@ export default async function HomePage() {
                     </Button>
                   </Link>
                   <a
-                    href={`https://wa.me/${process.env.WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20ingin%20konsultasi%20website`}
+                    href={`https://wa.me/${settings.brand_public_whatsapp}?text=Halo%20${encodeURIComponent(settings.brand_name)}%2C%20saya%20ingin%20konsultasi%20website`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 import { sendWA, waMsg } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate } from "@/lib/siteSettings";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -49,6 +50,7 @@ export async function POST(req: Request, { params }: Params) {
   const clientEmail = ticket.client.user.email;
   const clientName  = ticket.client.user.name ?? ticket.client.businessName;
   const preview     = body.trim().slice(0, 80) + (body.trim().length > 80 ? "…" : "");
+  const settings = await getSiteSettings();
   createNotification(
     ticket.clientId,
     "TICKET_REPLY",
@@ -63,7 +65,16 @@ export async function POST(req: Request, { params }: Params) {
         .catch((e) => console.error("[Email] ticket reply:", e));
     }
     if (ticket.client.phone) {
-      await sendWA(ticket.client.phone, waMsg.ticketReply(clientName, ticket.subject, preview));
+      const message = settings.template_wa_ticket_reply
+        ? renderSettingTemplate(settings.template_wa_ticket_reply, {
+            brandName: settings.brand_name,
+            clientName,
+            ticketSubject: ticket.subject,
+            messagePreview: preview,
+            portalUrl: `${settings.brand_site_url}/portal/tickets`,
+          })
+        : waMsg.ticketReply(clientName, ticket.subject, preview);
+      await sendWA(ticket.client.phone, message);
     }
   });
 

@@ -7,6 +7,7 @@ import DownloadInvoiceButton from "@/components/DownloadInvoiceButton";
 import PayInvoiceButton from "./PayInvoiceButton";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import Link from "next/link";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
@@ -33,13 +34,16 @@ export default async function PortalInvoicesPage({
 
   const statusFilter = status === "paid" ? "PAID" : status === "unpaid" ? "UNPAID" : undefined;
 
-  const invoices = await prisma.invoice.findMany({
-    where:   { 
-      clientId: user.client.id,
-      ...(statusFilter ? { status: statusFilter } : {})
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [invoices, settings] = await Promise.all([
+    prisma.invoice.findMany({
+      where:   {
+        clientId: user.client.id,
+        ...(statusFilter ? { status: statusFilter } : {})
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    getSiteSettings(),
+  ]);
 
   return (
     <div>
@@ -137,7 +141,7 @@ export default async function PortalInvoicesPage({
       </div>
 
       <p className="text-blue-200/25 text-xs text-center mt-8">
-        Pembayaran diproses secara aman melalui Tripay Payment Gateway.
+        {settings.payment_default_instructions}
         Hubungi kami jika ada pertanyaan.
       </p>
     </div>

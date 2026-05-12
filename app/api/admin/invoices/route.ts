@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail, validateEmailConfig } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 import { sendWA, waMsg } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,6 +13,7 @@ export async function POST(req: Request) {
   if (denied) return denied;
 
   const { clientId, invoiceNo, description, amount, lineItems, dueDate, whatsappMsg: customWaMsg } = await req.json();
+  const settings = await getSiteSettings();
 
   if (!clientId || !invoiceNo?.trim() || !amount) {
     return NextResponse.json({ error: "Klien, nomor invoice, dan jumlah wajib diisi." }, { status: 400 });
@@ -34,7 +36,7 @@ export async function POST(req: Request) {
       description: description?.trim() || null,
       amount: Math.round(Number(amount)),
       lineItems: Array.isArray(lineItems) ? lineItems : [],
-      dueDate: dueDate ? new Date(dueDate) : null,
+      dueDate: dueDate ? new Date(dueDate) : new Date(Date.now() + Number.parseInt(settings.invoice_valid_days || "7", 10) * 24 * 60 * 60 * 1000),
       whatsappMsg: customWaMsg?.trim() || null,
       status: "UNPAID",
     },
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
 
     // WhatsApp
     if (clientPhone) {
-      const payUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/bayar/${invoice.invoiceNo}`;
+      const payUrl = `${settings.brand_site_url}/bayar/${invoice.invoiceNo}`;
       const sent = await sendWA(
         clientPhone,
         waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate, payUrl),

@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { getSiteSettings, renderSettingTemplate } from "@/lib/siteSettings";
 
 let _resend: Resend | null = null;
 function getResend() {
@@ -72,6 +73,14 @@ function p(text: string) {
   return `<p style="color:#475569;margin:0 0 16px;font-size:15px;line-height:1.7">${text}</p>`;
 }
 
+function templateParagraphs(text: string) {
+  return text
+    .split("\n")
+    .filter((line) => line.trim())
+    .map((line) => p(line))
+    .join("");
+}
+
 function info(rows: [string, string][]) {
   const cells = rows.map(([k, v]) =>
     `<tr>
@@ -120,6 +129,26 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
 }
 
 /** Invoice created — sent to client when admin creates invoice */
+/** Magic link login - sent by Auth.js Resend provider */
+export async function sendMagicLinkEmail(email: string, url: string) {
+  const settings = await getSiteSettings();
+  const templateValues = {
+    brandName: settings.brand_name,
+    email,
+    url,
+    siteUrl: settings.brand_site_url || SITE,
+  };
+  const subject =
+    renderSettingTemplate(settings.template_email_magic_link_subject, templateValues) ||
+    `Link masuk ke ${settings.brand_name}`;
+  const body =
+    templateParagraphs(renderSettingTemplate(settings.template_email_magic_link_body, templateValues)) +
+    btn("Masuk ke Portal", url);
+  const html = base(subject, body);
+
+  await getResend().emails.send({ from: FROM, to: email, subject, html });
+}
+
 export async function sendInvoiceCreatedEmail(
   email: string,
   clientName: string,
@@ -127,6 +156,21 @@ export async function sendInvoiceCreatedEmail(
   amount: number,
   dueDate?: Date | null,
 ) {
+  const settings = await getSiteSettings();
+  const invoiceUrl = `${settings.brand_site_url || SITE}/portal/invoices`;
+  const dueDateText = dueDate
+    ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(dueDate)
+    : "-";
+  const templateValues = {
+    brandName: settings.brand_name,
+    clientName,
+    invoiceNo,
+    amount: formatRp(amount),
+    dueDate: dueDateText,
+    invoiceUrl,
+  };
+  const configuredBody = templateParagraphs(renderSettingTemplate(settings.template_email_invoice_body, templateValues));
+  const configuredSubject = renderSettingTemplate(settings.template_email_invoice_subject, templateValues);
   const rows: [string, string][] = [
     ["Nomor Invoice", invoiceNo],
     ["Jumlah Tagihan", formatRp(amount)],
@@ -134,11 +178,12 @@ export async function sendInvoiceCreatedEmail(
   if (dueDate) rows.push(["Jatuh Tempo", new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(dueDate)]);
 
   const html = base(
-    `Invoice Baru: ${invoiceNo}`,
+    configuredSubject || `Invoice Baru: ${invoiceNo}`,
+    configuredBody ||
     p(`Halo <strong>${clientName}</strong>,`) +
     p("Invoice baru telah dibuat untuk Anda. Berikut detail tagihannya:") +
     info(rows) +
-    btn("Lihat Invoice & Unduh PDF", `${SITE}/portal/invoices`) +
+    btn("Lihat Invoice & Unduh PDF", invoiceUrl) +
     p(`Setelah melakukan pembayaran, mohon konfirmasi via WhatsApp agar kami dapat segera memproses. Terima kasih.`)
   );
   await getResend().emails.send({ from: FROM, to: email, subject: `Invoice ${invoiceNo} — MFWEB`, html });

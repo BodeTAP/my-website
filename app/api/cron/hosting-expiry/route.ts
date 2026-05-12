@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendHostingExpiryEmail } from "@/lib/email";
 import { sendWA, waMsg } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate } from "@/lib/siteSettings";
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   const now   = new Date();
-  const MILESTONES = [7, 14, 30]; // hari pengiriman notifikasi
+  const settings = await getSiteSettings();
 
   const records = await prisma.hostingRecord.findMany({
     where: { status: "ACTIVE" },
@@ -76,7 +77,23 @@ export async function POST(req: NextRequest) {
 
         // 2. Kirim WhatsApp (jika ada nomor)
         if (clientPhone) {
-          const msg = waMsg.hostingExpiry(clientName, record.domainName, expiry, daysLeft, type);
+          const typeLabel = type === "domain" ? "Domain" : type === "hosting" ? "Hosting" : "SSL";
+          const expiryDate = new Intl.DateTimeFormat("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }).format(expiry);
+          const msg = settings.template_wa_hosting_expiry
+            ? renderSettingTemplate(settings.template_wa_hosting_expiry, {
+                brandName: settings.brand_name,
+                clientName,
+                domainName: record.domainName,
+                type,
+                typeLabel,
+                expiryDate,
+                daysLeft,
+              })
+            : waMsg.hostingExpiry(clientName, record.domainName, expiry, daysLeft, type);
           await sendWA(clientPhone, msg);
         }
 

@@ -6,6 +6,7 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
+import { sendMagicLinkEmail } from "@/lib/email";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
 
@@ -43,6 +44,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Resend({
       from: process.env.EMAIL_FROM ?? "noreply@mfweb.com",
+      apiKey: process.env.AUTH_RESEND_KEY,
+      async sendVerificationRequest({ identifier, url }) {
+        await sendMagicLinkEmail(identifier, url);
+      },
     }),
   ],
   callbacks: {

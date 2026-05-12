@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendWA, waMsg } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate } from "@/lib/siteSettings";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -50,12 +51,13 @@ export async function POST(req: Request, { params }: Params) {
   if (sub.status !== "ACTIVE") return NextResponse.json({ error: "Subscription tidak aktif." }, { status: 400 });
 
   // Auto-generate invoice number
+  const settings = await getSiteSettings();
   const month = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date());
   const count = await prisma.invoice.count();
-  const invoiceNo = `MNT-${String(count + 1).padStart(4, "0")}`;
+  const invoiceNo = `${settings.invoice_prefix || "MNT"}-${String(count + 1).padStart(4, "0")}`;
 
   const dueDate = new Date();
-  dueDate.setDate(dueDate.getDate() + 7); // Due in 7 days
+  dueDate.setDate(dueDate.getDate() + Number.parseInt(settings.invoice_valid_days || "7", 10));
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -79,7 +81,19 @@ export async function POST(req: Request, { params }: Params) {
     const phone = sub.client.phone;
     const clientName = sub.client.user.name ?? sub.client.businessName;
     if (phone) {
-      await sendWA(phone, waMsg.invoiceNew(clientName, invoiceNo, sub.package.price, dueDate, `${process.env.NEXT_PUBLIC_SITE_URL}/bayar/${invoiceNo}`)).catch((e) =>
+      const paymentUrl = `${settings.brand_site_url}/bayar/${invoiceNo}`;
+      const message = settings.template_wa_maintenance_billing
+        ? renderSettingTemplate(settings.template_wa_maintenance_billing, {
+            brandName: settings.brand_name,
+            clientName,
+            invoiceNo,
+            amount: `Rp ${sub.package.price.toLocaleString("id-ID")}`,
+            dueDate: new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(dueDate),
+            paymentUrl,
+            packageName: sub.package.name,
+          })
+        : waMsg.invoiceNew(clientName, invoiceNo, sub.package.price, dueDate, paymentUrl);
+      await sendWA(phone, message).catch((e) =>
         console.error("[WA] maintenance invoice:", e),
       );
     }

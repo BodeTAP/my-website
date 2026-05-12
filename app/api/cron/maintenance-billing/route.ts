@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendWA } from "@/lib/whatsapp";
-import { after } from "next/server";
+import { getSiteSettings, renderSettingTemplate } from "@/lib/siteSettings";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -28,16 +29,22 @@ export async function GET(req: NextRequest) {
   if (!adminPhone) return NextResponse.json({ error: "Admin phone not set" }, { status: 500 });
 
   const list = overdue
-    .map((s) => `- ${s.client.businessName} (${s.package.name}) — next: ${s.nextBillingDate.toLocaleDateString("id-ID")}`)
+    .map((s) => `- ${s.client.businessName} (${s.package.name}) - next: ${s.nextBillingDate.toLocaleDateString("id-ID")}`)
     .join("\n");
-  
-  const message = `⚠️ ${overdue.length} langganan belum di-generate invoice:\n${list}`;
+  const settings = await getSiteSettings();
+  const message = settings.template_admin_notification
+    ? renderSettingTemplate(settings.template_admin_notification, {
+        brandName: settings.brand_name,
+        eventName: "Maintenance billing overdue",
+        details: `${overdue.length} langganan belum di-generate invoice:\n${list}`,
+        count: overdue.length,
+      })
+    : `Peringatan: ${overdue.length} langganan belum di-generate invoice:\n${list}`;
 
   after(async () => {
     await sendWA(adminPhone, message);
   });
 
-  // Also log to console for visibility
   console.log(`[Maintenance-Billing] ${overdue.length} overdue subscriptions:\n${list}`);
 
   return NextResponse.json({ alerted: overdue.length });
