@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AI_FEATURE_ORDER, AI_FEATURE_SPECS, AI_MODEL_OPTIONS } from "@/lib/aiConfig";
+import DevicesClient from "./devices/DevicesClient";
 
 type SettingsTab = "umum" | "seo" | "komunikasi" | "payment" | "ai" | "broadcast";
 
@@ -23,7 +24,7 @@ const SECTIONS_BY_TAB: Record<SettingsTab, string[]> = {
   komunikasi: ["emailTemplates", "messageTemplates"],
   payment: ["paymentBehavior"],
   ai: ["aiModel", "aiFeatures", "aiFeatureConfig", "aiBehavior", "aiAutoPublish", "aiPortal"],
-  broadcast: ["broadcastIdentity", "broadcastTemplates", "broadcastConsent", "broadcastGuardrail", "broadcastDelay"],
+  broadcast: ["waDevices", "broadcastIdentity", "broadcastTemplates", "broadcastConsent", "broadcastGuardrail", "broadcastDelay"],
 };
 
 const SETTINGS_TABS: { id: SettingsTab; label: string; tone: string }[] = [
@@ -50,6 +51,7 @@ const SECTION_META: Record<string, SectionMeta> = {
   aiBehavior: { id: "aiBehavior", tab: "ai", title: "Behavior Umum", keywords: "ai tone length retry json logging keyword topik" },
   aiAutoPublish: { id: "aiAutoPublish", tab: "ai", title: "Auto Publish & Cover", keywords: "auto publish cover pexels blob prompt topik" },
   aiPortal: { id: "aiPortal", tab: "ai", title: "Estimator & Portal Chat", keywords: "portal chat estimator pricing guide pertanyaan context invoice tiket proyek" },
+  waDevices: { id: "waDevices", tab: "broadcast", title: "Device WhatsApp", keywords: "device wa whatsapp fonnte token koneksi perangkat api key rotator" },
   broadcastIdentity: { id: "broadcastIdentity", tab: "broadcast", title: "Identitas Pesan", keywords: "broadcast brand website group footer" },
   broadcastTemplates: { id: "broadcastTemplates", tab: "broadcast", title: "Template Pesan", keywords: "broadcast template consent promo opt in opt out stop" },
   broadcastConsent: { id: "broadcastConsent", tab: "broadcast", title: "Consent & Keyword", keywords: "consent keyword opt in opt out auto reply" },
@@ -211,11 +213,20 @@ const PREVIEW_VALUES: Record<string, string> = {
 
 export default function SettingsClient({ 
   initial, 
+  hasFonnteAccountToken,
+  initialTab = "umum",
+  initialSection,
 }: { 
   initial: Record<string, string>; 
+  hasFonnteAccountToken: boolean;
+  initialTab?: SettingsTab;
+  initialSection?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("umum");
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(DEFAULT_OPEN_SECTIONS);
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    ...DEFAULT_OPEN_SECTIONS,
+    ...(initialSection ? { [initialSection]: true } : {}),
+  });
   
   // Settings State
   const [form, setForm] = useState(initial);
@@ -369,6 +380,12 @@ export default function SettingsClient({
     ),
     aiAutoPublish: <SummaryPill>Cover {form.ai_auto_publish_cover_enabled === "false" ? "off" : "on"}</SummaryPill>,
     aiPortal: <SummaryPill>{form.ai_portal_max_question_chars || "0"} karakter pertanyaan</SummaryPill>,
+    waDevices: (
+      <>
+        <SummaryPill>{hasFonnteAccountToken ? "Account token aktif" : "Account token belum ada"}</SummaryPill>
+        <SummaryPill>{form.fonnte_api_keys ? `${form.fonnte_api_keys.split(",").filter(Boolean).length} rotator` : "Rotator kosong"}</SummaryPill>
+      </>
+    ),
     broadcastIdentity: <SummaryPill>{form.broadcast_brand_name || "Brand broadcast kosong"}</SummaryPill>,
     broadcastTemplates: <SummaryPill>Consent, promo, opt-out</SummaryPill>,
     broadcastConsent: (
@@ -1125,6 +1142,23 @@ export default function SettingsClient({
       {/* Tab: Broadcast WhatsApp */}
       {activeTab === "broadcast" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <CollapsibleSection
+            id="waDevices"
+            title="Device WhatsApp"
+            description="Kelola perangkat Fonnte, API key, dan rotator yang dipakai untuk broadcast serta notifikasi WhatsApp."
+            summary={sectionSummary.waDevices}
+            hidden={!sectionVisible("waDevices")}
+            open={openSections.waDevices}
+            onToggle={toggleSection}
+          >
+            <DevicesClient
+              embedded
+              hasAccountToken={hasFonnteAccountToken}
+              initialApiKey={form.fonnte_api_key ?? ""}
+              initialApiKeys={form.fonnte_api_keys ?? ""}
+            />
+          </CollapsibleSection>
+
           <CollapsibleSection
             id="broadcastIdentity"
             title="Identitas Pesan"

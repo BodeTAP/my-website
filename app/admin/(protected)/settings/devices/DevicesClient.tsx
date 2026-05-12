@@ -57,7 +57,7 @@ function AddDeviceModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
             </div>
             <h2 className="text-white font-semibold">Tambah Device Baru</h2>
           </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
+          <button type="button" onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -145,7 +145,7 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
             <QrCode className="w-4 h-4 text-blue-400" />
             <h2 className="text-white font-semibold text-sm">Scan QR — {device.name}</h2>
           </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
+          <button type="button" onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -174,7 +174,7 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
               <p className="text-blue-200/50 text-xs text-center">
                 Buka WhatsApp → Perangkat Tertaut → Tautkan Perangkat → Scan QR ini
               </p>
-              <button onClick={fetchQR}
+              <button type="button" onClick={fetchQR}
                 className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                 <RefreshCw className="w-3 h-3" /> Refresh QR
               </button>
@@ -233,7 +233,7 @@ function EditDeviceModal({ device, onClose, onSuccess }: { device: Device; onClo
             </div>
             <h2 className="text-white font-semibold">Edit Device — {device.name}</h2>
           </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="space-y-1.5">
@@ -310,7 +310,7 @@ function DeleteDeviceModal({ device, onClose, onSuccess }: { device: Device; onC
             </div>
             <h2 className="text-white font-semibold text-sm">Hapus Device</h2>
           </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+          <button type="button" onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="p-5 space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
@@ -322,9 +322,9 @@ function DeleteDeviceModal({ device, onClose, onSuccess }: { device: Device; onC
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex gap-3">
-            <button onClick={onClose}
+            <button type="button" onClick={onClose}
               className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 text-sm font-medium transition-all">Batal</button>
-            <button onClick={handleDelete} disabled={loading}
+            <button type="button" onClick={handleDelete} disabled={loading}
               className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
               Hapus Permanen
@@ -409,7 +409,7 @@ function OrderModal({ device, onClose }: { device: Device; onClose: () => void }
             </div>
             <h2 className="text-white font-semibold">Order Paket — {device.name}</h2>
           </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-6 space-y-4">
           {success ? (
@@ -483,9 +483,9 @@ function OrderModal({ device, onClose }: { device: Device; onClose: () => void }
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={onClose}
+                <button type="button" onClick={onClose}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 text-sm font-medium transition-all">Batal</button>
-                <button onClick={handleOrder} disabled={loading}
+                <button type="button" onClick={handleOrder} disabled={loading}
                   className="flex-1 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
                   Pesan Sekarang
@@ -507,10 +507,12 @@ export default function DevicesClient({
   hasAccountToken,
   initialApiKey,
   initialApiKeys,
+  embedded = false,
 }: {
   hasAccountToken: boolean;
   initialApiKey: string;
   initialApiKeys: string;
+  embedded?: boolean;
 }) {
   const [devices, setDevices]     = useState<Device[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -628,7 +630,7 @@ export default function DevicesClient({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className={embedded ? "space-y-6" : "max-w-4xl mx-auto space-y-8"}>
       <FadeUp>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -644,11 +646,11 @@ export default function DevicesClient({
           </div>
           {hasAccountToken && (
             <div className="flex items-center gap-2">
-              <button onClick={() => fetchDevices(true)} disabled={refreshing}
+              <button type="button" onClick={() => fetchDevices(true)} disabled={refreshing}
                 className="p-2.5 rounded-xl border border-white/10 text-blue-200/50 hover:text-white hover:bg-white/5 transition-all disabled:opacity-50">
                 <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
               </button>
-              <button onClick={() => setShowAdd(true)}
+              <button type="button" onClick={() => setShowAdd(true)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-medium transition-all shadow-[0_0_15px_rgba(22,163,74,0.3)]">
                 <Plus className="w-4 h-4" />
                 Tambah Device
@@ -745,13 +747,13 @@ export default function DevicesClient({
             {saveError && <p className="text-red-400 text-sm">{saveError}</p>}
 
             <div className="flex items-center gap-3 flex-wrap">
-              <button onClick={saveApiKeys} disabled={saving || syncing}
+              <button type="button" onClick={saveApiKeys} disabled={saving || syncing}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Simpan API Keys
               </button>
               {hasAccountToken && (
-                <button onClick={syncFromDevices} disabled={syncing || saving}
+                <button type="button" onClick={syncFromDevices} disabled={syncing || saving}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600/20 hover:bg-green-600 border border-green-500/30 hover:border-green-500 text-green-400 hover:text-white text-sm font-medium transition-all disabled:opacity-50">
                   {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                   Sinkronisasi dari Device
@@ -833,20 +835,20 @@ export default function DevicesClient({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => setEditDevice(dev)}
+                        <button type="button" onClick={() => setEditDevice(dev)}
                           className="p-2 rounded-lg text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all"
                           title="Edit device">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         {dev.status === "disconnect" && (
-                          <button onClick={() => setQrDevice(dev)}
+                          <button type="button" onClick={() => setQrDevice(dev)}
                             className="p-2 rounded-lg text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition-all"
                             title="Scan QR untuk connect">
                             <QrCode className="w-3.5 h-3.5" />
                           </button>
                         )}
                         {dev.status === "connect" && (
-                          <button
+                          <button type="button"
                             onClick={() => handleDisconnect(dev)}
                             disabled={disconnecting === dev.token}
                             className="p-2 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-all disabled:opacity-50"
@@ -856,12 +858,12 @@ export default function DevicesClient({
                               : <WifiOff className="w-3.5 h-3.5" />}
                           </button>
                         )}
-                        <button onClick={() => setOrderDevice(dev)}
+                        <button type="button" onClick={() => setOrderDevice(dev)}
                           className="p-2 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-all"
                           title="Order paket">
                           <ShoppingCart className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => setDeleteDevice(dev)}
+                        <button type="button" onClick={() => setDeleteDevice(dev)}
                           className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
                           title="Hapus device permanen">
                           <Trash2 className="w-3.5 h-3.5" />
