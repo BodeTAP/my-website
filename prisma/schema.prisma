@@ -297,6 +297,8 @@ model Client {
   hostingRecords HostingRecord[]
   credit         ClientCredit?
   creditTxs      CreditTransaction[]
+  proposalTemplates ProposalTemplate[]
+  generatedProposals GeneratedProposal[]
 
   @@map("clients")
 }
@@ -337,6 +339,46 @@ model CreditPackage {
   createdAt   DateTime @default(now())
 
   @@map("credit_packages")
+}
+
+model ProposalTemplate {
+  id          String   @id @default(cuid())
+  clientId    String?
+  name        String
+  category    String
+  description String?
+  sections    Json
+  variables   Json?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client             Client?             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedProposals GeneratedProposal[]
+
+  @@index([clientId])
+  @@map("proposal_templates")
+}
+
+model GeneratedProposal {
+  id           String   @id @default(cuid())
+  clientId     String
+  templateId   String?
+  title        String
+  prospectName String?
+  templateName String?
+  input        Json
+  content      Json
+  status       String   @default("DRAFT")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  client   Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  template ProposalTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([clientId, createdAt])
+  @@map("generated_proposals")
 }
 
 model Project {

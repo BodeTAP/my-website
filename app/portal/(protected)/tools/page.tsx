@@ -78,13 +78,21 @@ export default async function PortalToolsPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <div className="glass rounded-2xl p-6 border border-white/5 h-full flex flex-col opacity-70">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5">
-              <FileText className="w-6 h-6 text-blue-200/45" />
+          <div className="glass rounded-2xl p-6 border border-blue-500/20 h-full flex flex-col hover:border-blue-400/40 transition-colors">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
+              <FileText className="w-6 h-6 text-blue-300" />
             </div>
             <h2 className="text-white font-black text-xl">Proposal Generator</h2>
-            <p className="text-blue-200/40 text-sm mt-2 leading-relaxed">Buat draft proposal berbasis brief klien.</p>
-            <span className="mt-auto w-fit rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-bold text-blue-200/45">Segera Hadir</span>
+            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat draft proposal bisnis dari template custom.</p>
+            <p className="text-amber-300 text-sm font-bold mt-5">5 kredit/proposal</p>
+            <div className="mt-auto pt-6">
+              <ToolActionButton
+                href={balance < 5 ? "/portal/credits" : "/portal/tools/proposal-generator"}
+                label={balance < 5 ? "Beli Kredit" : "Gunakan"}
+                loadingLabel={balance < 5 ? "Membuka..." : "Memuat..."}
+                className={`w-full h-11 rounded-xl font-bold ${balance < 5 ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
+              />
+            </div>
           </div>
         </StaggerItem>
 
