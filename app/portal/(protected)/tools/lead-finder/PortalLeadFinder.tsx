@@ -308,6 +308,11 @@ function socialStatusLabel(status: SocialScanStatus) {
   return "Tidak discan";
 }
 
+function socialStatusText(place: PlaceLead) {
+  const label = socialStatusLabel(place.socialScan.status);
+  return place.socialScan.error ? `${label}: ${place.socialScan.error}` : label;
+}
+
 function downloadCsv(places: PlaceLead[]) {
   const header = [
     "Nama Bisnis",
@@ -322,6 +327,7 @@ function downloadCsv(places: PlaceLead[]) {
     "Status Bisnis",
     "Sedang Buka",
     "Status Social Scan",
+    "Detail Social Scan",
     "Instagram",
     "Facebook",
     "TikTok",
@@ -344,6 +350,7 @@ function downloadCsv(places: PlaceLead[]) {
       place.businessStatus ?? "",
       place.isOpen === null ? "" : place.isOpen ? "Ya" : "Tidak",
       socialStatusLabel(place.socialScan.status),
+      place.socialScan.error ?? "",
       place.socialScan.links.instagram ?? "",
       place.socialScan.links.facebook ?? "",
       place.socialScan.links.tiktok ?? "",
@@ -1181,7 +1188,7 @@ export default function PortalLeadFinder({
                               ))
                             ) : (
                               <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-blue-200/35">
-                                Sosial: {socialStatusLabel(place.socialScan.status)}
+                                Sosial: {socialStatusText(place)}
                               </span>
                             )}
                           </div>

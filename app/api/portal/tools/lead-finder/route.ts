@@ -49,7 +49,7 @@ const DEEP_RESULT_CAP = 240;
 const DEEP_PLAN_CAP = 18;
 const SOCIAL_SCAN_COST_FALLBACK = 10;
 const SOCIAL_SCAN_CACHE_DAYS = 30;
-const SOCIAL_SCAN_TIMEOUT_MS = 4500;
+const SOCIAL_SCAN_TIMEOUT_MS = 10000;
 const SOCIAL_SCAN_CONCURRENCY = 5;
 const SOCIAL_SCAN_MAX_WEBSITES = 80;
 const SOCIAL_SCAN_MAX_BYTES = 512 * 1024;
@@ -62,6 +62,13 @@ const SOCIAL_DOMAINS: Record<SocialPlatform, RegExp> = {
   youtube: /(^|\.)youtube\.com$|(^|\.)youtu\.be$/i,
   x: /(^|\.)x\.com$|(^|\.)twitter\.com$/i,
 };
+
+const SOCIAL_SCAN_HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+} as const;
 
 const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
   "jakarta": { lat: -6.2088, lng: 106.8456 },
@@ -246,6 +253,22 @@ function normalizeWebsiteUrl(value: string | null | undefined) {
   }
 }
 
+function getHostnameWithOptionalWww(websiteUrl: string) {
+  const parsed = new URL(websiteUrl);
+  if (parsed.hostname.startsWith("www.")) return null;
+
+  parsed.hostname = `www.${parsed.hostname}`;
+  return parsed.toString();
+}
+
+function getErrorMessage(err: unknown) {
+  if (!(err instanceof Error)) return "Gagal scan website";
+  if (err.name === "TimeoutError" || err.name === "AbortError") return `Timeout ${Math.round(SOCIAL_SCAN_TIMEOUT_MS / 1000)} detik`;
+  if ("code" in err && typeof err.code === "string") return err.code;
+  if (err.message) return err.message.slice(0, 120);
+  return "Gagal scan website";
+}
+
 function isPrivateIpAddress(address: string) {
   if (address === "::1") return true;
   if (address.startsWith("fc") || address.startsWith("fd") || address.startsWith("fe80:")) return true;
@@ -418,37 +441,47 @@ async function scanWebsiteSocialLinks(websiteUrl: string): Promise<SocialScanRes
     };
   }
 
-  let result: SocialScanResult;
+  let result: SocialScanResult | null = null;
 
-  try {
-    await assertPublicWebsiteUrl(normalizedUrl);
+  const scanUrls = [normalizedUrl, getHostnameWithOptionalWww(normalizedUrl)].filter(Boolean) as string[];
+  const errors: string[] = [];
 
-    const res = await fetch(normalizedUrl, {
-      redirect: "follow",
-      signal: AbortSignal.timeout(SOCIAL_SCAN_TIMEOUT_MS),
-      headers: {
-        "User-Agent": "MFWEB Lead Finder Social Scan/1.0",
-        "Accept": "text/html,application/xhtml+xml",
-      },
-    });
+  for (const scanUrl of scanUrls) {
+    try {
+      await assertPublicWebsiteUrl(scanUrl);
 
-    if (!res.ok) {
-      result = emptySocialScan("FAILED", `HTTP ${res.status}`);
-    } else {
+      const res = await fetch(scanUrl, {
+        redirect: "follow",
+        signal: AbortSignal.timeout(SOCIAL_SCAN_TIMEOUT_MS),
+        headers: SOCIAL_SCAN_HEADERS,
+      });
+
+      if (!res.ok) {
+        errors.push(`${new URL(scanUrl).hostname}: HTTP ${res.status}`);
+        continue;
+      }
+
       const contentType = res.headers.get("content-type") ?? "";
       if (contentType && !contentType.includes("text/html") && !contentType.includes("application/xhtml")) {
-        result = emptySocialScan("FAILED", "Konten bukan HTML");
-      } else {
-        const html = await readLimitedText(res);
-        const links = extractSocialLinks(html, normalizedUrl);
-        result = {
-          status: Object.keys(links).length > 0 ? "FOUND" : "NOT_FOUND",
-          links,
-        };
+        errors.push(`${new URL(scanUrl).hostname}: Konten bukan HTML`);
+        continue;
       }
+
+      const finalUrl = res.url || scanUrl;
+      const html = await readLimitedText(res);
+      const links = extractSocialLinks(html, finalUrl);
+      result = {
+        status: Object.keys(links).length > 0 ? "FOUND" : "NOT_FOUND",
+        links,
+      };
+      break;
+    } catch (err) {
+      errors.push(`${new URL(scanUrl).hostname}: ${getErrorMessage(err)}`);
     }
-  } catch (err) {
-    result = emptySocialScan("FAILED", err instanceof Error && err.name === "TimeoutError" ? "Timeout" : "Gagal scan website");
+  }
+
+  if (!result) {
+    result = emptySocialScan("FAILED", errors.slice(0, 2).join("; ") || "Gagal scan website");
   }
 
   if (cache) {
