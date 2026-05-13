@@ -29,12 +29,18 @@ import type { PlaceLead } from "@/app/api/portal/tools/lead-finder/route";
 
 type FilterType = "ALL" | "NO_WEBSITE" | "HAS_WEBSITE";
 type StatusFilter = "ALL" | "OPERATIONAL" | "CLOSED_PERMANENTLY";
+type SearchMode = "standard" | "deep";
 type CityGroup = { label: string; cities: string[] };
 type SearchHistory = {
   query: string;
   city: string;
   total: number;
   timestamp: number;
+};
+
+const CREDIT_COST: Record<SearchMode, number> = {
+  standard: 5,
+  deep: 20,
 };
 
 const PRESETS = [
@@ -543,7 +549,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const [balance, setBalance] = useState(initialBalance);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
-  const [pages, setPages] = useState(1);
+  const [mode, setMode] = useState<SearchMode>("standard");
   const [filter, setFilter] = useState<FilterType>("NO_WEBSITE");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("OPERATIONAL");
   const [minRating, setMinRating] = useState<number>(0);
@@ -553,11 +559,14 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const [usedBias, setUsedBias] = useState(false);
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [lastCreditCost, setLastCreditCost] = useState(CREDIT_COST.standard);
+  const [lastMode, setLastMode] = useState<SearchMode>("standard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const insufficient = balance < 5;
+  const creditCost = CREDIT_COST[mode];
+  const insufficient = balance < creditCost;
   const filteredPlaces = useMemo(() => {
     return places.filter((place) => {
       if (filter === "NO_WEBSITE" && place.hasWebsite) return false;
@@ -591,7 +600,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
       const res = await fetch("/api/portal/tools/lead-finder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, city, pages }),
+        body: JSON.stringify({ query, city, mode }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -601,6 +610,8 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
       setPlaces(Array.isArray(data.places) ? data.places : []);
       setFullQuery(typeof data.fullQuery === "string" ? data.fullQuery : "");
       setUsedBias(!!data.usedBias);
+      setLastCreditCost(typeof data.creditCost === "number" ? data.creditCost : creditCost);
+      setLastMode(data.mode === "deep" ? "deep" : "standard");
       setSearched(true);
       setHistory((previous) => {
         const entry: SearchHistory = {
@@ -654,7 +665,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
             <AlertTriangle className="w-5 h-5 text-amber-300" />
             Kredit tidak cukup. Beli sekarang
           </span>
-          <span className="text-xs text-amber-200/70">Minimal 5 kredit per pencarian</span>
+          <span className="text-xs text-amber-200/70">Butuh {creditCost} kredit untuk mode ini</span>
         </Link>
       )}
 
@@ -705,28 +716,56 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
             ))}
           </div>
 
+          <div className="grid sm:grid-cols-2 gap-3">
+            {([
+              {
+                value: "standard" as const,
+                title: "Standard",
+                description: "Satu query utama, maksimal 60 leads.",
+                badge: "5 kredit",
+              },
+              {
+                value: "deep" as const,
+                title: "Deep Search",
+                description: "Multi-keyword dan multi-area, hasil lebih luas.",
+                badge: "20 kredit",
+              },
+            ]).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setMode(option.value)}
+                className={`rounded-2xl border p-4 text-left transition-all ${
+                  mode === option.value
+                    ? "border-blue-500/45 bg-blue-500/10 shadow-[0_0_20px_rgba(37,99,235,0.12)]"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black text-white">{option.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-blue-200/45">{option.description}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+                    mode === option.value
+                      ? "border-amber-400/30 bg-amber-400/10 text-amber-300"
+                      : "border-white/10 bg-white/5 text-blue-200/45"
+                  }`}>
+                    {option.badge}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-6">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              {loading ? `Mencari ${pages * 20} data...` : "Cari Calon Klien"}
+              {loading ? (mode === "deep" ? "Deep Search berjalan..." : "Mencari 60 leads...") : "Cari Calon Klien"}
             </Button>
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-blue-200/40 text-xs">Maks hasil:</span>
-              {([1, 2, 3] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setPages(value)}
-                  className={`px-2.5 py-1 rounded-lg text-xs border transition-all ${
-                    pages === value
-                      ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
-                      : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
-                  }`}
-                >
-                  {value * 20}
-                </button>
-              ))}
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-300">
+              {mode === "deep" ? "Multi-search aktif" : "Fix 60 leads"}
             </div>
 
             {history.length > 0 && (
@@ -771,7 +810,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
 
       {fullQuery && !error && !loading && (
         <div className="rounded-2xl bg-green-500/10 border border-green-500/25 px-5 py-4 text-green-100 text-sm">
-          Pencarian selesai. 5 kredit telah digunakan, saldo terbaru {balance} kredit.
+          {lastMode === "deep" ? "Deep Search selesai" : "Pencarian selesai"}. {lastCreditCost} kredit telah digunakan, saldo terbaru {balance} kredit.
         </div>
       )}
 
@@ -938,9 +977,9 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-5">
               <Coins className="w-6 h-6 text-amber-300" />
             </div>
-            <h2 className="text-white font-black text-xl">Gunakan 5 kredit?</h2>
+            <h2 className="text-white font-black text-xl">Gunakan {creditCost} kredit?</h2>
             <p className="text-blue-200/55 text-sm mt-2 leading-relaxed">
-              Pencarian Lead Finder akan memotong 5 kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
+              Mode <span className="text-white font-bold">{mode === "deep" ? "Deep Search" : "Standard"}</span> akan memotong {creditCost} kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Button
@@ -956,7 +995,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
                 onClick={runSearch}
                 className="h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black flex-1"
               >
-                Ya, Cari Lead
+                {mode === "deep" ? "Ya, Deep Search" : "Ya, Cari Lead"}
               </Button>
             </div>
           </div>

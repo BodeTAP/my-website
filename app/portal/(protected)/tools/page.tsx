@@ -65,7 +65,7 @@ export default async function PortalToolsPage() {
             </div>
             <h2 className="text-white font-black text-xl">Lead Finder</h2>
             <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Temukan bisnis lokal dari Google Maps</p>
-            <p className="text-amber-300 text-sm font-bold mt-5">5 kredit/pencarian</p>
+            <p className="text-amber-300 text-sm font-bold mt-5">Mulai 5 kredit/pencarian</p>
             <div className="mt-auto pt-6">
               <ToolActionButton
                 href={balance < 5 ? "/portal/credits" : "/portal/tools/lead-finder"}
