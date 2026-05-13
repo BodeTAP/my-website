@@ -11,7 +11,6 @@ import {
   Clock,
   Coins,
   Crosshair,
-  DatabaseZap,
   Download,
   Globe,
   GlobeOff,
@@ -281,27 +280,42 @@ function stripIndonesiaPrefix(phone: string) {
 }
 
 function downloadCsv(places: PlaceLead[]) {
-  const header = ["Name", "CountryCode", "Phone", "AllowCampaign", "AllowSMS", "Attribute 1"];
-  const rows = places
-    .filter((place) => place.phoneNorm || place.phone)
-    .map((place) => {
-      const phone = stripIndonesiaPrefix(place.phoneNorm || place.phone);
-      return [
-        place.name,
-        "62",
-        phone,
-        "TRUE",
-        "TRUE",
-        place.name,
-      ].map(csvEscape).join(",");
-    });
+  const header = [
+    "Nama Bisnis",
+    "Kategori",
+    "Alamat",
+    "Telepon",
+    "WhatsApp",
+    "Website",
+    "Punya Website",
+    "Rating",
+    "Jumlah Ulasan",
+    "Status Bisnis",
+    "Sedang Buka",
+  ];
+  const rows = places.map((place) => {
+    const phone = place.phoneNorm || place.phone;
+    return [
+      place.name,
+      place.category,
+      place.address,
+      place.phone,
+      phone ? `62${stripIndonesiaPrefix(phone)}` : "",
+      place.website ?? "",
+      place.hasWebsite ? "Ya" : "Tidak",
+      place.rating?.toString() ?? "",
+      place.ratingCount?.toString() ?? "",
+      place.businessStatus ?? "",
+      place.isOpen === null ? "" : place.isOpen ? "Ya" : "Tidak",
+    ].map(csvEscape).join(",");
+  });
 
-  const csv = [header.join(","), ...rows].join("\n");
+  const csv = ["\uFEFF" + header.join(","), ...rows].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `wati-leads-${Date.now()}.csv`;
+  a.download = `leads-${Date.now()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -556,7 +570,6 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const [minRating, setMinRating] = useState<number>(0);
   const [minReviews, setMinReviews] = useState<number>(0);
   const [hasPhoneOnly, setHasPhoneOnly] = useState(true);
-  const [hideSaved, setHideSaved] = useState(true);
   const [resultSearch, setResultSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("NO_WEBSITE");
   const [places, setPlaces] = useState<PlaceLead[]>([]);
@@ -580,7 +593,6 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
       if (filter === "NO_WEBSITE" && place.hasWebsite) return false;
       if (filter === "HAS_WEBSITE" && !place.hasWebsite) return false;
       if (hasPhoneOnly && !hasPhone) return false;
-      if (hideSaved && place.alreadySaved) return false;
       if (statusFilter === "OPERATIONAL" && place.businessStatus === "CLOSED_PERMANENTLY") return false;
       if (statusFilter === "CLOSED_PERMANENTLY" && place.businessStatus !== "CLOSED_PERMANENTLY") return false;
       if (minRating > 0 && (place.rating ?? 0) < minRating) return false;
@@ -609,12 +621,11 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
       if (sortBy === "PHONE") return Number(Boolean(b.phoneNorm || b.phone)) - Number(Boolean(a.phoneNorm || a.phone));
       return a.name.localeCompare(b.name, "id");
     });
-  }, [filter, hasPhoneOnly, hideSaved, minRating, minReviews, places, resultSearch, sortBy, statusFilter]);
+  }, [filter, hasPhoneOnly, minRating, minReviews, places, resultSearch, sortBy, statusFilter]);
 
   const noWebsiteCount = places.filter((place) => !place.hasWebsite).length;
   const noPhoneCount = places.filter((place) => !(place.phoneNorm || place.phone)).length;
   const closedCount = places.filter((place) => place.businessStatus === "CLOSED_PERMANENTLY").length;
-  const alreadySavedCount = places.filter((place) => place.alreadySaved).length;
 
   function requestSearch() {
     if (!query.trim() || insufficient) return;
@@ -863,7 +874,6 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
               <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
                 {noWebsiteCount > 0 && <span className="text-red-400"><strong>{noWebsiteCount}</strong> tanpa website</span>}
                 {noPhoneCount > 0 && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
-                {alreadySavedCount > 0 && <span><strong>{alreadySavedCount}</strong> sudah pernah ditemukan</span>}
                 {closedCount > 0 && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
               {fullQuery && <p className="text-blue-200/40 text-xs">{fullQuery}</p>}
@@ -873,7 +883,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
               <Button variant="outline" size="sm" onClick={() => downloadCsv(filteredPlaces)}
                 className="gap-2 text-xs border-green-500/25 bg-green-500/10 text-green-200 hover:bg-green-500/15 shrink-0">
                 <Download className="w-3.5 h-3.5" />
-                Download CSV Wati ({filteredPlaces.length})
+                Download CSV ({filteredPlaces.length})
               </Button>
             )}
           </div>
@@ -941,17 +951,6 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
             </button>
             <button
               type="button"
-              onClick={() => setHideSaved((current) => !current)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                hideSaved
-                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
-                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
-              }`}
-            >
-              Sembunyikan duplikat
-            </button>
-            <button
-              type="button"
               onClick={() => setStatusFilter(statusFilter === "OPERATIONAL" ? "ALL" : "OPERATIONAL")}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 statusFilter === "OPERATIONAL"
@@ -1004,9 +1003,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
                   <div key={place.placeId || `${place.name}-${place.phone}`} className={`glass rounded-2xl p-4 border transition-all ${isClosed ? "opacity-55 border-white/5" : "border-white/5 hover:border-white/15"}`}>
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0">
-                        {place.alreadySaved
-                          ? <DatabaseZap className="w-4 h-4 text-blue-200/30" />
-                          : place.hasWebsite
+                        {place.hasWebsite
                           ? <Globe className="w-4 h-4 text-green-400/60" />
                           : <GlobeOff className="w-4 h-4 text-red-400/70" />}
                       </div>
@@ -1014,11 +1011,6 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
                         <div className="flex items-start justify-between gap-2 flex-wrap">
                           <p className="text-white font-semibold text-sm leading-snug line-clamp-1">{place.name || "Tanpa nama"}</p>
                           <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-                            {place.alreadySaved && (
-                              <span className="flex items-center gap-1 text-[10px] text-blue-200/50 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
-                                <DatabaseZap className="w-2.5 h-2.5" /> Sudah ada
-                              </span>
-                            )}
                             <BusinessStatusBadge status={place.businessStatus} />
                             {place.hasWebsite ? (
                               <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
