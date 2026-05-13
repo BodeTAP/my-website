@@ -287,7 +287,7 @@ function downloadCsv(places: PlaceLead[]) {
     "Telepon",
     "WhatsApp",
     "Website",
-    "Punya Website",
+    "Status Website",
     "Rating",
     "Jumlah Ulasan",
     "Status Bisnis",
@@ -302,7 +302,7 @@ function downloadCsv(places: PlaceLead[]) {
       place.phone,
       phone ? `62${stripIndonesiaPrefix(phone)}` : "",
       place.website ?? "",
-      place.hasWebsite ? "Ya" : "Tidak",
+      place.hasWebsite ? "Ada" : "Tidak ada",
       place.rating?.toString() ?? "",
       place.ratingCount?.toString() ?? "",
       place.businessStatus ?? "",
@@ -573,13 +573,13 @@ export default function PortalLeadFinder({
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
   const [mode, setMode] = useState<SearchMode>("standard");
-  const [filter, setFilter] = useState<FilterType>("NO_WEBSITE");
+  const [filter, setFilter] = useState<FilterType>("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("OPERATIONAL");
   const [minRating, setMinRating] = useState<number>(0);
   const [minReviews, setMinReviews] = useState<number>(0);
   const [hasPhoneOnly, setHasPhoneOnly] = useState(true);
   const [resultSearch, setResultSearch] = useState("");
-  const [sortBy, setSortBy] = useState<SortBy>("NO_WEBSITE");
+  const [sortBy, setSortBy] = useState<SortBy>("PHONE");
   const [places, setPlaces] = useState<PlaceLead[]>([]);
   const [fullQuery, setFullQuery] = useState("");
   const [searched, setSearched] = useState(false);
@@ -696,7 +696,7 @@ export default function PortalLeadFinder({
             <Search className="w-7 h-7 text-blue-400" />
             Lead Finder
           </h1>
-          <p className="text-blue-200/50 text-sm mt-2">Temukan bisnis lokal dari Google Maps dalam format siap follow-up.</p>
+          <p className="text-blue-200/50 text-sm mt-2">Temukan prospek bisnis lokal dari Google Maps dalam format siap follow-up.</p>
         </div>
         <Link href="/portal/credits" className="w-fit">
           <div className="flex items-center gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 px-4 py-3 hover:bg-amber-500/15 transition-colors">
@@ -824,7 +824,7 @@ export default function PortalLeadFinder({
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-6">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              {loading ? (mode === "deep" ? "Deep Search berjalan..." : "Mencari 60 leads...") : "Cari Calon Klien"}
+              {loading ? (mode === "deep" ? "Deep Search berjalan..." : "Mencari prospek...") : "Cari Prospek"}
             </Button>
 
             <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-300">
@@ -890,7 +890,7 @@ export default function PortalLeadFinder({
                 )}
               </p>
               <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
-                {noWebsiteCount > 0 && <span className="text-red-400"><strong>{noWebsiteCount}</strong> tanpa website</span>}
+                {noWebsiteCount > 0 && <span className="text-blue-300/70"><strong>{noWebsiteCount}</strong> tanpa website</span>}
                 {noPhoneCount > 0 && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
                 {closedCount > 0 && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
@@ -927,10 +927,10 @@ export default function PortalLeadFinder({
               onChange={(event) => setSortBy(event.target.value as SortBy)}
               className="h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-blue-500/45"
             >
-              <option className="bg-[#07111f] text-white" value="NO_WEBSITE">Tanpa website dulu</option>
+              <option className="bg-[#07111f] text-white" value="PHONE">Ada nomor dulu</option>
               <option className="bg-[#07111f] text-white" value="REVIEWS">Review terbanyak</option>
               <option className="bg-[#07111f] text-white" value="RATING">Rating tertinggi</option>
-              <option className="bg-[#07111f] text-white" value="PHONE">Ada nomor dulu</option>
+              <option className="bg-[#07111f] text-white" value="NO_WEBSITE">Belum ada website dulu</option>
               <option className="bg-[#07111f] text-white" value="NAME">Nama A-Z</option>
             </select>
           </div>
@@ -951,7 +951,7 @@ export default function PortalLeadFinder({
                     : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
                 }`}
               >
-                {value === "NO_WEBSITE" ? "Tanpa Website" : value === "HAS_WEBSITE" ? "Punya Website" : "Semua"}
+                {value === "NO_WEBSITE" ? "Belum ada website" : value === "HAS_WEBSITE" ? "Ada website" : "Semua"}
               </button>
             ))}
 
@@ -1032,11 +1032,11 @@ export default function PortalLeadFinder({
                             <BusinessStatusBadge status={place.businessStatus} />
                             {place.hasWebsite ? (
                               <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                                <Globe className="w-2.5 h-2.5" /> Punya
+                                <Globe className="w-2.5 h-2.5" /> Ada website
                               </span>
                             ) : (
-                              <span className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-                                <GlobeOff className="w-2.5 h-2.5" /> Belum
+                              <span className="flex items-center gap-1 text-[10px] text-blue-300 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                                <GlobeOff className="w-2.5 h-2.5" /> Tanpa website
                               </span>
                             )}
                           </div>

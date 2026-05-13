@@ -71,7 +71,7 @@ export default async function PortalToolsPage() {
               <Search className="w-6 h-6 text-blue-300" />
             </div>
             <h2 className="text-white font-black text-xl">Lead Finder</h2>
-            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Temukan bisnis lokal dari Google Maps</p>
+            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Temukan prospek bisnis lokal dari Google Maps.</p>
             <p className="text-amber-300 text-sm font-bold mt-5">Mulai {leadFinderMinCost} kredit/pencarian</p>
             <div className="mt-auto pt-6">
               {toolSettings.leadFinder.enabled ? (
