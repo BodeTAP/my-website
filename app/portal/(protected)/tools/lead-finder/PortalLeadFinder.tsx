@@ -30,6 +30,7 @@ import type { PlaceLead } from "@/app/api/portal/tools/lead-finder/route";
 type FilterType = "ALL" | "NO_WEBSITE" | "HAS_WEBSITE";
 type StatusFilter = "ALL" | "OPERATIONAL" | "CLOSED_PERMANENTLY";
 type SearchMode = "standard" | "deep";
+type SortBy = "NO_WEBSITE" | "RATING" | "REVIEWS" | "NAME" | "PHONE";
 type CityGroup = { label: string; cities: string[] };
 type SearchHistory = {
   query: string;
@@ -553,6 +554,11 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const [filter, setFilter] = useState<FilterType>("NO_WEBSITE");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("OPERATIONAL");
   const [minRating, setMinRating] = useState<number>(0);
+  const [minReviews, setMinReviews] = useState<number>(0);
+  const [hasPhoneOnly, setHasPhoneOnly] = useState(true);
+  const [hideSaved, setHideSaved] = useState(true);
+  const [resultSearch, setResultSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortBy>("NO_WEBSITE");
   const [places, setPlaces] = useState<PlaceLead[]>([]);
   const [fullQuery, setFullQuery] = useState("");
   const [searched, setSearched] = useState(false);
@@ -568,17 +574,45 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const creditCost = CREDIT_COST[mode];
   const insufficient = balance < creditCost;
   const filteredPlaces = useMemo(() => {
-    return places.filter((place) => {
+    const search = resultSearch.trim().toLowerCase();
+    const filtered = places.filter((place) => {
+      const hasPhone = Boolean(place.phoneNorm || place.phone);
       if (filter === "NO_WEBSITE" && place.hasWebsite) return false;
       if (filter === "HAS_WEBSITE" && !place.hasWebsite) return false;
+      if (hasPhoneOnly && !hasPhone) return false;
+      if (hideSaved && place.alreadySaved) return false;
       if (statusFilter === "OPERATIONAL" && place.businessStatus === "CLOSED_PERMANENTLY") return false;
       if (statusFilter === "CLOSED_PERMANENTLY" && place.businessStatus !== "CLOSED_PERMANENTLY") return false;
       if (minRating > 0 && (place.rating ?? 0) < minRating) return false;
+      if (minReviews > 0 && (place.ratingCount ?? 0) < minReviews) return false;
+      if (search) {
+        const haystack = [
+          place.name,
+          place.address,
+          place.category,
+          place.phone,
+          place.website ?? "",
+        ].join(" ").toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
       return true;
     });
-  }, [filter, minRating, places, statusFilter]);
+
+    return filtered.sort((a, b) => {
+      if (sortBy === "NO_WEBSITE") {
+        if (a.hasWebsite !== b.hasWebsite) return a.hasWebsite ? 1 : -1;
+        if (Boolean(a.phoneNorm || a.phone) !== Boolean(b.phoneNorm || b.phone)) return a.phoneNorm || a.phone ? -1 : 1;
+        return (b.ratingCount ?? 0) - (a.ratingCount ?? 0);
+      }
+      if (sortBy === "RATING") return (b.rating ?? 0) - (a.rating ?? 0);
+      if (sortBy === "REVIEWS") return (b.ratingCount ?? 0) - (a.ratingCount ?? 0);
+      if (sortBy === "PHONE") return Number(Boolean(b.phoneNorm || b.phone)) - Number(Boolean(a.phoneNorm || a.phone));
+      return a.name.localeCompare(b.name, "id");
+    });
+  }, [filter, hasPhoneOnly, hideSaved, minRating, minReviews, places, resultSearch, sortBy, statusFilter]);
 
   const noWebsiteCount = places.filter((place) => !place.hasWebsite).length;
+  const noPhoneCount = places.filter((place) => !(place.phoneNorm || place.phone)).length;
   const closedCount = places.filter((place) => place.businessStatus === "CLOSED_PERMANENTLY").length;
   const alreadySavedCount = places.filter((place) => place.alreadySaved).length;
 
@@ -828,6 +862,7 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
               </p>
               <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
                 {noWebsiteCount > 0 && <span className="text-red-400"><strong>{noWebsiteCount}</strong> tanpa website</span>}
+                {noPhoneCount > 0 && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
                 {alreadySavedCount > 0 && <span><strong>{alreadySavedCount}</strong> sudah pernah ditemukan</span>}
                 {closedCount > 0 && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
@@ -841,6 +876,35 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
                 Download CSV Wati ({filteredPlaces.length})
               </Button>
             )}
+          </div>
+
+          <div className="grid lg:grid-cols-[1fr_220px] gap-3">
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <Search className="w-4 h-4 text-blue-200/35 shrink-0" />
+              <input
+                value={resultSearch}
+                onChange={(event) => setResultSearch(event.target.value)}
+                placeholder="Cari di hasil: nama, alamat, kategori..."
+                className="w-full bg-transparent text-sm text-white placeholder:text-blue-200/30 outline-none"
+              />
+              {resultSearch && (
+                <button type="button" onClick={() => setResultSearch("")} className="text-blue-200/35 hover:text-white">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortBy)}
+              className="h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-blue-500/45"
+            >
+              <option className="bg-[#07111f] text-white" value="NO_WEBSITE">Tanpa website dulu</option>
+              <option className="bg-[#07111f] text-white" value="REVIEWS">Review terbanyak</option>
+              <option className="bg-[#07111f] text-white" value="RATING">Rating tertinggi</option>
+              <option className="bg-[#07111f] text-white" value="PHONE">Ada nomor dulu</option>
+              <option className="bg-[#07111f] text-white" value="NAME">Nama A-Z</option>
+            </select>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -866,6 +930,28 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
             <div className="w-px bg-white/10 mx-1" />
             <button
               type="button"
+              onClick={() => setHasPhoneOnly((current) => !current)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                hasPhoneOnly
+                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+              }`}
+            >
+              Ada nomor
+            </button>
+            <button
+              type="button"
+              onClick={() => setHideSaved((current) => !current)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                hideSaved
+                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+              }`}
+            >
+              Sembunyikan duplikat
+            </button>
+            <button
+              type="button"
               onClick={() => setStatusFilter(statusFilter === "OPERATIONAL" ? "ALL" : "OPERATIONAL")}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 statusFilter === "OPERATIONAL"
@@ -887,6 +973,20 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
                   className={`px-1.5 py-0.5 rounded text-xs transition-all ${minRating === rating ? "text-yellow-300 font-semibold" : "text-blue-200/40 hover:text-white"}`}
                 >
                   {rating === 0 ? "Semua" : rating}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+              <span className="text-blue-200/40 text-xs">Ulasan:</span>
+              {[0, 10, 50, 100, 500].map((reviews) => (
+                <button
+                  key={reviews}
+                  type="button"
+                  onClick={() => setMinReviews(reviews)}
+                  className={`px-1.5 py-0.5 rounded text-xs transition-all ${minReviews === reviews ? "text-blue-300 font-semibold" : "text-blue-200/40 hover:text-white"}`}
+                >
+                  {reviews === 0 ? "Semua" : `${reviews}+`}
                 </button>
               ))}
             </div>

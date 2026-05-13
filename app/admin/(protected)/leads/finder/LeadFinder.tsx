@@ -242,6 +242,8 @@ const ALL_CITIES = CITY_GROUPS.flatMap((g) => g.cities);
 type SavedStatus = "idle" | "saving" | "saved" | "error";
 type FilterType  = "ALL" | "NO_WEBSITE" | "HAS_WEBSITE";
 type StatusFilter = "ALL" | "OPERATIONAL" | "CLOSED_PERMANENTLY";
+type SearchMode = "standard" | "deep";
+type SortBy = "NO_WEBSITE" | "RATING" | "REVIEWS" | "NAME" | "PHONE";
 
 type SearchHistory = {
   query:     string;
@@ -510,6 +512,7 @@ export default function LeadFinder() {
   const [query, setQuery]           = useState("");
   const [city, setCity]             = useState("");
   const [pages, setPages]           = useState(3);
+  const [mode, setMode]             = useState<SearchMode>("standard");
   const [loading, setLoading]       = useState(false);
   const [places, setPlaces]         = useState<PlaceLead[]>([]);
   const [searched, setSearched]     = useState(false);
@@ -520,6 +523,11 @@ export default function LeadFinder() {
   const [filter, setFilter]         = useState<FilterType>("NO_WEBSITE");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("OPERATIONAL");
   const [minRating, setMinRating]   = useState<number>(0);
+  const [minReviews, setMinReviews] = useState<number>(0);
+  const [hasPhoneOnly, setHasPhoneOnly] = useState(true);
+  const [hideSaved, setHideSaved]   = useState(true);
+  const [resultSearch, setResultSearch] = useState("");
+  const [sortBy, setSortBy]         = useState<SortBy>("NO_WEBSITE");
   const [savedIds, setSavedIds]     = useState<Set<string>>(new Set());
   const [saveStatus, setSaveStatus] = useState<SavedStatus>("idle");
   const [saveMsg, setSaveMsg]       = useState("");
@@ -543,7 +551,7 @@ export default function LeadFinder() {
       const res = await fetch("/api/admin/leads/finder", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ query: q.trim(), city: c.trim(), pages }),
+        body:    JSON.stringify({ query: q.trim(), city: c.trim(), pages, mode }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal mengambil data");
@@ -564,23 +572,47 @@ export default function LeadFinder() {
     } finally {
       setLoading(false);
     }
-  }, [query, city, pages]);
+  }, [query, city, pages, mode]);
 
   // Apply all filters
   const filtered = places.filter((p) => {
-    if (savedIds.has(p.placeId)) return false;
+    const hasPhone = Boolean(p.phoneNorm || p.phone);
+    const isSaved = p.alreadySaved || savedIds.has(p.placeId);
+    const search = resultSearch.trim().toLowerCase();
+    if (hideSaved && isSaved) return false;
     if (filter === "NO_WEBSITE"  && p.hasWebsite)  return false;
     if (filter === "HAS_WEBSITE" && !p.hasWebsite) return false;
+    if (hasPhoneOnly && !hasPhone) return false;
     if (statusFilter === "OPERATIONAL"       && p.businessStatus === "CLOSED_PERMANENTLY") return false;
     if (statusFilter === "CLOSED_PERMANENTLY" && p.businessStatus !== "CLOSED_PERMANENTLY") return false;
     if (minRating > 0 && (p.rating ?? 0) < minRating) return false;
+    if (minReviews > 0 && (p.ratingCount ?? 0) < minReviews) return false;
+    if (search) {
+      const haystack = [p.name, p.address, p.category, p.phone, p.website ?? ""].join(" ").toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
     return true;
+  }).sort((a, b) => {
+    if (sortBy === "NO_WEBSITE") {
+      if (a.hasWebsite !== b.hasWebsite) return a.hasWebsite ? 1 : -1;
+      if (Boolean(a.phoneNorm || a.phone) !== Boolean(b.phoneNorm || b.phone)) return a.phoneNorm || a.phone ? -1 : 1;
+      return (b.ratingCount ?? 0) - (a.ratingCount ?? 0);
+    }
+    if (sortBy === "RATING") return (b.rating ?? 0) - (a.rating ?? 0);
+    if (sortBy === "REVIEWS") return (b.ratingCount ?? 0) - (a.ratingCount ?? 0);
+    if (sortBy === "PHONE") return Number(Boolean(b.phoneNorm || b.phone)) - Number(Boolean(a.phoneNorm || a.phone));
+    return a.name.localeCompare(b.name, "id");
   });
 
-  const selectableFiltered = filtered.filter((p) => !p.alreadySaved && p.phoneNorm);
+  const selectableFiltered = filtered.filter((p) => !p.alreadySaved && !savedIds.has(p.placeId) && p.phoneNorm);
 
   const toggleSelect = (id: string) =>
-    setSelected((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+    setSelected((prev) => {
+      const s = new Set(prev);
+      if (s.has(id)) s.delete(id);
+      else s.add(id);
+      return s;
+    });
 
   const toggleAll = () =>
     setSelected(
@@ -656,6 +688,7 @@ export default function LeadFinder() {
   };
 
   const noWebsiteCount    = places.filter((p) => !p.hasWebsite && !p.alreadySaved && !savedIds.has(p.placeId)).length;
+  const noPhoneCount      = places.filter((p) => !(p.phoneNorm || p.phone)).length;
   const alreadySavedCount = places.filter((p) => p.alreadySaved || savedIds.has(p.placeId)).length;
   const closedCount       = places.filter((p) => p.businessStatus === "CLOSED_PERMANENTLY").length;
 
@@ -701,15 +734,57 @@ export default function LeadFinder() {
             ))}
           </div>
 
+          <div className="grid sm:grid-cols-2 gap-3">
+            {([
+              {
+                value: "standard" as const,
+                title: "Standard",
+                description: "Satu query utama, maksimal 60 leads.",
+                badge: `${pages * 20} hasil`,
+              },
+              {
+                value: "deep" as const,
+                title: "Deep Search",
+                description: "Multi-keyword dan multi-area, hasil lebih luas.",
+                badge: "hingga 240",
+              },
+            ]).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setMode(option.value)}
+                className={`rounded-2xl border p-4 text-left transition-all ${
+                  mode === option.value
+                    ? "border-indigo-500/45 bg-indigo-500/10 shadow-[0_0_20px_rgba(99,102,241,0.12)]"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black text-white">{option.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-blue-200/45">{option.description}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+                    mode === option.value
+                      ? "border-indigo-400/30 bg-indigo-400/10 text-indigo-300"
+                      : "border-white/10 bg-white/5 text-blue-200/45"
+                  }`}>
+                    {option.badge}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading}
               className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2 px-6">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              {loading ? `Mencari ${pages * 20} data...` : "Cari Calon Klien"}
+              {loading ? (mode === "deep" ? "Deep Search berjalan..." : `Mencari ${pages * 20} data...`) : "Cari Calon Klien"}
             </Button>
 
             {/* Max results */}
-            <div className="flex items-center gap-1.5">
+            <div className={`flex items-center gap-1.5 ${mode === "deep" ? "opacity-45 pointer-events-none" : ""}`}>
               <span className="text-blue-200/40 text-xs">Maks hasil:</span>
               {([1, 2, 3] as const).map((n) => (
                 <button key={n} type="button" onClick={() => setPages(n)}
@@ -779,6 +854,7 @@ export default function LeadFinder() {
               </p>
               <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
                 {noWebsiteCount > 0    && <span className="text-red-400"><strong>{noWebsiteCount}</strong> tanpa website</span>}
+                {noPhoneCount > 0      && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
                 {alreadySavedCount > 0 && <span><strong>{alreadySavedCount}</strong> sudah di DB</span>}
                 {closedCount > 0       && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
@@ -792,6 +868,35 @@ export default function LeadFinder() {
                 Export CSV ({filtered.length})
               </Button>
             )}
+          </div>
+
+          <div className="grid lg:grid-cols-[1fr_220px] gap-3">
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <Search className="w-4 h-4 text-blue-200/35 shrink-0" />
+              <input
+                value={resultSearch}
+                onChange={(event) => setResultSearch(event.target.value)}
+                placeholder="Cari di hasil: nama, alamat, kategori..."
+                className="w-full bg-transparent text-sm text-white placeholder:text-blue-200/30 outline-none"
+              />
+              {resultSearch && (
+                <button type="button" onClick={() => setResultSearch("")} className="text-blue-200/35 hover:text-white">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortBy)}
+              className="h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-indigo-500/45"
+            >
+              <option className="bg-[#0f1629] text-white" value="NO_WEBSITE">Tanpa website dulu</option>
+              <option className="bg-[#0f1629] text-white" value="REVIEWS">Review terbanyak</option>
+              <option className="bg-[#0f1629] text-white" value="RATING">Rating tertinggi</option>
+              <option className="bg-[#0f1629] text-white" value="PHONE">Ada nomor dulu</option>
+              <option className="bg-[#0f1629] text-white" value="NAME">Nama A-Z</option>
+            </select>
           </div>
 
           {/* Filters */}
@@ -812,6 +917,22 @@ export default function LeadFinder() {
 
             {/* Status filter */}
             <div className="w-px bg-white/10 mx-1" />
+            <button onClick={() => setHasPhoneOnly((current) => !current)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                hasPhoneOnly
+                  ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+              }`}>
+              Ada nomor
+            </button>
+            <button onClick={() => setHideSaved((current) => !current)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                hideSaved
+                  ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+              }`}>
+              Sembunyikan duplikat
+            </button>
             <button onClick={() => setStatusFilter(statusFilter === "OPERATIONAL" ? "ALL" : "OPERATIONAL")}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 statusFilter === "OPERATIONAL"
@@ -831,6 +952,18 @@ export default function LeadFinder() {
                     minRating === r ? "text-yellow-300 font-semibold" : "text-blue-200/40 hover:text-white"
                   }`}>
                   {r === 0 ? "Semua" : r}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+              <span className="text-blue-200/40 text-xs">Ulasan:</span>
+              {[0, 10, 50, 100, 500].map((reviews) => (
+                <button key={reviews} onClick={() => setMinReviews(reviews)}
+                  className={`px-1.5 py-0.5 rounded text-xs transition-all ${
+                    minReviews === reviews ? "text-indigo-300 font-semibold" : "text-blue-200/40 hover:text-white"
+                  }`}>
+                  {reviews === 0 ? "Semua" : `${reviews}+`}
                 </button>
               ))}
             </div>
@@ -871,13 +1004,14 @@ export default function LeadFinder() {
             <div className="grid sm:grid-cols-2 gap-3">
               {filtered.map((p) => {
                 const isClosed    = p.businessStatus === "CLOSED_PERMANENTLY";
-                const isSelectable = p.phoneNorm && !p.alreadySaved && !isClosed;
+                const isSaved = p.alreadySaved || savedIds.has(p.placeId);
+                const isSelectable = p.phoneNorm && !isSaved && !isClosed;
 
                 return (
                   <div key={p.placeId}
                     onClick={() => isSelectable && toggleSelect(p.placeId)}
                     className={`glass rounded-2xl p-4 border transition-all ${
-                      p.alreadySaved
+                      isSaved
                         ? "opacity-50 cursor-default border-white/5 bg-white/2"
                         : isClosed
                           ? "opacity-40 cursor-not-allowed border-white/5"
@@ -889,7 +1023,7 @@ export default function LeadFinder() {
                     }`}>
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0">
-                        {p.alreadySaved
+                        {isSaved
                           ? <DatabaseZap className="w-4 h-4 text-blue-200/30" />
                           : isSelectable
                             ? selected.has(p.placeId)
@@ -902,7 +1036,7 @@ export default function LeadFinder() {
                         <div className="flex items-start justify-between gap-2 flex-wrap">
                           <p className="text-white font-semibold text-sm leading-snug line-clamp-1">{p.name}</p>
                           <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-                            {p.alreadySaved && (
+                            {isSaved && (
                               <span className="flex items-center gap-1 text-[10px] text-blue-200/50 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
                                 <DatabaseZap className="w-2.5 h-2.5" /> Sudah di DB
                               </span>

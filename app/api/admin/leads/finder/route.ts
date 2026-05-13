@@ -22,6 +22,18 @@ export type PlaceLead = {
   isOpen:         boolean | null;
 };
 
+type SearchMode = "standard" | "deep";
+type SearchPlan = {
+  fullQuery: string;
+  coords: { lat: number; lng: number } | null;
+  pages: number;
+};
+
+const PAGE_SIZE = 20;
+const STANDARD_MAX_PAGES = 3;
+const DEEP_RESULT_CAP = 240;
+const DEEP_PLAN_CAP = 18;
+
 // City → approximate lat/lng for locationBias
 const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
   "jakarta":          { lat: -6.2088,  lng: 106.8456 },
@@ -80,6 +92,102 @@ function getCityCoords(query: string): { lat: number; lng: number } | null {
   return null;
 }
 
+function uniqueStrings(values: string[]) {
+  const seen = new Set<string>();
+  return values
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .filter((value) => {
+      const key = value.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function buildKeywordVariants(query: string) {
+  const normalized = query.trim().toLowerCase();
+  const variants = [query];
+
+  if (normalized.includes("salon") || normalized.includes("kecantikan") || normalized.includes("beauty")) {
+    variants.push("salon kecantikan", "beauty salon", "salon", "hair salon", "klinik kecantikan", "nail salon", "spa kecantikan");
+  } else if (normalized.includes("restoran") || normalized.includes("makan") || normalized.includes("kuliner")) {
+    variants.push("restoran", "rumah makan", "warung makan", "tempat makan", "kuliner");
+  } else if (normalized.includes("kafe") || normalized.includes("cafe") || normalized.includes("kopi")) {
+    variants.push("kafe", "cafe", "coffee shop", "kedai kopi");
+  } else if (normalized.includes("klinik") || normalized.includes("dokter")) {
+    variants.push("klinik", "klinik kesehatan", "praktek dokter", "medical clinic");
+  } else {
+    variants.push(`${query} terdekat`, `${query} terbaik`, `${query} murah`);
+  }
+
+  return uniqueStrings(variants).slice(0, 7);
+}
+
+function buildAreaVariants(city: string) {
+  const trimmed = city.trim();
+  if (!trimmed) return [""];
+
+  const normalized = trimmed.toLowerCase();
+  const areaMap: Record<string, string[]> = {
+    bandung: ["Bandung", "Kota Bandung", "Cimahi", "Kabupaten Bandung", "Bandung Barat", "Dago Bandung", "Setiabudi Bandung", "Buahbatu Bandung", "Antapani Bandung", "Cibiru Bandung"],
+    jakarta: ["Jakarta", "Jakarta Selatan", "Jakarta Utara", "Jakarta Barat", "Jakarta Timur", "Jakarta Pusat"],
+    surabaya: ["Surabaya", "Surabaya Barat", "Surabaya Timur", "Surabaya Selatan", "Surabaya Utara", "Sidoarjo", "Gresik"],
+    denpasar: ["Denpasar", "Kuta", "Seminyak", "Sanur", "Canggu", "Jimbaran", "Ubud"],
+    yogyakarta: ["Yogyakarta", "Sleman", "Bantul", "Wates", "Gunungkidul"],
+    tangerang: ["Tangerang", "Kota Tangerang", "Kabupaten Tangerang", "Tangerang Selatan"],
+    bekasi: ["Bekasi", "Kota Bekasi", "Kabupaten Bekasi", "Cikarang"],
+    bogor: ["Bogor", "Kota Bogor", "Kabupaten Bogor", "Cibinong"],
+  };
+
+  for (const [key, areas] of Object.entries(areaMap)) {
+    if (normalized.includes(key)) return uniqueStrings([trimmed, ...areas]).slice(0, 10);
+  }
+
+  return [trimmed];
+}
+
+function buildSearchPlans(query: string, city: string, mode: SearchMode, standardPages: number): SearchPlan[] {
+  const fullQuery = city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim();
+  const baseCoords = getCityCoords(fullQuery) ?? getCityCoords(city);
+
+  if (mode === "standard") {
+    return [{ fullQuery, coords: baseCoords, pages: standardPages }];
+  }
+
+  const plans: SearchPlan[] = [{ fullQuery, coords: baseCoords, pages: STANDARD_MAX_PAGES }];
+  const seen = new Set([fullQuery.toLowerCase()]);
+  const keywords = buildKeywordVariants(query);
+  const areas = buildAreaVariants(city);
+
+  for (const keyword of keywords) {
+    for (const area of areas) {
+      const nextQuery = area ? `${keyword} di ${area}` : keyword;
+      const key = nextQuery.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      plans.push({
+        fullQuery: nextQuery,
+        coords: getCityCoords(nextQuery) ?? getCityCoords(area),
+        pages: 1,
+      });
+      if (plans.length >= DEEP_PLAN_CAP) return plans;
+    }
+  }
+
+  return plans;
+}
+
+function getRawPlaceKey(place: Record<string, unknown>) {
+  const id = place.id as string | undefined;
+  if (id) return `id:${id}`;
+
+  const name = (place.displayName as { text?: string } | undefined)?.text ?? "";
+  const address = (place.formattedAddress as string | undefined) ?? "";
+  const phone = (place.nationalPhoneNumber as string | undefined) ?? "";
+  return `fallback:${name.toLowerCase()}|${address.toLowerCase()}|${phone}`;
+}
+
 export async function POST(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const denied = await requireApiPermission("leads");
@@ -100,8 +208,10 @@ export async function POST(req: NextRequest) {
   if (!apiKey) return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY belum dikonfigurasi" }, { status: 503 });
 
   try {
-    const { query, pages = 3, city = "" } = await req.json();
+    const { query, pages = 3, city = "", mode = "standard" } = await req.json();
     if (!query?.trim()) return NextResponse.json({ error: "Query tidak boleh kosong" }, { status: 400 });
+
+    const searchMode: SearchMode = mode === "deep" ? "deep" : "standard";
 
     // Build full query — combine category + city
     const fullQuery = city?.trim() ? `${query.trim()} di ${city.trim()}` : query.trim();
@@ -120,13 +230,10 @@ export async function POST(req: NextRequest) {
       "nextPageToken",
     ].join(",");
 
-    // Try to get precise coordinates for locationBias
-    const coords = getCityCoords(fullQuery) ?? getCityCoords(city ?? "");
-
-    const fetchPage = async (pageToken?: string) => {
+    const fetchPage = async (textQuery: string, coords: { lat: number; lng: number } | null, pageToken?: string) => {
       const body: Record<string, unknown> = {
-        textQuery:      fullQuery,
-        maxResultCount: 20,
+        textQuery,
+        pageSize: PAGE_SIZE,
         languageCode:   "id",
       };
 
@@ -159,16 +266,51 @@ export async function POST(req: NextRequest) {
       return res.json() as Promise<{ places?: Record<string, unknown>[]; nextPageToken?: string }>;
     };
 
-    const maxPages = Math.min(Math.max(1, pages), 3);
-    const allRaw: Record<string, unknown>[] = [];
-    let nextToken: string | undefined;
+    const maxPages = Math.min(Math.max(1, Number(pages) || 1), STANDARD_MAX_PAGES);
+    const searchPlans = buildSearchPlans(query.trim(), city.trim(), searchMode, maxPages);
+    const rawByKey = new Map<string, Record<string, unknown>>();
+    let rawTotal = 0;
 
-    for (let i = 0; i < maxPages; i++) {
-      const data = await fetchPage(nextToken);
-      allRaw.push(...(data.places ?? []));
-      nextToken = data.nextPageToken;
-      if (!nextToken) break;
+    const addRawPlaces = (records: Record<string, unknown>[]) => {
+      rawTotal += records.length;
+      for (const place of records) {
+        if (rawByKey.size >= DEEP_RESULT_CAP) break;
+        rawByKey.set(getRawPlaceKey(place), place);
+      }
+    };
+
+    const fetchPlan = async (plan: SearchPlan) => {
+      const records: Record<string, unknown>[] = [];
+      let nextToken: string | undefined;
+
+      for (let i = 0; i < plan.pages; i++) {
+        const data = await fetchPage(plan.fullQuery, plan.coords, nextToken);
+        records.push(...(data.places ?? []));
+        nextToken = data.nextPageToken;
+        if (!nextToken) break;
+      }
+
+      return records;
+    };
+
+    const [basePlan, ...variantPlans] = searchPlans;
+    addRawPlaces(await fetchPlan(basePlan));
+
+    if (searchMode === "deep" && rawByKey.size < DEEP_RESULT_CAP) {
+      for (let i = 0; i < variantPlans.length; i += 4) {
+        const batch = variantPlans.slice(i, i + 4);
+        const settled = await Promise.allSettled(batch.map((plan) => fetchPlan(plan)));
+
+        for (const result of settled) {
+          if (result.status === "fulfilled") addRawPlaces(result.value);
+          if (rawByKey.size >= DEEP_RESULT_CAP) break;
+        }
+
+        if (rawByKey.size >= DEEP_RESULT_CAP) break;
+      }
     }
+
+    const allRaw = Array.from(rawByKey.values());
 
     const places: PlaceLead[] = allRaw.map((p) => {
       const name           = (p.displayName as { text?: string })?.text ?? "";
@@ -211,7 +353,10 @@ export async function POST(req: NextRequest) {
       places,
       total:     places.length,
       fullQuery,
-      usedBias:  !!coords,
+      mode:      searchMode,
+      searchQueries: searchPlans.length,
+      rawTotal,
+      usedBias:  searchPlans.some((plan) => !!plan.coords),
     });
   } catch (err) {
     console.error("[LeadFinder]", err);
