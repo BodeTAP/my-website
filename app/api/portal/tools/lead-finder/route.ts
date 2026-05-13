@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deductCredits, getClientBalance } from "@/lib/credits";
 import { rateLimit } from "@/lib/rateLimit";
+import { getToolSettings } from "@/lib/toolSettings";
 import { normalizePhone } from "@/lib/whatsapp";
 
 export type PlaceLead = {
@@ -28,8 +29,6 @@ type SearchPlan = {
   pages: number;
 };
 
-const STANDARD_CREDIT_COST = 5;
-const DEEP_CREDIT_COST = 20;
 const PAGE_SIZE = 20;
 const STANDARD_MAX_PAGES = 3;
 const DEEP_RESULT_CAP = 240;
@@ -237,7 +236,11 @@ export async function POST(req: NextRequest) {
     if (!query?.trim()) return NextResponse.json({ error: "Query tidak boleh kosong" }, { status: 400 });
 
     const searchMode: SearchMode = mode === "deep" ? "deep" : "standard";
-    const creditCost = searchMode === "deep" ? DEEP_CREDIT_COST : STANDARD_CREDIT_COST;
+    const toolSettings = await getToolSettings();
+    if (!toolSettings.leadFinder.enabled) {
+      return NextResponse.json({ error: "Lead Finder sedang nonaktif." }, { status: 503 });
+    }
+    const creditCost = searchMode === "deep" ? toolSettings.leadFinder.deepCost : toolSettings.leadFinder.standardCost;
     const balance = await getClientBalance(clientId);
     if (balance < creditCost) {
       return NextResponse.json({ error: "Kredit tidak cukup", balance, requiredCredits: creditCost }, { status: 402 });

@@ -16,6 +16,22 @@ function fmtDate(d: Date | string) {
   return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(d));
 }
 
+function fmtRupiah(value: number) {
+  return `Rp ${new Intl.NumberFormat("id-ID").format(value)}`;
+}
+
+function formatCurrencyText(value: string) {
+  return value.replace(
+    /(?:Rp\s*)?(\d{1,3}(?:[.,]\d{3})+|\d{4,})(?!\s*(?:hari|minggu|bulan|tahun|%))/gi,
+    (match, raw: string) => {
+      const normalized = raw.replace(/[.,]/g, "");
+      const amount = Number(normalized);
+      if (!Number.isFinite(amount) || amount < 1000) return match;
+      return fmtRupiah(amount);
+    },
+  );
+}
+
 function parseContent(value: unknown): GeneratedProposalContent {
   const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
   return {
@@ -195,7 +211,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 
   for (const section of content.sections) {
-    const bodyLines = wrapText(section.body, reg, 9.5, CW);
+    const bodyLines = wrapText(formatCurrencyText(section.body), reg, 9.5, CW);
     const sectionHeight = 28 + bodyLines.length * 14;
     ensureSpace(sectionHeight);
 
@@ -212,7 +228,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 
   if (proposal.notes) {
-    const noteLines = wrapText(proposal.notes, reg, 8.5, CW - 28);
+    const noteLines = wrapText(formatCurrencyText(proposal.notes), reg, 8.5, CW - 28);
     ensureSpace(34 + noteLines.length * 13);
     page.drawRectangle({ x: ML, y: y - 18, width: CW, height: 22, color: hex("#fef9c3") });
     text("Catatan / Terms", ML + 12, y - 10, 10, bold, hex("#92400e"));

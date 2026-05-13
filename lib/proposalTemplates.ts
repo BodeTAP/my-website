@@ -3,8 +3,6 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export const PROPOSAL_GENERATOR_COST = 5;
-
 export type ProposalSection = {
   title: string;
   body: string;

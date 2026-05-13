@@ -27,11 +27,20 @@ user confirms a lasting preference, project decision, or important current state
   Motion detail animations.
 - Portal client desktop sidebar mirrors the admin sidebar collapse/expand pattern
   using `localStorage` key `portal-sidebar-collapsed`.
+- Portal `/portal` index should redirect to `/portal/dashboard` so logged-in
+  clients do not land on a 404 page.
+- Proposal Generator is intended for general businesses, not only web agency
+  use cases; default copy/templates should avoid assuming the seller is a web
+  agency.
+- Proposal Generator now supports a client-editable brand kit/design layer:
+  logo, colors, font style, layout preset, logo position, and PDF visibility
+  toggles. PDF preview/download should use the same renderer.
+- Proposal PDFs should automatically format plain large numeric costs as Rupiah,
+  e.g. `1500000` -> `Rp 1.500.000`.
 
 ## Current Focus
 
-- The active IDE file when this memory was created was
-  `components/admin/AdminShell.tsx`.
+- Current active work is around the portal Proposal Generator and its PDF output.
 
 ## Known Context
 
@@ -39,3 +48,6 @@ user confirms a lasting preference, project decision, or important current state
   framework gotchas.
 - Do not store real credentials, tokens, private customer data, or other secrets
   in this memory file.
+- If portal pages become dim/unclickable after sidebar changes, inspect
+  `components/portal/PortalShell.tsx` first: mobile drawer/backdrop state and
+  collapsed sidebar z-index have been the likely source.

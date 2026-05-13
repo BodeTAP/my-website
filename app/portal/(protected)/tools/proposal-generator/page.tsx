@@ -9,6 +9,7 @@ import {
   type GeneratedProposalContent,
 } from "@/lib/proposalTemplates";
 import { getClientProposalDesign, parseProposalDesign } from "@/lib/proposalDesign";
+import { getToolSettings } from "@/lib/toolSettings";
 import ProposalGeneratorClient from "./ProposalGeneratorClient";
 
 export default async function PortalProposalGeneratorPage() {
@@ -21,7 +22,7 @@ export default async function PortalProposalGeneratorPage() {
   });
   if (!user?.client) redirect("/portal/dashboard");
 
-  const [balance, templates, proposals, design] = await Promise.all([
+  const [balance, templates, proposals, design, toolSettings] = await Promise.all([
     getClientBalance(user.client.id),
     getVisibleProposalTemplates(user.client.id),
     prisma.generatedProposal.findMany({
@@ -30,6 +31,7 @@ export default async function PortalProposalGeneratorPage() {
       take: 100,
     }),
     getClientProposalDesign(user.client.id),
+    getToolSettings(),
   ]);
 
   return (
@@ -61,6 +63,8 @@ export default async function PortalProposalGeneratorPage() {
         createdAt: proposal.createdAt.toISOString(),
       }))}
       initialDesign={design}
+      enabled={toolSettings.proposalGenerator.enabled}
+      proposalCost={toolSettings.proposalGenerator.creditCost}
     />
   );
 }

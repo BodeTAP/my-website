@@ -1,3 +1,5 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
@@ -40,6 +42,7 @@ export const ROUTE_MODULE_MAP: Record<string, AdminModule> = {
   "/admin/invoices": "invoices",
   "/admin/proposals": "proposals",
   "/admin/proposal-templates": "proposals",
+  "/admin/tools": "proposals",
   "/admin/tickets": "tickets",
   "/admin/portfolio": "portfolio",
   "/admin/testimonials": "testimonials",

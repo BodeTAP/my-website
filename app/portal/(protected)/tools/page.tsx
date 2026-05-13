@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowRight, ClipboardList, Coins, FileText, ReceiptText,
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getClientBalance } from "@/lib/credits";
+import { getToolSettings } from "@/lib/toolSettings";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import ToolActionButton from "./ToolActionButton";
 
@@ -17,7 +18,13 @@ export default async function PortalToolsPage() {
   });
   if (!user?.client) redirect("/portal/dashboard");
 
-  const balance = await getClientBalance(user.client.id);
+  const [balance, toolSettings] = await Promise.all([
+    getClientBalance(user.client.id),
+    getToolSettings(),
+  ]);
+  const lowCreditThreshold = toolSettings.lowCreditWarningThreshold;
+  const leadFinderMinCost = Math.min(toolSettings.leadFinder.standardCost, toolSettings.leadFinder.deepCost);
+  const proposalCost = toolSettings.proposalGenerator.creditCost;
 
   return (
     <div className="space-y-6">
@@ -42,7 +49,7 @@ export default async function PortalToolsPage() {
         </Link>
       </FadeUp>
 
-      {balance < 10 && (
+      {balance < lowCreditThreshold && (
         <FadeUp delay={0.05}>
           <Link
             href="/portal/credits"
@@ -65,14 +72,20 @@ export default async function PortalToolsPage() {
             </div>
             <h2 className="text-white font-black text-xl">Lead Finder</h2>
             <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Temukan bisnis lokal dari Google Maps</p>
-            <p className="text-amber-300 text-sm font-bold mt-5">Mulai 5 kredit/pencarian</p>
+            <p className="text-amber-300 text-sm font-bold mt-5">Mulai {leadFinderMinCost} kredit/pencarian</p>
             <div className="mt-auto pt-6">
-              <ToolActionButton
-                href={balance < 5 ? "/portal/credits" : "/portal/tools/lead-finder"}
-                label={balance < 5 ? "Beli Kredit" : "Gunakan"}
-                loadingLabel={balance < 5 ? "Membuka..." : "Memuat..."}
-                className={`w-full h-11 rounded-xl font-bold ${balance < 5 ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
-              />
+              {toolSettings.leadFinder.enabled ? (
+                <ToolActionButton
+                  href={balance < leadFinderMinCost ? "/portal/credits" : "/portal/tools/lead-finder"}
+                  label={balance < leadFinderMinCost ? "Beli Kredit" : "Gunakan"}
+                  loadingLabel={balance < leadFinderMinCost ? "Membuka..." : "Memuat..."}
+                  className={`w-full h-11 rounded-xl font-bold ${balance < leadFinderMinCost ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
+                />
+              ) : (
+                <span className="flex h-11 w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-blue-200/40">
+                  Nonaktif
+                </span>
+              )}
             </div>
           </div>
         </StaggerItem>
@@ -84,14 +97,20 @@ export default async function PortalToolsPage() {
             </div>
             <h2 className="text-white font-black text-xl">Proposal Generator</h2>
             <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat draft proposal bisnis dari template custom.</p>
-            <p className="text-amber-300 text-sm font-bold mt-5">5 kredit/proposal</p>
+            <p className="text-amber-300 text-sm font-bold mt-5">{proposalCost} kredit/proposal</p>
             <div className="mt-auto pt-6">
-              <ToolActionButton
-                href={balance < 5 ? "/portal/credits" : "/portal/tools/proposal-generator"}
-                label={balance < 5 ? "Beli Kredit" : "Gunakan"}
-                loadingLabel={balance < 5 ? "Membuka..." : "Memuat..."}
-                className={`w-full h-11 rounded-xl font-bold ${balance < 5 ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
-              />
+              {toolSettings.proposalGenerator.enabled ? (
+                <ToolActionButton
+                  href={balance < proposalCost ? "/portal/credits" : "/portal/tools/proposal-generator"}
+                  label={balance < proposalCost ? "Beli Kredit" : "Gunakan"}
+                  loadingLabel={balance < proposalCost ? "Membuka..." : "Memuat..."}
+                  className={`w-full h-11 rounded-xl font-bold ${balance < proposalCost ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
+                />
+              ) : (
+                <span className="flex h-11 w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-blue-200/40">
+                  Nonaktif
+                </span>
+              )}
             </div>
           </div>
         </StaggerItem>

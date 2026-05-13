@@ -38,7 +38,7 @@ type SearchHistory = {
   timestamp: number;
 };
 
-const CREDIT_COST: Record<SearchMode, number> = {
+const DEFAULT_CREDIT_COST: Record<SearchMode, number> = {
   standard: 5,
   deep: 20,
 };
@@ -559,7 +559,15 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
   );
 }
 
-export default function PortalLeadFinder({ initialBalance }: { initialBalance: number }) {
+export default function PortalLeadFinder({
+  initialBalance,
+  enabled,
+  creditCosts = DEFAULT_CREDIT_COST,
+}: {
+  initialBalance: number;
+  enabled: boolean;
+  creditCosts?: Record<SearchMode, number>;
+}) {
   const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
   const [query, setQuery] = useState("");
@@ -578,14 +586,14 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
   const [usedBias, setUsedBias] = useState(false);
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [lastCreditCost, setLastCreditCost] = useState(CREDIT_COST.standard);
+  const [lastCreditCost, setLastCreditCost] = useState(creditCosts.standard);
   const [lastMode, setLastMode] = useState<SearchMode>("standard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const creditCost = CREDIT_COST[mode];
-  const insufficient = balance < creditCost;
+  const creditCost = creditCosts[mode];
+  const insufficient = balance < creditCost || !enabled;
   const filteredPlaces = useMemo(() => {
     const search = resultSearch.trim().toLowerCase();
     const filtered = places.filter((place) => {
@@ -701,7 +709,17 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
         </Link>
       </div>
 
-      {insufficient && (
+      {!enabled && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-blue-100">
+          <span className="flex items-center gap-3 text-sm font-bold">
+            <AlertTriangle className="w-5 h-5 text-blue-300" />
+            Lead Finder sedang nonaktif sementara.
+          </span>
+          <span className="text-xs text-blue-200/45">Silakan coba lagi nanti.</span>
+        </div>
+      )}
+
+      {enabled && insufficient && (
         <Link
           href="/portal/credits"
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 px-5 py-4 text-amber-100 hover:bg-amber-500/15 transition-colors"
@@ -767,13 +785,13 @@ export default function PortalLeadFinder({ initialBalance }: { initialBalance: n
                 value: "standard" as const,
                 title: "Standard",
                 description: "Satu query utama, maksimal 60 leads.",
-                badge: "5 kredit",
+                badge: `${creditCosts.standard} kredit`,
               },
               {
                 value: "deep" as const,
                 title: "Deep Search",
                 description: "Multi-keyword dan multi-area, hasil lebih luas.",
-                badge: "20 kredit",
+                badge: `${creditCosts.deep} kredit`,
               },
             ]).map((option) => (
               <button

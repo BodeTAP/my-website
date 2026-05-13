@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 import {
   inferProposalTitle,
   parseSections,
-  PROPOSAL_GENERATOR_COST,
   renderTemplateSections,
 } from "@/lib/proposalTemplates";
 import {
@@ -14,6 +13,7 @@ import {
   proposalDesignToJson,
   sanitizeProposalDesign,
 } from "@/lib/proposalDesign";
+import { getToolSettings } from "@/lib/toolSettings";
 
 async function getClientId() {
   const session = await auth();
@@ -72,6 +72,12 @@ export async function POST(req: NextRequest) {
 
   if (!templateId) return NextResponse.json({ error: "Template wajib dipilih" }, { status: 400 });
 
+  const toolSettings = await getToolSettings();
+  if (!toolSettings.proposalGenerator.enabled) {
+    return NextResponse.json({ error: "Proposal Generator sedang nonaktif." }, { status: 503 });
+  }
+  const creditCost = toolSettings.proposalGenerator.creditCost;
+
   const template = await prisma.proposalTemplate.findFirst({
     where: {
       id: templateId,
@@ -86,9 +92,9 @@ export async function POST(req: NextRequest) {
   if (!template) return NextResponse.json({ error: "Template tidak ditemukan" }, { status: 404 });
 
   const balance = await getClientBalance(clientId);
-  if (balance < PROPOSAL_GENERATOR_COST) {
+  if (balance < creditCost) {
     return NextResponse.json(
-      { error: "Kredit tidak cukup", balance, requiredCredits: PROPOSAL_GENERATOR_COST },
+      { error: "Kredit tidak cukup", balance, requiredCredits: creditCost },
       { status: 402 },
     );
   }
@@ -112,7 +118,7 @@ export async function POST(req: NextRequest) {
 
   const deductResult = await deductCredits(
     clientId,
-    PROPOSAL_GENERATOR_COST,
+    creditCost,
     "proposal_generator",
     `Generate proposal: ${title}`,
     { templateId, templateName: template.name },
@@ -146,7 +152,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ proposal, balance: deductResult.newBalance }, { status: 201 });
   } catch (error) {
-    await refundCredits(clientId, PROPOSAL_GENERATOR_COST, `Refund gagal generate proposal: ${title}`, { templateId });
+    await refundCredits(clientId, creditCost, `Refund gagal generate proposal: ${title}`, { templateId });
     console.error("[ProposalGenerator]", error);
     return NextResponse.json({ error: "Gagal menyimpan proposal" }, { status: 500 });
   }

@@ -95,7 +95,6 @@ type TemplateDraft = {
   variables: ProposalVariable[];
 };
 
-const PROPOSAL_COST = 5;
 const HISTORY_PAGE_SIZE = 6;
 
 const STATUS_OPTIONS = [
@@ -180,11 +179,15 @@ export default function ProposalGeneratorClient({
   initialTemplates,
   initialProposals,
   initialDesign,
+  enabled,
+  proposalCost,
 }: {
   initialBalance: number;
   initialTemplates: TemplateView[];
   initialProposals: ProposalView[];
   initialDesign: ProposalDesign;
+  enabled: boolean;
+  proposalCost: number;
 }) {
   const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
@@ -225,7 +228,7 @@ export default function ProposalGeneratorClient({
     [selectedTemplate],
   );
 
-  const canGenerate = balance >= PROPOSAL_COST;
+  const canGenerate = enabled && balance >= proposalCost;
   const stats = useMemo(() => ({
     total: proposals.length,
     sent: proposals.filter((proposal) => proposal.status === "SENT").length,
@@ -624,7 +627,7 @@ export default function ProposalGeneratorClient({
           <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5 xl:sticky xl:top-5">
             <div>
               <h2 className="text-white font-black text-lg">Brief Proposal</h2>
-              <p className="text-blue-200/45 text-sm mt-1">{PROPOSAL_COST} kredit per generate.</p>
+              <p className="text-blue-200/45 text-sm mt-1">{proposalCost} kredit per generate.</p>
             </div>
 
             <div className="space-y-3">
@@ -719,12 +722,16 @@ export default function ProposalGeneratorClient({
               </div>
             </div>
 
-            {!canGenerate && (
+            {!enabled ? (
+              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-blue-100/70">
+                Proposal Generator sedang nonaktif sementara.
+              </div>
+            ) : !canGenerate && (
               <Link
                 href="/portal/credits"
                 className="block rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-100 hover:bg-amber-500/15 transition-colors"
               >
-                Kredit tidak cukup. Beli sekarang.
+                Kredit tidak cukup. Butuh {proposalCost} kredit. Beli sekarang.
               </Link>
             )}
 

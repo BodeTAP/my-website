@@ -46,8 +46,13 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
       { label: "Klien & Kontak", href: "/admin/clients", icon: UserCheck, module: "clients" },
       { label: "Kredit Klien", href: "/admin/credits", icon: Coins, module: "clients" },
       { label: "Proposal", href: "/admin/proposals", icon: ScrollText, module: "proposals" },
-      { label: "Template Proposal", href: "/admin/proposal-templates", icon: FileText, module: "proposals" },
       { label: "Onboarding", href: "/admin/onboarding", icon: ClipboardList, module: "clients" },
+    ]
+  },
+  {
+    title: "Tools",
+    items: [
+      { label: "Tools", href: "/admin/tools", icon: Wrench, module: "proposals" },
     ]
   },
   {

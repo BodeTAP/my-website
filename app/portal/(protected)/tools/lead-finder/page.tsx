@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getClientBalance } from "@/lib/credits";
+import { getToolSettings } from "@/lib/toolSettings";
 import PortalLeadFinder from "./PortalLeadFinder";
 
 export default async function PortalLeadFinderPage() {
@@ -14,7 +15,19 @@ export default async function PortalLeadFinderPage() {
   });
   if (!user?.client) redirect("/portal/dashboard");
 
-  const balance = await getClientBalance(user.client.id);
+  const [balance, toolSettings] = await Promise.all([
+    getClientBalance(user.client.id),
+    getToolSettings(),
+  ]);
 
-  return <PortalLeadFinder initialBalance={balance} />;
+  return (
+    <PortalLeadFinder
+      initialBalance={balance}
+      enabled={toolSettings.leadFinder.enabled}
+      creditCosts={{
+        standard: toolSettings.leadFinder.standardCost,
+        deep: toolSettings.leadFinder.deepCost,
+      }}
+    />
+  );
 }
