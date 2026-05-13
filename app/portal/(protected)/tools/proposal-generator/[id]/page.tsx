@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft, Download, FileText, Send } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseSections } from "@/lib/proposalTemplates";
@@ -13,6 +13,20 @@ function fmtDate(value: Date) {
     month: "long",
     year: "numeric",
   }).format(value);
+}
+
+function waUrl(proposal: {
+  proposalNo: string | null;
+  title: string;
+  prospectName: string | null;
+  businessName: string | null;
+  whatsapp: string | null;
+}) {
+  const phone = proposal.whatsapp?.replace(/\D/g, "");
+  const message = encodeURIComponent(
+    `Halo ${proposal.prospectName ?? "Bapak/Ibu"}, berikut proposal ${proposal.proposalNo ?? proposal.title} untuk ${proposal.businessName ?? "kebutuhan bisnis Anda"}. Silakan dicek, dan kabari saya jika ada pertanyaan.`,
+  );
+  return phone ? `https://wa.me/${phone}?text=${message}` : `https://wa.me/?text=${message}`;
 }
 
 export default async function PortalGeneratedProposalDetailPage({ params }: Props) {
@@ -65,7 +79,35 @@ export default async function PortalGeneratedProposalDetailPage({ params }: Prop
           <Download className="w-4 h-4" />
           Unduh PDF
         </a>
+        <a
+          href={waUrl(proposal)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-4 font-bold transition-colors"
+        >
+          <Send className="w-4 h-4" />
+          Kirim WhatsApp
+        </a>
       </div>
+
+      <section className="glass rounded-2xl border border-white/10 p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">No. Proposal</p>
+          <p className="text-white font-bold mt-1">{proposal.proposalNo ?? "-"}</p>
+        </div>
+        <div>
+          <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">Calon Klien</p>
+          <p className="text-white font-bold mt-1">{proposal.prospectName ?? "-"}</p>
+        </div>
+        <div>
+          <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">Bisnis</p>
+          <p className="text-white font-bold mt-1">{proposal.businessName ?? "-"}</p>
+        </div>
+        <div>
+          <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">Berlaku Hingga</p>
+          <p className="text-white font-bold mt-1">{proposal.validUntil ? fmtDate(proposal.validUntil) : "-"}</p>
+        </div>
+      </section>
 
       <section className="glass rounded-2xl border border-white/10 p-5 space-y-5">
         {sections.map((section, index) => (
@@ -75,7 +117,13 @@ export default async function PortalGeneratedProposalDetailPage({ params }: Prop
           </article>
         ))}
       </section>
+
+      {proposal.notes && (
+        <section className="glass rounded-2xl border border-white/10 p-5">
+          <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">Catatan / Terms</p>
+          <p className="text-blue-100/65 text-sm leading-7 whitespace-pre-line mt-3">{proposal.notes}</p>
+        </section>
+      )}
     </div>
   );
 }
-

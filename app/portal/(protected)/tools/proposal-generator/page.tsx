@@ -8,6 +8,7 @@ import {
   parseVariables,
   type GeneratedProposalContent,
 } from "@/lib/proposalTemplates";
+import { getClientProposalDesign, parseProposalDesign } from "@/lib/proposalDesign";
 import ProposalGeneratorClient from "./ProposalGeneratorClient";
 
 export default async function PortalProposalGeneratorPage() {
@@ -20,7 +21,7 @@ export default async function PortalProposalGeneratorPage() {
   });
   if (!user?.client) redirect("/portal/dashboard");
 
-  const [balance, templates, proposals] = await Promise.all([
+  const [balance, templates, proposals, design] = await Promise.all([
     getClientBalance(user.client.id),
     getVisibleProposalTemplates(user.client.id),
     prisma.generatedProposal.findMany({
@@ -28,6 +29,7 @@ export default async function PortalProposalGeneratorPage() {
       orderBy: { createdAt: "desc" },
       take: 100,
     }),
+    getClientProposalDesign(user.client.id),
   ]);
 
   return (
@@ -45,13 +47,20 @@ export default async function PortalProposalGeneratorPage() {
       }))}
       initialProposals={proposals.map((proposal) => ({
         id: proposal.id,
+        proposalNo: proposal.proposalNo,
         title: proposal.title,
         prospectName: proposal.prospectName,
+        businessName: proposal.businessName,
+        whatsapp: proposal.whatsapp,
+        validUntil: proposal.validUntil?.toISOString().slice(0, 10) ?? null,
+        notes: proposal.notes,
         templateName: proposal.templateName,
         status: proposal.status,
+        design: parseProposalDesign(proposal.design),
         content: proposal.content as unknown as GeneratedProposalContent,
         createdAt: proposal.createdAt.toISOString(),
       }))}
+      initialDesign={design}
     />
   );
 }

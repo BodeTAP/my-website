@@ -9,6 +9,11 @@ import {
   PROPOSAL_GENERATOR_COST,
   renderTemplateSections,
 } from "@/lib/proposalTemplates";
+import {
+  getClientProposalDesign,
+  proposalDesignToJson,
+  sanitizeProposalDesign,
+} from "@/lib/proposalDesign";
 
 async function getClientId() {
   const session = await auth();
@@ -32,6 +37,17 @@ function asJson(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
+function getText(input: Record<string, unknown>, key: string) {
+  const value = input[key];
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+async function generateProposalNo(clientId: string) {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const count = await prisma.generatedProposal.count({ where: { clientId } });
+  return `PG-${date}-${String(count + 1).padStart(3, "0")}`;
+}
+
 export async function GET() {
   const { status, clientId } = await getClientId();
   if (!clientId) return NextResponse.json({ error: status === 401 ? "Unauthorized" : "Client not found" }, { status });
@@ -52,6 +68,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const templateId = typeof body.templateId === "string" ? body.templateId : "";
   const input = asRecord(body.input);
+  const design = body.design ? sanitizeProposalDesign(body.design) : await getClientProposalDesign(clientId);
 
   if (!templateId) return NextResponse.json({ error: "Template wajib dipilih" }, { status: 400 });
 
@@ -82,6 +99,12 @@ export async function POST(req: NextRequest) {
   }
 
   const title = inferProposalTitle(template.name, input);
+  const proposalNo = await generateProposalNo(clientId);
+  const prospectName = getText(input, "prospectName");
+  const businessName = getText(input, "businessName");
+  const whatsapp = getText(input, "whatsapp");
+  const notes = getText(input, "notes");
+  const validUntilText = getText(input, "validUntil");
   const content = {
     title,
     sections: renderTemplateSections(sections, input),
@@ -107,9 +130,15 @@ export async function POST(req: NextRequest) {
       data: {
         clientId,
         templateId: template.id,
+        proposalNo,
         title,
-        prospectName: typeof input.prospectName === "string" ? input.prospectName : null,
+        prospectName,
+        businessName,
+        whatsapp,
+        validUntil: validUntilText ? new Date(validUntilText) : null,
+        notes,
         templateName: template.name,
+        design: proposalDesignToJson(design),
         input: asJson(input),
         content: asJson(content),
       },

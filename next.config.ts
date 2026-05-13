@@ -46,8 +46,8 @@ const securityHeaders = [
       // Worker: dibutuhkan Clarity untuk session recording
       "worker-src blob: 'self'",
 
-      // Larang website ini di-embed di frame dari domain lain
-      "frame-ancestors 'none'",
+      // Izinkan embed hanya dari domain sendiri, dibutuhkan untuk preview PDF internal
+      "frame-ancestors 'self'",
     ].join("; "),
   },
 ];

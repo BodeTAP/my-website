@@ -299,6 +299,7 @@ model Client {
   creditTxs      CreditTransaction[]
   proposalTemplates ProposalTemplate[]
   generatedProposals GeneratedProposal[]
+  proposalBrandKit ProposalBrandKit?
 
   @@map("clients")
 }
@@ -365,9 +366,15 @@ model GeneratedProposal {
   id           String   @id @default(cuid())
   clientId     String
   templateId   String?
+  proposalNo   String?  @unique
   title        String
   prospectName String?
+  businessName String?
+  whatsapp     String?
+  validUntil   DateTime?
+  notes        String?
   templateName String?
+  design       Json?
   input        Json
   content      Json
   status       String   @default("DRAFT")
@@ -379,6 +386,28 @@ model GeneratedProposal {
 
   @@index([clientId, createdAt])
   @@map("generated_proposals")
+}
+
+model ProposalBrandKit {
+  id             String   @id @default(cuid())
+  clientId       String   @unique
+  logoUrl        String?
+  primaryColor   String   @default("#1e40af")
+  accentColor    String   @default("#0d9488")
+  fontStyle      String   @default("sans")
+  layout         String   @default("corporate")
+  logoPosition   String   @default("left")
+  showLogo       Boolean  @default(true)
+  showProposalNo Boolean  @default(true)
+  showDate       Boolean  @default(true)
+  showRecipient  Boolean  @default(true)
+  showFooter     Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("proposal_brand_kits")
 }
 
 model Project {

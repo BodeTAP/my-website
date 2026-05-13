@@ -205,7 +205,9 @@ function SidebarContent({
               imageClasses="ring-2 ring-blue-500/30 hover:ring-blue-400/60 transition-all shadow-lg"
               fallbackClasses="text-sm ring-2 ring-white/10 shadow-lg"
             />
-            <div className="absolute bottom-0 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#030914]"></div>
+            {!collapsed && (
+              <div className="absolute bottom-0 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#030914]" />
+            )}
           </Link>
           <div className={collapsed ? "w-12 flex justify-center" : ""}>
             <NotificationBell />
@@ -391,6 +393,7 @@ export default function PortalShell({
   creditBalance: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const sidebarCollapsed = useSyncExternalStore(
     subscribeSidebarCollapsed,
     getSidebarCollapsedSnapshot,
@@ -398,27 +401,71 @@ export default function PortalShell({
   ) === "true";
   const pathname = usePathname();
 
+  // Safety: always clear overflow on mount to prevent stuck scroll lock
+  useEffect(() => {
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+  }, []);
+
+  useEffect(() => {
+    const removeDesktopBackdrops = () => {
+      if (!window.matchMedia("(min-width: 1024px)").matches) return;
+
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.querySelectorAll<HTMLElement>("[data-portal-mobile-backdrop]").forEach((element) => element.remove());
+      document.querySelectorAll<HTMLElement>("div").forEach((element) => {
+        const className = typeof element.className === "string" ? element.className : "";
+        const looksLikeOldPortalBackdrop =
+          className.includes("fixed") &&
+          className.includes("inset-0") &&
+          className.includes("bg-black/80") &&
+          className.includes("backdrop-blur-sm") &&
+          (className.includes("z-40") || className.includes("z-10"));
+
+        if (looksLikeOldPortalBackdrop) element.remove();
+      });
+    };
+
+    removeDesktopBackdrops();
+    window.addEventListener("resize", removeDesktopBackdrops);
+    return () => window.removeEventListener("resize", removeDesktopBackdrops);
+  }, []);
+
   useEffect(() => {
     const timeout = window.setTimeout(() => setOpen(false), 0);
     return () => window.clearTimeout(timeout);
   }, [pathname]);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    const media = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      setIsDesktop(media.matches);
+      if (media.matches) setOpen(false);
+    };
+
+    closeOnDesktop();
+    media.addEventListener("change", closeOnDesktop);
+    return () => media.removeEventListener("change", closeOnDesktop);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open && !isDesktop ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  }, [open, isDesktop]);
 
   const isActive = (href: string) => pathname.startsWith(href);
+  const mobileDrawerOpen = open && !isDesktop;
   const toggleSidebarCollapsed = () => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!sidebarCollapsed));
     window.dispatchEvent(new Event(SIDEBAR_STORAGE_EVENT));
   };
 
   return (
-    <div className="min-h-screen flex bg-[#030914]">
+    <div className="h-screen overflow-hidden flex bg-[#030914]">
       {/* ── Desktop sidebar ─────────────────────────────── */}
       <div
-        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col z-20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col relative z-30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           sidebarCollapsed ? "w-20" : "w-72"
         }`}
       >
@@ -435,9 +482,10 @@ export default function PortalShell({
       </div>
 
       {/* ── Mobile drawer backdrop ───────────────────────── */}
-      {open && (
+      {mobileDrawerOpen && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          data-portal-mobile-backdrop
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-10 lg:hidden transition-opacity"
           onClick={() => setOpen(false)}
         />
       )}
@@ -445,7 +493,7 @@ export default function PortalShell({
       {/* ── Mobile drawer ───────────────────────────────── */}
       <div
         className={`fixed inset-y-0 left-0 z-50 w-72 shadow-[10px_0_40px_rgba(0,0,0,0.8)] border-r border-white/10 lg:hidden transition-transform duration-300 ease-[0.22,1,0.36,1] ${
-          open ? "translate-x-0" : "-translate-x-full"
+          mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="absolute top-5 right-5 z-50">
@@ -469,7 +517,7 @@ export default function PortalShell({
       </div>
 
       {/* ── Main content ────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 relative">
+      <div className="flex-1 flex flex-col min-w-0 relative z-20">
         {/* Mobile top bar */}
         <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#030914]/90 backdrop-blur-lg border-b border-white/5 sticky top-0 z-30 shadow-lg">
           <button
@@ -522,7 +570,7 @@ export default function PortalShell({
           })}
         </nav>
 
-        <main className="flex-1 overflow-auto pb-24 lg:pb-0 relative">
+        <main className="flex-1 overflow-y-auto pb-24 lg:pb-0 relative">
           <div className="p-5 sm:p-8 lg:p-10">{children}</div>
         </main>
       </div>

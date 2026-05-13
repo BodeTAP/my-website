@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { type GeneratedProposalContent, parseSections } from "@/lib/proposalTemplates";
+import { proposalDesignToJson, sanitizeProposalDesign } from "@/lib/proposalDesign";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -60,6 +61,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const body = await req.json();
   const title = typeof body.title === "string" ? body.title.trim() : undefined;
   const nextStatus = typeof body.status === "string" && STATUS_LABELS.has(body.status) ? body.status : undefined;
+  const prospectName = typeof body.prospectName === "string" ? body.prospectName.trim() : undefined;
+  const businessName = typeof body.businessName === "string" ? body.businessName.trim() : undefined;
+  const whatsapp = typeof body.whatsapp === "string" ? body.whatsapp.trim() : undefined;
+  const notes = typeof body.notes === "string" ? body.notes.trim() : undefined;
+  const validUntil = typeof body.validUntil === "string" ? body.validUntil : undefined;
+  const design = body.design ? sanitizeProposalDesign(body.design) : undefined;
   const content = parseContent(proposal.content);
 
   const updated = await prisma.generatedProposal.update({
@@ -70,6 +77,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         content: asJson({ ...content, title }),
       }),
       ...(nextStatus && { status: nextStatus }),
+      ...(prospectName !== undefined && { prospectName: prospectName || null }),
+      ...(businessName !== undefined && { businessName: businessName || null }),
+      ...(whatsapp !== undefined && { whatsapp: whatsapp || null }),
+      ...(notes !== undefined && { notes: notes || null }),
+      ...(validUntil !== undefined && { validUntil: validUntil ? new Date(validUntil) : null }),
+      ...(design && { design: proposalDesignToJson(design) }),
     },
   });
 
@@ -90,4 +103,3 @@ export async function DELETE(_req: Request, { params }: Params) {
   await prisma.generatedProposal.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
-

@@ -14,13 +14,17 @@ import {
   Eye,
   FileText,
   History,
+  ImageIcon,
   Loader2,
+  Palette,
   Pencil,
   Plus,
   Save,
   Search,
   Sparkles,
   Trash2,
+  Send,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -54,12 +58,32 @@ type GeneratedProposalContent = {
 
 type ProposalView = {
   id: string;
+  proposalNo: string | null;
   title: string;
   prospectName: string | null;
+  businessName: string | null;
+  whatsapp: string | null;
+  validUntil: string | null;
+  notes: string | null;
   templateName: string | null;
   status: string;
+  design: ProposalDesign;
   content: GeneratedProposalContent;
   createdAt: string;
+};
+
+type ProposalDesign = {
+  logoUrl: string | null;
+  primaryColor: string;
+  accentColor: string;
+  fontStyle: "sans" | "serif" | "mono";
+  layout: "corporate" | "minimal" | "modern" | "bold";
+  logoPosition: "left" | "center" | "right";
+  showLogo: boolean;
+  showProposalNo: boolean;
+  showDate: boolean;
+  showRecipient: boolean;
+  showFooter: boolean;
 };
 
 type TemplateDraft = {
@@ -87,6 +111,21 @@ const STATUS_STYLE: Record<string, string> = {
   ACCEPTED: "bg-emerald-500/10 border-emerald-500/25 text-emerald-200",
   DECLINED: "bg-red-500/10 border-red-500/25 text-red-200",
 };
+
+const LAYOUT_OPTIONS: Array<{ value: ProposalDesign["layout"]; label: string; hint: string }> = [
+  { value: "corporate", label: "Corporate", hint: "Header kuat, cocok untuk proposal formal." },
+  { value: "minimal", label: "Minimal", hint: "Rapi, putih, dan ringan untuk dibaca." },
+  { value: "modern", label: "Modern", hint: "Aksen visual lebih dinamis." },
+  { value: "bold", label: "Bold", hint: "Judul besar dan tampilan lebih tegas." },
+];
+
+const FONT_OPTIONS: Array<{ value: ProposalDesign["fontStyle"]; label: string }> = [
+  { value: "sans", label: "Sans" },
+  { value: "serif", label: "Serif" },
+  { value: "mono", label: "Mono" },
+];
+
+const CORE_FIELD_KEYS = new Set(["prospectName", "businessName", "whatsapp", "validUntil", "notes"]);
 
 function emptyDraft(): TemplateDraft {
   return {
@@ -128,14 +167,24 @@ function proposalToText(proposal: ProposalView | { title: string; content: Gener
   ].join("\n");
 }
 
+function buildWhatsAppUrl(proposal: ProposalView) {
+  const phone = proposal.whatsapp?.replace(/\D/g, "");
+  const message = encodeURIComponent(
+    `Halo ${proposal.prospectName ?? "Bapak/Ibu"}, berikut proposal ${proposal.proposalNo ?? proposal.title} untuk ${proposal.businessName ?? "kebutuhan bisnis Anda"}. Silakan dicek, dan kabari saya jika ada pertanyaan.`,
+  );
+  return phone ? `https://wa.me/${phone}?text=${message}` : `https://wa.me/?text=${message}`;
+}
+
 export default function ProposalGeneratorClient({
   initialBalance,
   initialTemplates,
   initialProposals,
+  initialDesign,
 }: {
   initialBalance: number;
   initialTemplates: TemplateView[];
   initialProposals: ProposalView[];
+  initialDesign: ProposalDesign;
 }) {
   const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
@@ -143,16 +192,27 @@ export default function ProposalGeneratorClient({
   const [proposals, setProposals] = useState(initialProposals);
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplates[0]?.id ?? "");
   const [formValues, setFormValues] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<"generate" | "templates" | "history">("generate");
+  const [activeTab, setActiveTab] = useState<"generate" | "design" | "templates" | "history">("generate");
   const [draft, setDraft] = useState<TemplateDraft>(emptyDraft());
   const [result, setResult] = useState<ProposalView | null>(initialProposals[0] ?? null);
+  const [design, setDesign] = useState<ProposalDesign>(initialProposals[0]?.design ?? initialDesign);
   const [resultTitle, setResultTitle] = useState(initialProposals[0]?.title ?? "");
   const [resultStatus, setResultStatus] = useState(initialProposals[0]?.status ?? "DRAFT");
+  const [resultMeta, setResultMeta] = useState({
+    prospectName: initialProposals[0]?.prospectName ?? "",
+    businessName: initialProposals[0]?.businessName ?? "",
+    whatsapp: initialProposals[0]?.whatsapp ?? "",
+    validUntil: initialProposals[0]?.validUntil ?? "",
+    notes: initialProposals[0]?.notes ?? "",
+  });
   const [historyQuery, setHistoryQuery] = useState("");
   const [historyPage, setHistoryPage] = useState(1);
+  const [pdfPreviewVersion, setPdfPreviewVersion] = useState(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingMeta, setSavingMeta] = useState(false);
+  const [savingDesign, setSavingDesign] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -160,8 +220,18 @@ export default function ProposalGeneratorClient({
     () => templates.find((template) => template.id === selectedTemplateId) ?? templates[0],
     [selectedTemplateId, templates],
   );
+  const templateVariables = useMemo(
+    () => (selectedTemplate?.variables ?? []).filter((variable) => !CORE_FIELD_KEYS.has(variable.key)),
+    [selectedTemplate],
+  );
 
   const canGenerate = balance >= PROPOSAL_COST;
+  const stats = useMemo(() => ({
+    total: proposals.length,
+    sent: proposals.filter((proposal) => proposal.status === "SENT").length,
+    accepted: proposals.filter((proposal) => proposal.status === "ACCEPTED").length,
+    draft: proposals.filter((proposal) => proposal.status === "DRAFT").length,
+  }), [proposals]);
 
   const filteredProposals = useMemo(() => {
     const query = historyQuery.trim().toLowerCase();
@@ -170,7 +240,9 @@ export default function ProposalGeneratorClient({
     return proposals.filter((proposal) => {
       return [
         proposal.title,
+        proposal.proposalNo ?? "",
         proposal.prospectName ?? "",
+        proposal.businessName ?? "",
         proposal.templateName ?? "",
         proposal.status,
       ].some((value) => value.toLowerCase().includes(query));
@@ -187,6 +259,14 @@ export default function ProposalGeneratorClient({
     setResult(proposal);
     setResultTitle(proposal.title);
     setResultStatus(proposal.status);
+    setDesign(proposal.design ?? initialDesign);
+    setResultMeta({
+      prospectName: proposal.prospectName ?? "",
+      businessName: proposal.businessName ?? "",
+      whatsapp: proposal.whatsapp ?? "",
+      validUntil: proposal.validUntil ?? "",
+      notes: proposal.notes ?? "",
+    });
   };
 
   const updateDraft = (patch: Partial<TemplateDraft>) => setDraft((current) => ({ ...current, ...patch }));
@@ -318,20 +398,30 @@ export default function ProposalGeneratorClient({
     setMessage("");
 
     try {
+      const payloadInput = {
+        ...formValues,
+        prospectName: formValues.prospectName ?? "",
+        businessName: formValues.businessName ?? "",
+        whatsapp: formValues.whatsapp ?? "",
+        validUntil: formValues.validUntil ?? "",
+        notes: formValues.notes ?? "",
+      };
       const res = await fetch("/api/portal/tools/proposal-generator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateId: selectedTemplate.id, input: formValues }),
+        body: JSON.stringify({ templateId: selectedTemplate.id, input: payloadInput, design }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal membuat proposal");
 
       const nextProposal: ProposalView = {
         ...data.proposal,
+        design: data.proposal.design ?? design,
         content: data.proposal.content,
         createdAt: data.proposal.createdAt,
       };
       selectProposal(nextProposal);
+      setPdfPreviewVersion((version) => version + 1);
       setProposals((current) => [nextProposal, ...current.filter((proposal) => proposal.id !== nextProposal.id)]);
       setBalance(data.balance);
       setMessage("Proposal berhasil dibuat.");
@@ -359,7 +449,7 @@ export default function ProposalGeneratorClient({
       const res = await fetch(`/api/portal/tools/proposal-generator/${result.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: resultTitle, status: resultStatus }),
+        body: JSON.stringify({ title: resultTitle, status: resultStatus, ...resultMeta, design }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan perubahan proposal");
@@ -367,11 +457,13 @@ export default function ProposalGeneratorClient({
       const updated: ProposalView = {
         ...result,
         ...data.proposal,
+        design: data.proposal.design ?? design,
         content: data.proposal.content,
         createdAt: data.proposal.createdAt,
       };
 
       selectProposal(updated);
+      setPdfPreviewVersion((version) => version + 1);
       setProposals((current) => current.map((proposal) => proposal.id === updated.id ? updated : proposal));
       setMessage("Perubahan proposal berhasil disimpan.");
       router.refresh();
@@ -379,6 +471,60 @@ export default function ProposalGeneratorClient({
       setError((err as Error).message);
     } finally {
       setSavingMeta(false);
+    }
+  };
+
+  const saveDesignDefaults = async () => {
+    setSavingDesign(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/portal/tools/proposal-generator/design", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(design),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan desain");
+
+      setDesign(data.design);
+      setMessage("Brand kit proposal berhasil disimpan.");
+      router.refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSavingDesign(false);
+    }
+  };
+
+  const applyDesignToProposal = async () => {
+    if (!result) return saveDesignDefaults();
+    await saveResultMeta();
+  };
+
+  const uploadLogo = async (file: File | null) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/portal/tools/proposal-generator/logo", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal mengupload logo");
+
+      setDesign((current) => ({ ...current, logoUrl: data.url, showLogo: true }));
+      setMessage("Logo berhasil diupload. Simpan brand kit atau terapkan ke proposal untuk memakainya.");
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -423,9 +569,24 @@ export default function ProposalGeneratorClient({
         </Link>
       </div>
 
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Total Proposal", value: stats.total, tone: "text-blue-300 bg-blue-500/10 border-blue-500/20" },
+          { label: "Draft", value: stats.draft, tone: "text-blue-100/70 bg-white/5 border-white/10" },
+          { label: "Terkirim", value: stats.sent, tone: "text-cyan-300 bg-cyan-500/10 border-cyan-500/20" },
+          { label: "Diterima", value: stats.accepted, tone: "text-emerald-300 bg-emerald-500/10 border-emerald-500/20" },
+        ].map((item) => (
+          <div key={item.label} className={`rounded-2xl border p-4 ${item.tone}`}>
+            <p className="text-2xl font-black">{item.value}</p>
+            <p className="text-[10px] uppercase tracking-widest font-black opacity-70 mt-1">{item.label}</p>
+          </div>
+        ))}
+      </div>
+
       <div className="flex flex-wrap gap-2">
         {[
           { id: "generate", label: "Generate", icon: Sparkles },
+          { id: "design", label: "Desain", icon: Palette },
           { id: "templates", label: "Template", icon: Pencil },
           { id: "history", label: "Riwayat", icon: History },
         ].map((tab) => {
@@ -459,8 +620,8 @@ export default function ProposalGeneratorClient({
       )}
 
       {activeTab === "generate" && (
-        <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
-          <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5">
+        <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
+          <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5 xl:sticky xl:top-5">
             <div>
               <h2 className="text-white font-black text-lg">Brief Proposal</h2>
               <p className="text-blue-200/45 text-sm mt-1">{PROPOSAL_COST} kredit per generate.</p>
@@ -485,7 +646,45 @@ export default function ProposalGeneratorClient({
             </div>
 
             <div className="space-y-4">
-              {(selectedTemplate?.variables ?? []).map((variable) => (
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Nama calon klien</label>
+                <input
+                  value={formValues.prospectName ?? ""}
+                  onChange={(event) => setFormValues((current) => ({ ...current, prospectName: event.target.value }))}
+                  placeholder="Budi Santoso"
+                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Nama bisnis/organisasi</label>
+                <input
+                  value={formValues.businessName ?? ""}
+                  onChange={(event) => setFormValues((current) => ({ ...current, businessName: event.target.value }))}
+                  placeholder="PT Sukses Bersama"
+                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">WhatsApp</label>
+                  <input
+                    value={formValues.whatsapp ?? ""}
+                    onChange={(event) => setFormValues((current) => ({ ...current, whatsapp: event.target.value }))}
+                    placeholder="08xxxxxxxxxx"
+                    className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Berlaku hingga</label>
+                  <input
+                    type="date"
+                    value={formValues.validUntil ?? ""}
+                    onChange={(event) => setFormValues((current) => ({ ...current, validUntil: event.target.value }))}
+                    className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              {templateVariables.map((variable) => (
                 <div key={variable.key} className="space-y-2">
                   <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">
                     {variable.label}
@@ -508,6 +707,16 @@ export default function ProposalGeneratorClient({
                   )}
                 </div>
               ))}
+              <div className="space-y-2">
+                <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Catatan / Terms</label>
+                <textarea
+                  value={formValues.notes ?? ""}
+                  onChange={(event) => setFormValues((current) => ({ ...current, notes: event.target.value }))}
+                  placeholder="Tambahkan syarat pembayaran, masa berlaku, atau catatan khusus."
+                  rows={3}
+                  className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+                />
+              </div>
             </div>
 
             {!canGenerate && (
@@ -539,7 +748,7 @@ export default function ProposalGeneratorClient({
             </Button>
           </section>
 
-          <section className="glass rounded-2xl border border-white/10 p-5 min-h-[560px]">
+          <section className="glass rounded-2xl border border-white/10 p-5">
             {result ? (
               <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-white/10 pb-5">
@@ -550,8 +759,41 @@ export default function ProposalGeneratorClient({
                       onChange={(event) => setResultTitle(event.target.value)}
                       className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white font-black text-lg outline-none focus:border-blue-500"
                     />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        value={resultMeta.prospectName}
+                        onChange={(event) => setResultMeta((current) => ({ ...current, prospectName: event.target.value }))}
+                        placeholder="Nama calon klien"
+                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                      />
+                      <input
+                        value={resultMeta.businessName}
+                        onChange={(event) => setResultMeta((current) => ({ ...current, businessName: event.target.value }))}
+                        placeholder="Nama bisnis/organisasi"
+                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                      />
+                      <input
+                        value={resultMeta.whatsapp}
+                        onChange={(event) => setResultMeta((current) => ({ ...current, whatsapp: event.target.value }))}
+                        placeholder="WhatsApp"
+                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                      />
+                      <input
+                        type="date"
+                        value={resultMeta.validUntil}
+                        onChange={(event) => setResultMeta((current) => ({ ...current, validUntil: event.target.value }))}
+                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <textarea
+                      value={resultMeta.notes}
+                      onChange={(event) => setResultMeta((current) => ({ ...current, notes: event.target.value }))}
+                      placeholder="Catatan / terms proposal"
+                      rows={2}
+                      className="w-full rounded-xl bg-[#07111f] border border-white/10 px-3 py-2 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+                    />
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-blue-200/40 text-sm">{result.templateName ?? "Template custom"} - {formatDate(result.createdAt)}</p>
+                      <p className="text-blue-200/40 text-sm">{result.proposalNo ?? "Belum bernomor"} - {result.templateName ?? "Template custom"} - {formatDate(result.createdAt)}</p>
                       <select
                         value={resultStatus}
                         onChange={(event) => setResultStatus(event.target.value)}
@@ -591,19 +833,28 @@ export default function ProposalGeneratorClient({
                       <Download className="w-4 h-4 mr-2" />
                       PDF
                     </a>
+                    <a
+                      href={buildWhatsAppUrl({ ...result, ...resultMeta })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-sm font-bold transition-colors"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      WhatsApp
+                    </a>
                     <Button type="button" onClick={downloadResult} className="rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white">
                       Unduh TXT
                     </Button>
                   </div>
                 </div>
 
-                <div className="space-y-5">
-                  {result.content.sections.map((section, index) => (
-                    <article key={`${section.title}-${index}`} className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
-                      <h3 className="text-white font-black">{section.title}</h3>
-                      <p className="text-blue-100/65 text-sm leading-7 whitespace-pre-line mt-3">{section.body}</p>
-                    </article>
-                  ))}
+                <div className="rounded-2xl overflow-hidden bg-white shadow-2xl ring-1 ring-white/10">
+                  <iframe
+                    key={`${result.id}-${pdfPreviewVersion}`}
+                    src={`/api/portal/tools/proposal-generator/${result.id}/pdf?preview=1&v=${pdfPreviewVersion}`}
+                    title={`Preview PDF ${result.title}`}
+                    className="w-full h-[calc(100vh-12rem)] min-h-[760px] bg-white"
+                  />
                 </div>
               </div>
             ) : (
@@ -614,6 +865,218 @@ export default function ProposalGeneratorClient({
                   </div>
                   <p className="text-white font-black">Belum ada preview</p>
                   <p className="text-blue-200/45 text-sm mt-1">Isi brief dan generate proposal pertama Anda.</p>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {activeTab === "design" && (
+        <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
+          <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5">
+            <div>
+              <h2 className="text-white font-black text-lg">Brand Kit Proposal</h2>
+              <p className="text-blue-200/45 text-sm mt-1">Atur tampilan PDF tanpa mengubah isi template.</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
+                  {design.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={design.logoUrl} alt="Logo proposal" className="w-full h-full object-contain p-2" />
+                  ) : (
+                    <ImageIcon className="w-8 h-8 text-blue-200/35" />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-sm font-bold transition-colors">
+                    {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    Upload Logo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      disabled={uploadingLogo}
+                      className="hidden"
+                      onChange={(event) => {
+                        void uploadLogo(event.target.files?.[0] ?? null);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  {design.logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setDesign((current) => ({ ...current, logoUrl: null }))}
+                      className="block text-sm font-bold text-red-200/80 hover:text-red-100"
+                    >
+                      Hapus logo
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="space-y-2">
+                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Warna utama</span>
+                <div className="flex h-12 rounded-xl bg-[#07111f] border border-white/10 overflow-hidden">
+                  <input
+                    type="color"
+                    value={design.primaryColor}
+                    onChange={(event) => setDesign((current) => ({ ...current, primaryColor: event.target.value }))}
+                    className="w-14 h-full bg-transparent"
+                  />
+                  <input
+                    value={design.primaryColor}
+                    onChange={(event) => setDesign((current) => ({ ...current, primaryColor: event.target.value }))}
+                    className="flex-1 bg-transparent px-3 text-white outline-none"
+                  />
+                </div>
+              </label>
+              <label className="space-y-2">
+                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Warna aksen</span>
+                <div className="flex h-12 rounded-xl bg-[#07111f] border border-white/10 overflow-hidden">
+                  <input
+                    type="color"
+                    value={design.accentColor}
+                    onChange={(event) => setDesign((current) => ({ ...current, accentColor: event.target.value }))}
+                    className="w-14 h-full bg-transparent"
+                  />
+                  <input
+                    value={design.accentColor}
+                    onChange={(event) => setDesign((current) => ({ ...current, accentColor: event.target.value }))}
+                    className="flex-1 bg-transparent px-3 text-white outline-none"
+                  />
+                </div>
+              </label>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/45">Layout PDF</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {LAYOUT_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setDesign((current) => ({ ...current, layout: option.value }))}
+                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                      design.layout === option.value
+                        ? "bg-blue-600/20 border-blue-500/50"
+                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                    }`}
+                  >
+                    <p className="text-white font-black">{option.label}</p>
+                    <p className="text-blue-200/45 text-sm mt-1">{option.hint}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="space-y-2">
+                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Font</span>
+                <select
+                  value={design.fontStyle}
+                  onChange={(event) => setDesign((current) => ({ ...current, fontStyle: event.target.value as ProposalDesign["fontStyle"] }))}
+                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                >
+                  {FONT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-[#07111f] text-white">{option.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2">
+                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Posisi logo</span>
+                <select
+                  value={design.logoPosition}
+                  onChange={(event) => setDesign((current) => ({ ...current, logoPosition: event.target.value as ProposalDesign["logoPosition"] }))}
+                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                >
+                  <option value="left" className="bg-[#07111f] text-white">Kiri</option>
+                  <option value="center" className="bg-[#07111f] text-white">Tengah</option>
+                  <option value="right" className="bg-[#07111f] text-white">Kanan</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                ["showLogo", "Tampilkan logo"],
+                ["showProposalNo", "Tampilkan nomor proposal"],
+                ["showDate", "Tampilkan tanggal"],
+                ["showRecipient", "Tampilkan data penerima"],
+                ["showFooter", "Tampilkan footer"],
+              ].map(([key, label]) => (
+                <label key={key} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm font-bold text-blue-100/75">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(design[key as keyof ProposalDesign])}
+                    onChange={(event) => setDesign((current) => ({ ...current, [key]: event.target.checked }))}
+                    className="accent-blue-500"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button
+                type="button"
+                disabled={savingDesign}
+                onClick={saveDesignDefaults}
+                className="h-12 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 font-bold"
+              >
+                {savingDesign ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Simpan Brand Kit
+              </Button>
+              <Button
+                type="button"
+                disabled={savingMeta}
+                onClick={applyDesignToProposal}
+                className="h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold"
+              >
+                {savingMeta ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Palette className="w-4 h-4 mr-2" />}
+                Terapkan ke Preview
+              </Button>
+            </div>
+          </section>
+
+          <section className="glass rounded-2xl border border-white/10 p-5 min-h-[620px]">
+            {result ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-blue-200/45 text-xs font-black uppercase tracking-widest">Preview Desain</p>
+                    <h2 className="text-white font-black mt-1">{result.title}</h2>
+                  </div>
+                  <a
+                    href={`/api/portal/tools/proposal-generator/${result.id}/pdf`}
+                    target="_blank"
+                    className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white px-3 text-sm font-bold transition-colors"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    PDF
+                  </a>
+                </div>
+                <div className="rounded-2xl overflow-hidden bg-white shadow-2xl ring-1 ring-white/10">
+                  <iframe
+                    key={`design-${result.id}-${pdfPreviewVersion}`}
+                    src={`/api/portal/tools/proposal-generator/${result.id}/pdf?preview=1&v=${pdfPreviewVersion}`}
+                    title={`Preview desain ${result.title}`}
+                    className="w-full h-[calc(100vh-12rem)] min-h-[760px] bg-white"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="min-h-[540px] flex items-center justify-center text-center">
+                <div>
+                  <div className="mx-auto w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                    <Palette className="w-7 h-7 text-blue-200/45" />
+                  </div>
+                  <p className="text-white font-black">Belum ada proposal untuk preview</p>
+                  <p className="text-blue-200/45 text-sm mt-1">Simpan brand kit, lalu generate proposal untuk melihat hasil desainnya.</p>
                 </div>
               </div>
             )}
@@ -866,11 +1329,16 @@ export default function ProposalGeneratorClient({
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-white font-bold">{proposal.title}</p>
+                    {proposal.proposalNo && (
+                      <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-blue-200/70">
+                        {proposal.proposalNo}
+                      </span>
+                    )}
                     <span className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${STATUS_STYLE[proposal.status] ?? STATUS_STYLE.DRAFT}`}>
                       {STATUS_OPTIONS.find((status) => status.value === proposal.status)?.label ?? proposal.status}
                     </span>
                   </div>
-                  <p className="text-blue-200/40 text-sm mt-1">{proposal.templateName ?? "Template custom"} - {formatDate(proposal.createdAt)}</p>
+                  <p className="text-blue-200/40 text-sm mt-1">{proposal.businessName ?? proposal.prospectName ?? proposal.templateName ?? "Template custom"} - {formatDate(proposal.createdAt)}</p>
                 </button>
                 <div className="flex flex-wrap gap-2">
                   <Link href={`/portal/tools/proposal-generator/${proposal.id}`} className="inline-flex h-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-xs font-bold">
@@ -880,6 +1348,10 @@ export default function ProposalGeneratorClient({
                   <a href={`/api/portal/tools/proposal-generator/${proposal.id}/pdf`} target="_blank" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-xs font-bold">
                     <Download className="w-4 h-4 mr-2" />
                     PDF
+                  </a>
+                  <a href={buildWhatsAppUrl(proposal)} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-xs font-bold">
+                    <Send className="w-4 h-4 mr-2" />
+                    WA
                   </a>
                   <button
                     type="button"
