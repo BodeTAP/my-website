@@ -8,6 +8,7 @@ type ToolSettingKey =
   | "tool_lead_finder_enabled"
   | "tool_lead_finder_standard_cost"
   | "tool_lead_finder_deep_cost"
+  | "tool_lead_finder_social_scan_cost"
   | "tool_proposal_generator_enabled"
   | "tool_proposal_generator_cost"
   | "tool_low_credit_warning_threshold";
@@ -149,6 +150,7 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
             />
             <NumberField label="Standard Search" value={settings.tool_lead_finder_standard_cost} onChange={(value) => update("tool_lead_finder_standard_cost", value)} />
             <NumberField label="Deep Search" value={settings.tool_lead_finder_deep_cost} onChange={(value) => update("tool_lead_finder_deep_cost", value)} />
+            <NumberField label="Social Scan Add-on" value={settings.tool_lead_finder_social_scan_cost} onChange={(value) => update("tool_lead_finder_social_scan_cost", value)} />
           </div>
         </div>
 

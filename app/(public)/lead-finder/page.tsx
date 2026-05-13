@@ -16,6 +16,7 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
@@ -52,9 +53,14 @@ const features = [
     desc: "Urutkan berdasarkan rating, jumlah review, nomor telepon, status bisnis, dan kelengkapan profil.",
   },
   {
+    icon: Users,
+    title: "Social Scan opsional",
+    desc: "Scan website prospek untuk menemukan link Instagram, Facebook, TikTok, LinkedIn, YouTube, dan X.",
+  },
+  {
     icon: Download,
     title: "Export siap follow up",
-    desc: "Unduh hasil ke CSV dengan nomor WhatsApp yang sudah dirapikan untuk proses outreach.",
+    desc: "Unduh hasil ke CSV dengan nomor WhatsApp dan link sosial yang sudah ditemukan.",
   },
 ];
 
@@ -62,7 +68,8 @@ const workflows = [
   "Pilih segmen bisnis, misalnya restoran, salon, klinik, bengkel, toko, distributor, atau travel agent.",
   "Tentukan kota atau area agar hasil lebih presisi.",
   "Gunakan mode Standard untuk pencarian cepat atau Deep Search untuk cakupan lebih luas.",
-  "Filter prospek yang punya nomor telepon, rating bagus, status aktif, atau profil digital yang masih perlu dilengkapi.",
+  "Aktifkan Social Scan jika perlu memetakan kanal sosial prospek dari website mereka.",
+  "Filter prospek yang punya nomor telepon, rating bagus, status aktif, atau kanal sosial tertentu.",
   "Export CSV lalu mulai follow up dari pipeline sales Anda.",
 ];
 
@@ -123,6 +130,7 @@ export default async function LeadFinderLandingPage() {
   const [packages, toolSettings] = await Promise.all([getCreditPackages(), getToolSettings()]);
   const standardCost = toolSettings.leadFinder.standardCost;
   const deepCost = toolSettings.leadFinder.deepCost;
+  const socialScanCost = toolSettings.leadFinder.socialScanCost;
 
   return (
     <div className="min-h-screen overflow-x-clip">
@@ -311,6 +319,7 @@ export default async function LeadFinderLandingPage() {
             <h2 className="text-3xl font-black text-white sm:text-4xl">Beli kredit, pakai sesuai kebutuhan</h2>
             <p className="mt-3 text-blue-200/55">
               Standard Search memakai {standardCost} kredit. Deep Search memakai {deepCost} kredit untuk pencarian lebih luas.
+              Social Scan opsional dapat ditambahkan mulai {socialScanCost} kredit.
             </p>
           </FadeUp>
 

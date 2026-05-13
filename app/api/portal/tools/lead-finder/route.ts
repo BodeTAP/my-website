@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deductCredits, getClientBalance } from "@/lib/credits";
 import { rateLimit } from "@/lib/rateLimit";
 import { getToolSettings } from "@/lib/toolSettings";
 import { normalizePhone } from "@/lib/whatsapp";
+
+export const runtime = "nodejs";
+
+export type SocialPlatform = "instagram" | "facebook" | "tiktok" | "linkedin" | "youtube" | "x";
+export type SocialScanStatus = "NOT_REQUESTED" | "NO_WEBSITE" | "FOUND" | "NOT_FOUND" | "FAILED" | "SKIPPED";
+export type SocialLinks = Partial<Record<SocialPlatform, string>>;
+export type SocialScanResult = {
+  status: SocialScanStatus;
+  links: SocialLinks;
+  error?: string;
+};
 
 export type PlaceLead = {
   placeId: string;
@@ -20,6 +33,7 @@ export type PlaceLead = {
   ratingCount: number | null;
   businessStatus: "OPERATIONAL" | "CLOSED_TEMPORARILY" | "CLOSED_PERMANENTLY" | null;
   isOpen: boolean | null;
+  socialScan: SocialScanResult;
 };
 
 type SearchMode = "standard" | "deep";
@@ -33,6 +47,21 @@ const PAGE_SIZE = 20;
 const STANDARD_MAX_PAGES = 3;
 const DEEP_RESULT_CAP = 240;
 const DEEP_PLAN_CAP = 18;
+const SOCIAL_SCAN_COST_FALLBACK = 10;
+const SOCIAL_SCAN_CACHE_DAYS = 30;
+const SOCIAL_SCAN_TIMEOUT_MS = 4500;
+const SOCIAL_SCAN_CONCURRENCY = 5;
+const SOCIAL_SCAN_MAX_WEBSITES = 80;
+const SOCIAL_SCAN_MAX_BYTES = 512 * 1024;
+
+const SOCIAL_DOMAINS: Record<SocialPlatform, RegExp> = {
+  instagram: /(^|\.)instagram\.com$/i,
+  facebook: /(^|\.)facebook\.com$/i,
+  tiktok: /(^|\.)tiktok\.com$/i,
+  linkedin: /(^|\.)linkedin\.com$/i,
+  youtube: /(^|\.)youtube\.com$|(^|\.)youtu\.be$/i,
+  x: /(^|\.)x\.com$|(^|\.)twitter\.com$/i,
+};
 
 const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
   "jakarta": { lat: -6.2088, lng: 106.8456 },
@@ -198,6 +227,298 @@ function getRawPlaceKey(place: Record<string, unknown>) {
   return `fallback:${name.toLowerCase()}|${address.toLowerCase()}|${phone}`;
 }
 
+function emptySocialScan(status: SocialScanStatus, error?: string): SocialScanResult {
+  return { status, links: {}, ...(error ? { error } : {}) };
+}
+
+function normalizeWebsiteUrl(value: string | null | undefined) {
+  if (!value) return null;
+
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    parsed.hash = "";
+    parsed.search = "";
+    parsed.pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function isPrivateIpAddress(address: string) {
+  if (address === "::1") return true;
+  if (address.startsWith("fc") || address.startsWith("fd") || address.startsWith("fe80:")) return true;
+
+  const parts = address.split(".").map((part) => Number.parseInt(part, 10));
+  if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part))) return false;
+
+  const [a, b] = parts;
+  return (
+    a === 10 ||
+    a === 127 ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    a === 0
+  );
+}
+
+async function assertPublicWebsiteUrl(websiteUrl: string) {
+  const parsed = new URL(websiteUrl);
+  const hostname = parsed.hostname.toLowerCase();
+
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+    throw new Error("Host lokal tidak boleh discan");
+  }
+
+  if (isIP(hostname)) {
+    if (isPrivateIpAddress(hostname)) throw new Error("IP private tidak boleh discan");
+    return;
+  }
+
+  const records = await lookup(hostname, { all: true, verbatim: true });
+  if (records.some((record) => isPrivateIpAddress(record.address))) {
+    throw new Error("Host private tidak boleh discan");
+  }
+}
+
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&#x2F;/gi, "/")
+    .replace(/&#47;/g, "/")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'");
+}
+
+function platformFromUrl(rawUrl: string): SocialPlatform | null {
+  try {
+    const host = new URL(rawUrl).hostname.replace(/^www\./, "");
+    for (const [platform, pattern] of Object.entries(SOCIAL_DOMAINS) as Array<[SocialPlatform, RegExp]>) {
+      if (pattern.test(host)) return platform;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function normalizeSocialUrl(rawUrl: string, baseUrl: string) {
+  try {
+    const parsed = new URL(decodeHtmlEntities(rawUrl), baseUrl);
+    parsed.hash = "";
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function extractSocialLinks(html: string, websiteUrl: string): SocialLinks {
+  const links: SocialLinks = {};
+  const hrefPattern = /\bhref\s*=\s*["']([^"']+)["']/gi;
+  const rawSocialPattern = /https?:\/\/(?:www\.)?(?:instagram\.com|facebook\.com|tiktok\.com|linkedin\.com|youtube\.com|youtu\.be|x\.com|twitter\.com)\/[^\s"'<>)]*/gi;
+  const candidates = new Set<string>();
+  let match: RegExpExecArray | null;
+
+  while ((match = hrefPattern.exec(html)) !== null) {
+    candidates.add(match[1]);
+  }
+
+  while ((match = rawSocialPattern.exec(html)) !== null) {
+    candidates.add(match[0]);
+  }
+
+  for (const candidate of candidates) {
+    const normalized = normalizeSocialUrl(candidate, websiteUrl);
+    if (!normalized) continue;
+
+    const platform = platformFromUrl(normalized);
+    if (!platform || links[platform]) continue;
+
+    links[platform] = normalized;
+  }
+
+  return links;
+}
+
+async function readLimitedText(res: Response) {
+  const reader = res.body?.getReader();
+  if (!reader) return "";
+
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+
+    total += value.byteLength;
+    if (total > SOCIAL_SCAN_MAX_BYTES) break;
+    chunks.push(value);
+  }
+
+  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
+function socialLinksFromCache(value: unknown): SocialLinks {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const links: SocialLinks = {};
+
+  for (const platform of Object.keys(SOCIAL_DOMAINS) as SocialPlatform[]) {
+    const url = (value as Record<string, unknown>)[platform];
+    if (typeof url === "string") links[platform] = url;
+  }
+
+  return links;
+}
+
+function getSocialScanCacheDelegate() {
+  return (prisma as unknown as {
+    leadFinderSocialScanCache?: {
+      findFirst: (args: {
+        where: { websiteUrl: string; scannedAt: { gte: Date } };
+        select: { socialLinks: true; status: true; error: true };
+      }) => Promise<{ socialLinks: unknown; status: string; error: string | null } | null>;
+      upsert: (args: {
+        where: { websiteUrl: string };
+        update: { socialLinks: SocialLinks; status: SocialScanStatus; error: string | null; scannedAt: Date };
+        create: { websiteUrl: string; socialLinks: SocialLinks; status: SocialScanStatus; error: string | null };
+      }) => Promise<unknown>;
+    };
+  }).leadFinderSocialScanCache;
+}
+
+async function scanWebsiteSocialLinks(websiteUrl: string): Promise<SocialScanResult> {
+  const normalizedUrl = normalizeWebsiteUrl(websiteUrl);
+  if (!normalizedUrl) return emptySocialScan("FAILED", "URL website tidak valid");
+
+  const cacheAfter = new Date(Date.now() - SOCIAL_SCAN_CACHE_DAYS * 24 * 60 * 60 * 1000);
+  const cache = getSocialScanCacheDelegate();
+  const cached = cache
+    ? await cache.findFirst({
+        where: {
+          websiteUrl: normalizedUrl,
+          scannedAt: { gte: cacheAfter },
+        },
+        select: { socialLinks: true, status: true, error: true },
+      }).catch((err) => {
+        console.warn("[PortalLeadFinder] Social scan cache read failed", err);
+        return null;
+      })
+    : null;
+
+  if (cached) {
+    return {
+      status: cached.status as SocialScanStatus,
+      links: socialLinksFromCache(cached.socialLinks),
+      ...(cached.error ? { error: cached.error } : {}),
+    };
+  }
+
+  let result: SocialScanResult;
+
+  try {
+    await assertPublicWebsiteUrl(normalizedUrl);
+
+    const res = await fetch(normalizedUrl, {
+      redirect: "follow",
+      signal: AbortSignal.timeout(SOCIAL_SCAN_TIMEOUT_MS),
+      headers: {
+        "User-Agent": "MFWEB Lead Finder Social Scan/1.0",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) {
+      result = emptySocialScan("FAILED", `HTTP ${res.status}`);
+    } else {
+      const contentType = res.headers.get("content-type") ?? "";
+      if (contentType && !contentType.includes("text/html") && !contentType.includes("application/xhtml")) {
+        result = emptySocialScan("FAILED", "Konten bukan HTML");
+      } else {
+        const html = await readLimitedText(res);
+        const links = extractSocialLinks(html, normalizedUrl);
+        result = {
+          status: Object.keys(links).length > 0 ? "FOUND" : "NOT_FOUND",
+          links,
+        };
+      }
+    }
+  } catch (err) {
+    result = emptySocialScan("FAILED", err instanceof Error && err.name === "TimeoutError" ? "Timeout" : "Gagal scan website");
+  }
+
+  if (cache) {
+    await cache.upsert({
+      where: { websiteUrl: normalizedUrl },
+      update: {
+        socialLinks: result.links,
+        status: result.status,
+        error: result.error ?? null,
+        scannedAt: new Date(),
+      },
+      create: {
+        websiteUrl: normalizedUrl,
+        socialLinks: result.links,
+        status: result.status,
+        error: result.error ?? null,
+      },
+    }).catch((err) => {
+      console.warn("[PortalLeadFinder] Social scan cache write failed", err);
+    });
+  }
+
+  return result;
+}
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>,
+) {
+  const results: R[] = [];
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex++;
+      results[index] = await task(items[index]);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
+async function attachSocialScans(places: PlaceLead[], enabled: boolean) {
+  if (!enabled) return { scanned: 0, skipped: 0 };
+
+  const websitePlaces = places.filter((place) => place.website);
+  const scanTargets = websitePlaces.slice(0, SOCIAL_SCAN_MAX_WEBSITES);
+  const skipped = Math.max(0, websitePlaces.length - scanTargets.length);
+
+  for (const place of places) {
+    if (!place.website) place.socialScan = emptySocialScan("NO_WEBSITE");
+  }
+  for (const place of websitePlaces.slice(SOCIAL_SCAN_MAX_WEBSITES)) {
+    place.socialScan = emptySocialScan("SKIPPED", "Batas scan tercapai");
+  }
+
+  const results = await runWithConcurrency(scanTargets, SOCIAL_SCAN_CONCURRENCY, async (place) => ({
+    place,
+    result: await scanWebsiteSocialLinks(place.website!),
+  }));
+
+  for (const { place, result } of results) {
+    place.socialScan = result;
+  }
+
+  return { scanned: scanTargets.length, skipped };
+}
+
 async function getSessionClient() {
   const session = await auth();
   if (!session?.user?.email) return { status: 401 as const, clientId: null, email: null };
@@ -232,15 +553,18 @@ export async function POST(req: NextRequest) {
   if (!apiKey) return NextResponse.json({ error: "GOOGLE_PLACES_API_KEY belum dikonfigurasi" }, { status: 503 });
 
   try {
-    const { query, city = "", mode = "standard" } = await req.json();
+    const { query, city = "", mode = "standard", socialScan = false } = await req.json();
     if (!query?.trim()) return NextResponse.json({ error: "Query tidak boleh kosong" }, { status: 400 });
 
     const searchMode: SearchMode = mode === "deep" ? "deep" : "standard";
+    const shouldScanSocial = socialScan === true;
     const toolSettings = await getToolSettings();
     if (!toolSettings.leadFinder.enabled) {
       return NextResponse.json({ error: "Lead Finder sedang nonaktif." }, { status: 503 });
     }
-    const creditCost = searchMode === "deep" ? toolSettings.leadFinder.deepCost : toolSettings.leadFinder.standardCost;
+    const baseCreditCost = searchMode === "deep" ? toolSettings.leadFinder.deepCost : toolSettings.leadFinder.standardCost;
+    const socialScanCost = toolSettings.leadFinder.socialScanCost ?? SOCIAL_SCAN_COST_FALLBACK;
+    const creditCost = baseCreditCost + (shouldScanSocial ? socialScanCost : 0);
     const balance = await getClientBalance(clientId);
     if (balance < creditCost) {
       return NextResponse.json({ error: "Kredit tidak cukup", balance, requiredCredits: creditCost }, { status: 402 });
@@ -363,8 +687,11 @@ export async function POST(req: NextRequest) {
         ratingCount: typeof p.userRatingCount === "number" ? p.userRatingCount : null,
         businessStatus,
         isOpen: openingHours?.openNow ?? null,
+        socialScan: emptySocialScan("NOT_REQUESTED"),
       };
     });
+
+    const socialScanStats = await attachSocialScans(places, shouldScanSocial);
 
     const phones = places.map((p) => p.phoneNorm).filter(Boolean);
     if (phones.length > 0) {
@@ -383,7 +710,16 @@ export async function POST(req: NextRequest) {
       creditCost,
       "lead_finder",
       searchMode === "deep" ? `Deep Search: ${fullQuery}` : `Search: ${fullQuery}`,
-      { query, city, mode: searchMode, results: places.length, rawTotal, searchQueries: searchPlans.length },
+      {
+        query,
+        city,
+        mode: searchMode,
+        results: places.length,
+        rawTotal,
+        searchQueries: searchPlans.length,
+        socialScan: shouldScanSocial,
+        socialScanStats,
+      },
     );
 
     if (!deductResult.ok) {
@@ -400,6 +736,10 @@ export async function POST(req: NextRequest) {
       fullQuery,
       mode: searchMode,
       creditCost,
+      baseCreditCost,
+      socialScanCost: shouldScanSocial ? socialScanCost : 0,
+      socialScan: shouldScanSocial,
+      socialScanStats,
       searchQueries: searchPlans.length,
       rawTotal,
       usedBias: searchPlans.some((plan) => !!plan.coords),

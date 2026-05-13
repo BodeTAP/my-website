@@ -27,6 +27,7 @@ export default async function PortalLeadFinderPage() {
       creditCosts={{
         standard: toolSettings.leadFinder.standardCost,
         deep: toolSettings.leadFinder.deepCost,
+        socialScan: toolSettings.leadFinder.socialScanCost,
       }}
     />
   );

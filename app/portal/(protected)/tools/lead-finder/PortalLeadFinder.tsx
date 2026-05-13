@@ -24,12 +24,13 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { PlaceLead } from "@/app/api/portal/tools/lead-finder/route";
+import type { PlaceLead, SocialPlatform, SocialScanStatus } from "@/app/api/portal/tools/lead-finder/route";
 
 type FilterType = "ALL" | "NO_WEBSITE" | "HAS_WEBSITE";
 type StatusFilter = "ALL" | "OPERATIONAL" | "CLOSED_PERMANENTLY";
 type SearchMode = "standard" | "deep";
-type SortBy = "NO_WEBSITE" | "RATING" | "REVIEWS" | "NAME" | "PHONE";
+type SortBy = "NO_WEBSITE" | "RATING" | "REVIEWS" | "NAME" | "PHONE" | "SOCIAL";
+type SocialFilter = "ALL" | "ANY" | "NONE" | SocialPlatform;
 type CityGroup = { label: string; cities: string[] };
 type SearchHistory = {
   query: string;
@@ -42,6 +43,17 @@ const DEFAULT_CREDIT_COST: Record<SearchMode, number> = {
   standard: 5,
   deep: 20,
 };
+
+const DEFAULT_SOCIAL_SCAN_COST = 10;
+
+const SOCIAL_PLATFORMS: Array<{ value: SocialPlatform; label: string }> = [
+  { value: "instagram", label: "Instagram" },
+  { value: "facebook", label: "Facebook" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "youtube", label: "YouTube" },
+  { value: "x", label: "X" },
+];
 
 const PRESETS = [
   "restoran", "kafe", "salon kecantikan", "bengkel motor", "apotek",
@@ -279,6 +291,23 @@ function stripIndonesiaPrefix(phone: string) {
   return phone.replace(/\D/g, "").replace(/^62/, "").replace(/^0/, "");
 }
 
+function getSocialPlatforms(place: PlaceLead) {
+  return SOCIAL_PLATFORMS.filter((platform) => place.socialScan.links[platform.value]);
+}
+
+function hasAnySocial(place: PlaceLead) {
+  return getSocialPlatforms(place).length > 0;
+}
+
+function socialStatusLabel(status: SocialScanStatus) {
+  if (status === "FOUND") return "Ditemukan";
+  if (status === "NOT_FOUND") return "Tidak ditemukan";
+  if (status === "NO_WEBSITE") return "Tidak ada website";
+  if (status === "FAILED") return "Gagal scan";
+  if (status === "SKIPPED") return "Dilewati";
+  return "Tidak discan";
+}
+
 function downloadCsv(places: PlaceLead[]) {
   const header = [
     "Nama Bisnis",
@@ -292,6 +321,13 @@ function downloadCsv(places: PlaceLead[]) {
     "Jumlah Ulasan",
     "Status Bisnis",
     "Sedang Buka",
+    "Status Social Scan",
+    "Instagram",
+    "Facebook",
+    "TikTok",
+    "LinkedIn",
+    "YouTube",
+    "X",
   ];
   const rows = places.map((place) => {
     const phone = place.phoneNorm || place.phone;
@@ -307,6 +343,13 @@ function downloadCsv(places: PlaceLead[]) {
       place.ratingCount?.toString() ?? "",
       place.businessStatus ?? "",
       place.isOpen === null ? "" : place.isOpen ? "Ya" : "Tidak",
+      socialStatusLabel(place.socialScan.status),
+      place.socialScan.links.instagram ?? "",
+      place.socialScan.links.facebook ?? "",
+      place.socialScan.links.tiktok ?? "",
+      place.socialScan.links.linkedin ?? "",
+      place.socialScan.links.youtube ?? "",
+      place.socialScan.links.x ?? "",
     ].map(csvEscape).join(",");
   });
 
@@ -562,17 +605,19 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
 export default function PortalLeadFinder({
   initialBalance,
   enabled,
-  creditCosts = DEFAULT_CREDIT_COST,
+  creditCosts = { ...DEFAULT_CREDIT_COST, socialScan: DEFAULT_SOCIAL_SCAN_COST },
 }: {
   initialBalance: number;
   enabled: boolean;
-  creditCosts?: Record<SearchMode, number>;
+  creditCosts?: Record<SearchMode, number> & { socialScan?: number };
 }) {
   const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
   const [mode, setMode] = useState<SearchMode>("standard");
+  const [socialScanEnabled, setSocialScanEnabled] = useState(false);
+  const [socialFilter, setSocialFilter] = useState<SocialFilter>("ALL");
   const [filter, setFilter] = useState<FilterType>("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("OPERATIONAL");
   const [minRating, setMinRating] = useState<number>(0);
@@ -592,7 +637,8 @@ export default function PortalLeadFinder({
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const creditCost = creditCosts[mode];
+  const socialScanCost = creditCosts.socialScan ?? DEFAULT_SOCIAL_SCAN_COST;
+  const creditCost = creditCosts[mode] + (socialScanEnabled ? socialScanCost : 0);
   const insufficient = balance < creditCost || !enabled;
   const filteredPlaces = useMemo(() => {
     const search = resultSearch.trim().toLowerCase();
@@ -601,6 +647,11 @@ export default function PortalLeadFinder({
       if (filter === "NO_WEBSITE" && place.hasWebsite) return false;
       if (filter === "HAS_WEBSITE" && !place.hasWebsite) return false;
       if (hasPhoneOnly && !hasPhone) return false;
+      if (socialScanEnabled) {
+        if (socialFilter === "ANY" && !hasAnySocial(place)) return false;
+        if (socialFilter === "NONE" && hasAnySocial(place)) return false;
+        if (SOCIAL_PLATFORMS.some((platform) => platform.value === socialFilter) && !place.socialScan.links[socialFilter as SocialPlatform]) return false;
+      }
       if (statusFilter === "OPERATIONAL" && place.businessStatus === "CLOSED_PERMANENTLY") return false;
       if (statusFilter === "CLOSED_PERMANENTLY" && place.businessStatus !== "CLOSED_PERMANENTLY") return false;
       if (minRating > 0 && (place.rating ?? 0) < minRating) return false;
@@ -627,13 +678,15 @@ export default function PortalLeadFinder({
       if (sortBy === "RATING") return (b.rating ?? 0) - (a.rating ?? 0);
       if (sortBy === "REVIEWS") return (b.ratingCount ?? 0) - (a.ratingCount ?? 0);
       if (sortBy === "PHONE") return Number(Boolean(b.phoneNorm || b.phone)) - Number(Boolean(a.phoneNorm || a.phone));
+      if (sortBy === "SOCIAL") return Number(hasAnySocial(b)) - Number(hasAnySocial(a));
       return a.name.localeCompare(b.name, "id");
     });
-  }, [filter, hasPhoneOnly, minRating, minReviews, places, resultSearch, sortBy, statusFilter]);
+  }, [filter, hasPhoneOnly, minRating, minReviews, places, resultSearch, socialFilter, socialScanEnabled, sortBy, statusFilter]);
 
   const noWebsiteCount = places.filter((place) => !place.hasWebsite).length;
   const noPhoneCount = places.filter((place) => !(place.phoneNorm || place.phone)).length;
   const closedCount = places.filter((place) => place.businessStatus === "CLOSED_PERMANENTLY").length;
+  const socialFoundCount = places.filter(hasAnySocial).length;
 
   function requestSearch() {
     if (!query.trim() || insufficient) return;
@@ -653,7 +706,7 @@ export default function PortalLeadFinder({
       const res = await fetch("/api/portal/tools/lead-finder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, city, mode }),
+        body: JSON.stringify({ query, city, mode, socialScan: socialScanEnabled }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -821,6 +874,32 @@ export default function PortalLeadFinder({
             ))}
           </div>
 
+          <button
+            type="button"
+            onClick={() => setSocialScanEnabled((current) => !current)}
+            className={`w-full rounded-2xl border p-4 text-left transition-all ${
+              socialScanEnabled
+                ? "border-emerald-500/40 bg-emerald-500/10"
+                : "border-white/10 bg-white/5 hover:border-white/20"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-black text-white">Social Scan</p>
+                <p className="mt-1 text-xs leading-relaxed text-blue-200/45">
+                  Cek link Instagram, Facebook, TikTok, LinkedIn, YouTube, dan X dari website bisnis. Hasil memakai cache dan dibatasi agar pencarian tetap stabil.
+                </p>
+              </div>
+              <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+                socialScanEnabled
+                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                  : "border-white/10 bg-white/5 text-blue-200/45"
+              }`}>
+                +{socialScanCost} kredit
+              </span>
+            </div>
+          </button>
+
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-6">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
@@ -829,6 +908,7 @@ export default function PortalLeadFinder({
 
             <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-300">
               {mode === "deep" ? "Multi-search aktif" : "Fix 60 leads"}
+              {socialScanEnabled ? " + Social Scan" : ""}
             </div>
 
             {history.length > 0 && (
@@ -892,6 +972,7 @@ export default function PortalLeadFinder({
               <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
                 {noWebsiteCount > 0 && <span className="text-blue-300/70"><strong>{noWebsiteCount}</strong> tanpa website</span>}
                 {noPhoneCount > 0 && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
+                {socialScanEnabled && <span className="text-emerald-300/80"><strong>{socialFoundCount}</strong> punya social link</span>}
                 {closedCount > 0 && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
               {fullQuery && <p className="text-blue-200/40 text-xs">{fullQuery}</p>}
@@ -931,6 +1012,7 @@ export default function PortalLeadFinder({
               <option className="bg-[#07111f] text-white" value="REVIEWS">Review terbanyak</option>
               <option className="bg-[#07111f] text-white" value="RATING">Rating tertinggi</option>
               <option className="bg-[#07111f] text-white" value="NO_WEBSITE">Belum ada website dulu</option>
+              <option className="bg-[#07111f] text-white" value="SOCIAL">Ada sosial media dulu</option>
               <option className="bg-[#07111f] text-white" value="NAME">Nama A-Z</option>
             </select>
           </div>
@@ -955,6 +1037,22 @@ export default function PortalLeadFinder({
               </button>
             ))}
 
+            <div className="w-px bg-white/10 mx-1" />
+            <select
+              value={socialFilter}
+              onChange={(event) => setSocialFilter(event.target.value as SocialFilter)}
+              disabled={!socialScanEnabled}
+              className="h-8 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-white outline-none disabled:opacity-45"
+            >
+              <option className="bg-[#07111f] text-white" value="ALL">Semua sosial</option>
+              <option className="bg-[#07111f] text-white" value="ANY">Ada sosial media</option>
+              <option className="bg-[#07111f] text-white" value="NONE">Tidak ditemukan</option>
+              {SOCIAL_PLATFORMS.map((platform) => (
+                <option key={platform.value} className="bg-[#07111f] text-white" value={platform.value}>
+                  {platform.label}
+                </option>
+              ))}
+            </select>
             <div className="w-px bg-white/10 mx-1" />
             <button
               type="button"
@@ -1017,6 +1115,7 @@ export default function PortalLeadFinder({
             <div className="grid sm:grid-cols-2 gap-3">
               {filteredPlaces.map((place) => {
                 const isClosed = place.businessStatus === "CLOSED_PERMANENTLY";
+                const socialPlatforms = getSocialPlatforms(place);
                 return (
                   <div key={place.placeId || `${place.name}-${place.phone}`} className={`glass rounded-2xl p-4 border transition-all ${isClosed ? "opacity-55 border-white/5" : "border-white/5 hover:border-white/15"}`}>
                     <div className="flex items-start gap-3">
@@ -1065,6 +1164,28 @@ export default function PortalLeadFinder({
                             <span className="truncate max-w-[220px]">{place.website.replace(/^https?:\/\//, "")}</span>
                           </a>
                         )}
+
+                        {socialScanEnabled && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {socialPlatforms.length > 0 ? (
+                              socialPlatforms.map((platform) => (
+                                <a
+                                  key={platform.value}
+                                  href={place.socialScan.links[platform.value]}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/15"
+                                >
+                                  {platform.label}
+                                </a>
+                              ))
+                            ) : (
+                              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-blue-200/35">
+                                Sosial: {socialStatusLabel(place.socialScan.status)}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1089,7 +1210,9 @@ export default function PortalLeadFinder({
             </div>
             <h2 className="text-white font-black text-xl">Gunakan {creditCost} kredit?</h2>
             <p className="text-blue-200/55 text-sm mt-2 leading-relaxed">
-              Mode <span className="text-white font-bold">{mode === "deep" ? "Deep Search" : "Standard"}</span> akan memotong {creditCost} kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
+              Mode <span className="text-white font-bold">{mode === "deep" ? "Deep Search" : "Standard"}</span>
+              {socialScanEnabled ? <span> dengan <span className="text-white font-bold">Social Scan</span></span> : null}
+              {" "}akan memotong {creditCost} kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Button

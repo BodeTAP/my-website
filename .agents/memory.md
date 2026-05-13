@@ -34,6 +34,8 @@ user confirms a lasting preference, project decision, or important current state
   agency.
 - Lead Finder landing/product copy should target general business prospecting
   use cases, not only web agencies or website sellers.
+- Lead Finder supports optional Social Scan as a paid add-on that scans business
+  websites for social links and caches results server-side.
 - Proposal Generator now supports a client-editable brand kit/design layer:
   logo, colors, font style, layout preset, logo position, and PDF visibility
   toggles. PDF preview/download should use the same renderer.

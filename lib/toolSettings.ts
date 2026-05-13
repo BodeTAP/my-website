@@ -6,6 +6,7 @@ export const TOOL_SETTING_DEFAULTS = {
   tool_lead_finder_enabled: "true",
   tool_lead_finder_standard_cost: "5",
   tool_lead_finder_deep_cost: "20",
+  tool_lead_finder_social_scan_cost: "10",
   tool_proposal_generator_enabled: "true",
   tool_proposal_generator_cost: "5",
   tool_low_credit_warning_threshold: "10",
@@ -18,6 +19,7 @@ export type ToolSettings = {
     enabled: boolean;
     standardCost: number;
     deepCost: number;
+    socialScanCost: number;
   };
   proposalGenerator: {
     enabled: boolean;
@@ -61,6 +63,10 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
       deepCost: parsePositiveInt(
         values.tool_lead_finder_deep_cost,
         Number(TOOL_SETTING_DEFAULTS.tool_lead_finder_deep_cost),
+      ),
+      socialScanCost: parsePositiveInt(
+        values.tool_lead_finder_social_scan_cost,
+        Number(TOOL_SETTING_DEFAULTS.tool_lead_finder_social_scan_cost),
       ),
     },
     proposalGenerator: {
