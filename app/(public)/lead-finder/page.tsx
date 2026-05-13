@@ -25,7 +25,7 @@ import { getToolSettings } from "@/lib/toolSettings";
 export const metadata: Metadata = {
   title: "Lead Finder untuk Cari Prospek Bisnis Lokal | MFWEB",
   description:
-    "Temukan calon klien dari Google Maps, filter bisnis tanpa website, export CSV, dan mulai outreach lebih cepat dengan Lead Finder MFWEB.",
+    "Temukan prospek bisnis lokal dari Google Maps, sortir kontak yang layak dihubungi, export CSV, dan bangun pipeline sales lebih cepat dengan Lead Finder MFWEB.",
   alternates: { canonical: "/lead-finder" },
 };
 
@@ -43,13 +43,13 @@ const features = [
   },
   {
     icon: Globe2,
-    title: "Prioritaskan tanpa website",
-    desc: "Filter prospek yang belum punya website agar penawaran Anda terasa lebih tepat sasaran.",
+    title: "Lihat jejak digital bisnis",
+    desc: "Cek apakah prospek punya website, nomor telepon, rating, review, dan status operasional sebelum dihubungi.",
   },
   {
     icon: Filter,
     title: "Sortir kualitas lead",
-    desc: "Urutkan berdasarkan rating, jumlah review, nomor telepon, status bisnis, dan kebutuhan website.",
+    desc: "Urutkan berdasarkan rating, jumlah review, nomor telepon, status bisnis, dan kelengkapan profil.",
   },
   {
     icon: Download,
@@ -59,18 +59,18 @@ const features = [
 ];
 
 const workflows = [
-  "Pilih niche bisnis, misalnya restoran, salon, klinik, bengkel, atau travel agent.",
+  "Pilih segmen bisnis, misalnya restoran, salon, klinik, bengkel, toko, distributor, atau travel agent.",
   "Tentukan kota atau area agar hasil lebih presisi.",
   "Gunakan mode Standard untuk pencarian cepat atau Deep Search untuk cakupan lebih luas.",
-  "Filter bisnis tanpa website, punya nomor telepon, dan masih aktif.",
+  "Filter prospek yang punya nomor telepon, rating bagus, status aktif, atau profil digital yang masih perlu dilengkapi.",
   "Export CSV lalu mulai follow up dari pipeline sales Anda.",
 ];
 
 const useCases = [
-  "Agency website yang butuh daftar prospek lokal harian.",
-  "Freelancer yang ingin pitching ke bisnis tanpa website.",
+  "Distributor yang ingin mencari toko, outlet, reseller, atau mitra area baru.",
+  "Vendor B2B yang menawarkan layanan operasional, pemasok, logistik, software, atau peralatan bisnis.",
   "Tim sales B2B yang mencari kontak usaha berdasarkan kota.",
-  "Pemilik jasa lokal yang ingin memetakan kompetitor dan peluang area.",
+  "Pemilik bisnis yang ingin memetakan kompetitor, calon partner, dan peluang ekspansi lokal.",
 ];
 
 const faqs = [
@@ -135,11 +135,11 @@ export default async function LeadFinderLandingPage() {
                 Prospecting tool
               </div>
               <h1 className="max-w-3xl text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Cari calon klien dari Google Maps dalam hitungan menit
+                Temukan prospek bisnis lokal dalam hitungan menit
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-relaxed text-blue-100/65 sm:text-lg">
-                Lead Finder membantu Anda menemukan bisnis lokal, melihat siapa yang belum punya website,
-                menyaring kontak yang layak dihubungi, lalu mengunduh data siap follow up.
+                Lead Finder membantu tim sales, distributor, vendor, dan pemilik bisnis menemukan kontak usaha
+                berdasarkan kategori dan area, lalu mengunduh data yang siap dimasukkan ke pipeline.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/portal/register">
@@ -161,7 +161,7 @@ export default async function LeadFinderLandingPage() {
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                  Filter tanpa website
+                  Filter kontak siap follow up
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
@@ -203,8 +203,8 @@ export default async function LeadFinderLandingPage() {
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     {[
                       ["60", "leads ditemukan"],
-                      ["38", "tanpa website"],
-                      ["52", "ada nomor"],
+                      ["41", "kontak lengkap"],
+                      ["38", "prospek aktif"],
                     ].map(([num, label]) => (
                       <div key={label} className="rounded-xl border border-white/10 bg-black/25 p-4">
                         <p className="text-2xl font-black text-white">{num}</p>
@@ -215,9 +215,9 @@ export default async function LeadFinderLandingPage() {
 
                   <div className="mt-4 space-y-2">
                     {[
-                      { name: "Nara Beauty Studio", area: "Jl. Riau, Bandung", tag: "Belum punya website", phone: "0812-3456-7890", hot: true },
-                      { name: "Lumi Hair Lab", area: "Dago, Bandung", tag: "Punya website", phone: "022-555-0134", hot: false },
-                      { name: "Ayla Skin Clinic", area: "Buahbatu, Bandung", tag: "Belum punya website", phone: "0857-1111-2200", hot: true },
+                      { name: "Nara Beauty Studio", area: "Jl. Riau, Bandung", tag: "Kontak lengkap", phone: "0812-3456-7890", hot: true },
+                      { name: "Lumi Hair Lab", area: "Dago, Bandung", tag: "Rating tinggi", phone: "022-555-0134", hot: false },
+                      { name: "Ayla Skin Clinic", area: "Buahbatu, Bandung", tag: "Prospek aktif", phone: "0857-1111-2200", hot: true },
                     ].map((lead) => (
                       <div key={lead.name} className="grid gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3 sm:grid-cols-[1fr_auto] sm:items-center">
                         <div>
@@ -248,7 +248,7 @@ export default async function LeadFinderLandingPage() {
           <FadeUp className="mb-10 max-w-2xl">
             <h2 className="text-3xl font-black text-white sm:text-4xl">Dibuat untuk prospecting yang praktis</h2>
             <p className="mt-3 text-blue-200/55">
-              Fokusnya sederhana: bantu tim Anda menemukan bisnis yang kemungkinan besar butuh layanan digital.
+              Fokusnya sederhana: bantu tim Anda menemukan bisnis yang relevan, punya sinyal kualitas, dan mudah ditindaklanjuti.
             </p>
           </FadeUp>
           <StaggerChildren className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -276,7 +276,7 @@ export default async function LeadFinderLandingPage() {
               </div>
               <h2 className="text-3xl font-black text-white">Workflow dari ide niche ke daftar prospek</h2>
               <p className="mt-3 text-blue-200/55">
-                Cocok untuk rutinitas sales harian, riset area baru, atau validasi pasar sebelum campaign.
+                Cocok untuk rutinitas sales harian, riset area baru, validasi pasar, atau pencarian calon mitra bisnis.
               </p>
               <Link href="/portal/register" className="mt-7 inline-flex">
                 <Button className="h-11 rounded-xl bg-emerald-500 px-5 font-black text-[#041014] hover:bg-emerald-400">
@@ -368,7 +368,7 @@ export default async function LeadFinderLandingPage() {
             <div>
               <h2 className="text-3xl font-black text-white sm:text-4xl">Cocok untuk siapa?</h2>
               <p className="mt-3 text-blue-200/55">
-                Lead Finder paling terasa manfaatnya saat Anda punya layanan yang bisa ditawarkan ke banyak bisnis lokal.
+                Lead Finder paling terasa manfaatnya saat Anda perlu menemukan banyak bisnis lokal yang bisa dihubungi secara terarah.
               </p>
             </div>
           </FadeUp>

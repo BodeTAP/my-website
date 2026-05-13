@@ -32,6 +32,8 @@ user confirms a lasting preference, project decision, or important current state
 - Proposal Generator is intended for general businesses, not only web agency
   use cases; default copy/templates should avoid assuming the seller is a web
   agency.
+- Lead Finder landing/product copy should target general business prospecting
+  use cases, not only web agencies or website sellers.
 - Proposal Generator now supports a client-editable brand kit/design layer:
   logo, colors, font style, layout preset, logo position, and PDF visibility
   toggles. PDF preview/download should use the same renderer.

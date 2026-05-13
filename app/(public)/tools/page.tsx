@@ -165,9 +165,9 @@ export default function ToolsPage() {
                     <Coins className="h-3.5 w-3.5" />
                     Tool premium
                   </div>
-                  <h2 className="text-2xl font-black text-white sm:text-3xl">Lead Finder untuk cari calon klien dari Google Maps</h2>
+                  <h2 className="text-2xl font-black text-white sm:text-3xl">Lead Finder untuk cari prospek bisnis lokal</h2>
                   <p className="mt-3 max-w-2xl text-sm leading-relaxed text-blue-100/60 sm:text-base">
-                    Temukan bisnis lokal, filter yang belum punya website, rapikan nomor WhatsApp, lalu export CSV untuk follow up.
+                    Temukan bisnis berdasarkan kategori dan area, sortir kontak yang layak dihubungi, lalu export CSV untuk follow up.
                   </p>
                   <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-blue-200/60">
                     <span className="inline-flex items-center gap-1.5">
