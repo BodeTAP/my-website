@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles } from "lucide-react";
+import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles, Search, Coins, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 
@@ -151,6 +151,46 @@ export default function ToolsPage() {
               );
             })}
           </StaggerChildren>
+        </div>
+      </section>
+
+      {/* Premium Lead Finder */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <FadeUp>
+            <Link href="/lead-finder" className="group block">
+              <div className="grid gap-6 rounded-3xl border border-blue-500/25 bg-blue-500/10 p-6 transition-colors hover:border-blue-400/45 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+                <div>
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                    <Coins className="h-3.5 w-3.5" />
+                    Tool premium
+                  </div>
+                  <h2 className="text-2xl font-black text-white sm:text-3xl">Lead Finder untuk cari calon klien dari Google Maps</h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-blue-100/60 sm:text-base">
+                    Temukan bisnis lokal, filter yang belum punya website, rapikan nomor WhatsApp, lalu export CSV untuk follow up.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-blue-200/60">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Search className="h-3.5 w-3.5 text-blue-300" />
+                      Google Maps search
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Download className="h-3.5 w-3.5 text-emerald-300" />
+                      Export CSV
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                      Mulai 5 kredit
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-black text-blue-200 group-hover:text-white">
+                  Lihat landing page
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+          </FadeUp>
         </div>
       </section>
 
