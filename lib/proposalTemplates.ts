@@ -134,18 +134,22 @@ const DEFAULT_TEMPLATES: ProposalTemplatePayload[] = [
   },
 ];
 
+const LEGACY_DEFAULT_TEMPLATE_NAMES = [
+  "Website Company Profile",
+  "Landing Page Campaign",
+  "Maintenance Website",
+];
+
 function asJson(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
 export async function ensureDefaultProposalTemplates() {
-  const defaultNames = DEFAULT_TEMPLATES.map((template) => template.name);
-
   await prisma.proposalTemplate.updateMany({
     where: {
       clientId: null,
       isDefault: true,
-      name: { notIn: defaultNames },
+      name: { in: LEGACY_DEFAULT_TEMPLATE_NAMES },
     },
     data: { isActive: false },
   });
@@ -166,9 +170,7 @@ export async function ensureDefaultProposalTemplates() {
       isActive: true,
     };
 
-    if (existing) {
-      await prisma.proposalTemplate.update({ where: { id: existing.id }, data });
-    } else {
+    if (!existing) {
       await prisma.proposalTemplate.create({ data });
     }
   }

@@ -5,15 +5,20 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Check,
   Coins,
   Copy,
+  Download,
+  Eye,
   FileText,
   History,
   Loader2,
   Pencil,
   Plus,
   Save,
+  Search,
   Sparkles,
   Trash2,
 } from "lucide-react";
@@ -52,6 +57,7 @@ type ProposalView = {
   title: string;
   prospectName: string | null;
   templateName: string | null;
+  status: string;
   content: GeneratedProposalContent;
   createdAt: string;
 };
@@ -66,6 +72,21 @@ type TemplateDraft = {
 };
 
 const PROPOSAL_COST = 5;
+const HISTORY_PAGE_SIZE = 6;
+
+const STATUS_OPTIONS = [
+  { value: "DRAFT", label: "Draft" },
+  { value: "SENT", label: "Terkirim" },
+  { value: "ACCEPTED", label: "Diterima" },
+  { value: "DECLINED", label: "Ditolak" },
+];
+
+const STATUS_STYLE: Record<string, string> = {
+  DRAFT: "bg-white/10 border-white/10 text-blue-100/70",
+  SENT: "bg-blue-500/10 border-blue-500/25 text-blue-200",
+  ACCEPTED: "bg-emerald-500/10 border-emerald-500/25 text-emerald-200",
+  DECLINED: "bg-red-500/10 border-red-500/25 text-red-200",
+};
 
 function emptyDraft(): TemplateDraft {
   return {
@@ -125,8 +146,13 @@ export default function ProposalGeneratorClient({
   const [activeTab, setActiveTab] = useState<"generate" | "templates" | "history">("generate");
   const [draft, setDraft] = useState<TemplateDraft>(emptyDraft());
   const [result, setResult] = useState<ProposalView | null>(initialProposals[0] ?? null);
+  const [resultTitle, setResultTitle] = useState(initialProposals[0]?.title ?? "");
+  const [resultStatus, setResultStatus] = useState(initialProposals[0]?.status ?? "DRAFT");
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [historyPage, setHistoryPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingMeta, setSavingMeta] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -136,6 +162,32 @@ export default function ProposalGeneratorClient({
   );
 
   const canGenerate = balance >= PROPOSAL_COST;
+
+  const filteredProposals = useMemo(() => {
+    const query = historyQuery.trim().toLowerCase();
+    if (!query) return proposals;
+
+    return proposals.filter((proposal) => {
+      return [
+        proposal.title,
+        proposal.prospectName ?? "",
+        proposal.templateName ?? "",
+        proposal.status,
+      ].some((value) => value.toLowerCase().includes(query));
+    });
+  }, [historyQuery, proposals]);
+
+  const historyPageCount = Math.max(1, Math.ceil(filteredProposals.length / HISTORY_PAGE_SIZE));
+  const pagedProposals = filteredProposals.slice(
+    (historyPage - 1) * HISTORY_PAGE_SIZE,
+    historyPage * HISTORY_PAGE_SIZE,
+  );
+
+  const selectProposal = (proposal: ProposalView) => {
+    setResult(proposal);
+    setResultTitle(proposal.title);
+    setResultStatus(proposal.status);
+  };
 
   const updateDraft = (patch: Partial<TemplateDraft>) => setDraft((current) => ({ ...current, ...patch }));
 
@@ -279,7 +331,7 @@ export default function ProposalGeneratorClient({
         content: data.proposal.content,
         createdAt: data.proposal.createdAt,
       };
-      setResult(nextProposal);
+      selectProposal(nextProposal);
       setProposals((current) => [nextProposal, ...current.filter((proposal) => proposal.id !== nextProposal.id)]);
       setBalance(data.balance);
       setMessage("Proposal berhasil dibuat.");
@@ -295,6 +347,39 @@ export default function ProposalGeneratorClient({
     if (!result) return;
     await navigator.clipboard.writeText(proposalToText(result));
     setMessage("Proposal disalin ke clipboard.");
+  };
+
+  const saveResultMeta = async () => {
+    if (!result) return;
+    setSavingMeta(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const res = await fetch(`/api/portal/tools/proposal-generator/${result.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: resultTitle, status: resultStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan perubahan proposal");
+
+      const updated: ProposalView = {
+        ...result,
+        ...data.proposal,
+        content: data.proposal.content,
+        createdAt: data.proposal.createdAt,
+      };
+
+      selectProposal(updated);
+      setProposals((current) => current.map((proposal) => proposal.id === updated.id ? updated : proposal));
+      setMessage("Perubahan proposal berhasil disimpan.");
+      router.refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSavingMeta(false);
+    }
   };
 
   const downloadResult = () => {
@@ -458,16 +543,54 @@ export default function ProposalGeneratorClient({
             {result ? (
               <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-white/10 pb-5">
-                  <div>
+                  <div className="flex-1 space-y-3">
                     <p className="text-blue-200/45 text-xs font-black uppercase tracking-widest">Preview</p>
-                    <h2 className="text-white font-black text-xl mt-1">{result.content.title}</h2>
-                    <p className="text-blue-200/40 text-sm mt-1">{result.templateName ?? "Template custom"} - {formatDate(result.createdAt)}</p>
+                    <input
+                      value={resultTitle}
+                      onChange={(event) => setResultTitle(event.target.value)}
+                      className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white font-black text-lg outline-none focus:border-blue-500"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-blue-200/40 text-sm">{result.templateName ?? "Template custom"} - {formatDate(result.createdAt)}</p>
+                      <select
+                        value={resultStatus}
+                        onChange={(event) => setResultStatus(event.target.value)}
+                        className={`h-9 rounded-xl border px-3 text-xs font-black outline-none ${STATUS_STYLE[resultStatus] ?? STATUS_STYLE.DRAFT}`}
+                      >
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status.value} value={status.value} className="bg-[#07111f] text-white">
+                            {status.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        type="button"
+                        disabled={savingMeta}
+                        onClick={saveResultMeta}
+                        className="h-9 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                      >
+                        {savingMeta ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                        Simpan
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Link href={`/portal/tools/proposal-generator/${result.id}`} className="inline-flex h-10 items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-sm font-bold">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Detail
+                    </Link>
                     <Button type="button" onClick={copyResult} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
                       <Copy className="w-4 h-4 mr-2" />
                       Salin
                     </Button>
+                    <a
+                      href={`/api/portal/tools/proposal-generator/${result.id}/pdf`}
+                      target="_blank"
+                      className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white px-3 text-sm font-bold transition-colors"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      PDF
+                    </a>
                     <Button type="button" onClick={downloadResult} className="rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white">
                       Unduh TXT
                     </Button>
@@ -708,37 +831,108 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "history" && (
         <section className="glass rounded-2xl border border-white/10 overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between gap-3">
+          <div className="px-5 py-4 border-b border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h2 className="text-white font-black text-lg">Riwayat Proposal</h2>
-              <p className="text-blue-200/45 text-sm mt-1">{proposals.length} proposal terakhir</p>
+              <p className="text-blue-200/45 text-sm mt-1">{filteredProposals.length} dari {proposals.length} proposal</p>
             </div>
-            <History className="w-5 h-5 text-blue-200/45" />
+            <div className="relative w-full lg:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/35" />
+              <input
+                value={historyQuery}
+                onChange={(event) => {
+                  setHistoryQuery(event.target.value);
+                  setHistoryPage(1);
+                }}
+                placeholder="Cari judul, template, status..."
+                className="w-full h-11 rounded-xl bg-[#07111f] border border-white/10 pl-11 pr-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+              />
+            </div>
           </div>
           <div className="divide-y divide-white/10">
             {proposals.length === 0 ? (
               <div className="p-8 text-center text-blue-200/45">Belum ada proposal.</div>
-            ) : proposals.map((proposal) => (
-              <button
-                key={proposal.id}
-                type="button"
-                onClick={() => {
-                  setResult(proposal);
-                  setActiveTab("generate");
-                }}
-                className="w-full px-5 py-4 text-left hover:bg-white/5 transition-colors flex items-center justify-between gap-4"
-              >
-                <div>
-                  <p className="text-white font-bold">{proposal.title}</p>
+            ) : filteredProposals.length === 0 ? (
+              <div className="p-8 text-center text-blue-200/45">Tidak ada proposal yang cocok.</div>
+            ) : pagedProposals.map((proposal) => (
+              <div key={proposal.id} className="px-5 py-4 hover:bg-white/5 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    selectProposal(proposal);
+                    setActiveTab("generate");
+                  }}
+                  className="text-left flex-1"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-white font-bold">{proposal.title}</p>
+                    <span className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${STATUS_STYLE[proposal.status] ?? STATUS_STYLE.DRAFT}`}>
+                      {STATUS_OPTIONS.find((status) => status.value === proposal.status)?.label ?? proposal.status}
+                    </span>
+                  </div>
                   <p className="text-blue-200/40 text-sm mt-1">{proposal.templateName ?? "Template custom"} - {formatDate(proposal.createdAt)}</p>
+                </button>
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/portal/tools/proposal-generator/${proposal.id}`} className="inline-flex h-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-xs font-bold">
+                    <Eye className="w-4 h-4 mr-2" />
+                    Detail
+                  </Link>
+                  <a href={`/api/portal/tools/proposal-generator/${proposal.id}/pdf`} target="_blank" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-xs font-bold">
+                    <Download className="w-4 h-4 mr-2" />
+                    PDF
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      selectProposal(proposal);
+                      setActiveTab("generate");
+                    }}
+                    className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-200 hover:bg-blue-500/15 flex items-center justify-center"
+                    aria-label="Pilih proposal"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
                 </div>
-                <Check className="w-4 h-4 text-emerald-300" />
-              </button>
+              </div>
             ))}
           </div>
+          {filteredProposals.length > HISTORY_PAGE_SIZE && (
+            <div className="px-5 py-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-blue-200/45 text-sm">Halaman {historyPage} dari {historyPageCount}</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={historyPage <= 1}
+                  onClick={() => setHistoryPage((page) => Math.max(1, page - 1))}
+                  className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 text-blue-200/70 disabled:opacity-40 hover:bg-white/10 flex items-center justify-center"
+                  aria-label="Halaman sebelumnya"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                {Array.from({ length: historyPageCount }, (_item, index) => index + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setHistoryPage(page)}
+                    className={`h-9 min-w-9 rounded-xl border px-3 text-sm font-bold ${page === historyPage ? "bg-blue-600 border-blue-500 text-white" : "bg-white/5 border-white/10 text-blue-200/70 hover:bg-white/10"}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  disabled={historyPage >= historyPageCount}
+                  onClick={() => setHistoryPage((page) => Math.min(historyPageCount, page + 1))}
+                  className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 text-blue-200/70 disabled:opacity-40 hover:bg-white/10 flex items-center justify-center"
+                  aria-label="Halaman berikutnya"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </div>
   );
 }
-

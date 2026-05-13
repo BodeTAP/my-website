@@ -39,7 +39,7 @@ export async function GET() {
   const proposals = await prisma.generatedProposal.findMany({
     where: { clientId },
     orderBy: { createdAt: "desc" },
-    take: 20,
+    take: 100,
   });
 
   return NextResponse.json({ proposals });
@@ -122,4 +122,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Gagal menyimpan proposal" }, { status: 500 });
   }
 }
-

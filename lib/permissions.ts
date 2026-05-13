@@ -39,6 +39,7 @@ export const ROUTE_MODULE_MAP: Record<string, AdminModule> = {
   "/admin/projects": "projects",
   "/admin/invoices": "invoices",
   "/admin/proposals": "proposals",
+  "/admin/proposal-templates": "proposals",
   "/admin/tickets": "tickets",
   "/admin/portfolio": "portfolio",
   "/admin/testimonials": "testimonials",

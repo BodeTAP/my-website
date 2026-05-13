@@ -26,7 +26,7 @@ export default async function PortalProposalGeneratorPage() {
     prisma.generatedProposal.findMany({
       where: { clientId: user.client.id },
       orderBy: { createdAt: "desc" },
-      take: 20,
+      take: 100,
     }),
   ]);
 
@@ -48,10 +48,10 @@ export default async function PortalProposalGeneratorPage() {
         title: proposal.title,
         prospectName: proposal.prospectName,
         templateName: proposal.templateName,
+        status: proposal.status,
         content: proposal.content as unknown as GeneratedProposalContent,
         createdAt: proposal.createdAt.toISOString(),
       }))}
     />
   );
 }
-
