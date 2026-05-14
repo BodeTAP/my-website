@@ -14,6 +14,9 @@ type ToolSettingKey =
   | "tool_proposal_generator_cost"
   | "tool_invoice_generator_enabled"
   | "tool_invoice_generator_cost"
+  | "tool_invoice_generator_default_due_days"
+  | "tool_invoice_generator_default_footer"
+  | "tool_invoice_generator_default_include_tax"
   | "tool_low_credit_warning_threshold";
 type SettingsRecord = Record<ToolSettingKey, string>;
 
@@ -73,6 +76,31 @@ function ToggleField({
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
         className="h-5 w-5 shrink-0 accent-blue-500"
+      />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-blue-200/45 text-xs font-black uppercase tracking-wider">{label}</span>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        className="mt-2 w-full rounded-xl border border-white/10 bg-[#07111f] px-4 py-3 text-sm text-white outline-none focus:border-blue-500/55"
       />
     </label>
   );
@@ -181,6 +209,19 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
               description="Klien bisa membuat dan download invoice PDF."
             />
             <NumberField label="Biaya Generate" value={settings.tool_invoice_generator_cost} onChange={(value) => update("tool_invoice_generator_cost", value)} />
+            <NumberField label="Default Jatuh Tempo" value={settings.tool_invoice_generator_default_due_days} onChange={(value) => update("tool_invoice_generator_default_due_days", value)} suffix="hari" />
+            <ToggleField
+              checked={settings.tool_invoice_generator_default_include_tax === "true"}
+              onChange={(value) => update("tool_invoice_generator_default_include_tax", value)}
+              label="Default sertakan PPN 11%"
+              description="Form invoice klien akan otomatis mencentang PPN 11% saat dibuka."
+            />
+            <TextAreaField
+              label="Footer Default"
+              value={settings.tool_invoice_generator_default_footer}
+              onChange={(value) => update("tool_invoice_generator_default_footer", value)}
+              placeholder="Terima kasih atas kepercayaan Anda."
+            />
           </div>
         </div>
 

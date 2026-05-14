@@ -42,6 +42,11 @@ export default async function PortalInvoiceGeneratorPage() {
       initialBalance={balance}
       enabled={toolSettings.invoiceGenerator.enabled}
       invoiceCost={toolSettings.invoiceGenerator.creditCost}
+      invoiceDefaults={{
+        dueDays: toolSettings.invoiceGenerator.defaultDueDays,
+        footer: toolSettings.invoiceGenerator.defaultFooter,
+        includeTax: toolSettings.invoiceGenerator.defaultIncludeTax,
+      }}
       initialDesign={invoiceDesign}
       clientDefaults={{
         businessName: user.client.businessName,

@@ -65,6 +65,9 @@ user confirms a lasting preference, project decision, or important current state
 - Invoice Generator tax is fixed to optional `PPN 11%`; users can include or
   exclude it, and the API calculates the amount automatically from subtotal
   after discount.
+- Admin Tools now controls Invoice Generator defaults: credit cost, default due
+  days, default footer, and whether PPN 11% is included by default. Admin Tools
+  also shows usage totals for generated proposals/invoices and credits spent.
 - On 2026-05-14, the `generated_invoices` table was applied manually with
   `prisma db execute` and marked applied because `prisma migrate dev` detected
   database drift; do not reset the database for this migration.

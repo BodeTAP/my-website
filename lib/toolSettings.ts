@@ -12,6 +12,9 @@ export const TOOL_SETTING_DEFAULTS = {
   tool_proposal_generator_cost: "5",
   tool_invoice_generator_enabled: "true",
   tool_invoice_generator_cost: "3",
+  tool_invoice_generator_default_due_days: "7",
+  tool_invoice_generator_default_footer: "Terima kasih atas kepercayaan Anda.",
+  tool_invoice_generator_default_include_tax: "false",
   tool_low_credit_warning_threshold: "10",
 } as const;
 
@@ -32,6 +35,9 @@ export type ToolSettings = {
   invoiceGenerator: {
     enabled: boolean;
     creditCost: number;
+    defaultDueDays: number;
+    defaultFooter: string;
+    defaultIncludeTax: boolean;
   };
   lowCreditWarningThreshold: number;
 };
@@ -46,6 +52,11 @@ function parsePositiveInt(value: string | undefined, fallback: number) {
   const parsed = Number.parseInt(value ?? "", 10);
   if (!Number.isFinite(parsed) || parsed < 0) return fallback;
   return Math.min(parsed, 9999);
+}
+
+function parseString(value: string | undefined, fallback: string) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed.slice(0, 500) : fallback;
 }
 
 export function mergeToolSettingRows(rows: Array<{ key: string; value: string }>) {
@@ -91,6 +102,15 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
         values.tool_invoice_generator_cost,
         Number(TOOL_SETTING_DEFAULTS.tool_invoice_generator_cost),
       ),
+      defaultDueDays: parsePositiveInt(
+        values.tool_invoice_generator_default_due_days,
+        Number(TOOL_SETTING_DEFAULTS.tool_invoice_generator_default_due_days),
+      ),
+      defaultFooter: parseString(
+        values.tool_invoice_generator_default_footer,
+        TOOL_SETTING_DEFAULTS.tool_invoice_generator_default_footer,
+      ),
+      defaultIncludeTax: parseBoolean(values.tool_invoice_generator_default_include_tax),
     },
     lowCreditWarningThreshold: parsePositiveInt(
       values.tool_low_credit_warning_threshold,
@@ -100,8 +120,13 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
 }
 
 export function normalizeToolSettingValue(key: ToolSettingKey, value: unknown) {
-  if (key.endsWith("_enabled")) {
+  if (key.endsWith("_enabled") || key === "tool_invoice_generator_default_include_tax") {
     return value === true || value === "true" ? "true" : "false";
+  }
+
+  if (key === "tool_invoice_generator_default_footer") {
+    const trimmed = typeof value === "string" ? value.trim() : "";
+    return trimmed ? trimmed.slice(0, 500) : TOOL_SETTING_DEFAULTS[key];
   }
 
   const parsed = Number.parseInt(String(value ?? ""), 10);

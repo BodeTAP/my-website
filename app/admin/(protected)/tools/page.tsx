@@ -1,4 +1,4 @@
-import { Coins, FileText, Search, Wrench } from "lucide-react";
+import { BarChart3, Coins, FileText, ReceiptText, Search, Wrench } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ensureDefaultProposalTemplates, parseSections, parseVariables } from "@/lib/proposalTemplates";
@@ -10,7 +10,7 @@ export default async function AdminToolsPage() {
   await requireModule("proposals");
   await ensureDefaultProposalTemplates();
 
-  const [settingRows, templates] = await Promise.all([
+  const [settingRows, templates, proposalCount, invoiceStats, proposalCreditStats, invoiceCreditStats] = await Promise.all([
     prisma.siteSetting.findMany({
       where: { key: { in: TOOL_SETTING_KEYS } },
       select: { key: true, value: true },
@@ -18,6 +18,19 @@ export default async function AdminToolsPage() {
     prisma.proposalTemplate.findMany({
       where: { clientId: null, isDefault: true },
       orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
+    }),
+    prisma.generatedProposal.count(),
+    prisma.generatedInvoice.aggregate({
+      _count: { id: true },
+      _sum: { total: true },
+    }),
+    prisma.creditTransaction.aggregate({
+      where: { tool: "proposal_generator", type: "USE" },
+      _sum: { amount: true },
+    }),
+    prisma.creditTransaction.aggregate({
+      where: { tool: "invoice_generator", type: "USE" },
+      _sum: { amount: true },
     }),
   ]);
 
@@ -27,6 +40,15 @@ export default async function AdminToolsPage() {
     settings.tool_proposal_generator_enabled,
     settings.tool_invoice_generator_enabled,
   ].filter((value) => value === "true").length;
+  const proposalCreditsUsed = Math.abs(proposalCreditStats._sum.amount ?? 0);
+  const invoiceCreditsUsed = Math.abs(invoiceCreditStats._sum.amount ?? 0);
+
+  const formatRupiah = (amount: number) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(amount);
 
   return (
     <div className="space-y-8">
@@ -60,6 +82,33 @@ export default async function AdminToolsPage() {
           </div>
         </div>
       </div>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-5">
+          <BarChart3 className="mb-4 h-5 w-5 text-blue-300" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Proposal Dibuat</p>
+          <p className="mt-1 text-2xl font-black text-white">{proposalCount}</p>
+          <p className="mt-1 text-xs font-bold text-blue-200/35">{proposalCreditsUsed} kredit terpakai</p>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
+          <ReceiptText className="mb-4 h-5 w-5 text-emerald-300" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200/45">Invoice Dibuat</p>
+          <p className="mt-1 text-2xl font-black text-white">{invoiceStats._count.id}</p>
+          <p className="mt-1 text-xs font-bold text-emerald-200/35">{invoiceCreditsUsed} kredit terpakai</p>
+        </div>
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
+          <Coins className="mb-4 h-5 w-5 text-amber-300" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-amber-200/45">Total Nilai Invoice</p>
+          <p className="mt-1 text-2xl font-black text-white">{formatRupiah(invoiceStats._sum.total ?? 0)}</p>
+          <p className="mt-1 text-xs font-bold text-amber-200/35">Dari Invoice Generator</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <FileText className="mb-4 h-5 w-5 text-blue-200/70" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Template Proposal</p>
+          <p className="mt-1 text-2xl font-black text-white">{templates.length}</p>
+          <p className="mt-1 text-xs font-bold text-blue-200/35">Template bawaan admin</p>
+        </div>
+      </section>
 
       <ToolSettingsClient initialSettings={settings} />
 

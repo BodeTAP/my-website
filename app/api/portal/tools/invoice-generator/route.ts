@@ -39,6 +39,12 @@ function parseDate(value: unknown, fallback?: Date) {
   return Number.isNaN(date.getTime()) ? fallback ?? null : date;
 }
 
+function addDays(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
 async function getClient() {
   const session = await auth();
   if (!session?.user?.email) return { status: 401 as const, client: null };
@@ -118,7 +124,9 @@ export async function POST(req: NextRequest) {
 
   const subtotal = lineItems.reduce((sum, item) => sum + Math.round(item.quantity * item.price), 0);
   const discount = Math.min(asMoney(body.discount), subtotal);
-  const includeTax = body.includeTax === true;
+  const includeTax = typeof body.includeTax === "boolean"
+    ? body.includeTax
+    : toolSettings.invoiceGenerator.defaultIncludeTax;
   const taxableAmount = Math.max(0, subtotal - discount);
   const taxAmount = includeTax ? Math.round(taxableAmount * 0.11) : 0;
   const total = Math.max(0, subtotal - discount + taxAmount);
@@ -130,7 +138,7 @@ export async function POST(req: NextRequest) {
   if (!billToName) return NextResponse.json({ error: "Nama penerima invoice wajib diisi." }, { status: 400 });
 
   const issueDate = parseDate(body.issueDate, new Date()) ?? new Date();
-  const dueDate = parseDate(body.dueDate);
+  const dueDate = parseDate(body.dueDate, addDays(toolSettings.invoiceGenerator.defaultDueDays));
   const fromName = asString(body.fromName, client.businessName).slice(0, 120) || client.businessName;
 
   const deductResult = await deductCredits(
@@ -172,7 +180,7 @@ export async function POST(req: NextRequest) {
         taxAmount,
         total,
         notes: asString(body.notes).slice(0, 1000) || null,
-        footer: asString(body.footer, "Terima kasih atas kepercayaan Anda.").slice(0, 500) || null,
+        footer: asString(body.footer, toolSettings.invoiceGenerator.defaultFooter).slice(0, 500) || null,
         design: invoiceDesignToJson(design),
       },
     });

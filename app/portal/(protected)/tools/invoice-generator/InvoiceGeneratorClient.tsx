@@ -47,6 +47,12 @@ type ClientDefaults = {
   address: string;
 };
 
+type InvoiceDefaults = {
+  dueDays: number;
+  footer: string;
+  includeTax: boolean;
+};
+
 const DESIGN_TEMPLATES: Array<{ value: InvoiceDesign["layout"]; label: string; hint: string; primary: string; accent: string }> = [
   { value: "corporate", label: "Corporate", hint: "Header kuat untuk invoice formal.", primary: "#1d4ed8", accent: "#0d9488" },
   { value: "minimal", label: "Minimal", hint: "Putih bersih, cocok untuk invoice sederhana.", primary: "#0f172a", accent: "#2563eb" },
@@ -95,6 +101,7 @@ export default function InvoiceGeneratorClient({
   initialBalance,
   enabled,
   invoiceCost,
+  invoiceDefaults,
   initialDesign,
   clientDefaults,
   initialInvoices,
@@ -102,6 +109,7 @@ export default function InvoiceGeneratorClient({
   initialBalance: number;
   enabled: boolean;
   invoiceCost: number;
+  invoiceDefaults: InvoiceDefaults;
   initialDesign: InvoiceDesign;
   clientDefaults: ClientDefaults;
   initialInvoices: GeneratedInvoiceView[];
@@ -130,11 +138,11 @@ export default function InvoiceGeneratorClient({
     billToPhone: "",
     billToAddress: "",
     issueDate: today(),
-    dueDate: addDays(7),
+    dueDate: addDays(invoiceDefaults.dueDays),
     discount: 0,
-    includeTax: false,
+    includeTax: invoiceDefaults.includeTax,
     notes: "",
-    footer: "Terima kasih atas kepercayaan Anda.",
+    footer: invoiceDefaults.footer,
   });
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { description: "Layanan profesional", quantity: 1, price: 1_500_000 },
