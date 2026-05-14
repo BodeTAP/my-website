@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Coins, Download, FileText, History, Loader2, Plus, ReceiptText, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, Brush, Coins, Download, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type LineItem = {
@@ -12,14 +12,31 @@ type LineItem = {
   price: number;
 };
 
+export type InvoiceDesign = {
+  logoUrl: string | null;
+  primaryColor: string;
+  accentColor: string;
+  fontStyle: "sans" | "serif" | "mono";
+  layout: "corporate" | "minimal" | "modern" | "premium";
+  logoPosition: "left" | "center" | "right";
+  showLogo: boolean;
+  showInvoiceNo: boolean;
+  showDueDate: boolean;
+  showSender: boolean;
+  showRecipient: boolean;
+  showFooter: boolean;
+};
+
 export type GeneratedInvoiceView = {
   id: string;
   invoiceNo: string;
+  templateName: string | null;
   title: string;
   billToName: string;
   issueDate: string;
   dueDate: string | null;
   total: number;
+  design: InvoiceDesign;
   createdAt: string;
 };
 
@@ -29,6 +46,19 @@ type ClientDefaults = {
   phone: string;
   address: string;
 };
+
+const DESIGN_TEMPLATES: Array<{ value: InvoiceDesign["layout"]; label: string; hint: string; primary: string; accent: string }> = [
+  { value: "corporate", label: "Corporate", hint: "Header kuat untuk invoice formal.", primary: "#1d4ed8", accent: "#0d9488" },
+  { value: "minimal", label: "Minimal", hint: "Putih bersih, cocok untuk invoice sederhana.", primary: "#0f172a", accent: "#2563eb" },
+  { value: "modern", label: "Modern", hint: "Aksen samping dan warna lebih tegas.", primary: "#155e75", accent: "#f59e0b" },
+  { value: "premium", label: "Premium", hint: "Nuansa elegan untuk layanan bernilai tinggi.", primary: "#312e81", accent: "#c026d3" },
+];
+
+const FONT_OPTIONS: Array<{ value: InvoiceDesign["fontStyle"]; label: string }> = [
+  { value: "sans", label: "Sans" },
+  { value: "serif", label: "Serif" },
+  { value: "mono", label: "Mono" },
+];
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -65,24 +95,29 @@ export default function InvoiceGeneratorClient({
   initialBalance,
   enabled,
   invoiceCost,
+  initialDesign,
   clientDefaults,
   initialInvoices,
 }: {
   initialBalance: number;
   enabled: boolean;
   invoiceCost: number;
+  initialDesign: InvoiceDesign;
   clientDefaults: ClientDefaults;
   initialInvoices: GeneratedInvoiceView[];
 }) {
   const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
   const [invoices, setInvoices] = useState(initialInvoices);
-  const [activeTab, setActiveTab] = useState<"create" | "history">("create");
+  const [activeTab, setActiveTab] = useState<"create" | "design" | "history">("create");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [savingDesign, setSavingDesign] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [latestInvoice, setLatestInvoice] = useState<GeneratedInvoiceView | null>(initialInvoices[0] ?? null);
+  const [design, setDesign] = useState<InvoiceDesign>(initialDesign);
 
   const [form, setForm] = useState({
     title: "Invoice",
@@ -97,8 +132,7 @@ export default function InvoiceGeneratorClient({
     issueDate: today(),
     dueDate: addDays(7),
     discount: 0,
-    taxLabel: "",
-    taxAmount: 0,
+    includeTax: false,
     notes: "",
     footer: "Terima kasih atas kepercayaan Anda.",
   });
@@ -110,7 +144,9 @@ export default function InvoiceGeneratorClient({
     () => lineItems.reduce((sum, item) => sum + Math.round((Number(item.quantity) || 0) * (Number(item.price) || 0)), 0),
     [lineItems],
   );
-  const total = Math.max(0, subtotal - form.discount + form.taxAmount);
+  const taxableAmount = Math.max(0, subtotal - form.discount);
+  const taxAmount = form.includeTax ? Math.round(taxableAmount * 0.11) : 0;
+  const total = taxableAmount + taxAmount;
   const canGenerate = enabled && balance >= invoiceCost;
   const filteredInvoices = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -120,8 +156,21 @@ export default function InvoiceGeneratorClient({
     );
   }, [invoices, query]);
 
-  function updateForm(key: keyof typeof form, value: string | number) {
+  function updateForm(key: keyof typeof form, value: string | number | boolean) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateDesign(patch: Partial<InvoiceDesign>) {
+    setDesign((current) => ({ ...current, ...patch }));
+  }
+
+  function applyDesignTemplate(template: (typeof DESIGN_TEMPLATES)[number]) {
+    setDesign((current) => ({
+      ...current,
+      layout: template.value,
+      primaryColor: template.primary,
+      accentColor: template.accent,
+    }));
   }
 
   function updateItem(index: number, patch: Partial<LineItem>) {
@@ -145,7 +194,12 @@ export default function InvoiceGeneratorClient({
       const res = await fetch("/api/portal/tools/invoice-generator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, lineItems }),
+        body: JSON.stringify({
+          ...form,
+          lineItems,
+          design,
+          templateName: DESIGN_TEMPLATES.find((template) => template.value === design.layout)?.label ?? design.layout,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal membuat invoice");
@@ -153,11 +207,13 @@ export default function InvoiceGeneratorClient({
       const invoice: GeneratedInvoiceView = {
         id: data.invoice.id,
         invoiceNo: data.invoice.invoiceNo,
+        templateName: data.invoice.templateName ?? null,
         title: data.invoice.title,
         billToName: data.invoice.billToName,
         issueDate: data.invoice.issueDate.slice(0, 10),
         dueDate: data.invoice.dueDate ? data.invoice.dueDate.slice(0, 10) : null,
         total: data.invoice.total,
+        design,
         createdAt: data.invoice.createdAt,
       };
 
@@ -170,6 +226,54 @@ export default function InvoiceGeneratorClient({
       setError(err instanceof Error ? err.message : "Gagal membuat invoice");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function saveDesign() {
+    setSavingDesign(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/portal/tools/invoice-generator/design", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(design),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan desain");
+      setDesign(data.design);
+      setMessage("Template desain invoice berhasil disimpan.");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menyimpan desain");
+    } finally {
+      setSavingDesign(false);
+    }
+  }
+
+  async function uploadLogo(file: File | null) {
+    if (!file) return;
+    setUploadingLogo(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/portal/tools/invoice-generator/logo", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal mengupload logo");
+
+      setDesign((current) => ({ ...current, logoUrl: data.url, showLogo: true }));
+      setMessage("Logo berhasil diupload. Simpan template desain untuk memakai logo ini di invoice berikutnya.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal mengupload logo");
+    } finally {
+      setUploadingLogo(false);
     }
   }
 
@@ -225,6 +329,7 @@ export default function InvoiceGeneratorClient({
       <div className="flex flex-wrap gap-2">
         {[
           { id: "create", label: "Buat Invoice", icon: FileText },
+          { id: "design", label: "Template Desain", icon: Brush },
           { id: "history", label: "Riwayat", icon: History },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -252,6 +357,20 @@ export default function InvoiceGeneratorClient({
       {activeTab === "create" && (
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <section className="glass rounded-3xl border border-white/5 p-5 space-y-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Template Desain Aktif</p>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="font-black text-white">{DESIGN_TEMPLATES.find((template) => template.value === design.layout)?.label ?? "Custom"}</h2>
+                  <p className="mt-1 text-sm text-blue-200/45">PDF invoice akan memakai warna, font, logo, dan visibilitas dari tab desain.</p>
+                </div>
+                <button type="button" onClick={() => setActiveTab("design")} className="inline-flex h-10 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 text-sm font-black text-blue-200 hover:bg-blue-500/15">
+                  <Brush className="mr-2 h-4 w-4" />
+                  Edit Desain
+                </button>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Judul Invoice" value={form.title} onChange={(value) => updateForm("title", value)} />
               <Field label="Tanggal Invoice" type="date" value={form.issueDate} onChange={(value) => updateForm("issueDate", value)} />
@@ -288,10 +407,9 @@ export default function InvoiceGeneratorClient({
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <MoneyField label="Diskon" value={form.discount} onChange={(value) => updateForm("discount", value)} />
-              <Field label="Label Pajak" value={form.taxLabel} onChange={(value) => updateForm("taxLabel", value)} placeholder="PPN 11%" />
-              <MoneyField label="Nominal Pajak" value={form.taxAmount} onChange={(value) => updateForm("taxAmount", value)} />
+              <Toggle label={`Sertakan PPN 11% (${formatRupiah(taxAmount)})`} checked={form.includeTax} onChange={(checked) => updateForm("includeTax", checked)} />
             </div>
 
             <TextArea label="Catatan" value={form.notes} onChange={(value) => updateForm("notes", value)} placeholder="Instruksi pembayaran, nomor rekening, atau catatan lain." />
@@ -312,7 +430,7 @@ export default function InvoiceGeneratorClient({
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3 text-sm">
               <SummaryRow label="Subtotal" value={formatRupiah(subtotal)} />
               <SummaryRow label="Diskon" value={`-${formatRupiah(form.discount)}`} />
-              <SummaryRow label={form.taxLabel || "Pajak"} value={formatRupiah(form.taxAmount)} />
+              <SummaryRow label="PPN 11%" value={form.includeTax ? formatRupiah(taxAmount) : "Tidak disertakan"} />
               <div className="border-t border-white/10 pt-3 flex items-center justify-between">
                 <span className="text-blue-200/55 font-bold">Total</span>
                 <span className="text-xl font-black text-white">{formatRupiah(total)}</span>
@@ -324,6 +442,153 @@ export default function InvoiceGeneratorClient({
                 Download Invoice Terakhir
               </a>
             )}
+          </aside>
+        </div>
+      )}
+
+      {activeTab === "design" && (
+        <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
+          <section className="glass rounded-3xl border border-white/5 p-5 space-y-5">
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Template</p>
+              <h2 className="mt-2 text-xl font-black text-white">Pilih Preset Desain</h2>
+              <p className="mt-1 text-sm text-blue-200/45">Preset mengatur layout dan palet awal. Setelah itu tetap bisa diedit manual.</p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              {DESIGN_TEMPLATES.map((template) => {
+                const active = design.layout === template.value;
+                return (
+                  <button
+                    key={template.value}
+                    type="button"
+                    onClick={() => applyDesignTemplate(template)}
+                    className={`rounded-2xl border p-4 text-left transition-all ${active ? "border-blue-500/45 bg-blue-500/15" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="h-5 w-5 rounded-full border border-white/20" style={{ backgroundColor: template.primary }} />
+                      <span className="h-5 w-5 rounded-full border border-white/20" style={{ backgroundColor: template.accent }} />
+                    </div>
+                    <h3 className="mt-3 font-black text-white">{template.label}</h3>
+                    <p className="mt-1 text-sm text-blue-200/45">{template.hint}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Logo Invoice</p>
+              <div className="mt-3 flex items-center gap-4">
+                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  {design.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={design.logoUrl} alt="Logo invoice" className="h-full w-full object-contain p-2" />
+                  ) : (
+                    <ImageIcon className="h-8 w-8 text-blue-200/35" />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 text-sm font-bold text-white transition-colors hover:bg-white/15">
+                    {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    Upload Logo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      disabled={uploadingLogo}
+                      className="hidden"
+                      onChange={(event) => {
+                        void uploadLogo(event.target.files?.[0] ?? null);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  {design.logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => updateDesign({ logoUrl: null })}
+                      className="block text-sm font-bold text-red-200/80 hover:text-red-100"
+                    >
+                      Hapus logo
+                    </button>
+                  )}
+                  <p className="text-xs text-blue-200/35">PNG/JPG maksimal 2MB.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Posisi Logo" value={design.logoPosition} onChange={(value) => updateDesign({ logoPosition: value as InvoiceDesign["logoPosition"] })} />
+              <ColorField label="Warna Utama" value={design.primaryColor} onChange={(value) => updateDesign({ primaryColor: value })} />
+              <ColorField label="Warna Aksen" value={design.accentColor} onChange={(value) => updateDesign({ accentColor: value })} />
+            </div>
+
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Font</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {FONT_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => updateDesign({ fontStyle: option.value })}
+                    className={`rounded-xl border px-4 py-2 text-sm font-black ${design.fontStyle === option.value ? "border-blue-500/45 bg-blue-500/15 text-white" : "border-white/10 bg-white/5 text-blue-200/55"}`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Toggle label="Tampilkan logo" checked={design.showLogo} onChange={(checked) => updateDesign({ showLogo: checked })} />
+              <Toggle label="Tampilkan nomor invoice" checked={design.showInvoiceNo} onChange={(checked) => updateDesign({ showInvoiceNo: checked })} />
+              <Toggle label="Tampilkan jatuh tempo" checked={design.showDueDate} onChange={(checked) => updateDesign({ showDueDate: checked })} />
+              <Toggle label="Tampilkan pengirim" checked={design.showSender} onChange={(checked) => updateDesign({ showSender: checked })} />
+              <Toggle label="Tampilkan penerima" checked={design.showRecipient} onChange={(checked) => updateDesign({ showRecipient: checked })} />
+              <Toggle label="Tampilkan footer" checked={design.showFooter} onChange={(checked) => updateDesign({ showFooter: checked })} />
+            </div>
+
+            <Button type="button" onClick={saveDesign} disabled={savingDesign} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
+              {savingDesign ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Simpan Template Desain
+            </Button>
+          </section>
+
+          <aside className="glass rounded-3xl border border-white/5 p-5 h-fit">
+            <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Desain</p>
+            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white text-slate-900">
+              <div className={`p-5 ${design.layout === "minimal" ? "bg-white" : ""}`} style={{ backgroundColor: design.layout === "minimal" ? "#ffffff" : design.primaryColor }}>
+                <div className={`flex gap-3 ${design.logoPosition === "center" ? "justify-center text-center" : design.logoPosition === "right" ? "justify-between flex-row-reverse text-right" : "justify-between"}`}>
+                  <div>
+                    {design.showLogo && (
+                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-xs font-black text-white" style={{ backgroundColor: design.accentColor }}>
+                        LOGO
+                      </div>
+                    )}
+                    {design.showSender && <p className={`font-black ${design.layout === "minimal" ? "text-slate-950" : "text-white"}`}>{form.fromName || clientDefaults.businessName}</p>}
+                    <p className={`text-xs ${design.layout === "minimal" ? "text-slate-500" : "text-blue-100"}`}>{form.fromEmail || clientDefaults.email}</p>
+                  </div>
+                  <div>
+                    <p className={`text-2xl font-black ${design.layout === "minimal" ? "text-slate-950" : "text-white"}`}>INVOICE</p>
+                    {design.showInvoiceNo && <p className={`text-xs ${design.layout === "minimal" ? "text-slate-500" : "text-blue-100"}`}>IG-YYYYMMDD-001</p>}
+                  </div>
+                </div>
+              </div>
+              <div className="p-5 space-y-4">
+                {design.showRecipient && (
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ditagihkan Kepada</p>
+                    <p className="mt-1 font-black">{form.billToName || "Nama Klien"}</p>
+                  </div>
+                )}
+                <div className="rounded-xl bg-slate-100 p-3 text-sm">
+                  <div className="flex justify-between font-bold"><span>Layanan profesional</span><span>{formatRupiah(1_500_000)}</span></div>
+                </div>
+                <div className="flex items-center justify-between rounded-xl px-4 py-3 text-white" style={{ backgroundColor: design.primaryColor }}>
+                  <span className="text-xs font-black uppercase tracking-widest opacity-70">Total</span>
+                  <span className="text-lg font-black">{formatRupiah(total)}</span>
+                </div>
+              </div>
+            </div>
           </aside>
         </div>
       )}
@@ -387,6 +652,27 @@ function MoneyField({ label, value, onChange }: { label: string; value: number; 
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-blue-200/35">Rp</span>
         <input value={moneyInput(value)} onChange={(event) => onChange(parseMoney(event.target.value))} placeholder="0" className="h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 text-right text-sm text-white outline-none focus:border-blue-500/45" />
       </div>
+    </label>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="block">
+      <span className="text-xs font-black uppercase tracking-widest text-blue-200/40">{label}</span>
+      <div className="mt-2 flex h-11 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+        <input type="color" value={value} onChange={(event) => onChange(event.target.value)} className="h-11 w-14 border-0 bg-transparent p-1" />
+        <input value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-white outline-none" />
+      </div>
+    </label>
+  );
+}
+
+function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <label className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <span className="text-sm font-bold text-blue-100/80">{label}</span>
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-5 w-5 accent-blue-500" />
     </label>
   );
 }

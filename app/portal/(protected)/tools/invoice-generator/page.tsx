@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getClientBalance } from "@/lib/credits";
+import { getClientInvoiceDesign, parseInvoiceDesign } from "@/lib/invoiceDesign";
 import { prisma } from "@/lib/prisma";
 import { getToolSettings } from "@/lib/toolSettings";
 import InvoiceGeneratorClient, { type GeneratedInvoiceView } from "./InvoiceGeneratorClient";
@@ -25,13 +26,14 @@ export default async function PortalInvoiceGeneratorPage() {
   });
   if (!user?.client) redirect("/portal/dashboard");
 
-  const [balance, invoices, toolSettings] = await Promise.all([
+  const [balance, invoices, invoiceDesign, toolSettings] = await Promise.all([
     getClientBalance(user.client.id),
     prisma.generatedInvoice.findMany({
       where: { clientId: user.client.id },
       orderBy: { createdAt: "desc" },
       take: 100,
     }),
+    getClientInvoiceDesign(user.client.id),
     getToolSettings(),
   ]);
 
@@ -40,6 +42,7 @@ export default async function PortalInvoiceGeneratorPage() {
       initialBalance={balance}
       enabled={toolSettings.invoiceGenerator.enabled}
       invoiceCost={toolSettings.invoiceGenerator.creditCost}
+      initialDesign={invoiceDesign}
       clientDefaults={{
         businessName: user.client.businessName,
         email: user.client.user.email,
@@ -49,11 +52,13 @@ export default async function PortalInvoiceGeneratorPage() {
       initialInvoices={invoices.map((invoice) => ({
         id: invoice.id,
         invoiceNo: invoice.invoiceNo,
+        templateName: invoice.templateName,
         title: invoice.title,
         billToName: invoice.billToName,
         issueDate: invoice.issueDate.toISOString().slice(0, 10),
         dueDate: invoice.dueDate?.toISOString().slice(0, 10) ?? null,
         total: invoice.total,
+        design: parseInvoiceDesign(invoice.design),
         createdAt: invoice.createdAt.toISOString(),
       })) satisfies GeneratedInvoiceView[]}
     />

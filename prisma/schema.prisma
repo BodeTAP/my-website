@@ -315,6 +315,7 @@ model Client {
   generatedProposals GeneratedProposal[]
   generatedInvoices GeneratedInvoice[]
   proposalBrandKit ProposalBrandKit?
+  invoiceBrandKit InvoiceBrandKit?
 
   @@map("clients")
 }
@@ -407,6 +408,7 @@ model GeneratedInvoice {
   id            String   @id @default(cuid())
   clientId      String
   invoiceNo     String   @unique
+  templateName   String?
   title         String
   fromName      String
   fromEmail     String?
@@ -426,6 +428,7 @@ model GeneratedInvoice {
   total         Int
   notes         String?  @db.Text
   footer        String?  @db.Text
+  design        Json?
   status        String   @default("DRAFT")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -434,6 +437,29 @@ model GeneratedInvoice {
 
   @@index([clientId, createdAt])
   @@map("generated_invoices")
+}
+
+model InvoiceBrandKit {
+  id             String   @id @default(cuid())
+  clientId       String   @unique
+  logoUrl        String?
+  primaryColor   String   @default("#1d4ed8")
+  accentColor    String   @default("#0d9488")
+  fontStyle      String   @default("sans")
+  layout         String   @default("corporate")
+  logoPosition   String   @default("left")
+  showLogo       Boolean  @default(true)
+  showInvoiceNo  Boolean  @default(true)
+  showDueDate    Boolean  @default(true)
+  showSender     Boolean  @default(true)
+  showRecipient  Boolean  @default(true)
+  showFooter     Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_brand_kits")
 }
 
 model ProposalBrandKit {

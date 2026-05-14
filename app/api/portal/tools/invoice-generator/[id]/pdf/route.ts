@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { readFile } from "fs/promises";
+import path from "path";
+import { PDFDocument, PDFImage, StandardFonts, rgb } from "pdf-lib";
 import { auth } from "@/lib/auth";
+import { parseInvoiceDesign } from "@/lib/invoiceDesign";
 import { prisma } from "@/lib/prisma";
 
 type Params = { params: Promise<{ id: string }> };
@@ -53,6 +56,35 @@ function wrap(text: string, maxChars: number) {
   return lines;
 }
 
+async function loadLogo(pdfDoc: PDFDocument, logoUrl: string | null): Promise<PDFImage | null> {
+  if (!logoUrl) return null;
+  try {
+    if (logoUrl.startsWith("/uploads/")) {
+      const safeRelativePath = logoUrl
+        .replace(/^\/+/, "")
+        .split("/")
+        .filter((part) => part && part !== "." && part !== "..")
+        .join(path.sep);
+      const filePath = path.join(process.cwd(), "public", safeRelativePath);
+      const bytes = await readFile(filePath);
+      return logoUrl.toLowerCase().endsWith(".png")
+        ? await pdfDoc.embedPng(bytes)
+        : await pdfDoc.embedJpg(bytes);
+    }
+
+    const res = await fetch(logoUrl);
+    if (!res.ok) return null;
+    const bytes = await res.arrayBuffer();
+    const contentType = res.headers.get("content-type") ?? "";
+    return contentType.includes("png") || logoUrl.toLowerCase().endsWith(".png")
+      ? await pdfDoc.embedPng(bytes)
+      : await pdfDoc.embedJpg(bytes);
+  } catch (err) {
+    console.warn("[InvoicePDF] Logo tidak bisa dimuat:", err);
+    return null;
+  }
+}
+
 export async function GET(_req: Request, { params }: Params) {
   const session = await auth();
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -70,18 +102,32 @@ export async function GET(_req: Request, { params }: Params) {
 
   if (!invoice) return NextResponse.json({ error: "Invoice tidak ditemukan" }, { status: 404 });
 
+  const design = parseInvoiceDesign(invoice.design);
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]);
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const regular = await pdfDoc.embedFont(
+    design.fontStyle === "serif"
+      ? StandardFonts.TimesRoman
+      : design.fontStyle === "mono"
+        ? StandardFonts.Courier
+        : StandardFonts.Helvetica,
+  );
+  const bold = await pdfDoc.embedFont(
+    design.fontStyle === "serif"
+      ? StandardFonts.TimesRomanBold
+      : design.fontStyle === "mono"
+        ? StandardFonts.CourierBold
+        : StandardFonts.HelveticaBold,
+  );
+  const logo = design.showLogo ? await loadLogo(pdfDoc, design.logoUrl) : null;
 
   const W = 595;
   const H = 842;
   const ML = 48;
   const CW = W - ML * 2;
   const C = {
-    primary: hex("#1d4ed8"),
-    accent: hex("#0d9488"),
+    primary: hex(design.primaryColor),
+    accent: hex(design.accentColor),
     text: hex("#0f172a"),
     muted: hex("#64748b"),
     light: hex("#f1f5f9"),
@@ -103,44 +149,77 @@ export async function GET(_req: Request, { params }: Params) {
     page.drawLine({ start: { x: ML, y: H - yTop }, end: { x: ML + CW, y: H - yTop }, thickness: 0.5, color: C.border });
   };
 
-  rect(0, 0, W, 116, C.primary);
-  text(invoice.fromName, ML, 38, 18, bold, C.white);
-  if (invoice.fromEmail) text(invoice.fromEmail, ML, 60, 8, regular, hex("#bfdbfe"));
-  if (invoice.fromPhone) text(invoice.fromPhone, ML, 74, 8, regular, hex("#bfdbfe"));
-  textRight("INVOICE", ML + CW, 42, 28, bold, C.white);
-  textRight(invoice.invoiceNo, ML + CW, 72, 9, regular, hex("#bfdbfe"));
+  const headerHeight = design.layout === "minimal" ? 92 : design.layout === "premium" ? 132 : 116;
+  const headerText = design.layout === "minimal" ? C.text : C.white;
+  const headerMuted = design.layout === "minimal" ? C.muted : hex("#bfdbfe");
+  if (design.layout === "minimal") {
+    rect(0, 0, W, headerHeight, C.white);
+    page.drawLine({ start: { x: ML, y: H - headerHeight }, end: { x: ML + CW, y: H - headerHeight }, thickness: 2, color: C.primary });
+  } else {
+    rect(0, 0, W, headerHeight, C.primary);
+    if (design.layout === "modern") rect(0, 0, 16, H, C.accent);
+    if (design.layout === "premium") rect(0, headerHeight - 12, W, 12, C.accent);
+  }
 
-  let y = 150;
-  text("DITAGIHKAN KEPADA", ML, y, 7, bold, C.muted);
-  text(invoice.billToName, ML, y + 16, 12, bold, C.text);
-  let leftY = y + 32;
-  if (invoice.billToEmail) {
-    text(invoice.billToEmail, ML, leftY, 8, regular, C.muted);
-    leftY += 12;
+  if (logo) {
+    const maxW = 72;
+    const maxH = 40;
+    const scale = Math.min(maxW / logo.width, maxH / logo.height, 1);
+    const width = logo.width * scale;
+    const height = logo.height * scale;
+    const logoX = design.logoPosition === "center"
+      ? W / 2 - width / 2
+      : design.logoPosition === "right"
+        ? ML + CW - width
+        : ML;
+    page.drawImage(logo, { x: logoX, y: H - 36 - height, width, height });
   }
-  if (invoice.billToPhone) {
-    text(invoice.billToPhone, ML, leftY, 8, regular, C.muted);
-    leftY += 12;
+
+  const senderX = logo && design.logoPosition === "left" ? ML + 92 : ML;
+  if (design.showSender) {
+    text(invoice.fromName, senderX, 38, 18, bold, headerText);
+    if (invoice.fromEmail) text(invoice.fromEmail, senderX, 60, 8, regular, headerMuted);
+    if (invoice.fromPhone) text(invoice.fromPhone, senderX, 74, 8, regular, headerMuted);
   }
-  if (invoice.billToAddress) {
-    for (const lineText of wrap(invoice.billToAddress, 42).slice(0, 3)) {
-      text(lineText, ML, leftY, 8, regular, C.muted);
+  textRight("INVOICE", ML + CW, 42, design.layout === "premium" ? 30 : 28, bold, headerText);
+  if (design.showInvoiceNo) textRight(invoice.invoiceNo, ML + CW, 72, 9, regular, headerMuted);
+
+  let y = headerHeight + 34;
+  let leftY = y;
+  if (design.showRecipient) {
+    text("DITAGIHKAN KEPADA", ML, y, 7, bold, C.muted);
+    text(invoice.billToName, ML, y + 16, 12, bold, C.text);
+    leftY = y + 32;
+    if (invoice.billToEmail) {
+      text(invoice.billToEmail, ML, leftY, 8, regular, C.muted);
       leftY += 12;
+    }
+    if (invoice.billToPhone) {
+      text(invoice.billToPhone, ML, leftY, 8, regular, C.muted);
+      leftY += 12;
+    }
+    if (invoice.billToAddress) {
+      for (const lineText of wrap(invoice.billToAddress, 42).slice(0, 3)) {
+        text(lineText, ML, leftY, 8, regular, C.muted);
+        leftY += 12;
+      }
     }
   }
 
   const RX = ML + CW / 2 + 32;
   text("TANGGAL INVOICE", RX, y, 7, bold, C.muted);
   text(formatDate(invoice.issueDate), RX, y + 16, 10, bold, C.text);
-  text("JATUH TEMPO", RX, y + 42, 7, bold, C.muted);
-  text(formatDate(invoice.dueDate), RX, y + 58, 10, bold, C.text);
+  if (design.showDueDate) {
+    text("JATUH TEMPO", RX, y + 42, 7, bold, C.muted);
+    text(formatDate(invoice.dueDate), RX, y + 58, 10, bold, C.text);
+  }
 
   y = Math.max(leftY, y + 80) + 20;
   line(y);
   y += 14;
 
-  rect(ML, y, CW, 28, C.light);
-  text("DESKRIPSI", ML + 10, y + 11, 7, bold, C.muted);
+  rect(ML, y, CW, 28, design.layout === "minimal" ? hex("#f8fafc") : C.light);
+  text("DESKRIPSI", ML + 10, y + 11, 7, bold, design.layout === "minimal" ? C.text : C.muted);
   textRight("QTY", ML + CW - 155, y + 11, 7, bold, C.muted);
   textRight("HARGA", ML + CW - 70, y + 11, 7, bold, C.muted);
   textRight("JUMLAH", ML + CW - 10, y + 11, 7, bold, C.muted);
@@ -185,7 +264,7 @@ export async function GET(_req: Request, { params }: Params) {
     y += 17;
   }
 
-  rect(totalsX - 12, y - 8, 232, 42, C.primary);
+  rect(totalsX - 12, y - 8, 232, 42, design.layout === "premium" ? C.accent : C.primary);
   text("TOTAL", totalsX, y + 8, 8, bold, hex("#bfdbfe"));
   textRight(formatRupiah(invoice.total), ML + CW - 10, y + 8, 14, bold, C.white);
   y += 62;
@@ -199,10 +278,12 @@ export async function GET(_req: Request, { params }: Params) {
     }
   }
 
-  const footY = H - 52;
-  line(footY);
-  text(invoice.footer ?? "Dokumen dibuat otomatis.", ML, footY + 18, 8, regular, C.muted);
-  textRight("Generated by MFWEB Portal", ML + CW, footY + 18, 8, regular, C.muted);
+  if (design.showFooter) {
+    const footY = H - 52;
+    line(footY);
+    text(invoice.footer ?? "Dokumen dibuat otomatis.", ML, footY + 18, 8, regular, C.muted);
+    textRight("Generated by MFWEB Portal", ML + CW, footY + 18, 8, regular, C.muted);
+  }
 
   const bytes = await pdfDoc.save();
   const buffer = Buffer.from(bytes);

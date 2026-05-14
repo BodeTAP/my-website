@@ -60,6 +60,7 @@ next-env.d.ts
 # next-sitemap (generated at build time)
 public/robots.txt
 public/sitemap*.xml
+public/uploads/
 
 # Claude Code internal files
 .claude/

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { deductCredits, getClientBalance, refundCredits } from "@/lib/credits";
+import { getClientInvoiceDesign, invoiceDesignToJson, sanitizeInvoiceDesign } from "@/lib/invoiceDesign";
 import { prisma } from "@/lib/prisma";
 import { getToolSettings } from "@/lib/toolSettings";
 
@@ -96,6 +97,8 @@ export async function POST(req: NextRequest) {
   }
 
   const body = asRecord(await req.json().catch(() => ({})));
+  const design = body.design ? sanitizeInvoiceDesign(body.design) : await getClientInvoiceDesign(client.id);
+  const templateName = asString(body.templateName, design.layout).slice(0, 80) || design.layout;
   const rawItems = Array.isArray(body.lineItems) ? body.lineItems : [];
   const lineItems: InvoiceItem[] = rawItems
     .map((item) => {
@@ -115,7 +118,9 @@ export async function POST(req: NextRequest) {
 
   const subtotal = lineItems.reduce((sum, item) => sum + Math.round(item.quantity * item.price), 0);
   const discount = Math.min(asMoney(body.discount), subtotal);
-  const taxAmount = asMoney(body.taxAmount);
+  const includeTax = body.includeTax === true;
+  const taxableAmount = Math.max(0, subtotal - discount);
+  const taxAmount = includeTax ? Math.round(taxableAmount * 0.11) : 0;
   const total = Math.max(0, subtotal - discount + taxAmount);
   if (total <= 0) return NextResponse.json({ error: "Total invoice harus lebih dari 0." }, { status: 400 });
 
@@ -148,6 +153,7 @@ export async function POST(req: NextRequest) {
       data: {
         clientId: client.id,
         invoiceNo,
+        templateName,
         title,
         fromName,
         fromEmail: asString(body.fromEmail, client.user.email).slice(0, 160) || null,
@@ -162,11 +168,12 @@ export async function POST(req: NextRequest) {
         lineItems: lineItems as unknown as Prisma.InputJsonValue,
         subtotal,
         discount,
-        taxLabel: asString(body.taxLabel).slice(0, 60) || null,
+        taxLabel: includeTax ? "PPN 11%" : null,
         taxAmount,
         total,
         notes: asString(body.notes).slice(0, 1000) || null,
         footer: asString(body.footer, "Terima kasih atas kepercayaan Anda.").slice(0, 500) || null,
+        design: invoiceDesignToJson(design),
       },
     });
 

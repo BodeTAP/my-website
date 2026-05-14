@@ -56,9 +56,20 @@ user confirms a lasting preference, project decision, or important current state
 - Portal Invoice Generator is implemented as a client document generator using
   `generated_invoices`; generated invoices are PDF-only and intentionally do
   not connect to admin invoices, payment links, or Tripay.
+- Portal Invoice Generator supports client-editable design templates via
+  `invoice_brand_kits`; generated invoice PDFs store the selected design snapshot
+  so older invoices keep their original styling.
+- Invoice Generator logo upload uses Vercel Blob when `BLOB_READ_WRITE_TOKEN`
+  is configured and falls back to `public/uploads/invoice-logos` for local
+  development when the token is absent.
+- Invoice Generator tax is fixed to optional `PPN 11%`; users can include or
+  exclude it, and the API calculates the amount automatically from subtotal
+  after discount.
 - On 2026-05-14, the `generated_invoices` table was applied manually with
   `prisma db execute` and marked applied because `prisma migrate dev` detected
   database drift; do not reset the database for this migration.
+- On 2026-05-14, the `invoice_brand_kits` migration was also applied manually
+  with `prisma db execute` and marked applied for the same drift reason.
 - Lead Finder Social Scan now treats direct social-profile `websiteUri` values
   (Instagram/Facebook/TikTok/LinkedIn/YouTube/X) as `FOUND` before fetching or
   reading cached scan results.
