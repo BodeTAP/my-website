@@ -10,6 +10,8 @@ export const TOOL_SETTING_DEFAULTS = {
   tool_lead_finder_social_scan_cost: "10",
   tool_proposal_generator_enabled: "true",
   tool_proposal_generator_cost: "5",
+  tool_invoice_generator_enabled: "true",
+  tool_invoice_generator_cost: "3",
   tool_low_credit_warning_threshold: "10",
 } as const;
 
@@ -24,6 +26,10 @@ export type ToolSettings = {
     socialScanCost: number;
   };
   proposalGenerator: {
+    enabled: boolean;
+    creditCost: number;
+  };
+  invoiceGenerator: {
     enabled: boolean;
     creditCost: number;
   };
@@ -77,6 +83,13 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
       creditCost: parsePositiveInt(
         values.tool_proposal_generator_cost,
         Number(TOOL_SETTING_DEFAULTS.tool_proposal_generator_cost),
+      ),
+    },
+    invoiceGenerator: {
+      enabled: parseBoolean(values.tool_invoice_generator_enabled),
+      creditCost: parsePositiveInt(
+        values.tool_invoice_generator_cost,
+        Number(TOOL_SETTING_DEFAULTS.tool_invoice_generator_cost),
       ),
     },
     lowCreditWarningThreshold: parsePositiveInt(

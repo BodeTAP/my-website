@@ -53,6 +53,7 @@ export async function PATCH(req: NextRequest) {
   revalidatePath("/portal/tools");
   revalidatePath("/portal/tools/lead-finder");
   revalidatePath("/portal/tools/proposal-generator");
+  revalidatePath("/portal/tools/invoice-generator");
 
   return NextResponse.json({ settings: mergeToolSettingRows(rows) as Record<ToolSettingKey, string> });
 }

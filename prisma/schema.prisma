@@ -313,6 +313,7 @@ model Client {
   creditTxs      CreditTransaction[]
   proposalTemplates ProposalTemplate[]
   generatedProposals GeneratedProposal[]
+  generatedInvoices GeneratedInvoice[]
   proposalBrandKit ProposalBrandKit?
 
   @@map("clients")
@@ -400,6 +401,39 @@ model GeneratedProposal {
 
   @@index([clientId, createdAt])
   @@map("generated_proposals")
+}
+
+model GeneratedInvoice {
+  id            String   @id @default(cuid())
+  clientId      String
+  invoiceNo     String   @unique
+  title         String
+  fromName      String
+  fromEmail     String?
+  fromPhone     String?
+  fromAddress   String?
+  billToName    String
+  billToEmail   String?
+  billToPhone   String?
+  billToAddress String?
+  issueDate     DateTime
+  dueDate       DateTime?
+  lineItems     Json
+  subtotal      Int
+  discount      Int      @default(0)
+  taxLabel      String?
+  taxAmount     Int      @default(0)
+  total         Int
+  notes         String?  @db.Text
+  footer        String?  @db.Text
+  status        String   @default("DRAFT")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+  @@map("generated_invoices")
 }
 
 model ProposalBrandKit {

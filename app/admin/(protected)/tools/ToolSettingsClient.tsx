@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Coins, FileText, Loader2, Save, Search } from "lucide-react";
+import { AlertTriangle, Coins, FileText, Loader2, ReceiptText, Save, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ToolSettingKey =
@@ -12,6 +12,8 @@ type ToolSettingKey =
   | "tool_lead_finder_social_scan_cost"
   | "tool_proposal_generator_enabled"
   | "tool_proposal_generator_cost"
+  | "tool_invoice_generator_enabled"
+  | "tool_invoice_generator_cost"
   | "tool_low_credit_warning_threshold";
 type SettingsRecord = Record<ToolSettingKey, string>;
 
@@ -131,7 +133,7 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
         </div>
       )}
 
-      <div className="grid gap-5 p-5 xl:grid-cols-3">
+      <div className="grid gap-5 p-5 xl:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
           <div className="mb-5 flex items-start gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-500/25 bg-blue-500/10">
@@ -158,6 +160,27 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
               description="Klien bisa menambahkan Social Scan saat menjalankan Lead Finder."
             />
             <NumberField label="Social Scan Add-on" value={settings.tool_lead_finder_social_scan_cost} onChange={(value) => update("tool_lead_finder_social_scan_cost", value)} />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
+          <div className="mb-5 flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-500/25 bg-blue-500/10">
+              <ReceiptText className="h-5 w-5 text-blue-300" />
+            </div>
+            <div>
+              <h3 className="font-black text-white">Invoice Generator</h3>
+              <p className="mt-1 text-sm text-blue-200/40">Tool portal untuk membuat invoice PDF tanpa payment.</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <ToggleField
+              checked={settings.tool_invoice_generator_enabled === "true"}
+              onChange={(value) => update("tool_invoice_generator_enabled", value)}
+              label="Aktif di portal"
+              description="Klien bisa membuat dan download invoice PDF."
+            />
+            <NumberField label="Biaya Generate" value={settings.tool_invoice_generator_cost} onChange={(value) => update("tool_invoice_generator_cost", value)} />
           </div>
         </div>
 

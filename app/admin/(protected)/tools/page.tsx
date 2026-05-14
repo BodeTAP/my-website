@@ -25,6 +25,7 @@ export default async function AdminToolsPage() {
   const activeTools = [
     settings.tool_lead_finder_enabled,
     settings.tool_proposal_generator_enabled,
+    settings.tool_invoice_generator_enabled,
   ].filter((value) => value === "true").length;
 
   return (
@@ -45,7 +46,7 @@ export default async function AdminToolsPage() {
           <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 px-4 py-3">
             <Search className="mb-2 h-4 w-4 text-blue-300" />
             <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Tools Aktif</p>
-            <p className="font-black text-white">{activeTools}/2</p>
+            <p className="font-black text-white">{activeTools}/3</p>
           </div>
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
             <Coins className="mb-2 h-4 w-4 text-amber-300" />

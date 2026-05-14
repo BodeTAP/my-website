@@ -25,6 +25,7 @@ export default async function PortalToolsPage() {
   const lowCreditThreshold = toolSettings.lowCreditWarningThreshold;
   const leadFinderMinCost = Math.min(toolSettings.leadFinder.standardCost, toolSettings.leadFinder.deepCost);
   const proposalCost = toolSettings.proposalGenerator.creditCost;
+  const invoiceCost = toolSettings.invoiceGenerator.creditCost;
 
   return (
     <div className="space-y-6">
@@ -127,13 +128,27 @@ export default async function PortalToolsPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <div className="glass rounded-2xl p-6 border border-white/5 h-full flex flex-col opacity-70">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5">
-              <ReceiptText className="w-6 h-6 text-blue-200/45" />
+          <div className="glass rounded-2xl p-6 border border-blue-500/20 h-full flex flex-col hover:border-blue-400/40 transition-colors">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
+              <ReceiptText className="w-6 h-6 text-blue-300" />
             </div>
             <h2 className="text-white font-black text-xl">Invoice Generator</h2>
-            <p className="text-blue-200/40 text-sm mt-2 leading-relaxed">Buat invoice cepat dari detail layanan dan tagihan.</p>
-            <span className="mt-auto w-fit rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-bold text-blue-200/45">Segera Hadir</span>
+            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat invoice PDF tanpa payment link.</p>
+            <p className="text-amber-300 text-sm font-bold mt-5">{invoiceCost} kredit/invoice</p>
+            <div className="mt-auto pt-6">
+              {toolSettings.invoiceGenerator.enabled ? (
+                <ToolActionButton
+                  href={balance < invoiceCost ? "/portal/credits" : "/portal/tools/invoice-generator"}
+                  label={balance < invoiceCost ? "Beli Kredit" : "Gunakan"}
+                  loadingLabel={balance < invoiceCost ? "Membuka..." : "Memuat..."}
+                  className={`w-full h-11 rounded-xl font-bold ${balance < invoiceCost ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
+                />
+              ) : (
+                <span className="flex h-11 w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-bold text-blue-200/40">
+                  Nonaktif
+                </span>
+              )}
+            </div>
           </div>
         </StaggerItem>
       </StaggerChildren>

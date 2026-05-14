@@ -53,6 +53,12 @@ user confirms a lasting preference, project decision, or important current state
 
 ## Current Focus
 
+- Portal Invoice Generator is implemented as a client document generator using
+  `generated_invoices`; generated invoices are PDF-only and intentionally do
+  not connect to admin invoices, payment links, or Tripay.
+- On 2026-05-14, the `generated_invoices` table was applied manually with
+  `prisma db execute` and marked applied because `prisma migrate dev` detected
+  database drift; do not reset the database for this migration.
 - Lead Finder Social Scan now treats direct social-profile `websiteUri` values
   (Instagram/Facebook/TikTok/LinkedIn/YouTube/X) as `FOUND` before fetching or
   reading cached scan results.
