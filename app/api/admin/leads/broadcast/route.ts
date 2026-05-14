@@ -606,10 +606,10 @@ export async function POST(req: NextRequest) {
     }) as BroadcastLead[];
 
     const consentSkippedLeads = leads.filter((lead) =>
-      lead.doNotContact || lead.waOptInStatus !== "OPTED_IN"
+      lead.doNotContact || lead.waOptInStatus === "OPTED_OUT"
     );
     const consentEligibleLeads = leads.filter((lead) =>
-      !lead.doNotContact && lead.waOptInStatus === "OPTED_IN"
+      !lead.doNotContact && lead.waOptInStatus !== "OPTED_OUT"
     );
 
     // 3. Filter invalid phone format
@@ -667,7 +667,7 @@ export async function POST(req: NextRequest) {
 
     if (eligibleLeads.length === 0) {
       return NextResponse.json({
-        error: `Tidak ada lead yang bisa dikirim. ${consentSkippedLeads.length} belum opt-in/opt-out, ${cooldownLeads.length} dalam cooldown, ${invalidLeads.length} nomor tidak valid.`,
+        error: `Tidak ada lead yang bisa dikirim. ${consentSkippedLeads.length} opt-out/do-not-contact, ${cooldownLeads.length} dalam cooldown, ${invalidLeads.length} nomor tidak valid.`,
         consentSkippedLeads: consentSkippedLeads.map((l) => l.name),
         cooldownLeads:      cooldownLeads.map((l) => l.name),
         invalidPhones:      invalidLeads.map((l) => l.name),
@@ -770,8 +770,8 @@ export async function POST(req: NextRequest) {
     const skippedRecipients = [
       ...consentSkippedLeads.map((lead) => ({
         lead,
-        status: (lead.waOptInStatus === "OPTED_OUT" || lead.doNotContact ? "OPTED_OUT" : "SKIPPED") as "OPTED_OUT" | "SKIPPED",
-        reason: lead.waOptInStatus === "OPTED_OUT" || lead.doNotContact ? "OPTED_OUT" : "NO_WHATSAPP_OPT_IN",
+        status: "OPTED_OUT" as const,
+        reason: lead.doNotContact ? "DO_NOT_CONTACT" : "OPTED_OUT",
       })),
       ...invalidLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: lead.skipReason })),
       ...cooldownLeads.map((lead) => ({ lead, status: "SKIPPED" as const, reason: "COOLDOWN" })),

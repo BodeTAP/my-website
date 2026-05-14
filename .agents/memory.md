@@ -43,6 +43,8 @@ user confirms a lasting preference, project decision, or important current state
 - WhatsApp broadcast auto-reply requires Fonnte device inbound webhook set to
   `/api/webhooks/fonnte/inbound`; status webhook alone is not enough. Admin
   device edit UI now exposes both inbound and device-status webhook URLs.
+- WhatsApp broadcast should allow leads with `waOptInStatus = UNKNOWN`; only
+  `OPTED_OUT` or `doNotContact` leads are skipped by consent filtering.
 - Proposal Generator now supports a client-editable brand kit/design layer:
   logo, colors, font style, layout preset, logo position, and PDF visibility
   toggles. PDF preview/download should use the same renderer.

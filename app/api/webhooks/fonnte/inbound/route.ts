@@ -161,7 +161,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const leadsToAutoReply = uniqueByPhone(leads);
+    const leadsToAutoReply = uniqueByPhone(
+      leads.filter((lead) => lead.waOptInStatus !== "OPTED_IN" || lead.doNotContact),
+    );
 
     await prisma.lead.updateMany({
       where: { id: { in: leadIds } },

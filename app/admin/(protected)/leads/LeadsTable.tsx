@@ -85,8 +85,8 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
   } | null>(null);
 
   const coolingLeads  = leads.filter((l) => isCoolingDown(l.lastContactedAt, settings.cooldownHours));
-  const consentBlocked = leads.filter((l) => l.doNotContact || l.waOptInStatus !== "OPTED_IN");
-  const consentEligible = leads.filter((l) => !l.doNotContact && l.waOptInStatus === "OPTED_IN");
+  const consentBlocked = leads.filter((l) => l.doNotContact || l.waOptInStatus === "OPTED_OUT");
+  const consentEligible = leads.filter((l) => !l.doNotContact && l.waOptInStatus !== "OPTED_OUT");
   const eligibleRaw   = skipCooldown ? consentEligible.length : consentEligible.length - consentEligible.filter((l) => isCoolingDown(l.lastContactedAt, settings.cooldownHours)).length;
   const eligibleCount = Math.min(eligibleRaw, sessionLimit, settings.maxSessionLimit);
 
@@ -160,7 +160,7 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Broadcast hanya diizinkan <strong>{String(settings.allowedStartHour).padStart(2, "0")}.00-{String(settings.allowedEndHour).padStart(2, "0")}.00 WIB</strong></li>
                 <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
-                <li>Hanya lead berstatus <strong>Opt-in</strong> yang bisa dibroadcast</li>
+                <li>Lead berstatus <strong>Belum opt-in</strong> tetap bisa dibroadcast; opt-out tidak dikirim</li>
                 <li>Setiap pesan menyertakan instruksi opt-out {settings.optOutKeywords[0]?.toUpperCase() ?? "STOP"}</li>
               </ul>
             </div>
@@ -168,7 +168,7 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
             {consentBlocked.length > 0 && (
               <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-3 space-y-2">
                 <p className="text-red-300 text-xs font-semibold">
-                  {consentBlocked.length} lead belum opt-in atau sudah opt-out
+                  {consentBlocked.length} lead opt-out atau do-not-contact
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {consentBlocked.slice(0, 12).map((l) => (
