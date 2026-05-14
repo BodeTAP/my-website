@@ -29,6 +29,7 @@ export default async function PortalLeadFinderPage() {
         deep: toolSettings.leadFinder.deepCost,
         socialScan: toolSettings.leadFinder.socialScanCost,
       }}
+      socialScanAvailable={toolSettings.leadFinder.socialScanEnabled}
     />
   );
 }

@@ -16,6 +16,8 @@ user confirms a lasting preference, project decision, or important current state
 - Reply in Indonesian by default, unless the user asks for another language.
 - The user wants memory that works across sessions and even across accounts by
   storing project context in the repo.
+- Update this memory file after each work session with durable preferences,
+  project decisions, or important current state.
 
 ## Project Decisions
 
@@ -36,6 +38,8 @@ user confirms a lasting preference, project decision, or important current state
   use cases, not only web agencies or website sellers.
 - Lead Finder supports optional Social Scan as a paid add-on that scans business
   websites for social links and caches results server-side.
+- Lead Finder Social Scan can be enabled/disabled from Admin Tools via
+  `tool_lead_finder_social_scan_enabled`; portal UI and API both respect it.
 - Proposal Generator now supports a client-editable brand kit/design layer:
   logo, colors, font style, layout preset, logo position, and PDF visibility
   toggles. PDF preview/download should use the same renderer.
@@ -44,6 +48,9 @@ user confirms a lasting preference, project decision, or important current state
 
 ## Current Focus
 
+- Lead Finder Social Scan now treats direct social-profile `websiteUri` values
+  (Instagram/Facebook/TikTok/LinkedIn/YouTube/X) as `FOUND` before fetching or
+  reading cached scan results.
 - Current active work is around the portal Proposal Generator and its PDF output.
 
 ## Known Context

@@ -328,6 +328,15 @@ function platformFromUrl(rawUrl: string): SocialPlatform | null {
   return null;
 }
 
+function socialScanFromDirectSocialUrl(rawUrl: string): SocialScanResult | null {
+  const platform = platformFromUrl(rawUrl);
+  if (!platform) return null;
+
+  const links: SocialLinks = {};
+  links[platform] = rawUrl;
+  return { status: "FOUND", links };
+}
+
 function normalizeSocialUrl(rawUrl: string, baseUrl: string) {
   try {
     const parsed = new URL(decodeHtmlEntities(rawUrl), baseUrl);
@@ -417,6 +426,9 @@ function getSocialScanCacheDelegate() {
 async function scanWebsiteSocialLinks(websiteUrl: string): Promise<SocialScanResult> {
   const normalizedUrl = normalizeWebsiteUrl(websiteUrl);
   if (!normalizedUrl) return emptySocialScan("FAILED", "URL website tidak valid");
+
+  const directSocialScan = socialScanFromDirectSocialUrl(normalizedUrl);
+  if (directSocialScan) return directSocialScan;
 
   const cacheAfter = new Date(Date.now() - SOCIAL_SCAN_CACHE_DAYS * 24 * 60 * 60 * 1000);
   const cache = getSocialScanCacheDelegate();
@@ -590,11 +602,15 @@ export async function POST(req: NextRequest) {
     if (!query?.trim()) return NextResponse.json({ error: "Query tidak boleh kosong" }, { status: 400 });
 
     const searchMode: SearchMode = mode === "deep" ? "deep" : "standard";
-    const shouldScanSocial = socialScan === true;
+    const requestedSocialScan = socialScan === true;
     const toolSettings = await getToolSettings();
     if (!toolSettings.leadFinder.enabled) {
       return NextResponse.json({ error: "Lead Finder sedang nonaktif." }, { status: 503 });
     }
+    if (requestedSocialScan && !toolSettings.leadFinder.socialScanEnabled) {
+      return NextResponse.json({ error: "Social Scan sedang nonaktif." }, { status: 503 });
+    }
+    const shouldScanSocial = requestedSocialScan && toolSettings.leadFinder.socialScanEnabled;
     const baseCreditCost = searchMode === "deep" ? toolSettings.leadFinder.deepCost : toolSettings.leadFinder.standardCost;
     const socialScanCost = toolSettings.leadFinder.socialScanCost ?? SOCIAL_SCAN_COST_FALLBACK;
     const creditCost = baseCreditCost + (shouldScanSocial ? socialScanCost : 0);

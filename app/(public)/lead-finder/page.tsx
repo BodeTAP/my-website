@@ -130,7 +130,10 @@ export default async function LeadFinderLandingPage() {
   const [packages, toolSettings] = await Promise.all([getCreditPackages(), getToolSettings()]);
   const standardCost = toolSettings.leadFinder.standardCost;
   const deepCost = toolSettings.leadFinder.deepCost;
+  const socialScanEnabled = toolSettings.leadFinder.socialScanEnabled;
   const socialScanCost = toolSettings.leadFinder.socialScanCost;
+  const visibleFeatures = socialScanEnabled ? features : features.filter((feature) => feature.title !== "Social Scan opsional");
+  const visibleWorkflows = socialScanEnabled ? workflows : workflows.filter((item) => !item.includes("Social Scan"));
 
   return (
     <div className="min-h-screen overflow-x-clip">
@@ -260,7 +263,7 @@ export default async function LeadFinderLandingPage() {
             </p>
           </FadeUp>
           <StaggerChildren className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => (
+            {visibleFeatures.map((feature) => (
               <StaggerItem key={feature.title}>
                 <div className="h-full rounded-2xl border border-white/10 bg-white/[0.04] p-6">
                   <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10">
@@ -295,7 +298,7 @@ export default async function LeadFinderLandingPage() {
             </div>
           </FadeUp>
           <StaggerChildren className="space-y-3">
-            {workflows.map((item, index) => (
+            {visibleWorkflows.map((item, index) => (
               <StaggerItem key={item}>
                 <div className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-sm font-black text-blue-300">
@@ -319,7 +322,7 @@ export default async function LeadFinderLandingPage() {
             <h2 className="text-3xl font-black text-white sm:text-4xl">Beli kredit, pakai sesuai kebutuhan</h2>
             <p className="mt-3 text-blue-200/55">
               Standard Search memakai {standardCost} kredit. Deep Search memakai {deepCost} kredit untuk pencarian lebih luas.
-              Social Scan opsional dapat ditambahkan mulai {socialScanCost} kredit.
+              {socialScanEnabled ? ` Social Scan opsional dapat ditambahkan mulai ${socialScanCost} kredit.` : ""}
             </p>
           </FadeUp>
 

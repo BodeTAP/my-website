@@ -613,10 +613,12 @@ export default function PortalLeadFinder({
   initialBalance,
   enabled,
   creditCosts = { ...DEFAULT_CREDIT_COST, socialScan: DEFAULT_SOCIAL_SCAN_COST },
+  socialScanAvailable = true,
 }: {
   initialBalance: number;
   enabled: boolean;
   creditCosts?: Record<SearchMode, number> & { socialScan?: number };
+  socialScanAvailable?: boolean;
 }) {
   const router = useRouter();
   const [balance, setBalance] = useState(initialBalance);
@@ -645,7 +647,8 @@ export default function PortalLeadFinder({
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const socialScanCost = creditCosts.socialScan ?? DEFAULT_SOCIAL_SCAN_COST;
-  const creditCost = creditCosts[mode] + (socialScanEnabled ? socialScanCost : 0);
+  const activeSocialScan = socialScanAvailable && socialScanEnabled;
+  const creditCost = creditCosts[mode] + (activeSocialScan ? socialScanCost : 0);
   const insufficient = balance < creditCost || !enabled;
   const filteredPlaces = useMemo(() => {
     const search = resultSearch.trim().toLowerCase();
@@ -654,7 +657,7 @@ export default function PortalLeadFinder({
       if (filter === "NO_WEBSITE" && place.hasWebsite) return false;
       if (filter === "HAS_WEBSITE" && !place.hasWebsite) return false;
       if (hasPhoneOnly && !hasPhone) return false;
-      if (socialScanEnabled) {
+      if (activeSocialScan) {
         if (socialFilter === "ANY" && !hasAnySocial(place)) return false;
         if (socialFilter === "NONE" && hasAnySocial(place)) return false;
         if (SOCIAL_PLATFORMS.some((platform) => platform.value === socialFilter) && !place.socialScan.links[socialFilter as SocialPlatform]) return false;
@@ -688,7 +691,7 @@ export default function PortalLeadFinder({
       if (sortBy === "SOCIAL") return Number(hasAnySocial(b)) - Number(hasAnySocial(a));
       return a.name.localeCompare(b.name, "id");
     });
-  }, [filter, hasPhoneOnly, minRating, minReviews, places, resultSearch, socialFilter, socialScanEnabled, sortBy, statusFilter]);
+  }, [activeSocialScan, filter, hasPhoneOnly, minRating, minReviews, places, resultSearch, socialFilter, sortBy, statusFilter]);
 
   const noWebsiteCount = places.filter((place) => !place.hasWebsite).length;
   const noPhoneCount = places.filter((place) => !(place.phoneNorm || place.phone)).length;
@@ -713,7 +716,7 @@ export default function PortalLeadFinder({
       const res = await fetch("/api/portal/tools/lead-finder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, city, mode, socialScan: socialScanEnabled }),
+        body: JSON.stringify({ query, city, mode, socialScan: activeSocialScan }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -881,31 +884,33 @@ export default function PortalLeadFinder({
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSocialScanEnabled((current) => !current)}
-            className={`w-full rounded-2xl border p-4 text-left transition-all ${
-              socialScanEnabled
-                ? "border-emerald-500/40 bg-emerald-500/10"
-                : "border-white/10 bg-white/5 hover:border-white/20"
-            }`}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-black text-white">Social Scan</p>
-                <p className="mt-1 text-xs leading-relaxed text-blue-200/45">
-                  Cek link Instagram, Facebook, TikTok, LinkedIn, YouTube, dan X dari website bisnis. Hasil memakai cache dan dibatasi agar pencarian tetap stabil.
-                </p>
-              </div>
-              <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+          {socialScanAvailable && (
+            <button
+              type="button"
+              onClick={() => setSocialScanEnabled((current) => !current)}
+              className={`w-full rounded-2xl border p-4 text-left transition-all ${
                 socialScanEnabled
-                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                  : "border-white/10 bg-white/5 text-blue-200/45"
-              }`}>
-                +{socialScanCost} kredit
-              </span>
-            </div>
-          </button>
+                  ? "border-emerald-500/40 bg-emerald-500/10"
+                  : "border-white/10 bg-white/5 hover:border-white/20"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-black text-white">Social Scan</p>
+                  <p className="mt-1 text-xs leading-relaxed text-blue-200/45">
+                    Cek link Instagram, Facebook, TikTok, LinkedIn, YouTube, dan X dari website bisnis. Hasil memakai cache dan dibatasi agar pencarian tetap stabil.
+                  </p>
+                </div>
+                <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+                  socialScanEnabled
+                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                    : "border-white/10 bg-white/5 text-blue-200/45"
+                }`}>
+                  +{socialScanCost} kredit
+                </span>
+              </div>
+            </button>
+          )}
 
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-6">
@@ -915,7 +920,7 @@ export default function PortalLeadFinder({
 
             <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-300">
               {mode === "deep" ? "Multi-search aktif" : "Fix 60 leads"}
-              {socialScanEnabled ? " + Social Scan" : ""}
+              {activeSocialScan ? " + Social Scan" : ""}
             </div>
 
             {history.length > 0 && (
@@ -979,7 +984,7 @@ export default function PortalLeadFinder({
               <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
                 {noWebsiteCount > 0 && <span className="text-blue-300/70"><strong>{noWebsiteCount}</strong> tanpa website</span>}
                 {noPhoneCount > 0 && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
-                {socialScanEnabled && <span className="text-emerald-300/80"><strong>{socialFoundCount}</strong> punya social link</span>}
+                {activeSocialScan && <span className="text-emerald-300/80"><strong>{socialFoundCount}</strong> punya social link</span>}
                 {closedCount > 0 && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
               {fullQuery && <p className="text-blue-200/40 text-xs">{fullQuery}</p>}
@@ -1048,7 +1053,7 @@ export default function PortalLeadFinder({
             <select
               value={socialFilter}
               onChange={(event) => setSocialFilter(event.target.value as SocialFilter)}
-              disabled={!socialScanEnabled}
+              disabled={!activeSocialScan}
               className="h-8 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-white outline-none disabled:opacity-45"
             >
               <option className="bg-[#07111f] text-white" value="ALL">Semua sosial</option>
@@ -1172,7 +1177,7 @@ export default function PortalLeadFinder({
                           </a>
                         )}
 
-                        {socialScanEnabled && (
+                        {activeSocialScan && (
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {socialPlatforms.length > 0 ? (
                               socialPlatforms.map((platform) => (
@@ -1218,7 +1223,7 @@ export default function PortalLeadFinder({
             <h2 className="text-white font-black text-xl">Gunakan {creditCost} kredit?</h2>
             <p className="text-blue-200/55 text-sm mt-2 leading-relaxed">
               Mode <span className="text-white font-bold">{mode === "deep" ? "Deep Search" : "Standard"}</span>
-              {socialScanEnabled ? <span> dengan <span className="text-white font-bold">Social Scan</span></span> : null}
+              {activeSocialScan ? <span> dengan <span className="text-white font-bold">Social Scan</span></span> : null}
               {" "}akan memotong {creditCost} kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
