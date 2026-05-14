@@ -30,11 +30,13 @@ function NumberField({
   value,
   onChange,
   suffix = "kredit",
+  min = 0,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   suffix?: string;
+  min?: number;
 }) {
   return (
     <label className="block">
@@ -42,7 +44,7 @@ function NumberField({
       <div className="mt-2 flex items-center rounded-xl border border-white/10 bg-[#07111f] focus-within:border-blue-500/55">
         <input
           type="number"
-          min={0}
+          min={min}
           max={9999}
           value={asNumber(value)}
           onChange={(event) => onChange(event.target.value)}
@@ -146,7 +148,7 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
     <section className="glass rounded-3xl border border-blue-500/20 overflow-hidden">
       <div className="flex flex-col gap-4 border-b border-white/10 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-xl font-black text-white">Prioritas Tools</h2>
+          <h2 className="text-xl font-black text-white">Konfigurasi Tools</h2>
           <p className="mt-1 text-sm text-blue-200/45">Atur status aktif dan biaya kredit yang dipakai oleh portal klien.</p>
         </div>
         <Button type="button" disabled={saving} onClick={saveSettings} className="h-11 rounded-xl bg-blue-600 px-5 font-black text-white hover:bg-blue-500">
@@ -209,7 +211,7 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
               description="Klien bisa membuat dan download invoice PDF."
             />
             <NumberField label="Biaya Generate" value={settings.tool_invoice_generator_cost} onChange={(value) => update("tool_invoice_generator_cost", value)} />
-            <NumberField label="Default Jatuh Tempo" value={settings.tool_invoice_generator_default_due_days} onChange={(value) => update("tool_invoice_generator_default_due_days", value)} suffix="hari" />
+            <NumberField label="Default Jatuh Tempo" value={settings.tool_invoice_generator_default_due_days} onChange={(value) => update("tool_invoice_generator_default_due_days", value)} suffix="hari" min={1} />
             <ToggleField
               checked={settings.tool_invoice_generator_default_include_tax === "true"}
               onChange={(value) => update("tool_invoice_generator_default_include_tax", value)}

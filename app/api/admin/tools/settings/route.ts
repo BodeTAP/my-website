@@ -29,11 +29,13 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const updates = body && typeof body === "object" ? body as Record<string, unknown> : {};
 
+  const updateKeys = TOOL_SETTING_KEYS.filter((key) => Object.prototype.hasOwnProperty.call(updates, key));
+
   await prisma.$transaction(
-    TOOL_SETTING_KEYS.map((key) => {
+    updateKeys.map((key) => {
       const value = normalizeToolSettingValue(
         key,
-        Object.prototype.hasOwnProperty.call(updates, key) ? updates[key] : TOOL_SETTING_DEFAULTS[key],
+        updates[key],
       );
 
       return prisma.siteSetting.upsert({

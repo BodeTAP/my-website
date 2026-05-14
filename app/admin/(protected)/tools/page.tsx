@@ -88,19 +88,19 @@ export default async function AdminToolsPage() {
           <BarChart3 className="mb-4 h-5 w-5 text-blue-300" />
           <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Proposal Dibuat</p>
           <p className="mt-1 text-2xl font-black text-white">{proposalCount}</p>
-          <p className="mt-1 text-xs font-bold text-blue-200/35">{proposalCreditsUsed} kredit terpakai</p>
+          <p className="mt-1 text-xs font-bold text-blue-200/35">{proposalCreditsUsed} kredit terpakai - semua waktu</p>
         </div>
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
           <ReceiptText className="mb-4 h-5 w-5 text-emerald-300" />
           <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200/45">Invoice Dibuat</p>
           <p className="mt-1 text-2xl font-black text-white">{invoiceStats._count.id}</p>
-          <p className="mt-1 text-xs font-bold text-emerald-200/35">{invoiceCreditsUsed} kredit terpakai</p>
+          <p className="mt-1 text-xs font-bold text-emerald-200/35">{invoiceCreditsUsed} kredit terpakai - semua waktu</p>
         </div>
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
           <Coins className="mb-4 h-5 w-5 text-amber-300" />
           <p className="text-[10px] font-black uppercase tracking-widest text-amber-200/45">Total Nilai Invoice</p>
           <p className="mt-1 text-2xl font-black text-white">{formatRupiah(invoiceStats._sum.total ?? 0)}</p>
-          <p className="mt-1 text-xs font-bold text-amber-200/35">Dari Invoice Generator</p>
+          <p className="mt-1 text-xs font-bold text-amber-200/35">Dari Invoice Generator - semua waktu</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
           <FileText className="mb-4 h-5 w-5 text-blue-200/70" />

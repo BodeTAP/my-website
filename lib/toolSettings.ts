@@ -48,9 +48,9 @@ function parseBoolean(value: string | undefined) {
   return value === "true";
 }
 
-function parsePositiveInt(value: string | undefined, fallback: number) {
+function parsePositiveInt(value: string | undefined, fallback: number, min = 0) {
   const parsed = Number.parseInt(value ?? "", 10);
-  if (!Number.isFinite(parsed) || parsed < 0) return fallback;
+  if (!Number.isFinite(parsed) || parsed < min) return fallback;
   return Math.min(parsed, 9999);
 }
 
@@ -105,6 +105,7 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
       defaultDueDays: parsePositiveInt(
         values.tool_invoice_generator_default_due_days,
         Number(TOOL_SETTING_DEFAULTS.tool_invoice_generator_default_due_days),
+        1,
       ),
       defaultFooter: parseString(
         values.tool_invoice_generator_default_footer,
@@ -130,7 +131,8 @@ export function normalizeToolSettingValue(key: ToolSettingKey, value: unknown) {
   }
 
   const parsed = Number.parseInt(String(value ?? ""), 10);
-  if (!Number.isFinite(parsed) || parsed < 0) return TOOL_SETTING_DEFAULTS[key];
+  const min = key === "tool_invoice_generator_default_due_days" ? 1 : 0;
+  if (!Number.isFinite(parsed) || parsed < min) return TOOL_SETTING_DEFAULTS[key];
   return String(Math.min(parsed, 9999));
 }
 
