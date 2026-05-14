@@ -40,6 +40,9 @@ user confirms a lasting preference, project decision, or important current state
   websites for social links and caches results server-side.
 - Lead Finder Social Scan can be enabled/disabled from Admin Tools via
   `tool_lead_finder_social_scan_enabled`; portal UI and API both respect it.
+- WhatsApp broadcast auto-reply requires Fonnte device inbound webhook set to
+  `/api/webhooks/fonnte/inbound`; status webhook alone is not enough. Admin
+  device edit UI now exposes both inbound and device-status webhook URLs.
 - Proposal Generator now supports a client-editable brand kit/design layer:
   logo, colors, font style, layout preset, logo position, and PDF visibility
   toggles. PDF preview/download should use the same renderer.

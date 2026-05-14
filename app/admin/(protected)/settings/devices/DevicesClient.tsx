@@ -19,6 +19,17 @@ type Device = {
   token: string;
 };
 
+function getPublicSiteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "");
+  if (typeof window !== "undefined") return window.location.origin;
+  return "";
+}
+
+function getDefaultWebhookUrl(path: string) {
+  const origin = getPublicSiteUrl();
+  return origin ? `${origin}${path}` : "";
+}
+
 // ── Add Device Modal ──────────────────────────────────────────────────────────
 
 function AddDeviceModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
@@ -193,7 +204,8 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
 
 function EditDeviceModal({ device, onClose, onSuccess }: { device: Device; onClose: () => void; onSuccess: () => void }) {
   const [name, setName]           = useState(device.name);
-  const [webhookStatus, setWebhookStatus] = useState("");
+  const [webhook, setWebhook] = useState(() => getDefaultWebhookUrl("/api/webhooks/fonnte/inbound"));
+  const [webhookStatus, setWebhookStatus] = useState(() => getDefaultWebhookUrl("/api/webhooks/fonnte/device-status"));
   const [autoread, setAutoread]   = useState(device.autoread === "on");
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
@@ -210,6 +222,7 @@ function EditDeviceModal({ device, onClose, onSuccess }: { device: Device; onClo
           name: name.trim(),
           device: device.device,
           autoread,
+          ...(webhook ? { webhook } : {}),
           ...(webhookStatus ? { webhookstatus: webhookStatus } : {}),
         }),
       });
@@ -242,10 +255,18 @@ function EditDeviceModal({ device, onClose, onSuccess }: { device: Device; onClo
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-all" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-blue-200/70 text-xs font-medium">Webhook Status URL (opsional)</label>
+            <label className="text-blue-200/70 text-xs font-medium">Webhook Pesan Masuk URL</label>
+            <input type="url" value={webhook} onChange={(e) => setWebhook(e.target.value)}
+              placeholder="https://yourdomain.com/api/webhooks/fonnte/inbound"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/20 text-sm focus:outline-none focus:border-blue-500/50 transition-all font-mono" />
+            <p className="text-blue-200/35 text-[11px]">Wajib untuk auto-reply keyword YA/STOP dari lead.</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-blue-200/70 text-xs font-medium">Webhook Status URL</label>
             <input type="url" value={webhookStatus} onChange={(e) => setWebhookStatus(e.target.value)}
               placeholder="https://yourdomain.com/api/webhooks/fonnte/device-status"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/20 text-sm focus:outline-none focus:border-blue-500/50 transition-all font-mono" />
+            <p className="text-blue-200/35 text-[11px]">Dipakai untuk update status koneksi device.</p>
           </div>
           <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
             <div>
