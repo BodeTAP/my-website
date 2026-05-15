@@ -319,7 +319,7 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
             )}
             {result?.consentSkippedLeads && result.consentSkippedLeads.length > 0 && (
               <p className="text-red-300/70 text-xs">
-                Belum opt-in/opt-out: {result.consentSkippedLeads.join(", ")}
+                Opt-out/do-not-contact: {result.consentSkippedLeads.join(", ")}
               </p>
             )}
             {result?.invalidPhones && result.invalidPhones.length > 0 && (
