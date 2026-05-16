@@ -56,12 +56,12 @@ export default async function BlogPage({
         <div className="text-center mb-10">
           <FadeUp>
             <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-              Blog & <span className="text-gradient">Panduan</span>
+              Panduan website untuk bisnis lokal
             </h1>
           </FadeUp>
           <FadeUp delay={0.05}>
             <p className="text-blue-200/60 max-w-xl mx-auto mb-10">
-              Tips praktis agar bisnis Anda mudah ditemukan di internet dan terlihat lebih profesional.
+              Catatan praktis soal website, SEO dasar, konten, dan alur digital yang bisa langsung diterapkan.
             </p>
           </FadeUp>
           <FadeUp delay={0.1}>
@@ -71,7 +71,7 @@ export default async function BlogPage({
 
         <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 w-full">
           {/* View Toggle */}
-          <div className="flex items-center justify-center sm:justify-start gap-1 p-1 glass rounded-xl border border-white/10 shrink-0 z-10 w-full sm:w-auto">
+          <div className="flex items-center justify-center sm:justify-start gap-1 p-1 rounded-xl border border-white/10 bg-[#071225] shrink-0 z-10 w-full sm:w-auto">
             <Link
               href={createUrl({ view: "grid" })}
               className={`p-2 rounded-lg transition-all duration-300 ${
@@ -108,7 +108,7 @@ export default async function BlogPage({
                     className={`shrink-0 flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
                       !category
                         ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20"
-                        : "glass border-white/10 text-blue-200/70 hover:text-white hover:border-blue-500/30 hover:bg-white/5 hover:-translate-y-0.5"
+                        : "border-white/10 bg-[#071225] text-blue-200/70 hover:text-white hover:border-blue-500/30 hover:bg-white/5"
                     }`}
                   >
                     Semua
@@ -121,7 +121,7 @@ export default async function BlogPage({
                       className={`shrink-0 flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
                         category === c.slug
                           ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20"
-                          : "glass border-white/10 text-blue-200/70 hover:text-white hover:border-blue-500/30 hover:bg-white/5 hover:-translate-y-0.5"
+                          : "border-white/10 bg-[#071225] text-blue-200/70 hover:text-white hover:border-blue-500/30 hover:bg-white/5"
                       }`}
                     >
                       {c.name}
@@ -146,7 +146,7 @@ function ArticlesLoading({ view }: { view: string }) {
   return (
     <div className={isListView ? "flex flex-col gap-5" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
       {[...Array(6)].map((_, i) => (
-        <div key={i} className={`glass rounded-2xl overflow-hidden animate-pulse flex ${isListView ? 'flex-row h-[120px] sm:h-[220px]' : 'flex-col h-[400px]'}`}>
+        <div key={i} className={`flex overflow-hidden rounded-2xl border border-white/10 bg-[#071225] animate-pulse ${isListView ? 'flex-row h-[120px] sm:h-[220px]' : 'flex-col h-[400px]'}`}>
           <div className={`${isListView ? 'w-1/3 min-w-[100px] sm:min-w-[0] sm:w-64 lg:w-80 shrink-0 h-full' : 'h-48 w-full'} bg-white/5`}></div>
           <div className={`p-4 sm:p-6 flex flex-col flex-1 gap-2 sm:gap-4 w-full justify-center`}>
             <div className="flex items-center gap-2">
@@ -229,12 +229,12 @@ async function ArticlesGrid({ category, q, view, currentPage }: { category?: str
         <StaggerItem key={a.slug}>
           <HoverCard className={isListView ? "h-full md:h-auto" : "h-full"}>
             <Link href={`/blog/${a.slug}`}>
-              <article className={`glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group h-full flex ${isListView ? 'flex-row' : 'flex-col'}`}>
+              <article className={`overflow-hidden rounded-2xl border border-white/10 bg-[#071225] hover:border-blue-500/30 transition-colors duration-300 group h-full flex ${isListView ? 'flex-row' : 'flex-col'}`}>
                 <div className={`${isListView ? 'w-1/3 min-w-[100px] sm:min-w-[0] sm:w-64 lg:w-80 shrink-0 min-h-[120px] sm:min-h-[192px]' : 'h-48'} bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden relative`}>
                   {a.coverImage ? (
                     <Image src={a.coverImage} alt={a.title} width={400} height={256} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-10 min-h-[120px] sm:min-h-[192px]">📰</div>
+                    <div className="w-full h-full flex items-center justify-center text-sm text-blue-200/30 min-h-[120px] sm:min-h-[192px]">Belum ada gambar</div>
                   )}
                 </div>
                 <div className={`p-4 sm:p-6 flex flex-col flex-1 ${isListView ? 'justify-center' : ''}`}>
@@ -294,13 +294,13 @@ async function ArticlesGrid({ category, q, view, currentPage }: { category?: str
             {currentPage > 1 ? (
               <Link
                 href={getPageUrl(currentPage - 1)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all glass text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all bg-[#071225] text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
                 aria-label="Halaman sebelumnya"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Link>
             ) : (
-              <div className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold glass text-white/10 border border-white/5 cursor-not-allowed">
+              <div className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold bg-[#071225] text-white/10 border border-white/5 cursor-not-allowed">
                 <ChevronLeft className="w-4 h-4 opacity-50" />
               </div>
             )}
@@ -315,7 +315,7 @@ async function ArticlesGrid({ category, q, view, currentPage }: { category?: str
                   className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
                     currentPage === p
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                      : "glass text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
+                      : "bg-[#071225] text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
                   }`}
                 >
                   {p}
@@ -327,13 +327,13 @@ async function ArticlesGrid({ category, q, view, currentPage }: { category?: str
             {currentPage < totalPages ? (
               <Link
                 href={getPageUrl(currentPage + 1)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all glass text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all bg-[#071225] text-blue-200/60 hover:text-white hover:bg-white/10 border border-white/10"
                 aria-label="Halaman selanjutnya"
               >
                 <ChevronRight className="w-4 h-4" />
               </Link>
             ) : (
-              <div className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold glass text-white/10 border border-white/5 cursor-not-allowed">
+              <div className="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold bg-[#071225] text-white/10 border border-white/5 cursor-not-allowed">
                 <ChevronRight className="w-4 h-4 opacity-50" />
               </div>
             )}

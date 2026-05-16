@@ -29,10 +29,10 @@ export default async function PortfolioPage() {
         {/* Header */}
         <FadeUp className="text-center mb-14">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            Hasil <span className="text-gradient">Karya Kami</span>
+            Beberapa website yang sudah kami kerjakan
           </h1>
           <p className="text-blue-200/60 max-w-xl mx-auto">
-            Website profesional yang telah membantu bisnis lokal tumbuh dan ditemukan lebih banyak pelanggan.
+            Contoh pekerjaan untuk bisnis lokal, dari profil perusahaan sampai halaman yang membantu calon pelanggan menghubungi lebih mudah.
           </p>
         </FadeUp>
 
@@ -42,7 +42,7 @@ export default async function PortfolioPage() {
             <p className="text-blue-200/40 text-lg">Portofolio akan segera ditambahkan.</p>
             <Link href="/contact" className="mt-6 inline-block">
               <Button className="bg-blue-600 hover:bg-blue-500 text-white">
-                Jadilah Klien Pertama
+                Diskusikan proyek Anda
               </Button>
             </Link>
           </div>
@@ -51,7 +51,7 @@ export default async function PortfolioPage() {
             {portfolios.map((p) => (
               <StaggerItem key={p.slug}>
               <HoverCard className="h-full">
-              <div className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 group flex flex-col h-full">
+              <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#071225] transition-colors duration-300 hover:border-blue-500/30 group">
                 {/* Cover / Before-After */}
                 <div className="relative h-52 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
                   {p.coverImage ? (
@@ -69,8 +69,8 @@ export default async function PortfolioPage() {
                   )}
                   
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px] flex items-center justify-center">
-                     <div className="px-4 py-2 glass rounded-full text-white text-xs font-medium translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-blue-950/55 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                     <div className="px-4 py-2 rounded-full border border-white/10 bg-[#071225] text-white text-xs font-medium translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                        Lihat Detail
                      </div>
                   </div>
@@ -80,7 +80,7 @@ export default async function PortfolioPage() {
                       href={p.liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute top-3 right-3 glass rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      className="absolute top-3 right-3 rounded-lg border border-white/10 bg-[#071225] p-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                     >
                       <ExternalLink className="w-4 h-4 text-white" />
                     </a>
@@ -132,12 +132,12 @@ export default async function PortfolioPage() {
 
         {/* CTA */}
         <ScaleIn className="mt-16 text-center">
-          <div className="glass rounded-2xl p-10 max-w-2xl mx-auto">
+          <div className="rounded-2xl border border-white/10 bg-[#071225] p-10 max-w-2xl mx-auto">
             <h2 className="text-white font-bold text-2xl mb-3">
-              Bisnis Anda Bisa Jadi Yang Berikutnya
+              Ingin website Anda masuk daftar berikutnya?
             </h2>
             <p className="text-blue-200/60 mb-6">
-              Hubungi kami untuk konsultasi gratis dan dapatkan estimasi pengerjaan.
+              Ceritakan jenis bisnis dan halaman yang dibutuhkan. Kami bantu buat estimasi pengerjaan.
             </p>
             <Link href="/contact">
               <Button className="bg-blue-600 hover:bg-blue-500 text-white px-10">

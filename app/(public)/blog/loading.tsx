@@ -20,7 +20,7 @@ export default function BlogLoading() {
         {/* Article Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="glass rounded-2xl overflow-hidden border border-white/10 h-full flex flex-col">
+            <div key={i} className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#071225]">
               <Skeleton className="h-48 rounded-none" />
               <div className="p-6 space-y-4 flex-1 flex flex-col">
                 <div className="flex items-center gap-2">

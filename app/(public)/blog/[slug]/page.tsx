@@ -230,12 +230,12 @@ export default async function ArticlePage({ params }: Params) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {relatedArticles.map((rel) => (
                 <Link key={rel.id} href={`/blog/${rel.slug}`} className="group block h-full">
-                  <div className="glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300 h-full flex flex-col">
+                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#071225] transition-colors duration-300 hover:border-blue-500/30">
                     <div className="h-40 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
                       {rel.coverImage ? (
                         <Image src={rel.coverImage} alt={rel.title} width={400} height={160} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl opacity-10">📰</div>
+                        <div className="w-full h-full flex items-center justify-center text-sm text-blue-200/30">Belum ada gambar</div>
                       )}
                     </div>
                     <div className="p-5 flex-1 flex flex-col">
@@ -257,12 +257,12 @@ export default async function ArticlePage({ params }: Params) {
         )}
 
         {/* CTA */}
-        <div className="mt-14 glass rounded-2xl p-8 text-center">
+        <div className="mt-14 rounded-2xl border border-white/10 bg-[#071225] p-8 text-center">
           <h3 className="text-white font-bold text-xl mb-2">
-            Siap Membuat Website untuk Bisnis Anda?
+            Butuh website yang lebih rapi?
           </h3>
           <p className="text-blue-200/60 mb-6">
-            Konsultasi gratis, kami bantu dari awal hingga website Anda live.
+            Konsultasi gratis. Kami bantu cek kebutuhan dan estimasi pengerjaan.
           </p>
           <Link href="/contact">
             <Button className="bg-blue-600 hover:bg-blue-500 text-white px-8">

@@ -108,7 +108,7 @@ const services = [
     icon: LayoutDashboard,
     title: "Aplikasi Web Bisnis",
     slug: "aplikasi-web",
-    desc: "Sistem digital cerdas untuk operasional bisnis skala menengah ke atas — mencakup manajemen inventori, kasir, portal HR, booking online khusus, hingga dashboard analitik custom sesuai roadmap perusahaan Anda.",
+    desc: "Sistem operasional untuk bisnis skala menengah ke atas, seperti inventori, kasir, portal HR, booking online, atau dashboard analitik sesuai proses kerja Anda.",
     features: [
       "Sistem Multi-Role & Manajemen User",
       "Database Relasional & Pelaporan Kustom",
@@ -125,13 +125,13 @@ const process_steps = [
   {
     step: "01",
     title: "Konsultasi Gratis",
-    desc: "Ceritakan kebutuhan spesifik Anda. Tim kami analisa pasar dan merancang solusi digital yang tepat sasaran.",
+    desc: "Ceritakan kebutuhan, kondisi bisnis, dan target calon pelanggan Anda. Kami bantu pilih jalur yang paling masuk akal.",
     icon: MessageCircle,
   },
   {
     step: "02",
-    title: "Tahap Eksekusi",
-    desc: "Mulai dari sketsa antarmuka (UI/UX) hingga penulisan kode, kami kerjakan dengan metrik performa tinggi.",
+    title: "Desain & Pengerjaan",
+    desc: "Kami susun struktur halaman, desain antarmuka, lalu masuk ke pengembangan sesuai ruang lingkup yang disepakati.",
     icon: Palette,
   },
   {
@@ -143,7 +143,7 @@ const process_steps = [
   {
     step: "04",
     title: "Rilis Publik",
-    desc: "Domain terhubung, optimasi selesai. Website Anda resmi online dan siap mendatangkan ratusan konversi baru.",
+    desc: "Domain terhubung, optimasi dasar selesai, dan website siap digunakan untuk menerima calon pelanggan.",
     icon: Globe,
   },
 ];
@@ -234,33 +234,25 @@ export default function LayananPage() {
     <div>
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-600/20 to-indigo-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" />
-
         <div className="max-w-5xl mx-auto text-center relative z-10">
           <FadeUp>
-            <div className="inline-flex items-center gap-2 glass px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-blue-300 mb-8 border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)] bg-blue-500/5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">
               <Sparkles className="w-4 h-4 text-amber-400" />
-              Layanan Digital Premium
+              Layanan MFWEB
             </div>
           </FadeUp>
 
           <FadeUp delay={0.1}>
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
-              Solusi Website{" "}
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                Lengkap
-              </span>{" "}
-              <br className="hidden sm:block" />
-              untuk Akselerasi Bisnis Anda
+              Website dan sistem sederhana yang siap dipakai bisnis Anda
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.2}>
             <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-              Dari landing page sederhana pembawa konversi, hingga sistem
-              aplikasi bisnis kompleks. Kami merancang dengan{" "}
-              <strong className="text-white">estetika</strong> dan membangun
-              untuk <strong className="text-white">performa</strong>.
+              Pilih layanan sesuai tahap bisnis: landing page untuk validasi,
+              company profile untuk kredibilitas, toko online untuk penjualan,
+              atau aplikasi web untuk operasional yang lebih rapi.
             </p>
           </FadeUp>
 
@@ -269,7 +261,7 @@ export default function LayananPage() {
               <Link href="/contact">
                 <Button
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] transition-all rounded-xl group"
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold transition-colors rounded-xl group"
                 >
                   Konsultasi Proyek{" "}
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -279,7 +271,7 @@ export default function LayananPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white/10 text-white hover:bg-white/5 h-14 px-10 text-base font-bold rounded-xl glass hover:border-white/20 transition-all"
+                  className="border-white/10 bg-white/5 text-white hover:bg-white/10 h-14 px-10 text-base font-bold rounded-xl hover:border-white/20 transition-colors"
                 >
                   Lihat Estimasi Harga
                 </Button>
@@ -294,16 +286,11 @@ export default function LayananPage() {
         <div className="max-w-7xl mx-auto relative z-10">
           <FadeUp className="text-center mb-20">
             <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-              Katalog{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                Layanan
-              </span>{" "}
-              Kami
+              Pilihan layanan
             </h2>
             <p className="text-blue-200/60 max-w-2xl mx-auto text-lg leading-relaxed">
-              Setiap layanan sudah melalui riset pasar dan terbukti membantu
-              ribuan bisnis skala kecil hingga menengah untuk tumbuh secara
-              digital.
+              Mulai dari kebutuhan paling praktis sampai sistem yang lebih
+              khusus. Semua paket tetap dibahas dulu supaya ruang lingkupnya jelas.
             </p>
           </FadeUp>
 
@@ -499,15 +486,11 @@ export default function LayananPage() {
         <div className="max-w-7xl mx-auto relative z-10">
           <FadeUp className="text-center mb-24">
             <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-              Bagaimana Kami{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                Bekerja?
-              </span>
+              Cara kami bekerja
             </h2>
             <p className="text-blue-200/60 max-w-2xl mx-auto text-lg leading-relaxed">
-              Kami menyederhanakan proses digitalisasi yang kompleks menjadi 4
-              langkah transparan. Anda selalu dilibatkan dan mendapatkan
-              *update* di setiap tahapnya.
+              Proses dibuat sederhana: kebutuhan dipahami dulu, ruang lingkup
+              disepakati, lalu Anda mendapat pratinjau sebelum website live.
             </p>
           </FadeUp>
 
@@ -597,21 +580,17 @@ export default function LayananPage() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <FadeUp>
             <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 tracking-tight">
-              Siap Memulai Proyek{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                Digital
-              </span>{" "}
-              Anda?
+              Mau mulai dari layanan yang mana?
             </h2>
             <p className="text-blue-200/60 mb-10 text-xl max-w-2xl mx-auto leading-relaxed">
-              Ribuan peluang di dunia digital menunggu Anda. Hubungi kami
-              sekarang untuk merencanakan strategi eksekusi website Anda.
+              Kirim gambaran singkat bisnis Anda. Kami bantu pilih paket yang
+              cukup, bukan yang paling mahal.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-5">
               <Link href="/contact">
                 <Button
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] transition-all rounded-xl group"
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold transition-colors rounded-xl group"
                 >
                   Mulai Diskusi via Email{" "}
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -625,7 +604,7 @@ export default function LayananPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white/10 text-white hover:bg-white/5 h-14 px-10 text-base font-bold rounded-xl glass hover:border-white/20 transition-all"
+                  className="border-white/10 bg-white/5 text-white hover:bg-white/10 h-14 px-10 text-base font-bold rounded-xl hover:border-white/20 transition-colors"
                 >
                   💬 Konsultasi via WhatsApp
                 </Button>

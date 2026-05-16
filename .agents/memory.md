@@ -107,6 +107,9 @@ user confirms a lasting preference, project decision, or important current state
 - Public background direction uses calm dark banded sections instead of global
   grid/glow effects: base `#020611`, section `#071225`, alt `#06111f`, solid
   surfaces, and subtle dividers.
+- Public pages should keep the newer humanized direction: concrete Indonesian
+  copy, fewer superlatives, solid dark surfaces, limited glow/glass, and CTAs
+  tied to real next steps like WhatsApp, consultation, audit, or portal tools.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

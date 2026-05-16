@@ -41,7 +41,7 @@ export default function BlogSearch({ initialQuery }: { initialQuery: string }) {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Cari artikel..."
-        className="w-full glass rounded-2xl pl-12 pr-12 py-3 border border-white/10 text-white placeholder:text-blue-200/25 focus:border-blue-500/40 outline-none transition-all"
+        className="w-full rounded-2xl border border-white/10 bg-[#071225] py-3 pl-12 pr-12 text-white placeholder:text-blue-200/25 outline-none transition-colors focus:border-blue-500/40"
       />
       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
         {(isTyping || isPending) && (

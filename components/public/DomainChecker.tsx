@@ -85,12 +85,12 @@ export default function DomainChecker() {
   };
 
   return (
-    <div id="domain-checker" className="glass rounded-2xl p-6 sm:p-8 glow-blue max-w-2xl mx-auto">
+    <div id="domain-checker" className="mx-auto max-w-2xl rounded-2xl border border-white/10 bg-[#071225] p-6 sm:p-8">
       <h3 className="text-white font-bold text-xl mb-2 text-center">
         Cek Ketersediaan Domain Bisnis Anda
       </h3>
       <p className="text-blue-200/60 text-sm text-center mb-6">
-        Ketik nama bisnis Anda untuk melihat apakah domain-nya masih tersedia
+        Ketik nama bisnis Anda untuk melihat apakah domainnya masih tersedia.
       </p>
 
       <form onSubmit={handleCheck} className="flex gap-2">
@@ -150,7 +150,7 @@ export default function DomainChecker() {
           {!result.available && (
             <div>
               <p className="text-blue-200/50 text-xs mb-2 px-1">
-                {loadingSugg ? "Mencari alternatif yang tersedia..." : suggestions.length > 0 ? "✨ Domain alternatif yang tersedia:" : ""}
+                {loadingSugg ? "Mencari alternatif yang tersedia..." : suggestions.length > 0 ? "Domain alternatif yang tersedia:" : ""}
               </p>
 
               {loadingSugg && (

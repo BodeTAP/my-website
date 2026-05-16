@@ -54,7 +54,7 @@ const tools = [
     icon: Wand2,
     color: "purple" as const,
     label: "Generator Nama Bisnis",
-    desc: "Kehabisan ide nama? Generate ratusan kombinasi nama bisnis profesional dan slogan catchy hanya dalam hitungan detik.",
+    desc: "Cari ide nama bisnis dan slogan dari beberapa gaya kata. Cocok untuk tahap awal validasi brand.",
     tags: ["10+ Industri", "Pilihan Gaya Kata", "Slogan Unik"],
   },
   {
@@ -70,7 +70,7 @@ const tools = [
     icon: TrendingUp,
     color: "teal" as const,
     label: "Kalkulator ROI Digital",
-    desc: "Visualisasikan potensi keuntungan. Hitung estimasi cuan bisnis Anda bila memiliki website yang teroptimasi dengan baik.",
+    desc: "Hitung perkiraan dampak website terhadap lead, omzet, dan waktu balik modal dengan asumsi yang bisa Anda ubah.",
     tags: ["Estimasi Revenue", "Payback Period", "Konversi Prospek"],
   },
   {
@@ -86,8 +86,8 @@ const tools = [
     icon: Calculator,
     color: "green" as const,
     label: "Estimasi Harga Website",
-    desc: "Dapatkan estimasi biaya pembuatan website secara instan menggunakan AI. Pilih jenis bisnis, fitur, dan timeline Anda.",
-    tags: ["AI-Powered", "Breakdown Biaya", "Rekomendasi Paket"],
+    desc: "Dapatkan estimasi biaya website dari pilihan jenis bisnis, fitur, dan timeline pengerjaan.",
+    tags: ["Estimasi Awal", "Breakdown Biaya", "Rekomendasi Paket"],
   },
 ];
 
@@ -138,25 +138,24 @@ export default async function ToolsPage() {
     <div className="min-h-screen">
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-teal-600/20 to-blue-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" />
-        
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <FadeUp delay={0}>
-            <div className="inline-flex items-center gap-2 glass px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-teal-300 mb-8 border border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.15)] bg-teal-500/5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">
               <Wrench className="w-4 h-4 text-teal-400" />
-              Resource Center
+              Tools MFWEB
             </div>
           </FadeUp>
 
           <FadeUp delay={0.1}>
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
-              Koleksi Tools <span className="bg-gradient-to-r from-teal-400 via-emerald-400 to-blue-400 bg-clip-text text-transparent">Gratis & Premium</span> <br className="hidden sm:block" />Untuk Eksekusi Cepat
+              Tools untuk cek website, cari prospek, dan membuat dokumen bisnis
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.2}>
             <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-              Audit performa website, cari lead, buat proposal PDF, dan susun invoice profesional dari satu pusat tools MFWEB.
+              Gunakan tools gratis untuk audit ringan, atau tools premium di portal
+              untuk lead finder, proposal PDF, dan invoice PDF.
             </p>
           </FadeUp>
         </div>
@@ -193,8 +192,7 @@ export default async function ToolsPage() {
                 <StaggerItem key={tool.href}>
                   <HoverCard className="h-full">
                     <Link href={tool.href} className="group block h-full">
-                      <div className="glass relative flex h-full flex-col overflow-hidden rounded-[28px] border border-amber-500/15 bg-[#050b14] p-7 shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all duration-500 hover:border-amber-400/35">
-                        <div className={`absolute -right-20 -top-20 h-64 w-64 ${c.glow} rounded-full blur-[80px] opacity-0 transition-opacity duration-700 group-hover:opacity-100`} />
+                      <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-amber-500/15 bg-[#071225] p-7 transition-colors duration-300 hover:border-amber-400/35">
                         <div className="relative z-10 mb-6 flex items-start justify-between gap-4">
                           <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${c.bg} border border-white/5`}>
                             <tool.icon className={`h-7 w-7 ${c.text}`} />
@@ -240,15 +238,12 @@ export default async function ToolsPage() {
                 <StaggerItem key={tool.href}>
                   <HoverCard className="h-full">
                     <Link href={tool.href} className="group block h-full">
-                      <div className="glass rounded-[32px] p-8 border border-white/5 hover:border-white/20 transition-all duration-500 flex flex-col relative overflow-hidden bg-[#050b14] h-full shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-                        {/* Glow effect on hover */}
-                        <div className={`absolute -right-20 -top-20 w-64 h-64 ${c.glow} blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
-                        
+                      <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#071225] p-8 transition-colors duration-300 hover:border-white/20">
                         <div className="flex justify-between items-start mb-8 relative z-10">
                           <div className={`w-16 h-16 rounded-2xl ${c.bg} border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg`}>
                             <tool.icon className={`w-8 h-8 ${c.text}`} />
                           </div>
-                          <div className="bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-[0_0_15px_rgba(34,197,94,0.15)] animate-pulse-slow backdrop-blur-md">
+                          <div className="bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full flex items-center gap-1.5">
                             <Sparkles className="w-3 h-3 text-green-400" />
                             <span className="text-[10px] font-bold text-green-400 tracking-widest uppercase">Gratis</span>
                           </div>
@@ -280,32 +275,30 @@ export default async function ToolsPage() {
 
       {/* ── CTA ───────────────────────────────────────────── */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <ScaleIn>
-            <div className="glass rounded-[40px] p-10 sm:p-16 border border-white/5 relative overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.05)] bg-[#030914]/80">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-600/10 via-blue-600/5 to-transparent pointer-events-none" />
-              
+            <div className="rounded-2xl border border-white/10 bg-[#071225] p-10 sm:p-16">
               <FadeUp className="relative">
                 <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-                  Ketahui Akar Masalah <span className="text-gradient">Website Anda?</span>
+                  Butuh audit yang lebih rapi?
                 </h2>
               </FadeUp>
               <FadeUp delay={0.1} className="relative">
                 <p className="text-blue-200/60 mb-12 text-lg max-w-2xl mx-auto leading-relaxed">
-                  Jika tools di atas menunjukkan hasil yang kurang memuaskan, tim ahli kami siap melakukan audit mendalam secara manual. Bebas biaya konsultasi.
+                  Jika hasil tools menunjukkan banyak catatan, kami bisa bantu cek
+                  manual dan susun prioritas perbaikan yang paling berdampak.
                 </p>
               </FadeUp>
               <FadeUp delay={0.2} className="relative">
                 <div className="flex flex-col sm:flex-row justify-center gap-5">
                   <Link href="/contact">
-                    <Button size="lg" className="bg-teal-600 hover:bg-teal-500 text-white px-10 h-14 text-base font-bold shadow-[0_0_30px_rgba(13,148,136,0.4)] hover:shadow-[0_0_40px_rgba(13,148,136,0.6)] transition-all rounded-xl group">
-                      Mulai Konsultasi Ahli <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <Button size="lg" className="bg-teal-600 hover:bg-teal-500 text-white px-10 h-14 text-base font-bold transition-colors rounded-xl group">
+                      Konsultasi website <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                   <Link href="/layanan">
-                    <Button size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 h-14 px-10 text-base font-bold rounded-xl glass hover:border-white/20 transition-all">
-                      Eksplorasi Jasa Kami
+                    <Button size="lg" variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10 h-14 px-10 text-base font-bold rounded-xl hover:border-white/20 transition-colors">
+                      Lihat layanan
                     </Button>
                   </Link>
                 </div>

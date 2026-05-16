@@ -1,63 +1,70 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
-import { ArrowRight, CheckCircle, Users, Zap, Shield, Heart, Code, Headphones, Sparkles, Target, Rocket } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle,
+  Code,
+  Headphones,
+  Heart,
+  Shield,
+  Target,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FadeUp, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
+import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
 export const metadata: Metadata = {
-  title: "Tentang Kami — MFWEB Web Developer Profesional",
+  title: "Tentang MFWEB - Tim Website untuk Bisnis Lokal",
   description:
-    "Kenali MFWEB lebih dekat. Kami adalah tim web developer profesional yang membantu bisnis lokal Indonesia tampil kredibel di internet sejak hari pertama.",
+    "MFWEB membantu bisnis lokal menyiapkan website yang jelas, cepat diakses, mudah dikelola, dan siap dipakai untuk menerima calon pelanggan.",
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "Tentang Kami — MFWEB Web Developer Profesional",
+    title: "Tentang MFWEB - Tim Website untuk Bisnis Lokal",
     description:
-      "Tim web developer profesional yang membantu bisnis lokal Indonesia tampil kredibel di internet.",
+      "Tim website yang membantu bisnis lokal punya halaman, sistem, dan dokumen digital yang rapi.",
   },
 };
 
 const values = [
   {
-    icon: Zap,
-    title: "Cepat & Tepat Waktu",
-    desc: "Kami menghargai waktu Anda. Proyek diselesaikan sesuai deadline yang disepakati, tanpa drama maupun penundaan.",
+    icon: Target,
+    title: "Mulai dari kebutuhan bisnis",
+    desc: "Kami menanyakan cara calon pelanggan menemukan Anda, informasi apa yang perlu jelas, dan tindakan apa yang ingin diarahkan.",
   },
   {
-    icon: Shield,
-    title: "Kualitas Tanpa Kompromi",
-    desc: "Setiap website dibangun dengan standar kode tertinggi — super cepat, aman, mobile-friendly, dan SEO-ready.",
+    icon: Code,
+    title: "Teknisnya rapi",
+    desc: "Website dibuat cepat, responsif, aman, dan mudah dirawat. Bagian teknis tidak kami jadikan beban untuk klien.",
   },
   {
     icon: Heart,
-    title: "Klien adalah Mitra",
-    desc: "Kami tidak sekadar membuat website lalu pergi. Kami mendampingi bisnis Anda tumbuh di era digital jangka panjang.",
+    title: "Komunikasi sederhana",
+    desc: "Progress, revisi, dan keputusan desain dijelaskan dengan bahasa yang mudah dipahami, bukan istilah teknis yang memusingkan.",
   },
   {
     icon: Headphones,
-    title: "Support Penuh Dedikasi",
-    desc: "Ada kendala teknis? Tim support kami selalu siaga via WhatsApp untuk membantu menyelesaikan masalah Anda.",
+    title: "Support setelah live",
+    desc: "Setelah website online, kami tetap membantu jika ada kendala teknis, perubahan kecil, atau pertanyaan penggunaan dashboard.",
   },
 ];
 
 const stats = [
-  { num: "50+", label: "Proyek Selesai" },
-  { num: "95%", label: "Klien Sangat Puas" },
-  { num: "3 Hari", label: "Rata-rata Delivery" },
-  { num: "24/7", label: "Support Aktif" },
+  { num: "50+", label: "Proyek selesai" },
+  { num: "3-7 hari", label: "Rata-rata pengerjaan" },
+  { num: "1 tahun", label: "Domain dan hosting awal" },
+  { num: "WA", label: "Jalur support utama" },
 ];
 
-const reasons = [
-  "Website dibangun custom murni, bukan template generik",
-  "Sudah termasuk bundling domain .com + hosting SSD + SSL",
-  "Dioptimasi algoritma SEO agar mendominasi Google",
-  "Loading super cepat (Skor metrik 90+ di PageSpeed Insights)",
-  "Responsif dan mulus sempurna di semua ukuran layar",
-  "Dashboard admin mandiri untuk update konten tanpa coding",
-  "Sistem revisi yang adil sampai Anda benar-benar puas",
-  "Harga transparan di awal, nol biaya tersembunyi",
+const checks = [
+  "Struktur halaman dibuat jelas untuk pengunjung baru",
+  "CTA WhatsApp, formulir, atau tombol kontak dipasang sesuai kebutuhan",
+  "SEO dasar, sitemap, dan metadata disiapkan sejak awal",
+  "Tampilan dicek di HP, tablet, dan desktop sebelum live",
+  "Dashboard admin disiapkan untuk konten yang perlu sering diganti",
+  "Harga, timeline, dan revisi dibahas di depan",
 ];
 
 export default function AboutPage() {
@@ -71,206 +78,163 @@ export default function AboutPage() {
   };
 
   return (
-    <div>
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-600/20 to-indigo-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" />
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <FadeUp delay={0}>
-            <div className="inline-flex items-center gap-2 glass px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-blue-300 mb-8 border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)] bg-blue-500/5">
-              <Users className="w-4 h-4 text-blue-400" />
+    <div className="bg-[#020611]">
+      <section className="px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
+          <FadeUp>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-blue-200/70">
+              <Users className="h-4 w-4 text-blue-300" />
               Tentang MFWEB
+            </div>
+            <h1 className="max-w-3xl text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Kami membantu bisnis lokal punya website yang bekerja jelas.
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-blue-100/65">
+              Bukan sekadar tampilan bagus. Kami merapikan cara bisnis Anda diperkenalkan,
+              dihubungi, ditemukan di Google, dan dikelola setelah website live.
+            </p>
+            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
+              <Link href="/contact">
+                <Button size="lg" className="h-14 rounded-xl bg-blue-600 px-7 font-bold text-white hover:bg-blue-500">
+                  Diskusi kebutuhan
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/portfolio">
+                <Button size="lg" variant="outline" className="h-14 rounded-xl border-white/10 bg-white/5 px-7 font-bold text-white hover:bg-white/10">
+                  Lihat hasil kerja
+                </Button>
+              </Link>
             </div>
           </FadeUp>
 
-          <FadeUp delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
-              Katalisator Digital <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Bisnis Lokal</span> Indonesia
-            </h1>
-          </FadeUp>
-
-          <FadeUp delay={0.2}>
-            <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-              Kami memadukan estetika desain kelas dunia dengan performa kode tingkat tinggi untuk melahirkan website yang <strong className="text-white">memukau secara visual dan menghasilkan secara finansial</strong>.
-            </p>
-          </FadeUp>
-        </div>
-      </section>
-
-      {/* ── Story ─────────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <FadeUp>
-              <div className="relative">
-                <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-blue-400 mb-6">
-                  <Target className="w-4 h-4" /> Visi & Misi
+          <FadeUp delay={0.12}>
+            <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 sm:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10">
+                  <Shield className="h-5 w-5 text-blue-300" />
                 </div>
-                <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-                  Mengapa Kami <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Ada?</span>
-                </h2>
-                <div className="space-y-6 text-blue-200/70 text-lg leading-relaxed">
-                  <p>
-                    Mayoritas bisnis lokal di Indonesia memiliki potensi produk yang luar biasa, namun masih tertinggal karena <strong className="text-white">jejak digital yang kurang meyakinkan</strong>.
-                  </p>
-                  <p>
-                    Berangkat dari kegelisahan tersebut, tim engineer dan desainer kami mendirikan MFWEB. Misi kami sederhana: menjadi jembatan terkuat bagi UMKM dan perusahaan lokal untuk <strong className="text-white">mendominasi pasar online</strong>.
-                  </p>
-                  <p>
-                    Kami percaya bahwa setiap website bukanlah sekadar halaman brosur mati. Ia adalah <strong className="text-white">karyawan digital Anda yang bekerja 24 jam sehari, 7 hari seminggu</strong> untuk mendatangkan prospek berkualitas tiada henti.
-                  </p>
+                <div>
+                  <p className="font-semibold text-white">Yang biasanya kami rapikan</p>
+                  <p className="text-sm text-blue-200/50">Dari halaman publik sampai dokumen kerja.</p>
                 </div>
               </div>
-            </FadeUp>
-
-            <FadeUp delay={0.15}>
-              <div className="glass rounded-[40px] p-8 sm:p-10 border border-blue-500/20 relative overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.1)] bg-[#040d1a]">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px] rounded-full pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/10 blur-[80px] rounded-full pointer-events-none" />
-                
-                <div className="relative z-10 grid grid-cols-2 gap-6">
-                  {stats.map((s, i) => (
-                    <div key={s.label} className="bg-black/40 backdrop-blur-md rounded-3xl p-6 text-center border border-white/5 hover:border-blue-500/30 transition-colors group">
-                      <div className="text-4xl sm:text-5xl font-black text-white mb-2 group-hover:text-blue-400 transition-colors tracking-tight">{s.num}</div>
-                      <div className="text-blue-200/50 text-[11px] font-bold uppercase tracking-widest">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </FadeUp>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Values ────────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <FadeUp className="text-center mb-20">
-            <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-              Prinsip <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Fundamental</span>
-            </h2>
-            <p className="text-blue-200/60 max-w-2xl mx-auto text-lg leading-relaxed">
-              Empat pilar utama yang mendasari setiap baris kode yang kami ketik dan setiap piksel desain yang kami rancang.
-            </p>
-          </FadeUp>
-
-          <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((v, i) => (
-              <StaggerItem key={v.title}>
-                <HoverCard className="h-full">
-                  <div className="glass rounded-3xl p-8 hover:border-blue-500/40 transition-colors duration-500 group h-full relative overflow-hidden bg-black/20">
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-blue-500/20 transition-all" />
-                    
-                    <div className="w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all shadow-[0_0_15px_rgba(59,130,246,0.1)] relative z-10">
-                      <v.icon className="w-6 h-6 text-blue-400" />
-                    </div>
-                    <h3 className="text-white font-bold text-xl mb-3 relative z-10">{v.title}</h3>
-                    <p className="text-blue-200/60 text-sm leading-relaxed relative z-10">{v.desc}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {["Profil bisnis", "Alur kontak", "SEO dasar", "Dashboard konten", "Lead tools", "Proposal dan invoice"].map((item) => (
+                  <div key={item} className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-medium text-blue-100/75">
+                    {item}
                   </div>
-                </HoverCard>
+                ))}
+              </div>
+            </div>
+          </FadeUp>
+        </div>
+      </section>
+
+      <section className="border-y border-white/10 bg-[#071225] px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+          <FadeUp>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#020611] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-blue-200/60">
+              Cara kami melihat proyek
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Website yang baik harus mudah dipercaya, mudah dipakai, dan mudah dilanjutkan.
+            </h2>
+            <div className="mt-6 space-y-5 text-base leading-relaxed text-blue-100/65">
+              <p>
+                Banyak bisnis sudah punya produk bagus, tetapi calon pelanggan masih ragu karena informasi online-nya kurang jelas. Di titik itu, website bukan hiasan. Website menjadi tempat orang mengecek kredibilitas sebelum menghubungi.
+              </p>
+              <p>
+                Karena itu kami tidak hanya mengejar visual. Kami membantu menyusun struktur halaman, CTA, konten dasar, performa, dan alat pendukung seperti lead finder, proposal, serta invoice agar alur kerja bisnis lebih rapi.
+              </p>
+            </div>
+          </FadeUp>
+
+          <StaggerChildren className="grid grid-cols-2 gap-4">
+            {stats.map((stat) => (
+              <StaggerItem key={stat.label}>
+                <div className="rounded-2xl border border-white/10 bg-[#020611] p-5">
+                  <div className="text-2xl font-black text-white sm:text-3xl">{stat.num}</div>
+                  <div className="mt-2 text-xs font-semibold uppercase tracking-widest text-blue-200/45">{stat.label}</div>
+                </div>
               </StaggerItem>
             ))}
           </StaggerChildren>
         </div>
       </section>
 
-      {/* ── Why Us ────────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
-            <FadeUp delay={0.15} className="order-2 lg:order-1">
-              <div className="glass rounded-[40px] p-8 sm:p-12 border border-indigo-500/20 relative overflow-hidden shadow-[0_0_50px_rgba(99,102,241,0.05)] bg-[#050b14]">
-                <div className="absolute -top-20 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
-                
-                <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-                      <Code className="w-8 h-8 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-white font-black text-2xl tracking-tight">Tech Stack Modern</p>
-                      <p className="text-indigo-300/70 text-sm font-medium mt-1">Standar industri global</p>
-                    </div>
+      <section className="px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <FadeUp className="mb-12 max-w-2xl">
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Prinsip kerja yang kami jaga
+            </h2>
+            <p className="mt-4 text-blue-100/60">
+              Ini yang membuat proyek terasa lebih tertata dari brief awal sampai website benar-benar digunakan.
+            </p>
+          </FadeUp>
+
+          <StaggerChildren className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map((value) => (
+              <StaggerItem key={value.title}>
+                <div className="h-full rounded-2xl border border-white/10 bg-[#071225] p-6">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10">
+                    <value.icon className="h-5 w-5 text-blue-300" />
                   </div>
-                  
-                  <div className="bg-black/50 backdrop-blur-xl p-6 rounded-3xl border border-white/5 mb-2">
-                    <div className="flex flex-wrap gap-3">
-                      {["Next.js", "React 18", "TypeScript", "Tailwind CSS", "PostgreSQL", "Prisma ORM", "Framer Motion", "Vercel Edge"].map((t) => (
-                        <span key={t} className="text-sm font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-4 py-2 rounded-xl shadow-[0_0_10px_rgba(99,102,241,0.1)]">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  <h3 className="text-lg font-bold text-white">{value.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-blue-100/60">{value.desc}</p>
                 </div>
-              </div>
-            </FadeUp>
-
-            <FadeUp className="order-1 lg:order-2">
-              <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-purple-400 mb-6">
-                <Rocket className="w-4 h-4" /> Keunggulan Kompetitif
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-                Standar Kami <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Berbeda</span>
-              </h2>
-              <p className="text-blue-200/60 mb-10 text-lg leading-relaxed">
-                Kami tidak pernah menggunakan jalan pintas. Setiap baris kode dirancang khusus untuk memenangkan kompetisi di industri spesifik Anda.
-              </p>
-              <ul className="space-y-5">
-                {reasons.map((r) => (
-                  <li key={r} className="flex items-start gap-4">
-                    <div className="w-6 h-6 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
-                      <CheckCircle className="w-3.5 h-3.5 text-purple-400" />
-                    </div>
-                    <span className="text-blue-50/80 text-base font-medium">{r}</span>
-                  </li>
-                ))}
-              </ul>
-            </FadeUp>
-
-          </div>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <ScaleIn>
-            <div className="glass rounded-[40px] p-10 sm:p-16 border border-white/5 relative overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.05)] bg-[#030914]/80">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent pointer-events-none" />
-              
-              <FadeUp className="relative">
-                <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-                  Siap Berkolaborasi Bersama <span className="text-gradient">Kami?</span>
-                </h2>
-              </FadeUp>
-              <FadeUp delay={0.1} className="relative">
-                <p className="text-blue-200/60 mb-12 text-lg max-w-2xl mx-auto leading-relaxed">
-                  Tidak perlu ragu. Ceritakan visi bisnis Anda kepada kami, dan mari kita rancang strategi untuk mewujudkannya di ranah digital.
-                </p>
-              </FadeUp>
-              <FadeUp delay={0.2} className="relative">
-                <div className="flex flex-col sm:flex-row justify-center gap-5">
-                  <Link href="/contact">
-                    <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] transition-all rounded-xl group">
-                      Jadwalkan Konsultasi <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                  <Link href="/layanan">
-                    <Button size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 h-14 px-10 text-base font-bold rounded-xl glass hover:border-white/20 transition-all">
-                      Eksplorasi Layanan
-                    </Button>
-                  </Link>
+      <section className="border-y border-white/10 bg-[#06111f] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <FadeUp>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Apa yang bisa Anda harapkan?
+            </h2>
+            <p className="mt-5 text-blue-100/60">
+              Kami lebih suka menjanjikan hal yang bisa dicek: struktur, performa, akses admin, dan komunikasi yang jelas.
+            </p>
+          </FadeUp>
+
+          <StaggerChildren className="grid gap-3 sm:grid-cols-2">
+            {checks.map((check) => (
+              <StaggerItem key={check}>
+                <div className="flex h-full gap-3 rounded-xl border border-white/10 bg-[#020611] p-4">
+                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+                  <span className="text-sm leading-relaxed text-blue-100/70">{check}</span>
                 </div>
-              </FadeUp>
-            </div>
-          </ScaleIn>
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
         </div>
+      </section>
+
+      <section className="px-4 py-24 sm:px-6 lg:px-8">
+        <FadeUp className="mx-auto max-w-4xl rounded-2xl border border-white/10 bg-[#071225] p-8 text-center sm:p-12">
+          <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+            Punya bisnis yang perlu dirapikan online?
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-blue-100/60">
+            Ceritakan kondisi sekarang, target pelanggan, dan referensi yang Anda suka. Kami bantu susun langkah paling masuk akal.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <Link href="/contact">
+              <Button size="lg" className="h-14 rounded-xl bg-blue-600 px-8 font-bold text-white hover:bg-blue-500">
+                Mulai konsultasi
+              </Button>
+            </Link>
+            <Link href="/layanan">
+              <Button size="lg" variant="outline" className="h-14 rounded-xl border-white/10 bg-white/5 px-8 font-bold text-white hover:bg-white/10">
+                Lihat layanan
+              </Button>
+            </Link>
+          </div>
+        </FadeUp>
       </section>
 
       <Script

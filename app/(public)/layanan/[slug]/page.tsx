@@ -353,7 +353,7 @@ const services: Record<string, ServiceData> = {
       },
     ],
     forWhom: [
-      "Bisnis lokal yang ingin websitenya mendominasi pencarian di kota/area tertentu",
+      "Bisnis lokal yang ingin lebih mudah ditemukan di pencarian kota atau area tertentu",
       "Perusahaan yang ingin mengalahkan kompetitor di halaman pencarian",
       "Pemilik website yang butuh artikel original berkualitas untuk update blog rutin",
       "UMKM yang ingin mendapatkan pelanggan gratis dari Google tanpa bayar iklan terus-menerus",

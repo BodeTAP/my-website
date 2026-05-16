@@ -29,7 +29,7 @@ export default function TestimonialCarousel({ testimonials }: { testimonials: Te
           {displayItems.map((t, idx) => (
             <div
               key={`track1-${idx}`}
-              className="w-[320px] sm:w-[400px] glass bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-8 shrink-0 hover:border-blue-500/40 hover:bg-[#0d1b35]/80 transition-all duration-300 flex flex-col relative shadow-xl"
+              className="relative flex w-[320px] shrink-0 flex-col rounded-2xl border border-white/10 bg-[#071225] p-6 transition-colors duration-300 hover:border-blue-400/40 sm:w-[400px] sm:p-8"
             >
               <Quote className="absolute top-6 right-6 w-8 h-8 text-blue-500/10" />
               
@@ -47,7 +47,7 @@ export default function TestimonialCarousel({ testimonials }: { testimonials: Te
 
               {/* Author */}
               <div className="flex items-center gap-4 mt-auto">
-                <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-600/40 to-blue-800/20 border border-blue-500/30 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
+                <div className="w-12 h-12 rounded-full bg-[#0d1b35] border border-blue-500/30 flex items-center justify-center shrink-0 overflow-hidden">
                   {t.avatar ? (
                     <Image src={t.avatar} alt={t.name} width={48} height={48} className="w-full h-full object-cover" />
                   ) : (
@@ -68,7 +68,7 @@ export default function TestimonialCarousel({ testimonials }: { testimonials: Te
           {displayItems.map((t, idx) => (
             <div
               key={`track2-${idx}`}
-              className="w-[320px] sm:w-[400px] glass bg-white/5 border border-white/10 rounded-3xl p-6 sm:p-8 shrink-0 hover:border-blue-500/40 hover:bg-[#0d1b35]/80 transition-all duration-300 flex flex-col relative shadow-xl"
+              className="relative flex w-[320px] shrink-0 flex-col rounded-2xl border border-white/10 bg-[#071225] p-6 transition-colors duration-300 hover:border-blue-400/40 sm:w-[400px] sm:p-8"
             >
               <Quote className="absolute top-6 right-6 w-8 h-8 text-blue-500/10" />
               
@@ -86,7 +86,7 @@ export default function TestimonialCarousel({ testimonials }: { testimonials: Te
 
               {/* Author */}
               <div className="flex items-center gap-4 mt-auto">
-                <div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-600/40 to-blue-800/20 border border-blue-500/30 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
+                <div className="w-12 h-12 rounded-full bg-[#0d1b35] border border-blue-500/30 flex items-center justify-center shrink-0 overflow-hidden">
                   {t.avatar ? (
                     <Image src={t.avatar} alt={t.name} width={48} height={48} className="w-full h-full object-cover" />
                   ) : (
