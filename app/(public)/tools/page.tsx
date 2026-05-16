@@ -5,13 +5,33 @@ import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 import { getToolSettings } from "@/lib/toolSettings";
 
-export const metadata: Metadata = {
-  title: "Tools Gratis untuk Website & Bisnis — MFWEB",
-  description:
-    "Cek kecepatan website, analisis SEO, dan generator nama bisnis secara gratis. Tools online dari MFWEB untuk pemilik bisnis lokal.",
-  alternates: { canonical: "/tools" },
-};
+export const revalidate = 300;
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
+const pageTitle = "Tools Gratis & Premium untuk Website, Lead, Proposal, Invoice | MFWEB";
+const pageDescription =
+  "Gunakan tools gratis dan premium MFWEB untuk audit website, cari lead, buat proposal PDF, invoice PDF, QR code, estimasi harga, dan optimasi bisnis.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: pageTitle,
+  description: pageDescription,
+  alternates: { canonical: "/tools" },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: "/tools",
+    siteName: "MFWEB",
+    type: "website",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: ["/opengraph-image"],
+  },
+};
 const tools = [
   {
     href: "/tools/cek-kecepatan",
@@ -130,13 +150,13 @@ export default async function ToolsPage() {
 
           <FadeUp delay={0.1}>
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
-              Koleksi Tools <span className="bg-gradient-to-r from-teal-400 via-emerald-400 to-blue-400 bg-clip-text text-transparent">Gratis</span> <br className="hidden sm:block" />Untuk Eksekusi Cepat
+              Koleksi Tools <span className="bg-gradient-to-r from-teal-400 via-emerald-400 to-blue-400 bg-clip-text text-transparent">Gratis & Premium</span> <br className="hidden sm:block" />Untuk Eksekusi Cepat
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.2}>
             <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-              Analisis performa website Anda dan temukan ide cemerlang untuk bisnis tanpa biaya sepeser pun. Dirancang khusus untuk mempermudah operasional Anda.
+              Audit performa website, cari lead, buat proposal PDF, dan susun invoice profesional dari satu pusat tools MFWEB.
             </p>
           </FadeUp>
         </div>
@@ -297,3 +317,5 @@ export default async function ToolsPage() {
     </div>
   );
 }
+
+

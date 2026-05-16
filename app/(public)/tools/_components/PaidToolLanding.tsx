@@ -39,6 +39,7 @@ type PaidToolLandingProps = {
   eyebrow: string;
   title: string;
   description: string;
+  canonicalPath: string;
   primaryCta: string;
   portalHref: string;
   accent: "blue" | "emerald" | "amber";
@@ -76,6 +77,7 @@ export default function PaidToolLanding({
   eyebrow,
   title,
   description,
+  canonicalPath,
   primaryCta,
   portalHref,
   accent,
@@ -88,9 +90,63 @@ export default function PaidToolLanding({
   faqs,
 }: PaidToolLandingProps) {
   const c = accentClass[accent];
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id").replace(/\/$/, "");
+  const pageUrl = `${siteUrl}${canonicalPath}`;
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: eyebrow,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      url: pageUrl,
+      description,
+      isAccessibleForFree: false,
+      featureList: features.map((feature) => feature.title),
+      provider: {
+        "@type": "Organization",
+        name: "MFWEB",
+        url: siteUrl,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.q,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.a,
+        },
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Tools",
+          item: `${siteUrl}/tools`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: eyebrow,
+          item: pageUrl,
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen overflow-x-clip">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="relative px-4 pt-28 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <FadeUp>

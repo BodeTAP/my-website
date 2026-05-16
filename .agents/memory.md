@@ -86,7 +86,10 @@ user confirms a lasting preference, project decision, or important current state
   `/tools/invoice-generator`; `/tools/lead-finder` redirects to the existing
   `/lead-finder` landing page. The public `/tools` page has a premium tools
   section above the free tools grid and reads credit prices from Admin Tools
-  settings instead of hardcoded defaults.
+  settings instead of hardcoded defaults. Paid tools pages use 5-minute
+  revalidation, specific OG/Twitter metadata, exact-keyword H1s, FAQ +
+  SoftwareApplication JSON-LD, and `/tools/lead-finder` is excluded from the
+  sitemap because it is a redirect.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

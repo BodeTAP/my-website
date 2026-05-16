@@ -20,7 +20,7 @@ module.exports = {
       `${process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id"}/sitemap.xml`,
     ],
   },
-  exclude: ["/admin/*", "/portal/*", "/api/*", "/onboarding/*", "/bayar/*"],
+  exclude: ["/admin/*", "/portal/*", "/api/*", "/onboarding/*", "/bayar/*", "/tools/lead-finder"],
   changefreq: "weekly",
   priority: 0.7,
   sitemapSize: 5000,

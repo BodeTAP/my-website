@@ -3,11 +3,32 @@ import { Brain, Download, LayoutTemplate, Palette } from "lucide-react";
 import PaidToolLanding from "../_components/PaidToolLanding";
 import { getToolSettings } from "@/lib/toolSettings";
 
+export const revalidate = 300;
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
+const pageTitle = "Proposal Generator untuk Buat Proposal PDF Profesional | MFWEB";
+const pageDescription =
+  "Buat proposal PDF profesional dengan template, brand kit, konten terarah, dan riwayat dokumen langsung dari portal klien MFWEB.";
+
 export const metadata: Metadata = {
-  title: "Proposal Generator untuk Buat Proposal PDF Cepat | MFWEB",
-  description:
-    "Buat proposal bisnis profesional dengan template, brand kit, dan PDF siap download langsung dari portal klien MFWEB.",
+  metadataBase: new URL(SITE_URL),
+  title: pageTitle,
+  description: pageDescription,
   alternates: { canonical: "/tools/proposal-generator" },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: "/tools/proposal-generator",
+    siteName: "MFWEB",
+    type: "website",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: ["/opengraph-image"],
+  },
 };
 
 export default async function ProposalGeneratorLandingPage() {
@@ -17,8 +38,9 @@ export default async function ProposalGeneratorLandingPage() {
   return (
     <PaidToolLanding
       eyebrow="Proposal Generator"
-      title="Buat proposal profesional tanpa mulai dari halaman kosong"
-      description="Proposal Generator membantu user menyusun proposal bisnis dari template, menyesuaikan desain brand, lalu mengunduh PDF yang siap dikirim ke prospek."
+      title="Proposal Generator untuk Buat Proposal PDF Profesional"
+      description={pageDescription}
+      canonicalPath="/tools/proposal-generator"
       primaryCta="Buat proposal"
       portalHref="/portal/tools/proposal-generator"
       accent="blue"

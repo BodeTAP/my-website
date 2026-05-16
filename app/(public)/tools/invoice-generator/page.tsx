@@ -3,11 +3,32 @@ import { Copy, Palette, Percent, ReceiptText } from "lucide-react";
 import PaidToolLanding from "../_components/PaidToolLanding";
 import { getToolSettings } from "@/lib/toolSettings";
 
+export const revalidate = 300;
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
+const pageTitle = "Invoice Generator PDF dengan Template dan PPN 11% | MFWEB";
+const pageDescription =
+  "Buat invoice PDF cepat dengan template desain, brand kit, PPN 11% opsional, duplicate invoice, edit detail, status manual, dan download PDF.";
+
 export const metadata: Metadata = {
-  title: "Invoice Generator PDF dengan Template & PPN 11% | MFWEB",
-  description:
-    "Buat invoice PDF cepat dari portal klien dengan template desain, brand kit, PPN 11% opsional, edit detail, duplicate, dan download PDF.",
+  metadataBase: new URL(SITE_URL),
+  title: pageTitle,
+  description: pageDescription,
   alternates: { canonical: "/tools/invoice-generator" },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: "/tools/invoice-generator",
+    siteName: "MFWEB",
+    type: "website",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: ["/opengraph-image"],
+  },
 };
 
 export default async function InvoiceGeneratorLandingPage() {
@@ -18,8 +39,9 @@ export default async function InvoiceGeneratorLandingPage() {
   return (
     <PaidToolLanding
       eyebrow="Invoice Generator"
-      title="Buat invoice PDF cepat dengan desain yang tetap profesional"
-      description="Invoice Generator membantu user membuat tagihan PDF mandiri tanpa payment gateway, lengkap dengan template desain, status manual, duplicate invoice, dan PPN 11% opsional."
+      title="Invoice Generator PDF dengan Template dan PPN 11%"
+      description={pageDescription}
+      canonicalPath="/tools/invoice-generator"
       primaryCta="Buat invoice"
       portalHref="/portal/tools/invoice-generator"
       accent="emerald"
