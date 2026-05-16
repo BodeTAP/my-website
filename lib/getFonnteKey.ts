@@ -11,7 +11,15 @@ export async function getFonnteKey(): Promise<string | undefined> {
   try {
     const row = await prisma.siteSetting.findUnique({ where: { key: "fonnte_api_key" } });
     if (row?.value) return row.value;
+
+    const multiRow = await prisma.siteSetting.findUnique({ where: { key: "fonnte_api_keys" } });
+    const firstMultiKey = multiRow?.value.split(",").map((key) => key.trim()).find(Boolean);
+    if (firstMultiKey) return firstMultiKey;
   } catch { /* fallback to env */ }
+
+  const firstEnvKey = process.env.FONNTE_API_KEYS?.split(",").map((key) => key.trim()).find(Boolean);
+  if (firstEnvKey) return firstEnvKey;
+
   return process.env.FONNTE_API_KEY;
 }
 

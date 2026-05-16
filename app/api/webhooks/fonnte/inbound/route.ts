@@ -28,6 +28,28 @@ function pickString(payload: WebhookPayload, keys: string[]): string | null {
   return null;
 }
 
+async function readWebhookPayload(req: NextRequest): Promise<WebhookPayload> {
+  const contentType = req.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    return await req.json() as WebhookPayload;
+  }
+
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    const form = await req.formData();
+    return Object.fromEntries(Array.from(form.entries()).map(([key, value]) => [key, String(value)]));
+  }
+
+  const text = await req.text();
+  if (!text.trim()) return {};
+
+  try {
+    return JSON.parse(text) as WebhookPayload;
+  } catch {
+    return Object.fromEntries(new URLSearchParams(text).entries());
+  }
+}
+
 function phoneCandidates(raw: string): string[] {
   const normalized = normalizePhone(raw.replace(/@.+$/, ""));
   const local = normalized.startsWith("62") ? `0${normalized.slice(2)}` : normalized;
@@ -103,11 +125,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const payload = await req.json() as WebhookPayload;
-    const text = pickString(payload, ["message", "text", "body", "content", "msg"]);
-    const sender = pickString(payload, ["sender", "from", "phone", "whatsapp", "number", "target"]);
+    const payload = await readWebhookPayload(req);
+    const text = pickString(payload, ["message", "Message", "text", "Text", "body", "Body", "content", "msg"]);
+    const sender = pickString(payload, ["sender", "Sender", "from", "phone", "whatsapp", "number", "target"]);
 
     if (!text || !sender) {
+      console.warn("[Fonnte Inbound Webhook] Invalid payload", {
+        keys: Object.keys(payload),
+        hasText: Boolean(text),
+        hasSender: Boolean(sender),
+      });
       return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
     }
 
@@ -123,6 +150,7 @@ export async function POST(req: NextRequest) {
     const leadIds = leads.map((lead) => lead.id);
 
     if (leadIds.length === 0) {
+      console.warn("[Fonnte Inbound Webhook] Lead not found", { sender: normalizePhone(sender), text: normalizedText.slice(0, 30) });
       return NextResponse.json({ ok: true, optedIn: false, optedOut: false, reason: "lead_not_found" });
     }
 
@@ -143,7 +171,7 @@ export async function POST(req: NextRequest) {
         ? await Promise.all(
             leadsToAutoReply.map(async (lead) => ({
               leadId: lead.id,
-              sent:   await sendWA(lead.whatsapp, buildOptOutReplyMessage(lead, settings)),
+              sent:   await sendWA(sender, buildOptOutReplyMessage(lead, settings)),
             })),
           )
         : [];
@@ -181,7 +209,7 @@ export async function POST(req: NextRequest) {
       ? await Promise.all(
           leadsToAutoReply.map(async (lead) => ({
             leadId: lead.id,
-            sent:   await sendWA(lead.whatsapp, buildOptInPromoMessage(lead, settings)),
+            sent:   await sendWA(sender, buildOptInPromoMessage(lead, settings)),
           })),
         )
       : [];
