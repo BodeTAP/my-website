@@ -72,65 +72,76 @@ export default async function PortalCreditsPage({
   ]);
 
   return (
-    <div className="space-y-8">
-      <FadeUp className="rounded-2xl border border-amber-500/20 bg-[#071225] p-6 sm:p-8">
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-amber-300" />
-              </div>
-              <div>
-                <p className="text-amber-200/60 text-[11px] uppercase tracking-widest font-black">Saldo Aktif</p>
-                <h1 className="text-2xl font-bold text-white">Kredit Saya</h1>
-              </div>
+    <div className="space-y-5">
+      <FadeUp className="rounded-2xl border border-white/10 bg-[#071225] p-4 sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
+              <Wallet className="h-5 w-5 text-amber-300" />
             </div>
-            <p className="text-blue-200/55 text-sm max-w-xl">
-              Gunakan kredit untuk Lead Finder, Proposal Generator, dan Invoice Generator di portal.
-            </p>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-200/55">Saldo Aktif</p>
+              <h1 className="text-xl font-bold text-white">Kredit</h1>
+              <p className="mt-1 text-xs text-blue-200/50">
+                Untuk Lead Finder, Proposal Generator, dan Invoice Generator.
+              </p>
+            </div>
           </div>
-          <div className="rounded-2xl bg-black/35 border border-amber-500/20 px-6 py-5 min-w-[220px]">
-            <p className="text-amber-200/50 text-xs font-bold uppercase tracking-widest mb-1">Tersedia</p>
-            <p className="text-4xl sm:text-5xl font-black text-amber-300 tracking-tight">{balance}</p>
-            <p className="text-blue-200/45 text-sm mt-1">kredit</p>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 sm:min-w-40 sm:block sm:text-right">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-200/55">Tersedia</p>
+            <p className="text-2xl font-black leading-none tracking-tight text-amber-200">
+              {balance}
+              <span className="ml-1 text-xs font-bold text-amber-100/55">kredit</span>
+            </p>
           </div>
         </div>
       </FadeUp>
 
       {balance < 10 && (
         <FadeUp delay={0.05}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 px-5 py-4">
+          <div className="flex flex-col justify-between gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-300 shrink-0" />
-              <p className="text-amber-100 text-sm font-bold">Kredit hampir habis. Tambah saldo agar tools tetap bisa digunakan tanpa jeda.</p>
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-300" />
+              <p className="text-sm font-semibold text-amber-100">Kredit hampir habis. Tambah saldo agar tools tetap lancar dipakai.</p>
             </div>
-            <Link href="/portal/tools" className="text-amber-300 hover:text-white text-sm font-bold transition-colors">
+            <Link href="/portal/tools" className="text-sm font-bold text-amber-300 transition-colors hover:text-white">
               Lihat tools
             </Link>
           </div>
         </FadeUp>
       )}
 
-      <StaggerChildren stagger={0.08} className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <StaggerChildren stagger={0.08} className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {packages.map((pkg) => {
           const totalCredits = pkg.credits + pkg.bonusCredit;
           return (
             <StaggerItem key={pkg.id}>
-              <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 h-full flex flex-col hover:border-amber-500/30 transition-colors">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-5">
-                  <Coins className="w-6 h-6 text-amber-300" />
+              <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-[#071225] p-4 transition-colors hover:border-amber-500/30">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
+                      <Coins className="h-4 w-4 text-amber-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="truncate text-base font-black text-white">{pkg.name}</h2>
+                      <p className="mt-1 text-xs leading-relaxed text-blue-200/50">
+                        {pkg.credits} kredit{pkg.bonusCredit > 0 ? ` + ${pkg.bonusCredit} bonus` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-black text-amber-200">
+                    {totalCredits}
+                  </span>
                 </div>
-                <h2 className="text-white text-xl font-black">{pkg.name}</h2>
-                <p className="text-blue-200/50 text-sm mt-2 min-h-10">
-                  {pkg.credits} kredit{pkg.bonusCredit > 0 ? ` + ${pkg.bonusCredit} bonus` : ""}
-                </p>
-                <div className="my-6">
-                  <p className="text-3xl font-black text-white">{totalCredits}</p>
-                  <p className="text-blue-200/40 text-xs uppercase tracking-widest font-bold">Total Kredit</p>
-                </div>
-                <p className="text-amber-300 font-black text-xl mb-5">{formatRupiah(pkg.price)}</p>
-                <div className="mt-auto">
-                  <BuyCreditButton packageId={pkg.id} />
+
+                <div className="mt-4 flex flex-col gap-3 border-t border-white/5 pt-4 sm:flex-row sm:items-center sm:justify-between md:flex-col md:items-stretch lg:flex-row lg:items-center">
+                  <div>
+                    <p className="text-lg font-black text-white">{formatRupiah(pkg.price)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-blue-200/35">Sekali bayar</p>
+                  </div>
+                  <div className="sm:w-32 md:w-full lg:w-32">
+                    <BuyCreditButton packageId={pkg.id} />
+                  </div>
                 </div>
               </div>
             </StaggerItem>
@@ -140,30 +151,30 @@ export default async function PortalCreditsPage({
 
       <FadeUp delay={0.15}>
         <div className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
-          <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-white/5">
+          <div className="flex items-center justify-between gap-4 border-b border-white/5 px-4 py-4 sm:px-5">
             <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-              <ReceiptText className="w-5 h-5 text-blue-300" />
-            </div>
-            <div>
-              <h2 className="text-white font-bold text-lg">Riwayat Kredit</h2>
-              <p className="text-blue-200/45 text-xs">
-                Menampilkan {startIdx}-{endIdx} dari {transactionTotal} transaksi
-              </p>
-            </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+                <ReceiptText className="h-4 w-4 text-blue-300" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white">Riwayat Kredit</h2>
+                <p className="text-xs text-blue-200/45">
+                  Menampilkan {startIdx}-{endIdx} dari {transactionTotal} transaksi
+                </p>
+              </div>
             </div>
           </div>
 
           {transactions.length === 0 ? (
-            <div className="p-10 text-center text-blue-200/35 text-sm">Belum ada transaksi kredit.</div>
+            <div className="p-8 text-center text-sm text-blue-200/35">Belum ada transaksi kredit.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-blue-200/40 border-b border-white/5">
-                    <th className="px-6 py-3 font-bold">Tanggal</th>
-                    <th className="px-6 py-3 font-bold">Deskripsi</th>
-                    <th className="px-6 py-3 font-bold text-right">Jumlah</th>
+                  <tr className="border-b border-white/5 text-left text-blue-200/40">
+                    <th className="px-4 py-2.5 font-bold sm:px-5">Tanggal</th>
+                    <th className="px-4 py-2.5 font-bold sm:px-5">Deskripsi</th>
+                    <th className="px-4 py-2.5 text-right font-bold sm:px-5">Jumlah</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -171,11 +182,11 @@ export default async function PortalCreditsPage({
                     const positive = tx.amount > 0;
                     return (
                       <tr key={tx.id} className="border-b border-white/5 last:border-0">
-                        <td className="px-6 py-4 text-blue-200/55 whitespace-nowrap">{formatDate(tx.createdAt)}</td>
-                        <td className="px-6 py-4">
+                        <td className="whitespace-nowrap px-4 py-3 text-blue-200/55 sm:px-5">{formatDate(tx.createdAt)}</td>
+                        <td className="px-4 py-3 sm:px-5">
                           <div className="flex items-center gap-3">
-                            <span className={`w-8 h-8 rounded-xl flex items-center justify-center border ${positive ? "bg-green-500/10 border-green-500/20 text-green-300" : "bg-red-500/10 border-red-500/20 text-red-300"}`}>
-                              {positive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4" />}
+                            <span className={`flex h-7 w-7 items-center justify-center rounded-lg border ${positive ? "border-green-500/20 bg-green-500/10 text-green-300" : "border-red-500/20 bg-red-500/10 text-red-300"}`}>
+                              {positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownLeft className="h-3.5 w-3.5" />}
                             </span>
                             <div>
                               <p className="text-white font-medium">{tx.description}</p>
@@ -183,7 +194,7 @@ export default async function PortalCreditsPage({
                             </div>
                           </div>
                         </td>
-                        <td className={`px-6 py-4 text-right font-black ${positive ? "text-green-300" : "text-red-300"}`}>
+                        <td className={`px-4 py-3 text-right font-black sm:px-5 ${positive ? "text-green-300" : "text-red-300"}`}>
                           {positive ? "+" : ""}{tx.amount}
                         </td>
                       </tr>
@@ -194,7 +205,7 @@ export default async function PortalCreditsPage({
             </div>
           )}
           {transactionTotal > 0 && (
-            <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 bg-black/20 p-4 sm:flex-row">
               <p className="text-xs text-blue-200/40 font-medium">
                 Halaman <span className="text-blue-200">{page}</span> dari <span className="text-blue-200">{totalPages}</span>
               </p>

@@ -115,6 +115,9 @@ user confirms a lasting preference, project decision, or important current state
 - Portal client UX should follow the same grounded direction as public pages:
   workspace-like surfaces, practical copy, fewer glow/gradient effects, and
   tool labels that describe the user's next action clearly.
+- Portal Credits now uses a compact workspace layout: small balance header,
+  denser credit package cards, compact purchase buttons, and shorter credit
+  history rows.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

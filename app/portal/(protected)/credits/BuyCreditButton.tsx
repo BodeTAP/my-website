@@ -38,7 +38,7 @@ export default function BuyCreditButton({ packageId }: { packageId: string }) {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-11 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black"
+        className="h-10 w-full rounded-xl bg-amber-500 text-xs font-black text-black hover:bg-amber-400"
       >
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Beli <ArrowRight className="w-4 h-4 ml-1" /></>}
       </Button>
