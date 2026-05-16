@@ -17,6 +17,8 @@ type ToolSettingKey =
   | "tool_invoice_generator_default_due_days"
   | "tool_invoice_generator_default_footer"
   | "tool_invoice_generator_default_include_tax"
+  | "tool_signup_bonus_enabled"
+  | "tool_signup_bonus_amount"
   | "tool_low_credit_warning_threshold";
 type SettingsRecord = Record<ToolSettingKey, string>;
 
@@ -254,11 +256,18 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
               <Coins className="h-5 w-5 text-amber-300" />
             </div>
             <div>
-              <h3 className="font-black text-white">Kredit & Warning</h3>
-              <p className="mt-1 text-sm text-blue-200/40">Ambang saldo untuk banner kredit hampir habis.</p>
+              <h3 className="font-black text-white">Kredit & Trial</h3>
+              <p className="mt-1 text-sm text-blue-200/40">Bonus akun baru dan ambang saldo rendah.</p>
             </div>
           </div>
           <div className="space-y-4">
+            <ToggleField
+              checked={settings.tool_signup_bonus_enabled === "true"}
+              onChange={(value) => update("tool_signup_bonus_enabled", value)}
+              label="Bonus pendaftaran aktif"
+              description="Akun baru mendapat kredit gratis satu kali untuk mencoba tools."
+            />
+            <NumberField label="Bonus Akun Baru" value={settings.tool_signup_bonus_amount} onChange={(value) => update("tool_signup_bonus_amount", value)} />
             <NumberField label="Ambang Warning" value={settings.tool_low_credit_warning_threshold} onChange={(value) => update("tool_low_credit_warning_threshold", value)} />
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
               <div className="flex gap-2">

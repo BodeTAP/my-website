@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "./auth.config";
 import { sendMagicLinkEmail } from "@/lib/email";
+import { grantWelcomeCredits } from "@/lib/credits";
+import { getToolSettings } from "@/lib/toolSettings";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
 
@@ -88,6 +90,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as { role?: string }).role = token.role as string;
       }
       return session;
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      if (!user.id) return;
+
+      try {
+        const client = await prisma.client.upsert({
+          where: { userId: user.id },
+          create: { userId: user.id, businessName: user.name ?? "Klien Baru" },
+          update: {},
+          select: { id: true },
+        });
+        const settings = await getToolSettings();
+        if (settings.signupBonus.enabled) {
+          await grantWelcomeCredits(client.id, settings.signupBonus.amount);
+        }
+      } catch {
+        // Non-fatal: manual register and dashboard fallback also cover client setup.
+      }
     },
   },
 });

@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => {
       update: vi.fn(),
     },
     creditTransaction: {
+      findFirst: vi.fn(),
       create: vi.fn(),
     },
   };
@@ -33,6 +34,7 @@ vi.mock("@/lib/prisma", () => ({
 
 import {
   deductCredits,
+  grantWelcomeCredits,
   getClientBalance,
   getTransactionHistory,
   refundCredits,
@@ -106,6 +108,32 @@ describe("credits service", () => {
         meta: { packageId: "pkg-1", invoiceId: "inv-1", invoiceNo: "PKG-123" },
       }),
     });
+  });
+
+  it("memberikan bonus pendaftaran hanya jika belum pernah diberikan", async () => {
+    mocks.tx.creditTransaction.findFirst.mockResolvedValue(null);
+    mocks.tx.clientCredit.upsert.mockResolvedValue({ balance: 10 });
+
+    await expect(grantWelcomeCredits("client-1", 10)).resolves.toEqual({ granted: true, newBalance: 10 });
+
+    expect(mocks.tx.creditTransaction.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        clientId: "client-1",
+        amount: 10,
+        type: "TOPUP",
+        description: "Bonus pendaftaran akun baru",
+        meta: { source: "signup_bonus" },
+      }),
+    });
+  });
+
+  it("tidak menggandakan bonus pendaftaran", async () => {
+    mocks.tx.creditTransaction.findFirst.mockResolvedValue({ id: "tx-1" });
+    mocks.tx.clientCredit.upsert.mockResolvedValue({ balance: 10 });
+
+    await expect(grantWelcomeCredits("client-1", 10)).resolves.toEqual({ granted: false, newBalance: 10 });
+
+    expect(mocks.tx.creditTransaction.create).not.toHaveBeenCalled();
   });
 
   it("mencatat refund manual sebagai REFUND", async () => {

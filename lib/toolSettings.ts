@@ -15,6 +15,8 @@ export const TOOL_SETTING_DEFAULTS = {
   tool_invoice_generator_default_due_days: "7",
   tool_invoice_generator_default_footer: "Terima kasih atas kepercayaan Anda.",
   tool_invoice_generator_default_include_tax: "false",
+  tool_signup_bonus_enabled: "true",
+  tool_signup_bonus_amount: "10",
   tool_low_credit_warning_threshold: "10",
 } as const;
 
@@ -38,6 +40,10 @@ export type ToolSettings = {
     defaultDueDays: number;
     defaultFooter: string;
     defaultIncludeTax: boolean;
+  };
+  signupBonus: {
+    enabled: boolean;
+    amount: number;
   };
   lowCreditWarningThreshold: number;
 };
@@ -112,6 +118,13 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
         TOOL_SETTING_DEFAULTS.tool_invoice_generator_default_footer,
       ),
       defaultIncludeTax: parseBoolean(values.tool_invoice_generator_default_include_tax),
+    },
+    signupBonus: {
+      enabled: parseBoolean(values.tool_signup_bonus_enabled),
+      amount: parsePositiveInt(
+        values.tool_signup_bonus_amount,
+        Number(TOOL_SETTING_DEFAULTS.tool_signup_bonus_amount),
+      ),
     },
     lowCreditWarningThreshold: parsePositiveInt(
       values.tool_low_credit_warning_threshold,

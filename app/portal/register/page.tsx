@@ -29,6 +29,7 @@ export default function PortalRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [welcomeCredits, setWelcomeCredits] = useState(0);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -61,6 +62,7 @@ export default function PortalRegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Pendaftaran gagal, silakan coba lagi.");
+      setWelcomeCredits(typeof data.welcomeCredits === "number" ? data.welcomeCredits : 0);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
@@ -93,7 +95,7 @@ export default function PortalRegisterPage() {
                 </div>
                 <h2 className="text-white font-black text-2xl mb-3">Akun berhasil dibuat</h2>
                 <p className="text-blue-200/60 text-sm leading-relaxed mb-8 px-2">
-                  Akun Anda sudah siap. Silakan masuk memakai email dan kata sandi yang baru didaftarkan.
+                  Akun Anda sudah siap. {welcomeCredits > 0 ? `${welcomeCredits} kredit gratis sudah masuk untuk mencoba tools.` : "Silakan masuk memakai email dan kata sandi yang baru didaftarkan."}
                 </p>
                 <Button
                   onClick={() => router.push("/portal/login")}

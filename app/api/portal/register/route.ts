@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
+import { grantWelcomeCredits } from "@/lib/credits";
+import { getToolSettings } from "@/lib/toolSettings";
 
 export async function POST(req: Request) {
   const ip = getClientIP(req);
@@ -42,7 +44,7 @@ export async function POST(req: Request) {
 
     const hashed = await bcrypt.hash(password, 12);
 
-    await prisma.user.create({
+    const created = await prisma.user.create({
       data: {
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -55,9 +57,17 @@ export async function POST(req: Request) {
           },
         },
       },
+      include: { client: { select: { id: true } } },
     });
 
-    return NextResponse.json({ ok: true }, { status: 201 });
+    const settings = await getToolSettings();
+    let welcomeCredits = 0;
+    if (settings.signupBonus.enabled && created.client) {
+      const bonus = await grantWelcomeCredits(created.client.id, settings.signupBonus.amount);
+      welcomeCredits = bonus.granted ? settings.signupBonus.amount : 0;
+    }
+
+    return NextResponse.json({ ok: true, welcomeCredits }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Terjadi kesalahan server." }, { status: 500 });
   }

@@ -3,6 +3,8 @@ import "server-only";
 import type { CreditTransaction, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
+const WELCOME_BONUS_DESCRIPTION = "Bonus pendaftaran akun baru";
+
 export async function getClientBalance(clientId: string): Promise<number> {
   const credit = await prisma.clientCredit.findUnique({
     where: { clientId },
@@ -83,6 +85,54 @@ export async function topupCredits(
     });
 
     return updated.balance;
+  });
+}
+
+export async function grantWelcomeCredits(
+  clientId: string,
+  amount: number,
+): Promise<{ granted: boolean; newBalance: number }> {
+  if (amount <= 0) return { granted: false, newBalance: await getClientBalance(clientId) };
+
+  return prisma.$transaction(async (tx) => {
+    const existingBonus = await tx.creditTransaction.findFirst({
+      where: {
+        clientId,
+        type: "TOPUP",
+        description: WELCOME_BONUS_DESCRIPTION,
+      },
+      select: { id: true },
+    });
+
+    if (existingBonus) {
+      const current = await tx.clientCredit.upsert({
+        where: { clientId },
+        update: {},
+        create: { clientId, balance: 0 },
+        select: { balance: true },
+      });
+
+      return { granted: false, newBalance: current.balance };
+    }
+
+    const updated = await tx.clientCredit.upsert({
+      where: { clientId },
+      update: { balance: { increment: amount } },
+      create: { clientId, balance: amount },
+      select: { balance: true },
+    });
+
+    await tx.creditTransaction.create({
+      data: {
+        clientId,
+        amount,
+        type: "TOPUP",
+        description: WELCOME_BONUS_DESCRIPTION,
+        meta: { source: "signup_bonus" } as Prisma.InputJsonValue,
+      },
+    });
+
+    return { granted: true, newBalance: updated.balance };
   });
 }
 
