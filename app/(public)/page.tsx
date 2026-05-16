@@ -23,6 +23,7 @@ import FAQSection from "@/components/public/FAQSection";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings, SITE_SETTING_DEFAULTS } from "@/lib/siteSettings";
+import { getToolSettings } from "@/lib/toolSettings";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 const pageTitle = "Jasa Website dan Tools Bisnis untuk UMKM | MFWEB";
@@ -166,12 +167,13 @@ const benefits = [
 // Testimonials now managed from admin and fetched dynamically.
 
 export default async function HomePage() {
-  const [articles, portfolios, testimonials, heroStats, settings] = await Promise.all([
+  const [articles, portfolios, testimonials, heroStats, settings, toolSettings] = await Promise.all([
     getLatestArticles(),
     getFeaturedPortfolios(),
     getTestimonials(),
     getHeroStats(),
     getSiteSettings(),
+    getToolSettings(),
   ]);
   const siteUrl = settings.seo_canonical_base_url || settings.brand_site_url || SITE_URL;
   const heroHeadline =
@@ -197,6 +199,7 @@ export default async function HomePage() {
       ? SITE_SETTING_DEFAULTS.home_secondary_cta_url
       : settings.home_secondary_cta_url;
   const whatsappNumber = settings.brand_public_whatsapp.replace(/\D/g, "");
+  const welcomeCredits = toolSettings.signupBonus.enabled ? toolSettings.signupBonus.amount : 0;
 
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -496,6 +499,7 @@ export default async function HomePage() {
               Banyak bisnis sudah punya nomor WhatsApp dan Instagram, tapi masih
               bingung mencari prospek, menulis penawaran, dan membuat dokumen
               tagihan yang rapi. Tiga tools ini dibuat untuk bagian itu.
+              {welcomeCredits > 0 ? ` Akun baru mendapat ${welcomeCredits} kredit gratis untuk mencoba alurnya.` : ""}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/tools">

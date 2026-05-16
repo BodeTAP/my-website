@@ -35,6 +35,7 @@ export default async function InvoiceGeneratorLandingPage() {
   const settings = await getToolSettings();
   const creditCost = settings.invoiceGenerator.creditCost;
   const defaultTax = settings.invoiceGenerator.defaultIncludeTax;
+  const welcomeCredits = settings.signupBonus.enabled ? settings.signupBonus.amount : 0;
 
   return (
     <PaidToolLanding
@@ -99,6 +100,7 @@ export default async function InvoiceGeneratorLandingPage() {
           hint: "Invoice dapat diunduh ulang dari riwayat atau halaman detail invoice.",
         },
       ]}
+      welcomeCredits={welcomeCredits}
       faqs={[
         {
           q: "Apakah invoice ini tersambung ke pembayaran?",

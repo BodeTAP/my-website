@@ -16,7 +16,7 @@ export const TOOL_SETTING_DEFAULTS = {
   tool_invoice_generator_default_footer: "Terima kasih atas kepercayaan Anda.",
   tool_invoice_generator_default_include_tax: "false",
   tool_signup_bonus_enabled: "true",
-  tool_signup_bonus_amount: "10",
+  tool_signup_bonus_amount: "15",
   tool_low_credit_warning_threshold: "10",
 } as const;
 

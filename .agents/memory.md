@@ -119,8 +119,9 @@ user confirms a lasting preference, project decision, or important current state
   denser credit package cards, compact purchase buttons, and shorter credit
   history rows.
 - New client accounts receive a configurable one-time welcome credit bonus
-  through `tool_signup_bonus_enabled` and `tool_signup_bonus_amount`; the bonus
-  is recorded as a credit transaction and guarded against duplicate grants.
+  through `tool_signup_bonus_enabled` and `tool_signup_bonus_amount`; the default
+  is 15 credits, recorded as a credit transaction, and guarded against duplicate
+  grants.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

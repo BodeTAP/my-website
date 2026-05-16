@@ -132,6 +132,7 @@ export default async function LeadFinderLandingPage() {
   const deepCost = toolSettings.leadFinder.deepCost;
   const socialScanEnabled = toolSettings.leadFinder.socialScanEnabled;
   const socialScanCost = toolSettings.leadFinder.socialScanCost;
+  const welcomeCredits = toolSettings.signupBonus.enabled ? toolSettings.signupBonus.amount : 0;
   const visibleFeatures = socialScanEnabled ? features : features.filter((feature) => feature.title !== "Social Scan opsional");
   const visibleWorkflows = socialScanEnabled ? workflows : workflows.filter((item) => !item.includes("Social Scan"));
 
@@ -178,6 +179,12 @@ export default async function LeadFinderLandingPage() {
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                   Mulai {standardCost} kredit
                 </span>
+                {welcomeCredits > 0 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    Akun baru dapat {welcomeCredits} kredit gratis
+                  </span>
+                )}
               </div>
             </div>
           </FadeUp>
@@ -323,6 +330,7 @@ export default async function LeadFinderLandingPage() {
             <p className="mt-3 text-blue-200/55">
               Standard Search memakai {standardCost} kredit. Deep Search memakai {deepCost} kredit untuk pencarian lebih luas.
               {socialScanEnabled ? ` Social Scan opsional dapat ditambahkan mulai ${socialScanCost} kredit.` : ""}
+              {welcomeCredits > 0 ? ` Akun baru mendapat ${welcomeCredits} kredit gratis untuk mencoba pencarian pertama.` : ""}
             </p>
           </FadeUp>
 
@@ -431,7 +439,7 @@ export default async function LeadFinderLandingPage() {
             </div>
             <h2 className="text-3xl font-black text-white sm:text-4xl">Siap isi pipeline dengan prospek baru?</h2>
             <p className="mx-auto mt-3 max-w-2xl text-blue-100/65">
-              Buat akun portal, beli kredit, lalu mulai riset lead untuk niche dan kota yang Anda targetkan.
+              Buat akun portal{welcomeCredits > 0 ? ` dan dapatkan ${welcomeCredits} kredit gratis` : ""}, lalu mulai riset lead untuk niche dan kota yang Anda targetkan.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href="/portal/register">

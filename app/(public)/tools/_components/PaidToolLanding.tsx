@@ -50,6 +50,7 @@ type PaidToolLandingProps = {
   useCases: string[];
   pricing: PricingItem[];
   faqs: Faq[];
+  welcomeCredits?: number;
 };
 
 const accentClass = {
@@ -88,6 +89,7 @@ export default function PaidToolLanding({
   useCases,
   pricing,
   faqs,
+  welcomeCredits = 0,
 }: PaidToolLandingProps) {
   const c = accentClass[accent];
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id").replace(/\/$/, "");
@@ -187,6 +189,12 @@ export default function PaidToolLanding({
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                   {creditCost} kredit per dokumen
                 </span>
+                {welcomeCredits > 0 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    Akun baru dapat {welcomeCredits} kredit gratis
+                  </span>
+                )}
               </div>
             </div>
           </FadeUp>
@@ -338,7 +346,7 @@ export default function PaidToolLanding({
             </div>
             <h2 className="text-3xl font-black text-white sm:text-4xl">Siap membuat dokumen lebih cepat?</h2>
             <p className="mx-auto mt-3 max-w-2xl text-blue-100/65">
-              Buat akun portal, siapkan kredit, lalu gunakan tool ini kapan pun diperlukan.
+              Buat akun portal{welcomeCredits > 0 ? ` dan dapatkan ${welcomeCredits} kredit gratis` : ""}, lalu gunakan tool ini kapan pun diperlukan.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href="/portal/register">

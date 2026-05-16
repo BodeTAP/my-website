@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 export default async function ProposalGeneratorLandingPage() {
   const settings = await getToolSettings();
   const creditCost = settings.proposalGenerator.creditCost;
+  const welcomeCredits = settings.signupBonus.enabled ? settings.signupBonus.amount : 0;
 
   return (
     <PaidToolLanding
@@ -98,6 +99,7 @@ export default async function ProposalGeneratorLandingPage() {
           hint: "Brand kit dan template dapat disimpan agar proposal berikutnya lebih cepat dibuat.",
         },
       ]}
+      welcomeCredits={welcomeCredits}
       faqs={[
         {
           q: "Apakah proposal harus tersambung ke pembayaran?",
