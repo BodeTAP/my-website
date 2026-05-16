@@ -2,7 +2,19 @@ import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import type { Metadata } from "next";
-import { ArrowRight, Globe, TrendingUp, Shield, Zap, CheckCircle } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle,
+  FileText,
+  Globe,
+  MessageCircle,
+  ReceiptText,
+  Search,
+  Shield,
+  Sparkles,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DomainChecker from "@/components/public/DomainChecker";
 import PricingSection from "@/components/public/PricingSection";
@@ -11,13 +23,69 @@ import HeroStats from "@/components/public/HeroStats";
 import FAQSection from "@/components/public/FAQSection";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { getSiteSettings, SITE_SETTING_DEFAULTS } from "@/lib/siteSettings";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
+const pageTitle = "Jasa Website Profesional & Tools Bisnis untuk UMKM | MFWEB";
+const pageDescription =
+  "MFWEB membantu bisnis lokal punya website profesional, mudah ditemukan di Google, dan memakai tools bisnis untuk cari lead, buat proposal, serta invoice PDF.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: pageTitle,
+  description: pageDescription,
   alternates: { canonical: "/" },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: "/",
+    siteName: "MFWEB",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "MFWEB" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: ["/og-image.png"],
+  },
 };
+
+const LEGACY_HERO_HEADLINE =
+  "Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan";
+const LEGACY_HERO_SUBHEADLINE =
+  "Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!";
+const LEGACY_PRIMARY_CTA = "Mulai Buat Website Saya";
+const LEGACY_SECONDARY_CTA = "Lihat Hasil Kerja Kami";
+
+const DEFAULT_HERO_HEADLINE =
+  "Website Profesional dan Tools Bisnis untuk Mendatangkan Klien";
+const DEFAULT_HERO_SUBHEADLINE =
+  "Bangun website cepat, tampil profesional di Google, lalu gunakan Lead Finder, Proposal Generator, dan Invoice Generator untuk mempercepat proses jualan sampai closing.";
+
+const toolCards = [
+  {
+    title: "Lead Finder",
+    href: "/lead-finder",
+    desc: "Cari prospek bisnis lokal, siapkan data outreach, dan prioritaskan lead yang paling siap dihubungi.",
+    icon: Search,
+    badge: "Prospecting",
+  },
+  {
+    title: "Proposal Generator",
+    href: "/tools/proposal-generator",
+    desc: "Buat proposal PDF profesional dari template, brand kit, dan struktur penawaran yang siap dikirim.",
+    icon: FileText,
+    badge: "Closing",
+  },
+  {
+    title: "Invoice Generator",
+    href: "/tools/invoice-generator",
+    desc: "Buat invoice PDF mandiri dengan template desain, detail item, diskon, dan PPN 11% opsional.",
+    icon: ReceiptText,
+    badge: "Billing",
+  },
+];
 const STAT_DEFAULTS = [
   { num: "50+",    label: "Proyek selesai" },
   { num: "95%",    label: "Klien puas" },
@@ -96,7 +164,7 @@ const benefits = [
   { icon: Zap,        title: "Loading Super Cepat",         desc: "Website yang lambat kehilangan 53% pengunjung. Kami pastikan situs Anda memuat dalam detik." },
 ];
 
-// Testimonials now managed from admin — fetched dynamically
+// Testimonials now managed from admin and fetched dynamically.
 
 export default async function HomePage() {
   const [articles, portfolios, testimonials, heroStats, settings] = await Promise.all([
@@ -107,8 +175,30 @@ export default async function HomePage() {
     getSiteSettings(),
   ]);
   const siteUrl = settings.seo_canonical_base_url || settings.brand_site_url || SITE_URL;
+  const heroHeadline =
+    settings.home_hero_headline === LEGACY_HERO_HEADLINE ||
+    settings.home_hero_headline === SITE_SETTING_DEFAULTS.home_hero_headline
+      ? DEFAULT_HERO_HEADLINE
+      : settings.home_hero_headline;
+  const heroSubheadline =
+    settings.home_hero_subheadline === LEGACY_HERO_SUBHEADLINE ||
+    settings.home_hero_subheadline === SITE_SETTING_DEFAULTS.home_hero_subheadline
+      ? DEFAULT_HERO_SUBHEADLINE
+      : settings.home_hero_subheadline;
+  const primaryCtaLabel =
+    settings.home_primary_cta_label === LEGACY_PRIMARY_CTA
+      ? SITE_SETTING_DEFAULTS.home_primary_cta_label
+      : settings.home_primary_cta_label;
+  const secondaryCtaLabel =
+    settings.home_secondary_cta_label === LEGACY_SECONDARY_CTA
+      ? SITE_SETTING_DEFAULTS.home_secondary_cta_label
+      : settings.home_secondary_cta_label;
+  const secondaryCtaUrl =
+    settings.home_secondary_cta_url === "/portfolio"
+      ? SITE_SETTING_DEFAULTS.home_secondary_cta_url
+      : settings.home_secondary_cta_url;
+  const whatsappNumber = settings.brand_public_whatsapp.replace(/\D/g, "");
 
-  // JSON-LD: FAQ Page + LocalBusiness + Service
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -177,6 +267,30 @@ export default async function HomePage() {
           text: "Kami memberikan support teknis setelah website live. Jika ada bug atau masalah dari sisi kami, kami perbaiki tanpa biaya tambahan.",
         },
       },
+      {
+        "@type": "Question",
+        name: "Apakah MFWEB juga menyediakan tools bisnis?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Ya. MFWEB menyediakan tools bisnis seperti Lead Finder, Proposal Generator, dan Invoice Generator untuk membantu proses prospecting, penawaran, dan penagihan.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apakah Proposal Generator dan Invoice Generator bisa download PDF?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Bisa. Proposal Generator dan Invoice Generator dibuat untuk menghasilkan dokumen PDF yang bisa langsung diunduh dan dikirim ke klien.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Apakah tools premium memakai sistem kredit?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Ya. Tools premium di portal klien menggunakan sistem kredit, sehingga pemakaian dapat dikontrol sesuai kebutuhan bisnis.",
+        },
+      },
     ],
   };
 
@@ -188,8 +302,8 @@ export default async function HomePage() {
     url: siteUrl,
     logo: new URL(settings.brand_logo_url, siteUrl).toString(),
     image: new URL(settings.brand_default_og_image, siteUrl).toString(),
-    description: settings.seo_default_description,
-    telephone: `+${settings.brand_public_whatsapp}`,
+    description: pageDescription,
+    telephone: whatsappNumber ? `+${whatsappNumber}` : undefined,
     priceRange: "Rp 800K - Rp 5.4Jt",
     areaServed: {
       "@type": "Country",
@@ -243,6 +357,29 @@ export default async function HomePage() {
     },
   };
 
+  const toolsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Tools Bisnis MFWEB",
+    itemListElement: toolCards.map((tool, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "SoftwareApplication",
+        name: tool.title,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: `${siteUrl}${tool.href}`,
+        description: tool.desc,
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "IDR",
+          availability: "https://schema.org/InStock",
+        },
+      },
+    })),
+  };
+
   return (
     <div className="relative overflow-x-clip">
       {/* ── Hero ──────────────────────────────────────────────────── */}
@@ -256,30 +393,30 @@ export default async function HomePage() {
           <FadeUp delay={0}>
             <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-blue-300 mb-8 border border-blue-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              {settings.home_hero_badge}
+              Website, lead, proposal, dan invoice dalam satu ekosistem
             </div>
           </FadeUp>
 
           {/* Hero text is rendered immediately (no JS animation) to fix 5.9s LCP issue */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-            {settings.home_hero_headline}
+            {heroHeadline}
           </h1>
 
           <p className="text-blue-100/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            {settings.home_hero_subheadline}
+            {heroSubheadline}
           </p>
 
           <FadeUp delay={0.4}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 relative z-20">
               <Link href={settings.home_primary_cta_url || settings.brand_consultation_url || "/contact"}>
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.6)] text-base font-semibold transition-all hover:scale-105 btn-shine">
-                  {settings.home_primary_cta_label}
+                  {primaryCtaLabel}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Link href={settings.home_secondary_cta_url || "/portfolio"}>
+              <Link href={secondaryCtaUrl || "/tools"}>
                 <Button size="lg" variant="outline" className="glass border-white/10 text-white hover:bg-white/10 h-14 px-8 rounded-full text-base font-medium transition-all hover:scale-105">
-                  {settings.home_secondary_cta_label}
+                  {secondaryCtaLabel}
                 </Button>
               </Link>
             </div>
@@ -362,6 +499,75 @@ export default async function HomePage() {
           </FadeUp>
 
           <HeroStats stats={heroStats} />
+        </div>
+      </section>
+
+      {/* Business Tools */}
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 border-y border-white/5 bg-[#06111f]/55">
+        <div className="max-w-7xl mx-auto">
+          <FadeUp className="max-w-2xl mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-1.5 text-xs font-semibold text-emerald-200 mb-5">
+              <Sparkles className="h-3.5 w-3.5" />
+              Tools premium untuk alur penjualan
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Dari cari prospek sampai kirim tagihan, semua lebih cepat.
+            </h2>
+            <p className="text-blue-200/60 leading-relaxed">
+              MFWEB bukan hanya membantu membuat website. Anda juga bisa memakai
+              tools bisnis untuk mencari lead, menyusun penawaran, dan membuat
+              dokumen invoice PDF yang siap dikirim ke klien.
+            </p>
+          </FadeUp>
+
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {toolCards.map((tool) => {
+              const Icon = tool.icon;
+
+              return (
+                <StaggerItem key={tool.href}>
+                  <HoverCard className="h-full">
+                    <Link href={tool.href} className="block h-full">
+                      <article className="h-full rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-colors hover:border-blue-400/35 hover:bg-white/[0.06]">
+                        <div className="mb-6 flex items-start justify-between gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-500/15 text-blue-200">
+                            <Icon className="h-6 w-6" />
+                          </div>
+                          <span className="rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1 text-[11px] font-black uppercase text-amber-200">
+                            {tool.badge}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-black text-white mb-3">
+                          {tool.title}
+                        </h3>
+                        <p className="text-sm leading-relaxed text-blue-100/58 mb-6">
+                          {tool.desc}
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-sm font-bold text-blue-200 transition-colors hover:text-white">
+                          Lihat detail
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
+                      </article>
+                    </Link>
+                  </HoverCard>
+                </StaggerItem>
+              );
+            })}
+          </StaggerChildren>
+
+          <FadeUp delay={0.2} className="mt-10 flex flex-col sm:flex-row gap-3">
+            <Link href="/tools">
+              <Button className="bg-blue-600 hover:bg-blue-500 text-white">
+                Buka Katalog Tools
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/portal/register">
+              <Button variant="outline" className="border-white/10 text-white hover:bg-white/10">
+                Daftar Portal Klien
+              </Button>
+            </Link>
+          </FadeUp>
         </div>
       </section>
 
@@ -496,7 +702,9 @@ export default async function HomePage() {
                           {a.coverImage ? (
                             <Image src={a.coverImage} alt={a.title} width={400} height={160} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-5xl opacity-20">📰</div>
+                            <div className="w-full h-full flex items-center justify-center text-blue-300/25">
+                              <FileText className="h-12 w-12" />
+                            </div>
                           )}
                         </div>
                         <div className="p-5 flex-1 flex flex-col">
@@ -570,12 +778,17 @@ export default async function HomePage() {
                     </Button>
                   </Link>
                   <a
-                    href={`https://wa.me/${settings.brand_public_whatsapp}?text=Halo%20${encodeURIComponent(settings.brand_name)}%2C%20saya%20ingin%20konsultasi%20website`}
+                    href={
+                      whatsappNumber
+                        ? `https://wa.me/${whatsappNumber}?text=Halo%20${encodeURIComponent(settings.brand_name)}%2C%20saya%20ingin%20konsultasi%20website`
+                        : "/contact"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Button size="lg" variant="outline" className="border-green-500/30 text-green-400 hover:bg-green-500/10 h-12 px-8">
-                      💬 WhatsApp Langsung
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      WhatsApp Langsung
                     </Button>
                   </a>
                 </div>
@@ -605,6 +818,11 @@ export default async function HomePage() {
         id="json-ld-business"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
+      <Script
+        id="json-ld-tools"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(toolsJsonLd) }}
       />
     </div>
   );

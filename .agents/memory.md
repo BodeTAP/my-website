@@ -97,6 +97,9 @@ user confirms a lasting preference, project decision, or important current state
   Perusahaan, and Hubungi Kami; footer links should prioritize valid service
   routes, premium tools, clickable WhatsApp/email contacts, and clean legal
   links.
+- Public homepage positioning now combines website services with premium
+  business tools; default hero/SEO copy highlights Lead Finder, Proposal
+  Generator, and Invoice Generator alongside website services.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

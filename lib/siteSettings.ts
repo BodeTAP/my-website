@@ -15,13 +15,13 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
   brand_default_og_image: "/og-image.png",
 
   home_hero_badge: "Tersedia untuk proyek baru",
-  home_hero_headline: "Website Profesional yang Mendatangkan Klien, Bukan Sekadar Pajangan",
+  home_hero_headline: "Website Profesional dan Tools Bisnis untuk Mendatangkan Klien",
   home_hero_subheadline:
-    "Ubah bisnis lokal Anda menjadi pemain besar di era digital. Miliki website super cepat, ramah SEO, dan siap bersaing di halaman pertama Google. Selesai dalam 3 hari!",
-  home_primary_cta_label: "Mulai Buat Website Saya",
+    "Bangun website cepat, tampil profesional di Google, lalu gunakan Lead Finder, Proposal Generator, dan Invoice Generator untuk mempercepat proses jualan sampai closing.",
+  home_primary_cta_label: "Konsultasi Website",
   home_primary_cta_url: "/contact",
-  home_secondary_cta_label: "Lihat Hasil Kerja Kami",
-  home_secondary_cta_url: "/portfolio",
+  home_secondary_cta_label: "Lihat Tools Bisnis",
+  home_secondary_cta_url: "/tools",
   hero_stat_1_num: "50+",
   hero_stat_1_label: "Proyek selesai",
   hero_stat_2_num: "95%",
@@ -33,9 +33,9 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
   social_linkedin_url: "",
 
   seo_default_title_template: "%s | MFWEB",
-  seo_default_title: "Jasa Pembuatan Website Profesional untuk Bisnis Lokal | MFWEB",
+  seo_default_title: "Jasa Website Profesional & Tools Bisnis untuk UMKM | MFWEB",
   seo_default_description:
-    "MFWEB membantu bisnis lokal tampil profesional di internet dengan website yang cepat, menarik, dan mudah ditemukan di Google. Mulai dari Rp 800K.",
+    "MFWEB membantu bisnis lokal punya website profesional, mudah ditemukan di Google, dan memakai tools bisnis untuk cari lead, buat proposal, serta invoice PDF.",
   seo_default_og_image: "/og-image.png",
   seo_canonical_base_url: "https://mfweb.maffisorp.id",
   facebook_pixel_id: "",
