@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles, Search, Coins, FileText, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
+import { getToolSettings } from "@/lib/toolSettings";
 
 export const metadata: Metadata = {
   title: "Tools Gratis untuk Website & Bisnis — MFWEB",
@@ -70,35 +71,37 @@ const tools = [
   },
 ];
 
-const paidTools = [
-  {
-    href: "/lead-finder",
-    icon: Search,
-    color: "blue" as const,
-    label: "Lead Finder",
-    desc: "Temukan prospek bisnis lokal dari Google Maps, filter kontak yang layak dihubungi, simpan list, dan export CSV.",
-    tags: ["Google Maps", "Saved Lists", "Export CSV"],
-    price: "Mulai 5 kredit",
-  },
-  {
-    href: "/tools/proposal-generator",
-    icon: FileText,
-    color: "purple" as const,
-    label: "Proposal Generator",
-    desc: "Buat proposal bisnis profesional dari template, simpan brand kit, lalu download PDF siap kirim ke prospek.",
-    tags: ["Template", "Brand Kit", "PDF"],
-    price: "5 kredit",
-  },
-  {
-    href: "/tools/invoice-generator",
-    icon: ReceiptText,
-    color: "teal" as const,
-    label: "Invoice Generator",
-    desc: "Buat invoice PDF mandiri dengan template desain, PPN 11% opsional, edit detail, duplicate, dan status manual.",
-    tags: ["PPN 11%", "Duplicate", "PDF"],
-    price: "3 kredit",
-  },
-];
+function getPaidTools(settings: Awaited<ReturnType<typeof getToolSettings>>) {
+  return [
+    {
+      href: "/lead-finder",
+      icon: Search,
+      color: "blue" as const,
+      label: "Lead Finder",
+      desc: "Temukan prospek bisnis lokal dari Google Maps, filter kontak yang layak dihubungi, simpan list, dan export CSV.",
+      tags: ["Google Maps", "Saved Lists", "Export CSV"],
+      price: `Mulai ${settings.leadFinder.standardCost} kredit`,
+    },
+    {
+      href: "/tools/proposal-generator",
+      icon: FileText,
+      color: "purple" as const,
+      label: "Proposal Generator",
+      desc: "Buat proposal bisnis profesional dari template, simpan brand kit, lalu download PDF siap kirim ke prospek.",
+      tags: ["Template", "Brand Kit", "PDF"],
+      price: `${settings.proposalGenerator.creditCost} kredit`,
+    },
+    {
+      href: "/tools/invoice-generator",
+      icon: ReceiptText,
+      color: "teal" as const,
+      label: "Invoice Generator",
+      desc: "Buat invoice PDF mandiri dengan template desain, PPN 11% opsional, edit detail, duplicate, dan status manual.",
+      tags: ["PPN 11%", "Duplicate", "PDF"],
+      price: `${settings.invoiceGenerator.creditCost} kredit`,
+    },
+  ];
+}
 
 const COLOR = {
   blue:   { bg: "bg-blue-600/15",   border: "border-blue-500/30",   text: "text-blue-400",   badge: "bg-blue-500/10 text-blue-300 border-blue-500/20", glow: "bg-blue-600/30" },
@@ -107,7 +110,10 @@ const COLOR = {
   green:  { bg: "bg-green-600/15",  border: "border-green-500/30",  text: "text-green-400",  badge: "bg-green-500/10 text-green-300 border-green-500/20", glow: "bg-green-600/30" },
 };
 
-export default function ToolsPage() {
+export default async function ToolsPage() {
+  const toolSettings = await getToolSettings();
+  const paidTools = getPaidTools(toolSettings);
+
   return (
     <div className="min-h-screen">
       {/* ── Hero ──────────────────────────────────────────── */}
