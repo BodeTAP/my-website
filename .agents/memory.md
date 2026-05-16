@@ -68,6 +68,20 @@ user confirms a lasting preference, project decision, or important current state
 - Invoice Generator tax is fixed to optional `PPN 11%`; users can include or
   exclude it, and the API calculates the amount automatically from subtotal
   after discount.
+- Portal dashboard now includes tool usage stats, recent activity from generated
+  invoices/proposals/credit tool usage, an onboarding checklist, and document
+  brand-kit readiness indicators.
+- Portal Profile has a global document Brand Kit control that syncs base logo,
+  colors, and font style into both Proposal Generator and Invoice Generator
+  design settings.
+- Portal Invoice Generator has a detail/edit route at
+  `/portal/tools/invoice-generator/[id]` with manual status, edit, duplicate,
+  delete, and PDF actions.
+- Portal Lead Finder supports saved lead lists via `lead_finder_lists`; saved
+  lists can be reopened without charging credits again and deleted from the tool
+  UI. Saved-list API routes use raw SQL against `lead_finder_lists` so the flow
+  still works if a running dev server has not picked up a regenerated Prisma
+  client delegate yet.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.
@@ -78,10 +92,13 @@ user confirms a lasting preference, project decision, or important current state
   database drift; do not reset the database for this migration.
 - On 2026-05-14, the `invoice_brand_kits` migration was also applied manually
   with `prisma db execute` and marked applied for the same drift reason.
+- On 2026-05-16, the `lead_finder_lists` migration was applied manually with
+  `prisma db execute` and marked applied with `prisma migrate resolve`.
 - Lead Finder Social Scan now treats direct social-profile `websiteUri` values
   (Instagram/Facebook/TikTok/LinkedIn/YouTube/X) as `FOUND` before fetching or
   reading cached scan results.
-- Current active work is around the portal Proposal Generator and its PDF output.
+- Current active work is product polish for the client portal tools and their
+  dashboard/profile workflows.
 
 ## Known Context
 

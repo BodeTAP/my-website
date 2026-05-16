@@ -263,6 +263,25 @@ model LeadFinderSocialScanCache {
   @@map("lead_finder_social_scan_cache")
 }
 
+model LeadFinderList {
+  id         String   @id @default(cuid())
+  clientId   String
+  name       String
+  query      String
+  city       String?
+  mode       String   @default("standard")
+  socialScan Boolean  @default(false)
+  total      Int      @default(0)
+  items      Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+  @@map("lead_finder_lists")
+}
+
 // ─── Proposals ────────────────────────────────────────────────────────────────
 
 model Proposal {
@@ -314,6 +333,7 @@ model Client {
   proposalTemplates ProposalTemplate[]
   generatedProposals GeneratedProposal[]
   generatedInvoices GeneratedInvoice[]
+  leadFinderLists LeadFinderList[]
   proposalBrandKit ProposalBrandKit?
   invoiceBrandKit InvoiceBrandKit?
 

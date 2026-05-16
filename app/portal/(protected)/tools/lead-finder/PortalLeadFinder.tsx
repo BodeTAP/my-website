@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
+  Bookmark,
   ChevronDown,
   ChevronRight,
   Clock,
@@ -18,8 +19,11 @@ import {
   Loader2,
   MapPin,
   Phone,
+  FolderOpen,
+  Save,
   Search,
   Star,
+  Trash2,
   X,
   XCircle,
 } from "lucide-react";
@@ -37,6 +41,17 @@ type SearchHistory = {
   city: string;
   total: number;
   timestamp: number;
+};
+type SavedLeadList = {
+  id: string;
+  name: string;
+  query: string;
+  city: string | null;
+  mode: string;
+  socialScan: boolean;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 const DEFAULT_CREDIT_COST: Record<SearchMode, number> = {
@@ -643,7 +658,11 @@ export default function PortalLeadFinder({
   const [lastCreditCost, setLastCreditCost] = useState(creditCosts.standard);
   const [lastMode, setLastMode] = useState<SearchMode>("standard");
   const [loading, setLoading] = useState(false);
+  const [loadingListId, setLoadingListId] = useState<string | null>(null);
+  const [savingList, setSavingList] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [listMessage, setListMessage] = useState<string | null>(null);
+  const [savedLists, setSavedLists] = useState<SavedLeadList[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const socialScanCost = creditCosts.socialScan ?? DEFAULT_SOCIAL_SCAN_COST;
@@ -698,6 +717,20 @@ export default function PortalLeadFinder({
   const closedCount = places.filter((place) => place.businessStatus === "CLOSED_PERMANENTLY").length;
   const socialFoundCount = places.filter(hasAnySocial).length;
 
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/portal/tools/lead-finder/lists")
+      .then((res) => res.json())
+      .then((data) => {
+        if (mounted && Array.isArray(data.lists)) setSavedLists(data.lists);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   function requestSearch() {
     if (!query.trim() || insufficient) return;
     setConfirmOpen(true);
@@ -744,6 +777,84 @@ export default function PortalLeadFinder({
       setError(err instanceof Error ? err.message : "Pencarian gagal");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function saveCurrentList() {
+    if (places.length === 0 || savingList) return;
+    setSavingList(true);
+    setError(null);
+    setListMessage(null);
+
+    try {
+      const res = await fetch("/api/portal/tools/lead-finder/lists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fullQuery || `${query.trim()} ${city.trim()}`.trim(),
+          query: query.trim(),
+          city: city.trim(),
+          mode: lastMode,
+          socialScan: activeSocialScan,
+          items: places,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan list");
+
+      setSavedLists((current) => [data.list, ...current.filter((item) => item.id !== data.list.id)].slice(0, 50));
+      setListMessage("List lead berhasil disimpan.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menyimpan list");
+    } finally {
+      setSavingList(false);
+    }
+  }
+
+  async function loadSavedList(id: string) {
+    setLoadingListId(id);
+    setError(null);
+    setListMessage(null);
+
+    try {
+      const res = await fetch(`/api/portal/tools/lead-finder/lists/${id}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Gagal membuka list");
+
+      const list = data.list as SavedLeadList & { items?: unknown };
+      setQuery(list.query);
+      setCity(list.city ?? "");
+      setMode(list.mode === "deep" ? "deep" : "standard");
+      setSocialScanEnabled(!!list.socialScan);
+      setPlaces(Array.isArray(list.items) ? list.items as PlaceLead[] : []);
+      setFullQuery(list.city ? `${list.query} di ${list.city}` : list.query);
+      setSearched(true);
+      setUsedBias(false);
+      setLastMode(list.mode === "deep" ? "deep" : "standard");
+      setListMessage(`List "${list.name}" dibuka.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal membuka list");
+    } finally {
+      setLoadingListId(null);
+    }
+  }
+
+  async function deleteSavedList(id: string) {
+    setLoadingListId(id);
+    setError(null);
+    setListMessage(null);
+
+    try {
+      const res = await fetch(`/api/portal/tools/lead-finder/lists/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Gagal menghapus list");
+
+      setSavedLists((current) => current.filter((item) => item.id !== id));
+      setListMessage("List lead dihapus.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menghapus list");
+    } finally {
+      setLoadingListId(null);
     }
   }
 
@@ -963,6 +1074,62 @@ export default function PortalLeadFinder({
         </div>
       )}
 
+      {listMessage && !error && (
+        <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/25 px-5 py-4 text-emerald-100 text-sm">
+          {listMessage}
+        </div>
+      )}
+
+      {savedLists.length > 0 && (
+        <div className="glass rounded-3xl border border-white/5 p-5">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="flex items-center gap-2 text-white font-black">
+                <Bookmark className="h-4 w-4 text-blue-300" />
+                Saved Lists
+              </h2>
+              <p className="mt-1 text-xs text-blue-200/45">Buka ulang hasil pencarian tanpa memotong kredit lagi.</p>
+            </div>
+            {places.length > 0 && (
+              <Button type="button" size="sm" onClick={saveCurrentList} disabled={savingList} className="gap-2 bg-blue-600 text-white hover:bg-blue-500">
+                {savingList ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                Simpan Hasil Ini
+              </Button>
+            )}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {savedLists.slice(0, 6).map((list) => (
+              <div key={list.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-white">{list.name}</p>
+                    <p className="mt-1 truncate text-xs text-blue-200/45">{list.total} lead - {list.city ? `${list.query} di ${list.city}` : list.query}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void deleteSavedList(list.id)}
+                    disabled={loadingListId === list.id}
+                    className="shrink-0 rounded-lg border border-red-500/15 bg-red-500/10 p-2 text-red-200/70 hover:text-red-100 disabled:opacity-50"
+                    aria-label="Hapus saved list"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void loadSavedList(list.id)}
+                  disabled={loadingListId === list.id}
+                  className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 text-xs font-black text-blue-200 hover:bg-blue-500/15 disabled:opacity-50"
+                >
+                  {loadingListId === list.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FolderOpen className="h-3.5 w-3.5" />}
+                  Buka List
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {fullQuery && !error && !loading && (
         <div className="rounded-2xl bg-green-500/10 border border-green-500/25 px-5 py-4 text-green-100 text-sm">
           {lastMode === "deep" ? "Deep Search selesai" : "Pencarian selesai"}. {lastCreditCost} kredit telah digunakan, saldo terbaru {balance} kredit.
@@ -991,11 +1158,18 @@ export default function PortalLeadFinder({
             </div>
 
             {filteredPlaces.length > 0 && (
-              <Button variant="outline" size="sm" onClick={() => downloadCsv(filteredPlaces)}
-                className="gap-2 text-xs border-green-500/25 bg-green-500/10 text-green-200 hover:bg-green-500/15 shrink-0">
-                <Download className="w-3.5 h-3.5" />
-                Download CSV ({filteredPlaces.length})
-              </Button>
+              <div className="flex flex-wrap gap-2 sm:justify-end">
+                <Button variant="outline" size="sm" onClick={saveCurrentList} disabled={savingList}
+                  className="gap-2 text-xs border-blue-500/25 bg-blue-500/10 text-blue-200 hover:bg-blue-500/15 shrink-0">
+                  {savingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Simpan List
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => downloadCsv(filteredPlaces)}
+                  className="gap-2 text-xs border-green-500/25 bg-green-500/10 text-green-200 hover:bg-green-500/15 shrink-0">
+                  <Download className="w-3.5 h-3.5" />
+                  Download CSV ({filteredPlaces.length})
+                </Button>
+              </div>
             )}
           </div>
 

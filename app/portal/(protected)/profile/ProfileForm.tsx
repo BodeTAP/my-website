@@ -3,7 +3,7 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Loader2, Check, AlertCircle, Save, User, Building, Phone, MapPin, Mail } from "lucide-react";
+import { Camera, Loader2, Check, AlertCircle, Save, User, Building, Phone, MapPin, Mail, ImageIcon, Palette, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
@@ -15,8 +15,14 @@ type Profile = {
   phone:        string;
   address:      string;
 };
+type BrandKit = {
+  logoUrl: string | null;
+  primaryColor: string;
+  accentColor: string;
+  fontStyle: "sans" | "serif" | "mono";
+};
 
-export default function ProfileForm({ profile }: { profile: Profile }) {
+export default function ProfileForm({ profile, brandKit }: { profile: Profile; brandKit: BrandKit }) {
   const router           = useRouter();
   const fileRef          = useRef<HTMLInputElement>(null);
   const [pending, start] = useTransition();
@@ -27,8 +33,14 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
   const [address,      setAddress]      = useState(profile.address);
   const [avatarUrl,    setAvatarUrl]    = useState(profile.image);
   const [imgError,     setImgError]     = useState(false);
+  const [brandLogo,    setBrandLogo]    = useState(brandKit.logoUrl);
+  const [primaryColor, setPrimaryColor] = useState(brandKit.primaryColor);
+  const [accentColor,  setAccentColor]  = useState(brandKit.accentColor);
+  const [fontStyle,    setFontStyle]    = useState<BrandKit["fontStyle"]>(brandKit.fontStyle);
 
   const [uploading, setUploading]       = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [savingBrand, setSavingBrand]   = useState(false);
   const [toast,     setToast]           = useState<{ ok: boolean; msg: string } | null>(null);
 
   function showToast(ok: boolean, msg: string) {
@@ -80,6 +92,45 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         showToast(false, data.error ?? "Gagal menyimpan profil.");
       }
     });
+  }
+
+  async function handleBrandLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/portal/tools/invoice-generator/logo", { method: "POST", body: fd });
+    const data = await res.json().catch(() => ({}));
+    setUploadingLogo(false);
+
+    if (res.ok) {
+      setBrandLogo(data.url);
+      showToast(true, "Logo brand kit berhasil diupload.");
+    } else {
+      showToast(false, data.error ?? "Gagal mengupload logo brand kit.");
+    }
+
+    e.target.value = "";
+  }
+
+  async function handleBrandSave() {
+    setSavingBrand(true);
+    const res = await fetch("/api/portal/brand-kit", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ logoUrl: brandLogo, primaryColor, accentColor, fontStyle }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setSavingBrand(false);
+
+    if (res.ok) {
+      showToast(true, "Brand kit disinkronkan ke Proposal dan Invoice Generator.");
+      router.refresh();
+    } else {
+      showToast(false, data.error ?? "Gagal menyimpan brand kit.");
+    }
   }
 
   const initial = (name || profile.email || "U").charAt(0).toUpperCase();
@@ -191,6 +242,68 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         </div>
       </StaggerItem>
 
+      <StaggerItem>
+        <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+            <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+              <Palette className="w-4 h-4 text-pink-300" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-lg">Brand Kit Dokumen</h3>
+              <p className="mt-1 text-xs text-blue-200/40">Dipakai sebagai dasar desain Proposal Generator dan Invoice Generator.</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+              {brandLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={brandLogo} alt="Logo brand kit" className="h-full w-full object-contain p-2" />
+              ) : (
+                <ImageIcon className="h-8 w-8 text-blue-200/30" />
+              )}
+            </div>
+            <div className="flex-1 space-y-4">
+              <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 text-sm font-bold text-white hover:bg-white/15">
+                {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                Upload Logo
+                <input type="file" accept="image/png,image/jpeg" disabled={uploadingLogo} className="hidden" onChange={handleBrandLogoChange} />
+              </label>
+              {brandLogo && (
+                <button type="button" onClick={() => setBrandLogo(null)} className="ml-3 text-sm font-bold text-red-200/80 hover:text-red-100">
+                  Hapus logo
+                </button>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ColorField label="Warna Utama" value={primaryColor} onChange={setPrimaryColor} />
+                <ColorField label="Warna Aksen" value={accentColor} onChange={setAccentColor} />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(["sans", "serif", "mono"] as const).map((font) => (
+                  <button
+                    key={font}
+                    type="button"
+                    onClick={() => setFontStyle(font)}
+                    className={`rounded-xl border px-4 py-2 text-sm font-black ${fontStyle === font ? "border-blue-500/45 bg-blue-500/15 text-white" : "border-white/10 bg-white/5 text-blue-200/55"}`}
+                  >
+                    {font}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleBrandSave}
+            disabled={savingBrand}
+            className="h-12 rounded-xl bg-pink-600 px-6 text-sm font-semibold text-white hover:bg-pink-500"
+          >
+            {savingBrand ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            Simpan Brand Kit
+          </Button>
+        </div>
+      </StaggerItem>
+
       {/* Save Button */}
       <StaggerItem>
         <div className="flex justify-end pt-2">
@@ -235,5 +348,17 @@ function Field({
         />
       </div>
     </div>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="block">
+      <span className="text-blue-200/50 text-xs font-medium mb-2 flex items-center transition-colors">{label}</span>
+      <div className="flex h-11 overflow-hidden rounded-xl border border-white/10 bg-[#050b14]/50">
+        <input type="color" value={value} onChange={(event) => onChange(event.target.value)} className="h-11 w-14 border-0 bg-transparent p-1" />
+        <input value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-white outline-none" />
+      </div>
+    </label>
   );
 }

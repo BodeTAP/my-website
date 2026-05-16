@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getClientInvoiceDesign } from "@/lib/invoiceDesign";
 import { prisma } from "@/lib/prisma";
+import { getClientProposalDesign } from "@/lib/proposalDesign";
 import ProfileForm from "./ProfileForm";
 import { FadeUp } from "@/components/public/motion";
 
@@ -22,6 +24,18 @@ export default async function ProfilePage() {
     phone:        user.client?.phone ?? "",
     address:      user.client?.address ?? "",
   };
+  const [proposalDesign, invoiceDesign] = user.client
+    ? await Promise.all([
+        getClientProposalDesign(user.client.id),
+        getClientInvoiceDesign(user.client.id),
+      ])
+    : [null, null] as const;
+  const brandKit = {
+    logoUrl: proposalDesign?.logoUrl ?? invoiceDesign?.logoUrl ?? null,
+    primaryColor: proposalDesign?.primaryColor ?? invoiceDesign?.primaryColor ?? "#1e40af",
+    accentColor: proposalDesign?.accentColor ?? invoiceDesign?.accentColor ?? "#0d9488",
+    fontStyle: proposalDesign?.fontStyle ?? invoiceDesign?.fontStyle ?? "sans",
+  };
 
   return (
     <div>
@@ -32,7 +46,7 @@ export default async function ProfilePage() {
         </p>
       </FadeUp>
       <FadeUp delay={0.15}>
-        <ProfileForm profile={profile} />
+        <ProfileForm profile={profile} brandKit={brandKit} />
       </FadeUp>
     </div>
   );

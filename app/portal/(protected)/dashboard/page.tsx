@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check, Sparkles, AlertCircle, LayoutDashboard, PhoneCall, Coins } from "lucide-react";
+import { Activity, Briefcase, Receipt, MessageSquare, CheckCircle2, ArrowRight, Wrench, Loader2, Check, Sparkles, AlertCircle, LayoutDashboard, PhoneCall, Coins, FileText, Search, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, CountUp } from "@/components/public/motion";
 
@@ -13,6 +13,15 @@ const PROJECT_LABELS: Record<string, string> = {
   TESTING:     "Tahap Testing",
   LIVE:        "Sudah Live 🚀",
 };
+
+function formatDateTime(value: Date) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(value);
+}
 
 export default async function PortalDashboardPage() {
   const session = await auth();
@@ -65,10 +74,89 @@ export default async function PortalDashboardPage() {
   }
 
   const activeProject = client.projects[0];
-  const creditBalance = await prisma.clientCredit.findUnique({
-    where: { clientId: client.id },
-    select: { balance: true },
-  });
+  const [
+    creditBalance,
+    toolUsage,
+    recentGeneratedInvoices,
+    recentGeneratedProposals,
+    recentCreditTransactions,
+    brandKitStatus,
+  ] = await Promise.all([
+    prisma.clientCredit.findUnique({
+      where: { clientId: client.id },
+      select: { balance: true },
+    }),
+    Promise.all([
+      prisma.generatedProposal.count({ where: { clientId: client.id } }),
+      prisma.generatedInvoice.count({ where: { clientId: client.id } }),
+      prisma.creditTransaction.aggregate({
+        where: { clientId: client.id, tool: { in: ["lead_finder", "proposal_generator", "invoice_generator"] } },
+        _sum: { amount: true },
+      }),
+    ]),
+    prisma.generatedInvoice.findMany({
+      where: { clientId: client.id },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { id: true, invoiceNo: true, billToName: true, total: true, createdAt: true },
+    }),
+    prisma.generatedProposal.findMany({
+      where: { clientId: client.id },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { id: true, proposalNo: true, title: true, prospectName: true, createdAt: true },
+    }),
+    prisma.creditTransaction.findMany({
+      where: { clientId: client.id, tool: { in: ["lead_finder", "proposal_generator", "invoice_generator"] } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, tool: true, description: true, amount: true, createdAt: true },
+    }),
+    Promise.all([
+      prisma.proposalBrandKit.findUnique({ where: { clientId: client.id }, select: { id: true } }),
+      prisma.invoiceBrandKit.findUnique({ where: { clientId: client.id }, select: { id: true } }),
+    ]),
+  ]);
+  const [generatedProposalCount, generatedInvoiceCount, spentCredits] = toolUsage;
+  const [proposalBrandKit, invoiceBrandKit] = brandKitStatus;
+  const recentActivity = [
+    ...recentGeneratedInvoices.map((invoice) => ({
+      id: `invoice-${invoice.id}`,
+      icon: Receipt,
+      title: `Invoice ${invoice.invoiceNo}`,
+      detail: `${invoice.billToName} - Rp ${invoice.total.toLocaleString("id-ID")}`,
+      href: `/portal/tools/invoice-generator/${invoice.id}`,
+      date: invoice.createdAt,
+    })),
+    ...recentGeneratedProposals.map((proposal) => ({
+      id: `proposal-${proposal.id}`,
+      icon: FileText,
+      title: proposal.proposalNo ? `Proposal ${proposal.proposalNo}` : proposal.title,
+      detail: proposal.prospectName ?? proposal.title,
+      href: `/portal/tools/proposal-generator/${proposal.id}`,
+      date: proposal.createdAt,
+    })),
+    ...recentCreditTransactions.map((transaction) => ({
+      id: `credit-${transaction.id}`,
+      icon: transaction.tool === "lead_finder" ? Search : transaction.tool === "invoice_generator" ? Receipt : FileText,
+      title: transaction.description,
+      detail: `${Math.abs(transaction.amount)} kredit`,
+      href: transaction.tool === "lead_finder"
+        ? "/portal/tools/lead-finder"
+        : transaction.tool === "invoice_generator"
+          ? "/portal/tools/invoice-generator"
+          : "/portal/tools/proposal-generator",
+      date: transaction.createdAt,
+    })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
+  const onboardingItems = [
+    { label: "Lengkapi profil bisnis", done: Boolean(client.phone && client.address), href: "/portal/profile" },
+    { label: "Siapkan brand kit dokumen", done: Boolean(proposalBrandKit || invoiceBrandKit), href: "/portal/profile" },
+    { label: "Top up kredit tools", done: (creditBalance?.balance ?? 0) > 0, href: "/portal/credits" },
+    { label: "Buat proposal pertama", done: generatedProposalCount > 0, href: "/portal/tools/proposal-generator" },
+    { label: "Buat invoice pertama", done: generatedInvoiceCount > 0, href: "/portal/tools/invoice-generator" },
+  ];
+  const onboardingDone = onboardingItems.filter((item) => item.done).length;
   const hour = (new Date().getUTCHours() + 7) % 24; // WIB = UTC+7
   const greeting = hour < 11 ? "Selamat Pagi" : hour < 15 ? "Selamat Siang" : hour < 18 ? "Selamat Sore" : "Selamat Malam";
 
@@ -258,6 +346,47 @@ export default async function PortalDashboardPage() {
               </div>
             </FadeUp>
           )}
+
+          <FadeUp delay={0.25}>
+            <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center ring-1 ring-cyan-500/20">
+                    <Activity className="w-6 h-6 text-cyan-300" />
+                  </div>
+                  <div>
+                    <h2 className="text-white font-bold text-lg sm:text-xl tracking-tight">Aktivitas Terakhir</h2>
+                    <p className="text-blue-200/50 text-xs sm:text-sm mt-0.5">Riwayat penggunaan tools dan dokumen terbaru.</p>
+                  </div>
+                </div>
+                <Link href="/portal/tools" className="text-xs font-bold text-blue-300 hover:text-white inline-flex items-center gap-1">
+                  Buka Tools <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {recentActivity.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm text-blue-200/45">
+                    Belum ada aktivitas tool. Mulai dari Proposal Generator, Invoice Generator, atau Lead Finder.
+                  </div>
+                ) : recentActivity.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link key={item.id} href={item.href} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06]">
+                      <div className="w-10 h-10 shrink-0 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-blue-300" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-white">{item.title}</p>
+                        <p className="truncate text-xs text-blue-200/45">{item.detail}</p>
+                      </div>
+                      <span className="shrink-0 text-[11px] font-bold text-blue-200/35">{formatDateTime(item.date)}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </FadeUp>
         </div>
 
         {/* Right Column (Secondary / Stats) */}
@@ -297,7 +426,78 @@ export default async function PortalDashboardPage() {
                 </div>
               </Link>
             </StaggerItem>
+            <StaggerItem>
+              <Link href="/portal/tools/proposal-generator" className="block h-full">
+                <div className="glass rounded-3xl p-6 border border-violet-500/15 relative overflow-hidden group h-full hover:border-violet-500/35 transition-colors">
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-violet-500/10 blur-[30px] rounded-full pointer-events-none group-hover:bg-violet-500/20 transition-all" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/10 flex items-center justify-center mb-4 ring-1 ring-violet-500/20">
+                    <FileText className="w-6 h-6 text-violet-300" />
+                  </div>
+                  <div className="text-3xl font-black text-white mb-1"><CountUp from={0} to={generatedProposalCount} /></div>
+                  <div className="text-blue-200/50 text-[11px] uppercase tracking-wider font-bold">Proposal Dibuat</div>
+                </div>
+              </Link>
+            </StaggerItem>
+            <StaggerItem>
+              <Link href="/portal/tools/invoice-generator" className="block h-full">
+                <div className="glass rounded-3xl p-6 border border-cyan-500/15 relative overflow-hidden group h-full hover:border-cyan-500/35 transition-colors">
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-cyan-500/10 blur-[30px] rounded-full pointer-events-none group-hover:bg-cyan-500/20 transition-all" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 flex items-center justify-center mb-4 ring-1 ring-cyan-500/20">
+                    <Receipt className="w-6 h-6 text-cyan-300" />
+                  </div>
+                  <div className="text-3xl font-black text-white mb-1"><CountUp from={0} to={generatedInvoiceCount} /></div>
+                  <div className="text-blue-200/50 text-[11px] uppercase tracking-wider font-bold">Invoice Dibuat</div>
+                </div>
+              </Link>
+            </StaggerItem>
           </StaggerChildren>
+
+          <FadeUp delay={0.15}>
+            <div className="glass rounded-3xl p-6 border border-white/5">
+              <div className="flex items-start justify-between gap-4 mb-5">
+                <div>
+                  <h2 className="text-white font-bold text-lg">Checklist Portal</h2>
+                  <p className="text-blue-200/45 text-xs mt-1">{onboardingDone} dari {onboardingItems.length} langkah selesai</p>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-300 font-black">
+                  {Math.round((onboardingDone / onboardingItems.length) * 100)}%
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                {onboardingItems.map((item) => (
+                  <Link key={item.label} href={item.href} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 hover:bg-white/[0.06] transition-colors">
+                    <span className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${item.done ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/15 text-blue-200/30"}`}>
+                      {item.done && <Check className="w-3 h-3" />}
+                    </span>
+                    <span className={`text-sm font-bold ${item.done ? "text-blue-100/70 line-through decoration-blue-100/25" : "text-white"}`}>{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </FadeUp>
+
+          <FadeUp delay={0.18}>
+            <div className="glass rounded-3xl p-6 border border-white/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-pink-300" />
+                </div>
+                <div>
+                  <h2 className="text-white font-bold">Brand Kit Dokumen</h2>
+                  <p className="text-blue-200/45 text-xs">Proposal dan invoice siap konsisten.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+                <Link href="/portal/tools/proposal-generator" className={`rounded-xl border px-3 py-2.5 ${proposalBrandKit ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-white/10 bg-white/5 text-blue-200/55"}`}>
+                  Proposal {proposalBrandKit ? "siap" : "belum"}
+                </Link>
+                <Link href="/portal/tools/invoice-generator" className={`rounded-xl border px-3 py-2.5 ${invoiceBrandKit ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-white/10 bg-white/5 text-blue-200/55"}`}>
+                  Invoice {invoiceBrandKit ? "siap" : "belum"}
+                </Link>
+              </div>
+              <p className="mt-4 text-xs text-blue-200/35">Total kredit tools terpakai: {Math.abs(spentCredits._sum.amount ?? 0)} kredit.</p>
+            </div>
+          </FadeUp>
 
           {/* Active maintenance subscription */}
           {client.subscriptions[0] && (() => {

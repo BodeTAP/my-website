@@ -629,10 +629,15 @@ export default function InvoiceGeneratorClient({
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <p className="text-xs text-blue-200/35">Jatuh tempo: {fmtDate(invoice.dueDate)}</p>
-                  <a href={`/api/portal/tools/invoice-generator/${invoice.id}/pdf`} target="_blank" className="inline-flex h-9 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 text-xs font-black text-emerald-200 hover:bg-emerald-500/15">
-                    <Download className="mr-1.5 h-3.5 w-3.5" />
-                    PDF
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/portal/tools/invoice-generator/${invoice.id}`} className="inline-flex h-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 text-xs font-black text-blue-200 hover:bg-blue-500/15">
+                      Detail
+                    </Link>
+                    <a href={`/api/portal/tools/invoice-generator/${invoice.id}/pdf`} target="_blank" className="inline-flex h-9 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 text-xs font-black text-emerald-200 hover:bg-emerald-500/15">
+                      <Download className="mr-1.5 h-3.5 w-3.5" />
+                      PDF
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
