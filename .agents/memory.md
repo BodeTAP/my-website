@@ -104,6 +104,9 @@ user confirms a lasting preference, project decision, or important current state
   template/AI-like: fewer glow/glass effects, more concrete operational copy,
   calmer solid surfaces, and product visuals tied to the actual website/lead/
   proposal/invoice workflow.
+- Public background direction uses calm dark banded sections instead of global
+  grid/glow effects: base `#020611`, section `#071225`, alt `#06111f`, solid
+  surfaces, and subtle dividers.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

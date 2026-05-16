@@ -380,7 +380,7 @@ export default async function HomePage() {
   };
 
   return (
-    <div className="relative overflow-x-clip">
+    <div className="relative overflow-x-clip bg-[#020611]">
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="relative px-4 pb-16 pt-28 sm:px-6 lg:px-8 lg:pb-20">
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1fr)]">
@@ -550,7 +550,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Domain Checker ───────────────────────────────────────── */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="border-b border-white/8 bg-[#020611] py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <FadeUp className="text-center mb-10" delay={0.2}>
             <h2 className="text-3xl font-bold text-white mb-3">
@@ -567,7 +567,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Benefits ─────────────────────────────────────────────── */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
+      <section className="border-y border-white/8 bg-[#071225] px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.7fr_1.3fr]">
           <FadeUp>
             <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-blue-200/55">
@@ -605,9 +605,8 @@ export default async function HomePage() {
 
       {/* ── Portfolio Preview ─────────────────────────────────────── */}
       {portfolios.length > 0 && (
-        <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] pointer-events-none" />
-          <div className="max-w-7xl mx-auto relative z-10">
+        <section className="border-y border-white/8 bg-[#071225] py-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
             <FadeUp className="flex items-end justify-between mb-12">
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2">Hasil Kerja Terbaru</h2>
@@ -657,7 +656,7 @@ export default async function HomePage() {
 
       {/* ── Blog Preview ──────────────────────────────────────────── */}
       {articles.length > 0 && (
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section className="bg-[#020611] py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <FadeUp className="flex items-end justify-between mb-12">
               <div>
@@ -706,7 +705,7 @@ export default async function HomePage() {
       )}
 
       {/* ── Testimonials ──────────────────────────────────────────── */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="border-y border-white/8 bg-[#071225] py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <FadeUp className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
@@ -726,7 +725,7 @@ export default async function HomePage() {
       <FAQSection />
 
       {/* ── Final CTA ─────────────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
+      <section className="bg-[#020611] py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <ScaleIn>
             <div className="rounded-2xl border border-white/10 bg-[#071225] p-8 sm:p-10">

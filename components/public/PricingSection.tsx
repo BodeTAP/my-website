@@ -100,7 +100,7 @@ const plans = [
 
 export default function PricingSection() {
   return (
-    <section className="relative px-4 py-20 sm:px-6 lg:px-8">
+    <section className="relative bg-[#020611] px-4 py-20 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <FadeUp className="mb-12 max-w-2xl">
           <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-blue-200/55">

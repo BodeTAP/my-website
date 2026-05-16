@@ -46,13 +46,17 @@
 
 /* ── MFWEB Dark Blue Theme ──────────────────────────────────────────── */
 :root {
-  --vt-bg:       #070f1e;
-  --vt-surface:  #0d1b35;
+  --vt-bg:       #020611;
+  --vt-section:  #071225;
+  --vt-section-alt: #06111f;
+  --vt-surface:  #0b1728;
+  --vt-surface-strong: #101b2d;
   --vt-primary:  #1d4ed8;
   --vt-accent:   #3b82f6;
+  --vt-warm:     #f59e0b;
   --vt-muted:    #1e3a5f;
-  --vt-border:   rgba(59,130,246,0.15);
-  --vt-glass:    rgba(13,27,53,0.6);
+  --vt-border:   rgba(255,255,255,0.08);
+  --vt-glass:    rgba(11,23,40,0.82);
 
   --background: oklch(0.09 0.025 255);
   --foreground: oklch(0.95 0.01 250);
@@ -91,12 +95,9 @@
     @apply bg-background text-foreground antialiased;
     background-color: var(--vt-bg);
     background-image:
-      linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px),
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(29,78,216,0.15) 0%, transparent 80%);
-    background-size: 60px 60px, 60px 60px, 100vw 100vh;
-    background-attachment: fixed;
-    background-repeat: repeat, repeat, no-repeat;
+      radial-gradient(ellipse 70% 36% at 50% -12%, rgba(37,99,235,0.12) 0%, transparent 72%);
+    background-size: 100vw 720px;
+    background-repeat: no-repeat;
     min-height: 100vh;
   }
   html {
