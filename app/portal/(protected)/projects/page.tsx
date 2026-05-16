@@ -45,7 +45,7 @@ const STAGES: {
   },
   {
     status:      "LIVE",
-    label:       "Website Live 🚀",
+    label:       "Website Live",
     sublabel:    "Tahap 4",
     desc:        "Website resmi diluncurkan, domain aktif, dan diserahterimakan kepada Anda beserta akses pengelolaan.",
     activeColor: "bg-green-500/10",
@@ -84,7 +84,7 @@ export default async function PortalProjectsPage() {
 
       <div className="space-y-8">
         {projects.length === 0 ? (
-          <FadeUp delay={0.1} className="glass rounded-2xl p-12 text-center">
+          <FadeUp delay={0.1} className="rounded-2xl border border-white/10 bg-[#071225] p-12 text-center">
             <Rocket className="w-10 h-10 text-blue-200/20 mx-auto mb-3" />
             <p className="text-blue-200/40">Belum ada proyek aktif.</p>
             <p className="text-blue-200/25 text-sm mt-1">Hubungi tim kami untuk memulai proyek Anda.</p>
@@ -96,7 +96,7 @@ export default async function PortalProjectsPage() {
 
               return (
                 <StaggerItem key={project.id}>
-                  <FadeUp className="glass rounded-2xl overflow-hidden">
+                  <FadeUp className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
                 {/* Header */}
                 <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-white/5">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -156,7 +156,7 @@ export default async function PortalProjectsPage() {
                               isCompleted
                                 ? "bg-green-500 border-green-500"
                                 : isCurrent
-                                ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/15"
+                                ? "bg-blue-600 border-blue-400 ring-4 ring-blue-500/15"
                                 : "bg-[#0a1628] border-white/10"
                             }`}>
                               {isCompleted ? (
@@ -202,7 +202,7 @@ export default async function PortalProjectsPage() {
                                   </span>
                                 )}
                                 {isCompleted && (
-                                  <span className="text-[11px] font-semibold text-green-400">✓ Selesai</span>
+                                  <span className="text-[11px] font-semibold text-green-400">Selesai</span>
                                 )}
                               </div>
 

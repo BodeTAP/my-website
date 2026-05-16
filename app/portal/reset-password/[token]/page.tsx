@@ -52,21 +52,21 @@ export default function ResetPasswordTokenPage() {
           <p className="text-blue-200/50 text-sm mt-1">Portal Klien</p>
         </div>
 
-        <div className="glass rounded-2xl p-8">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-8">
           {done ? (
             <div className="text-center">
               <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <h2 className="text-white font-bold text-lg mb-2">Password Berhasil Diubah!</h2>
-              <p className="text-blue-200/60 text-sm">Anda akan diarahkan ke halaman login dalam beberapa detik...</p>
+              <h2 className="text-white font-bold text-lg mb-2">Kata sandi berhasil diubah</h2>
+              <p className="text-blue-200/60 text-sm">Anda akan diarahkan ke halaman login dalam beberapa detik.</p>
             </div>
           ) : (
             <>
-              <h2 className="text-white font-bold text-lg mb-1">Buat Password Baru</h2>
-              <p className="text-blue-200/50 text-sm mb-6">Masukkan password baru untuk akun portal Anda.</p>
+              <h2 className="text-white font-bold text-lg mb-1">Buat kata sandi baru</h2>
+              <p className="text-blue-200/50 text-sm mb-6">Masukkan kata sandi baru untuk akun portal Anda.</p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200 text-sm">Password Baru</Label>
+                  <Label className="text-blue-200 text-sm">Kata sandi baru</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
                     <Input
@@ -85,7 +85,7 @@ export default function ResetPasswordTokenPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200 text-sm">Konfirmasi Password</Label>
+                  <Label className="text-blue-200 text-sm">Konfirmasi kata sandi</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
                     <Input
@@ -94,7 +94,7 @@ export default function ResetPasswordTokenPage() {
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
                       className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
-                      placeholder="Ulangi password"
+                      placeholder="Ulangi kata sandi"
                     />
                   </div>
                 </div>
@@ -106,7 +106,7 @@ export default function ResetPasswordTokenPage() {
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white h-11"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simpan Password Baru"}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simpan kata sandi"}
                 </Button>
               </form>
             </>

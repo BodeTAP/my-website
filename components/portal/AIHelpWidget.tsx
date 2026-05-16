@@ -70,7 +70,7 @@ export default function AIHelpWidget({ maxMessages = 20 }: { maxMessages?: numbe
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 lg:bottom-6 right-6 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-500 transition-all z-50 animate-in fade-in zoom-in duration-300"
+        className="fixed bottom-24 lg:bottom-6 right-6 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white border border-blue-400/30 hover:bg-blue-500 transition-colors z-50 animate-in fade-in zoom-in duration-300"
       >
         <MessageSquare className="w-6 h-6" />
       </button>
@@ -78,12 +78,12 @@ export default function AIHelpWidget({ maxMessages = 20 }: { maxMessages?: numbe
   }
 
   return (
-    <div className="fixed bottom-24 lg:bottom-6 right-6 w-80 max-h-100 bg-[#030914]/35 backdrop-blur-2xl border border-white/10 rounded-2xl flex flex-col shadow-2xl z-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-24 lg:bottom-6 right-6 w-80 max-h-100 bg-[#071225] border border-white/10 rounded-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-blue-400" />
-          <span className="font-bold text-white text-sm">Tanya AI</span>
+          <span className="font-bold text-white text-sm">Bantuan Portal</span>
         </div>
         <button onClick={() => setOpen(false)} className="text-blue-200/50 hover:text-white transition-colors">
           <X className="w-4 h-4" />

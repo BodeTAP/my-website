@@ -15,7 +15,7 @@ function dateInput(value: Date | null) {
 }
 
 function lineItems(value: unknown): InvoiceDetailView["lineItems"] {
-  if (!Array.isArray(value)) return [{ description: "Layanan profesional", quantity: 1, price: 0 }];
+  if (!Array.isArray(value)) return [{ description: "Layanan website", quantity: 1, price: 0 }];
 
   const items = (value as RawItem[]).map((item) => ({
     description: typeof item.description === "string" ? item.description : "",
@@ -23,7 +23,7 @@ function lineItems(value: unknown): InvoiceDetailView["lineItems"] {
     price: typeof item.price === "number" ? item.price : Number(item.price ?? 0),
   })).filter((item) => item.description);
 
-  return items.length > 0 ? items : [{ description: "Layanan profesional", quantity: 1, price: 0 }];
+  return items.length > 0 ? items : [{ description: "Layanan website", quantity: 1, price: 0 }];
 }
 
 export default async function PortalInvoiceDetailPage({ params }: Params) {

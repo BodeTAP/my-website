@@ -556,7 +556,7 @@ export default function ProposalGeneratorClient({
             </div>
             <div>
               <h1 className="text-2xl font-black text-white">Proposal Generator</h1>
-              <p className="text-blue-200/50 text-sm">Buat proposal dari template yang bisa Anda edit sendiri.</p>
+              <p className="text-blue-200/50 text-sm">Buat proposal PDF dari template, lalu edit detailnya sebelum dikirim.</p>
             </div>
           </div>
         </div>
@@ -624,7 +624,7 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "generate" && (
         <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
-          <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5 xl:sticky xl:top-5">
+          <section className="rounded-2xl border border-blue-500/20 bg-[#071225] p-5 space-y-5 xl:sticky xl:top-5">
             <div>
               <h2 className="text-white font-black text-lg">Brief Proposal</h2>
               <p className="text-blue-200/45 text-sm mt-1">{proposalCost} kredit per generate.</p>
@@ -731,7 +731,7 @@ export default function ProposalGeneratorClient({
                 href="/portal/credits"
                 className="block rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-100 hover:bg-amber-500/15 transition-colors"
               >
-                Kredit tidak cukup. Butuh {proposalCost} kredit. Beli sekarang.
+                Kredit tidak cukup. Butuh {proposalCost} kredit untuk membuat proposal.
               </Link>
             )}
 
@@ -755,7 +755,7 @@ export default function ProposalGeneratorClient({
             </Button>
           </section>
 
-          <section className="glass rounded-2xl border border-white/10 p-5">
+          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5">
             {result ? (
               <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-white/10 pb-5">
@@ -881,7 +881,7 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "design" && (
         <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
-          <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5">
+          <section className="rounded-2xl border border-blue-500/20 bg-[#071225] p-5 space-y-5">
             <div>
               <h2 className="text-white font-black text-lg">Brand Kit Proposal</h2>
               <p className="text-blue-200/45 text-sm mt-1">Atur tampilan PDF tanpa mengubah isi template.</p>
@@ -1050,7 +1050,7 @@ export default function ProposalGeneratorClient({
             </div>
           </section>
 
-          <section className="glass rounded-2xl border border-white/10 p-5 min-h-[620px]">
+          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 min-h-[620px]">
             {result ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
@@ -1093,7 +1093,7 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "templates" && (
         <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
-          <section className="glass rounded-2xl border border-white/10 p-5 space-y-3">
+          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-white font-black text-lg">Daftar Template</h2>
@@ -1158,7 +1158,7 @@ export default function ProposalGeneratorClient({
             </div>
           </section>
 
-          <section className="glass rounded-2xl border border-blue-500/20 p-5 space-y-5">
+          <section className="rounded-2xl border border-blue-500/20 bg-[#071225] p-5 space-y-5">
             <div>
               <h2 className="text-white font-black text-lg">{draft.id ? "Edit Template" : "Template Baru"}</h2>
               <p className="text-blue-200/45 text-sm mt-1">Template custom tersimpan khusus untuk akun Anda.</p>
@@ -1300,7 +1300,7 @@ export default function ProposalGeneratorClient({
       )}
 
       {activeTab === "history" && (
-        <section className="glass rounded-2xl border border-white/10 overflow-hidden">
+        <section className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
           <div className="px-5 py-4 border-b border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h2 className="text-white font-black text-lg">Riwayat Proposal</h2>

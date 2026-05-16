@@ -870,7 +870,7 @@ export default function PortalLeadFinder({
             <Search className="w-7 h-7 text-blue-400" />
             Lead Finder
           </h1>
-          <p className="text-blue-200/50 text-sm mt-2">Temukan prospek bisnis lokal dari Google Maps dalam format siap follow-up.</p>
+          <p className="text-blue-200/50 text-sm mt-2">Cari prospek bisnis lokal dari Google Maps, lalu simpan atau export list yang relevan.</p>
         </div>
         <Link href="/portal/credits" className="w-fit">
           <div className="flex items-center gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 px-4 py-3 hover:bg-amber-500/15 transition-colors">
@@ -906,7 +906,7 @@ export default function PortalLeadFinder({
         </Link>
       )}
 
-      <div className="glass rounded-3xl p-6 border border-white/5">
+      <div className="rounded-2xl border border-white/10 bg-[#071225] p-6">
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -974,7 +974,7 @@ export default function PortalLeadFinder({
                 onClick={() => setMode(option.value)}
                 className={`rounded-2xl border p-4 text-left transition-all ${
                   mode === option.value
-                    ? "border-blue-500/45 bg-blue-500/10 shadow-[0_0_20px_rgba(37,99,235,0.12)]"
+                    ? "border-blue-500/45 bg-blue-500/10"
                     : "border-white/10 bg-white/5 hover:border-white/20"
                 }`}
               >
@@ -1026,7 +1026,7 @@ export default function PortalLeadFinder({
           <div className="flex items-center gap-3 flex-wrap">
             <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-6">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              {loading ? (mode === "deep" ? "Deep Search berjalan..." : "Mencari prospek...") : "Cari Prospek"}
+              {loading ? (mode === "deep" ? "Mencari lebih luas..." : "Mencari lead...") : "Cari Lead"}
             </Button>
 
             <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-300">
@@ -1081,7 +1081,7 @@ export default function PortalLeadFinder({
       )}
 
       {savedLists.length > 0 && (
-        <div className="glass rounded-3xl border border-white/5 p-5">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-5">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-white font-black">
@@ -1294,7 +1294,7 @@ export default function PortalLeadFinder({
           </div>
 
           {filteredPlaces.length === 0 ? (
-            <div className="glass rounded-2xl p-12 text-center border border-white/5">
+            <div className="rounded-2xl border border-white/10 bg-[#071225] p-12 text-center">
               <p className="text-blue-200/40">Tidak ada hasil untuk filter ini.</p>
             </div>
           ) : (
@@ -1303,7 +1303,7 @@ export default function PortalLeadFinder({
                 const isClosed = place.businessStatus === "CLOSED_PERMANENTLY";
                 const socialPlatforms = getSocialPlatforms(place);
                 return (
-                  <div key={place.placeId || `${place.name}-${place.phone}`} className={`glass rounded-2xl p-4 border transition-all ${isClosed ? "opacity-55 border-white/5" : "border-white/5 hover:border-white/15"}`}>
+                  <div key={place.placeId || `${place.name}-${place.phone}`} className={`rounded-2xl bg-[#071225] p-4 border transition-colors ${isClosed ? "opacity-55 border-white/10" : "border-white/10 hover:border-white/20"}`}>
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0">
                         {place.hasWebsite
@@ -1383,14 +1383,14 @@ export default function PortalLeadFinder({
       )}
 
       {!loading && !searched && places.length === 0 && (
-        <div className="glass rounded-3xl p-10 border border-white/5 text-center text-blue-200/35 text-sm">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-10 text-center text-blue-200/35 text-sm">
           Masukkan jenis bisnis dan kota untuk mulai mencari.
         </div>
       )}
 
       {confirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-[#07111f] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.55)] p-6">
+          <div className="w-full max-w-md rounded-2xl bg-[#071225] border border-white/10 p-6">
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-5">
               <Coins className="w-6 h-6 text-amber-300" />
             </div>

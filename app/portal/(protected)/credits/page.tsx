@@ -73,12 +73,11 @@ export default async function PortalCreditsPage({
 
   return (
     <div className="space-y-8">
-      <FadeUp className="glass rounded-3xl p-6 sm:p-8 border border-amber-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 blur-[90px] rounded-full pointer-events-none" />
+      <FadeUp className="rounded-2xl border border-amber-500/20 bg-[#071225] p-6 sm:p-8">
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.12)]">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
                 <Wallet className="w-6 h-6 text-amber-300" />
               </div>
               <div>
@@ -87,7 +86,7 @@ export default async function PortalCreditsPage({
               </div>
             </div>
             <p className="text-blue-200/55 text-sm max-w-xl">
-              Gunakan kredit untuk menjalankan tools pemasaran dan otomasi di portal MFWEB.
+              Gunakan kredit untuk Lead Finder, Proposal Generator, dan Invoice Generator di portal.
             </p>
           </div>
           <div className="rounded-2xl bg-black/35 border border-amber-500/20 px-6 py-5 min-w-[220px]">
@@ -117,7 +116,7 @@ export default async function PortalCreditsPage({
           const totalCredits = pkg.credits + pkg.bonusCredit;
           return (
             <StaggerItem key={pkg.id}>
-              <div className="glass rounded-2xl p-6 border border-white/5 h-full flex flex-col hover:border-amber-500/30 transition-colors">
+              <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 h-full flex flex-col hover:border-amber-500/30 transition-colors">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-5">
                   <Coins className="w-6 h-6 text-amber-300" />
                 </div>
@@ -140,7 +139,7 @@ export default async function PortalCreditsPage({
       </StaggerChildren>
 
       <FadeUp delay={0.15}>
-        <div className="glass rounded-3xl border border-white/5 overflow-hidden">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
           <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-white/5">
             <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">

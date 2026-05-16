@@ -49,10 +49,10 @@ export default async function PortalInvoicesPage({
     <div>
       <FadeUp className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Riwayat Invoice</h1>
-          <p className="text-blue-200/50 text-sm mt-1">Kelola tagihan pembayaran Anda</p>
+          <h1 className="text-2xl font-bold text-white">Invoice</h1>
+          <p className="text-blue-200/50 text-sm mt-1">Cek tagihan, status pembayaran, dan unduh PDF invoice.</p>
         </div>
-        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5 w-fit overflow-x-auto">
+        <div className="flex items-center gap-1 bg-[#071225] p-1 rounded-xl border border-white/10 w-fit overflow-x-auto">
           <Link href="/portal/invoices" className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${!status ? 'bg-blue-600 text-white shadow-md' : 'text-blue-200/60 hover:text-white hover:bg-white/5'}`}>
             Semua
           </Link>
@@ -67,14 +67,14 @@ export default async function PortalInvoicesPage({
 
       <div className="space-y-3">
         {invoices.length === 0 ? (
-          <FadeUp delay={0.1} className="glass rounded-2xl p-10 text-center text-blue-200/30 border border-white/5">
+          <FadeUp delay={0.1} className="rounded-2xl border border-white/10 bg-[#071225] p-10 text-center text-blue-200/35">
             {status ? `Tidak ada invoice dengan status ${status === 'paid' ? 'Lunas' : 'Belum Dibayar'}` : 'Belum ada invoice'}
           </FadeUp>
         ) : (
           <StaggerChildren stagger={0.05} className="space-y-3">
             {invoices.map((inv) => (
               <StaggerItem key={inv.id}>
-                <div className="glass rounded-2xl p-5 hover:border-blue-500/30 transition-colors duration-300">
+                <div className="rounded-2xl border border-white/10 bg-[#071225] p-5 hover:border-blue-500/30 transition-colors duration-300">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
                 {/* Info */}
                 <div className="flex-1 min-w-0 space-y-2">

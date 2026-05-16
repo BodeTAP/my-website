@@ -140,10 +140,10 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
       {/* Toast */}
       {toast && (
         <FadeUp>
-          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-lg backdrop-blur-md ${
+          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border ${
             toast.ok
-              ? "bg-green-500/10 border-green-500/30 text-green-300 shadow-green-500/10"
-              : "bg-red-500/10 border-red-500/30 text-red-300 shadow-red-500/10"
+              ? "bg-green-500/10 border-green-500/30 text-green-300"
+              : "bg-red-500/10 border-red-500/30 text-red-300"
           }`}>
             {toast.ok
               ? <Check className="w-5 h-5 shrink-0" />
@@ -155,13 +155,9 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
 
       {/* Avatar Section */}
       <StaggerItem>
-        <div className="glass rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative overflow-hidden group">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none group-hover:bg-blue-500/20 transition-colors duration-700" />
-          
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
           <div className="relative shrink-0 z-10">
             <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-[#050b14] ring-1 ring-white/10 p-1">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 opacity-20 blur-md" />
               <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-[#050b14]">
                 {avatarUrl && !imgError ? (
                   <Image
@@ -172,7 +168,7 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
                     onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white text-4xl font-bold">
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl font-bold">
                     {initial}
                   </div>
                 )}
@@ -183,7 +179,7 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="absolute bottom-0 right-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 ring-4 ring-[#050b14] transition-transform hover:scale-110 active:scale-95 z-20"
+              className="absolute bottom-0 right-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center ring-4 ring-[#050b14] transition-transform hover:scale-105 active:scale-95 z-20"
               aria-label="Ganti foto"
             >
               {uploading
@@ -220,7 +216,7 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
 
       {/* Form Fields Section */}
       <StaggerItem>
-        <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 sm:p-8 space-y-6">
           <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
               <User className="w-4 h-4 text-blue-400" />
@@ -243,7 +239,7 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
       </StaggerItem>
 
       <StaggerItem>
-        <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 sm:p-8 space-y-6">
           <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
             <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
               <Palette className="w-4 h-4 text-pink-300" />
@@ -310,7 +306,7 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
           <Button
             onClick={handleSave}
             disabled={pending}
-            className="bg-blue-600 hover:bg-blue-500 text-white h-12 px-8 rounded-xl font-semibold shadow-[0_0_20px_rgba(37,99,235,0.25)] hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm w-full sm:w-auto"
+            className="bg-blue-600 hover:bg-blue-500 text-white h-12 px-8 rounded-xl font-semibold transition-colors text-sm w-full sm:w-auto"
           >
             {pending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menyimpan...</> : <><Save className="w-4 h-4 mr-2" /> Simpan Perubahan</>}
           </Button>

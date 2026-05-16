@@ -90,7 +90,7 @@ export default async function PortalGeneratedProposalDetailPage({ params }: Prop
         </a>
       </div>
 
-      <section className="glass rounded-2xl border border-white/10 p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">No. Proposal</p>
           <p className="text-white font-bold mt-1">{proposal.proposalNo ?? "-"}</p>
@@ -109,7 +109,7 @@ export default async function PortalGeneratedProposalDetailPage({ params }: Prop
         </div>
       </section>
 
-      <section className="glass rounded-2xl border border-white/10 p-5 space-y-5">
+      <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
         {sections.map((section, index) => (
           <article key={`${section.title}-${index}`} className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
             <h2 className="text-white font-black">{section.title}</h2>
@@ -119,7 +119,7 @@ export default async function PortalGeneratedProposalDetailPage({ params }: Prop
       </section>
 
       {proposal.notes && (
-        <section className="glass rounded-2xl border border-white/10 p-5">
+        <section className="rounded-2xl border border-white/10 bg-[#071225] p-5">
           <p className="text-blue-200/45 text-[10px] font-black uppercase tracking-widest">Catatan / Terms</p>
           <p className="text-blue-100/65 text-sm leading-7 whitespace-pre-line mt-3">{proposal.notes}</p>
         </section>

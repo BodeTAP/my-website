@@ -167,7 +167,7 @@ export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoi
       )}
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="glass rounded-3xl border border-white/5 p-5 space-y-5">
+        <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Judul" value={invoice.title} onChange={(value) => updateInvoice("title", value)} />
             <label className="block">
@@ -232,7 +232,7 @@ export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoi
           </div>
         </section>
 
-        <aside className="glass rounded-3xl border border-white/5 p-5 h-fit space-y-5">
+        <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit space-y-5">
           <div>
             <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Ringkasan</p>
             <h2 className="mt-2 text-2xl font-black text-white">{invoice.title}</h2>

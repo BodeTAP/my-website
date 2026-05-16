@@ -42,7 +42,7 @@ export default async function ProfilePage() {
       <FadeUp className="mb-8">
         <h1 className="text-2xl font-bold text-white">Profil Saya</h1>
         <p className="text-blue-200/50 text-sm mt-1">
-          Kelola informasi akun dan foto profil Anda.
+          Kelola informasi akun, data bisnis, dan brand kit dokumen.
         </p>
       </FadeUp>
       <FadeUp delay={0.15}>

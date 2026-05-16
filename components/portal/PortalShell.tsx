@@ -58,12 +58,11 @@ const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
     >
     <motion.div
       layout
-      className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 overflow-hidden shadow-[0_0_15px_rgba(37,99,235,0.2)] group-hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-shadow"
+      className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-500/25 overflow-hidden"
       animate={{ rotate: collapsed ? -8 : 0, scale: collapsed ? 0.96 : 1 }}
       transition={SIDEBAR_SPRING}
     >
       <Image src="/logo.png" alt="MFWEB" width={24} height={24} className="shrink-0 relative z-10" style={{ width: 24, height: 24 }} />
-      <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent" />
     </motion.div>
     <motion.div
       aria-hidden={collapsed}
@@ -76,8 +75,8 @@ const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
       }}
       transition={SIDEBAR_FADE}
     >
-      <p className="text-white text-base font-black tracking-wide bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">MFWEB</p>
-      <p className="text-blue-400/80 text-[10px] font-bold uppercase tracking-wider mt-0.5">Portal Klien</p>
+      <p className="text-white text-base font-black tracking-wide">MFWEB</p>
+      <p className="text-blue-300/70 text-[10px] font-bold uppercase tracking-wider mt-0.5">Portal Klien</p>
     </motion.div>
     </Link>
   </motion.div>
@@ -89,7 +88,7 @@ function UserAvatar({ src, name, sizeClasses, imageClasses, fallbackClasses }: {
 
   if (!src || error) {
     return (
-      <div className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold bg-gradient-to-br from-indigo-500 to-blue-600 ${fallbackClasses || ""}`}>
+      <div className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold bg-blue-600 ${fallbackClasses || ""}`}>
         {initial}
       </div>
     );
@@ -129,28 +128,7 @@ function SidebarContent({
   creditBalance,
 }: SidebarContentProps) {
   return (
-    <aside className="flex flex-col h-full bg-[#030914]/80 backdrop-blur-xl relative overflow-hidden">
-      {/* Glow Effects */}
-      <motion.div
-        className="absolute top-0 left-0 w-64 h-64 bg-blue-600/5 blur-[100px] pointer-events-none"
-        animate={{ x: collapsed ? -40 : 0, opacity: collapsed ? 0.35 : 1 }}
-        transition={SIDEBAR_SPRING}
-      />
-      <motion.div
-        className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-600/5 blur-[100px] pointer-events-none"
-        animate={{ x: collapsed ? 48 : 0, opacity: collapsed ? 0.35 : 1 }}
-        transition={SIDEBAR_SPRING}
-      />
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={collapsed ? "portal-sidebar-contract" : "portal-sidebar-expand"}
-          className="absolute inset-y-0 -left-16 w-28 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent pointer-events-none"
-          initial={{ x: collapsed ? 230 : 40, opacity: 0 }}
-          animate={{ x: collapsed ? -40 : 290, opacity: [0, 1, 0] }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </AnimatePresence>
+    <aside className="flex flex-col h-full bg-[#030914]/95 backdrop-blur-xl relative overflow-hidden">
 
       {/* Logo */}
       <motion.div
@@ -167,7 +145,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-9 h-9 items-center justify-center rounded-xl text-blue-200/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_18px_rgba(37,99,235,0.22)]`}
+            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-9 h-9 items-center justify-center rounded-xl text-blue-200/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-colors`}
             aria-label={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
             title={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
           >
@@ -296,7 +274,7 @@ function SidebarContent({
                 collapsed ? "justify-center w-12 h-12 mx-auto px-0 py-0" : "justify-between px-3 py-3"
               } ${
                 active
-                  ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 text-white border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
+                  ? "bg-blue-600/15 text-white border border-blue-500/25"
                   : "text-blue-200/60 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
               aria-label={collapsed ? item.label : undefined}
@@ -358,7 +336,7 @@ function SidebarContent({
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className={`flex items-center justify-center rounded-xl text-red-400/80 hover:text-white bg-red-500/10 hover:bg-red-500/80 border border-red-500/20 transition-all text-sm font-bold group shadow-[0_0_10px_rgba(239,68,68,0)] hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] ${
+          className={`flex items-center justify-center rounded-xl text-red-400/80 hover:text-white bg-red-500/10 hover:bg-red-500/80 border border-red-500/20 transition-colors text-sm font-bold group ${
             collapsed ? "w-12 h-12 mx-auto px-0 py-0" : "w-full gap-2 px-3 py-3"
           }`}
           aria-label={collapsed ? "Keluar sesi" : undefined}
@@ -465,7 +443,7 @@ export default function PortalShell({
     <div className="h-screen overflow-hidden flex bg-[#030914]">
       {/* ── Desktop sidebar ─────────────────────────────── */}
       <div
-        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col relative z-30 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col relative z-30 overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           sidebarCollapsed ? "w-20" : "w-72"
         }`}
       >
@@ -561,7 +539,7 @@ export default function PortalShell({
                 }`}
               >
                 {active && (
-                  <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-80" />
+                  <div className="absolute top-0 inset-x-0 h-px bg-blue-500/40" />
                 )}
                 <item.icon className={`w-5 h-5 ${active ? "animate-pulse-slow" : ""}`} />
                 <span className="leading-none">{item.label}</span>

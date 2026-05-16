@@ -71,42 +71,35 @@ export default function PortalRegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden bg-[#030914]">
-      {/* Background Orbs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
-      
       <div className="w-full max-w-md relative z-10">
         
         {/* Logo */}
         <FadeUp delay={0}>
           <div className="text-center mb-10 group">
-            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 mb-5 shadow-[0_0_30px_rgba(79,70,229,0.15)] group-hover:shadow-[0_0_40px_rgba(79,70,229,0.3)] group-hover:scale-105 transition-all duration-500">
+            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 mb-5">
               <Image src="/logo.png" alt="MFWEB" width={32} height={32} className="relative z-10 drop-shadow-lg" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent rounded-2xl pointer-events-none" />
             </div>
-            <h1 className="text-white font-black text-3xl tracking-tight bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">MFWEB</h1>
-            <p className="text-indigo-400/80 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Pendaftaran Klien</p>
+            <h1 className="text-white font-black text-3xl tracking-tight">MFWEB</h1>
+            <p className="text-indigo-300/70 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Pendaftaran Klien</p>
           </div>
         </FadeUp>
 
         <ScaleIn delay={0.1}>
-          <div className="glass rounded-[32px] p-8 sm:p-10 border border-white/5 bg-[#050b14]/80 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl relative overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/10 blur-[50px] rounded-full pointer-events-none" />
-            
+          <div className="rounded-2xl border border-white/10 bg-[#071225] p-8 sm:p-10">
             {success ? (
               <div className="text-center py-6">
-                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.15)]">
+                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
                   <CheckCircle className="w-10 h-10 text-green-400" />
                 </div>
-                <h2 className="text-white font-black text-2xl mb-3">Pendaftaran Selesai!</h2>
+                <h2 className="text-white font-black text-2xl mb-3">Akun berhasil dibuat</h2>
                 <p className="text-blue-200/60 text-sm leading-relaxed mb-8 px-2">
-                  Sistem kami telah mengotorisasi akun Anda. Silakan masuk menggunakan kredensial yang baru saja Anda daftarkan.
+                  Akun Anda sudah siap. Silakan masuk memakai email dan kata sandi yang baru didaftarkan.
                 </p>
                 <Button
                   onClick={() => router.push("/portal/login")}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm transition-colors"
                 >
-                  Masuk Sesi Sekarang
+                  Masuk sekarang
                 </Button>
               </div>
             ) : (
@@ -134,7 +127,7 @@ export default function PortalRegisterPage() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                  Daftar Otomatis dengan Google
+                  Daftar dengan Google
                 </button>
 
                 <div className="relative mb-6">
@@ -142,14 +135,14 @@ export default function PortalRegisterPage() {
                     <div className="w-full border-t border-white/5" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="px-4 bg-[#050b14] text-white/30 font-bold uppercase tracking-widest text-[10px]">Atau Manual via Email</span>
+                    <span className="px-4 bg-[#071225] text-white/30 font-bold uppercase tracking-widest text-[10px]">Atau isi manual</span>
                   </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Nama */}
                   <div className="space-y-2">
-                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Nama Panggilan *</Label>
+                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Nama *</Label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400/50" />
                       <Input
@@ -164,7 +157,7 @@ export default function PortalRegisterPage() {
 
                   {/* Email */}
                   <div className="space-y-2">
-                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Email Terdaftar *</Label>
+                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Email *</Label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400/50" />
                       <Input
@@ -219,7 +212,7 @@ export default function PortalRegisterPage() {
 
                   {/* Password */}
                   <div className="space-y-2">
-                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Kata Sandi Akses *</Label>
+                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Kata Sandi *</Label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400/50" />
                       <Input
@@ -272,7 +265,7 @@ export default function PortalRegisterPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white h-12 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] transition-all mt-4"
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white h-12 rounded-xl font-bold text-sm transition-colors mt-4"
                   >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Buat Akun Sekarang"}
                   </Button>

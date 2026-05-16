@@ -57,7 +57,7 @@ const DESIGN_TEMPLATES: Array<{ value: InvoiceDesign["layout"]; label: string; h
   { value: "corporate", label: "Corporate", hint: "Header kuat untuk invoice formal.", primary: "#1d4ed8", accent: "#0d9488" },
   { value: "minimal", label: "Minimal", hint: "Putih bersih, cocok untuk invoice sederhana.", primary: "#0f172a", accent: "#2563eb" },
   { value: "modern", label: "Modern", hint: "Aksen samping dan warna lebih tegas.", primary: "#155e75", accent: "#f59e0b" },
-  { value: "premium", label: "Premium", hint: "Nuansa elegan untuk layanan bernilai tinggi.", primary: "#312e81", accent: "#c026d3" },
+  { value: "premium", label: "Formal", hint: "Nuansa rapi untuk invoice bernilai besar.", primary: "#312e81", accent: "#c026d3" },
 ];
 
 const FONT_OPTIONS: Array<{ value: InvoiceDesign["fontStyle"]; label: string }> = [
@@ -145,7 +145,7 @@ export default function InvoiceGeneratorClient({
     footer: invoiceDefaults.footer,
   });
   const [lineItems, setLineItems] = useState<LineItem[]>([
-    { description: "Layanan profesional", quantity: 1, price: 1_500_000 },
+    { description: "Layanan website", quantity: 1, price: 1_500_000 },
   ]);
 
   const subtotal = useMemo(
@@ -299,7 +299,7 @@ export default function InvoiceGeneratorClient({
             </div>
             <div>
               <h1 className="text-2xl font-black text-white">Invoice Generator</h1>
-              <p className="text-blue-200/50 text-sm">Buat invoice PDF mandiri tanpa payment link.</p>
+              <p className="text-blue-200/50 text-sm">Buat invoice PDF mandiri untuk dikirim ke klien.</p>
             </div>
           </div>
         </div>
@@ -364,7 +364,7 @@ export default function InvoiceGeneratorClient({
 
       {activeTab === "create" && (
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <section className="glass rounded-3xl border border-white/5 p-5 space-y-5">
+          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Template Desain Aktif</p>
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -429,7 +429,7 @@ export default function InvoiceGeneratorClient({
             </Button>
           </section>
 
-          <aside className="glass rounded-3xl border border-white/5 p-5 h-fit space-y-5">
+          <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit space-y-5">
             <div>
               <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Ringkas</p>
               <h2 className="mt-2 text-2xl font-black text-white">{form.title || "Invoice"}</h2>
@@ -456,7 +456,7 @@ export default function InvoiceGeneratorClient({
 
       {activeTab === "design" && (
         <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-          <section className="glass rounded-3xl border border-white/5 p-5 space-y-5">
+          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
             <div>
               <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Template</p>
               <h2 className="mt-2 text-xl font-black text-white">Pilih Preset Desain</h2>
@@ -561,7 +561,7 @@ export default function InvoiceGeneratorClient({
             </Button>
           </section>
 
-          <aside className="glass rounded-3xl border border-white/5 p-5 h-fit">
+          <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit">
             <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Desain</p>
             <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white text-slate-900">
               <div className={`p-5 ${design.layout === "minimal" ? "bg-white" : ""}`} style={{ backgroundColor: design.layout === "minimal" ? "#ffffff" : design.primaryColor }}>
@@ -589,7 +589,7 @@ export default function InvoiceGeneratorClient({
                   </div>
                 )}
                 <div className="rounded-xl bg-slate-100 p-3 text-sm">
-                  <div className="flex justify-between font-bold"><span>Layanan profesional</span><span>{formatRupiah(1_500_000)}</span></div>
+                  <div className="flex justify-between font-bold"><span>Layanan website</span><span>{formatRupiah(1_500_000)}</span></div>
                 </div>
                 <div className="flex items-center justify-between rounded-xl px-4 py-3 text-white" style={{ backgroundColor: design.primaryColor }}>
                   <span className="text-xs font-black uppercase tracking-widest opacity-70">Total</span>
@@ -602,11 +602,11 @@ export default function InvoiceGeneratorClient({
       )}
 
       {activeTab === "history" && (
-        <section className="glass rounded-3xl border border-white/5 p-5 space-y-4">
+        <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-black text-white">Riwayat Invoice</h2>
-              <p className="text-sm text-blue-200/45">Invoice yang dibuat dari tool ini tidak terhubung ke payment.</p>
+              <p className="text-sm text-blue-200/45">Invoice dari tool ini berupa PDF dan tidak terhubung ke pembayaran online.</p>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-200/35" />

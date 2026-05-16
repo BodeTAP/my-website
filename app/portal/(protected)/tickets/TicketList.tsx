@@ -128,7 +128,7 @@ export default function TicketList({
   const activeMessages = openTicket ? (liveMessages[openTicket] ?? []) : [];
 
   return (
-    <div className="glass rounded-2xl border border-white/5 overflow-hidden flex flex-col lg:flex-row h-[calc(100vh-220px)] min-h-[500px]">
+    <div className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden flex flex-col lg:flex-row h-[calc(100vh-220px)] min-h-[500px]">
       
       {/* ─── LEFT PANE: Ticket List ─── */}
       <div className={`w-full lg:w-1/3 flex flex-col border-r border-white/5 ${openTicket || showNew ? 'hidden lg:flex' : 'flex'}`}>

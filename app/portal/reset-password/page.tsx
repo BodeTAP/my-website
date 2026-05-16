@@ -43,14 +43,14 @@ export default function ResetPasswordPage() {
           <p className="text-blue-200/50 text-sm mt-1">Portal Klien</p>
         </div>
 
-        <div className="glass rounded-2xl p-8">
+        <div className="rounded-2xl border border-white/10 bg-[#071225] p-8">
           {sent ? (
             <div className="text-center">
               <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <h2 className="text-white font-bold text-lg mb-2">Cek Email Anda!</h2>
+              <h2 className="text-white font-bold text-lg mb-2">Cek email Anda</h2>
               <p className="text-blue-200/60 text-sm mb-6">
                 Jika email <span className="text-blue-300 font-medium">{email}</span> terdaftar,
-                kami telah mengirimkan link reset password. Berlaku 1 jam.
+                kami telah mengirim link reset kata sandi. Berlaku 1 jam.
               </p>
               <Link href="/portal/login">
                 <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white h-11">
@@ -60,9 +60,9 @@ export default function ResetPasswordPage() {
             </div>
           ) : (
             <>
-              <h2 className="text-white font-bold text-lg mb-1">Lupa Password?</h2>
+              <h2 className="text-white font-bold text-lg mb-1">Lupa kata sandi?</h2>
               <p className="text-blue-200/50 text-sm mb-6">
-                Masukkan email Anda dan kami kirimkan link untuk membuat password baru.
+                Masukkan email Anda dan kami kirim link untuk membuat kata sandi baru.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,13 +88,13 @@ export default function ResetPasswordPage() {
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white h-11"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Kirim Link Reset"}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Kirim link reset"}
                 </Button>
               </form>
 
               <Link href="/portal/login" className="flex items-center justify-center gap-1.5 text-blue-400/60 hover:text-blue-300 text-sm mt-5 transition-colors">
                 <ArrowLeft className="w-3.5 h-3.5" />
-                Kembali ke Login
+                Kembali ke login
               </Link>
             </>
           )}

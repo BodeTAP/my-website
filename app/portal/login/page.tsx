@@ -60,44 +60,37 @@ export default function PortalLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-[#030914]">
-      {/* Background Orbs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none" />
-      
       <div className="w-full max-w-md relative z-10 py-12">
         
         {/* Logo */}
         <FadeUp delay={0}>
           <div className="text-center mb-10 group">
-            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 mb-5 shadow-[0_0_30px_rgba(37,99,235,0.15)] group-hover:shadow-[0_0_40px_rgba(37,99,235,0.3)] group-hover:scale-105 transition-all duration-500">
+            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 mb-5">
               <Image src="/logo.png" alt="MFWEB" width={32} height={32} className="relative z-10 drop-shadow-lg" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-transparent rounded-2xl pointer-events-none" />
             </div>
-            <h1 className="text-white font-black text-3xl tracking-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">MFWEB</h1>
-            <p className="text-blue-400/80 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Portal Klien Terpadu</p>
+            <h1 className="text-white font-black text-3xl tracking-tight">MFWEB</h1>
+            <p className="text-blue-300/70 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Portal Klien</p>
           </div>
         </FadeUp>
 
         <ScaleIn delay={0.1}>
-          <div className="glass rounded-[32px] p-8 sm:p-10 border border-white/5 bg-[#050b14]/80 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 blur-[50px] rounded-full pointer-events-none" />
-            
+          <div className="rounded-2xl border border-white/10 bg-[#071225] p-8 sm:p-10">
             {sent ? (
               <div className="text-center py-6">
-                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.15)]">
+                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
                   <CheckCircle className="w-10 h-10 text-green-400" />
                 </div>
-                <h2 className="text-white font-black text-2xl mb-3">Cek Inbox Anda!</h2>
+                <h2 className="text-white font-black text-2xl mb-3">Cek email Anda</h2>
                 <p className="text-blue-200/60 text-sm leading-relaxed mb-8 px-2">
-                  Tautan akses instan telah dikirimkan secara aman ke{" "}
+                  Tautan masuk sudah dikirim ke{" "}
                   <strong className="text-white font-bold">{email}</strong>.
-                  Klik tautan tersebut untuk masuk tanpa password.
+                  Klik tautan tersebut untuk masuk tanpa kata sandi.
                 </p>
                 <button
                   onClick={() => setSent(false)}
                   className="text-blue-400 hover:text-blue-300 hover:underline text-xs font-semibold uppercase tracking-wider block mx-auto transition-colors"
                 >
-                  Gunakan Metode Lain
+                  Gunakan cara lain
                 </button>
               </div>
             ) : (
@@ -105,7 +98,7 @@ export default function PortalLoginPage() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-blue-400" />
-                    <h2 className="text-white font-black text-xl">Masuk Sesi</h2>
+                    <h2 className="text-white font-black text-xl">Masuk ke portal</h2>
                   </div>
                 </div>
                 <p className="text-blue-200/50 text-xs font-medium mb-8">
@@ -135,7 +128,7 @@ export default function PortalLoginPage() {
                     <div className="w-full border-t border-white/5" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="px-4 bg-[#050b14] text-white/30 font-bold uppercase tracking-widest text-[10px]">Atau Gunakan Email</span>
+                    <span className="px-4 bg-[#071225] text-white/30 font-bold uppercase tracking-widest text-[10px]">Atau gunakan email</span>
                   </div>
                 </div>
 
@@ -145,7 +138,7 @@ export default function PortalLoginPage() {
                     onClick={() => { setMode("password"); setError(""); }}
                     className={`flex-1 py-2 text-xs rounded-lg font-bold transition-all ${
                       mode === "password"
-                        ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
+                        ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
                         : "text-white/40 hover:text-white"
                     }`}
                   >
@@ -155,7 +148,7 @@ export default function PortalLoginPage() {
                     onClick={() => { setMode("magic"); setError(""); }}
                     className={`flex-1 py-2 text-xs rounded-lg font-bold transition-all ${
                       mode === "magic"
-                        ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
+                        ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
                         : "text-white/40 hover:text-white"
                     }`}
                   >
@@ -196,7 +189,7 @@ export default function PortalLoginPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-11 pr-11 h-12 bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                          placeholder="••••••••"
+                          placeholder="Kata sandi"
                         />
                         <button
                           type="button"
@@ -217,9 +210,9 @@ export default function PortalLoginPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all mt-2"
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm transition-colors mt-2"
                     >
-                      {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Otentikasi Akun"}
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Masuk"}
                     </Button>
                   </form>
                 )}
@@ -229,12 +222,12 @@ export default function PortalLoginPage() {
                   <form onSubmit={handleMagicLink} className="space-y-5">
                     <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl mb-2">
                       <p className="text-blue-200/80 text-xs leading-relaxed text-center">
-                        Masukkan email Anda dan kami akan mengirimkan tautan akses khusus yang dapat langsung diklik tanpa memerlukan kata sandi.
+                        Masukkan email. Kami akan mengirim tautan masuk yang bisa diklik tanpa kata sandi.
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Alamat Email Valid</Label>
+                      <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Alamat Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
                         <Input
@@ -257,7 +250,7 @@ export default function PortalLoginPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all mt-2"
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm transition-colors mt-2"
                     >
                       {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Kirim Tautan Akses"}
                     </Button>

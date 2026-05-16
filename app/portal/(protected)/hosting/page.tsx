@@ -13,7 +13,7 @@ function daysLeft(date: Date | null) {
 }
 
 function formatDate(date: Date | null) {
-  if (!date) return "—";
+  if (!date) return "-";
   return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 }
 
@@ -89,7 +89,7 @@ export default async function PortalHostingPage() {
 
       {records.length === 0 ? (
         <FadeUp delay={0.1}>
-          <div className="glass rounded-3xl p-16 text-center border border-white/5">
+          <div className="rounded-2xl border border-white/10 bg-[#071225] p-16 text-center">
             <Globe className="w-12 h-12 text-blue-400/30 mx-auto mb-4" />
             <h2 className="text-white/60 font-bold text-lg mb-2">Belum Ada Data Hosting</h2>
             <p className="text-white/30 text-sm max-w-sm mx-auto">
@@ -132,12 +132,7 @@ export default async function PortalHostingPage() {
 
             return (
               <StaggerItem key={record.id}>
-                <div className={`glass rounded-3xl p-6 sm:p-8 border bg-${statusColor.bg} border-${statusColor.border} relative overflow-hidden`}>
-                  {/* Glow for critical */}
-                  {(overallStatus === "KRITIS" || overallStatus === "EXPIRED") && (
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-red-500/10 blur-[60px] rounded-full pointer-events-none" />
-                  )}
-
+                <div className={`rounded-2xl p-6 sm:p-8 border bg-${statusColor.bg} border-${statusColor.border}`}>
                   <div className="relative z-10">
                     {/* Header */}
                     <div className="flex items-start justify-between flex-wrap gap-3 mb-6">
@@ -148,7 +143,7 @@ export default async function PortalHostingPage() {
                         <div>
                           <h2 className="text-white font-black text-xl">{record.domainName}</h2>
                           <p className="text-white/40 text-xs mt-0.5">
-                            {[record.hostingProvider, record.hostingPlan].filter(Boolean).join(" · ") || "Tidak ada info hosting"}
+                            {[record.hostingProvider, record.hostingPlan].filter(Boolean).join(" - ") || "Tidak ada info hosting"}
                           </p>
                         </div>
                       </div>
@@ -163,9 +158,9 @@ export default async function PortalHostingPage() {
                     {/* Status bars */}
                     <div className="bg-black/30 rounded-2xl p-5 border border-white/5 mb-4">
                       <p className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-3">Status Layanan</p>
-                      <StatusBar days={domainDays}  label="🌐 Domain" />
-                      <StatusBar days={hostingDays} label="🖥 Hosting" />
-                      <StatusBar days={sslDays}     label="🔒 SSL Certificate" />
+                      <StatusBar days={domainDays}  label="Domain" />
+                      <StatusBar days={hostingDays} label="Hosting" />
+                      <StatusBar days={sslDays}     label="SSL Certificate" />
                     </div>
 
                     {/* Detail info */}

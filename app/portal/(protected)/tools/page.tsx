@@ -37,7 +37,7 @@ export default async function PortalToolsPage() {
             </div>
             <h1 className="text-2xl font-bold text-white">Tools</h1>
           </div>
-          <p className="text-blue-200/50 text-sm">Pilih tools pemasaran dan produktivitas untuk bisnis Anda.</p>
+          <p className="text-blue-200/50 text-sm">Pilih alat yang ingin dipakai hari ini: cari lead, buat proposal, atau buat invoice PDF.</p>
         </div>
         <Link href="/portal/credits" className="w-fit">
           <div className="flex items-center gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 px-4 py-3 hover:bg-amber-500/15 transition-colors">
@@ -58,7 +58,7 @@ export default async function PortalToolsPage() {
           >
             <span className="flex items-center gap-3 text-sm font-bold">
               <AlertTriangle className="w-5 h-5 text-amber-300" />
-              Kredit hampir habis! Beli sekarang
+              Kredit hampir habis. Top up dulu agar tools tetap bisa dipakai.
             </span>
             <ArrowRight className="w-4 h-4 text-amber-300" />
           </Link>
@@ -67,18 +67,18 @@ export default async function PortalToolsPage() {
 
       <StaggerChildren stagger={0.08} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         <StaggerItem>
-          <div className="glass rounded-2xl p-6 border border-blue-500/20 h-full flex flex-col hover:border-blue-400/40 transition-colors">
+          <div className="rounded-2xl border border-blue-500/20 bg-[#071225] p-6 h-full flex flex-col hover:border-blue-400/40 transition-colors">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
               <Search className="w-6 h-6 text-blue-300" />
             </div>
             <h2 className="text-white font-black text-xl">Lead Finder</h2>
-            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Temukan prospek bisnis lokal dari Google Maps.</p>
+            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Cari prospek bisnis lokal dari Google Maps, simpan list, lalu export data.</p>
             <p className="text-amber-300 text-sm font-bold mt-5">Mulai {leadFinderMinCost} kredit/pencarian</p>
             <div className="mt-auto pt-6">
               {toolSettings.leadFinder.enabled ? (
                 <ToolActionButton
                   href={balance < leadFinderMinCost ? "/portal/credits" : "/portal/tools/lead-finder"}
-                  label={balance < leadFinderMinCost ? "Beli Kredit" : "Gunakan"}
+                  label={balance < leadFinderMinCost ? "Beli Kredit" : "Buka Lead Finder"}
                   loadingLabel={balance < leadFinderMinCost ? "Membuka..." : "Memuat..."}
                   className={`w-full h-11 rounded-xl font-bold ${balance < leadFinderMinCost ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
                 />
@@ -92,18 +92,18 @@ export default async function PortalToolsPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <div className="glass rounded-2xl p-6 border border-blue-500/20 h-full flex flex-col hover:border-blue-400/40 transition-colors">
+          <div className="rounded-2xl border border-blue-500/20 bg-[#071225] p-6 h-full flex flex-col hover:border-blue-400/40 transition-colors">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
               <FileText className="w-6 h-6 text-blue-300" />
             </div>
             <h2 className="text-white font-black text-xl">Proposal Generator</h2>
-            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat draft proposal bisnis dari template custom.</p>
+            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat proposal PDF dari template, brand kit, dan detail penawaran Anda.</p>
             <p className="text-amber-300 text-sm font-bold mt-5">{proposalCost} kredit/proposal</p>
             <div className="mt-auto pt-6">
               {toolSettings.proposalGenerator.enabled ? (
                 <ToolActionButton
                   href={balance < proposalCost ? "/portal/credits" : "/portal/tools/proposal-generator"}
-                  label={balance < proposalCost ? "Beli Kredit" : "Gunakan"}
+                  label={balance < proposalCost ? "Beli Kredit" : "Buat Proposal"}
                   loadingLabel={balance < proposalCost ? "Membuka..." : "Memuat..."}
                   className={`w-full h-11 rounded-xl font-bold ${balance < proposalCost ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
                 />
@@ -117,7 +117,7 @@ export default async function PortalToolsPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <div className="glass rounded-2xl p-6 border border-white/5 h-full flex flex-col opacity-70">
+          <div className="rounded-2xl border border-white/10 bg-[#071225] p-6 h-full flex flex-col opacity-70">
             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5">
               <ClipboardList className="w-6 h-6 text-blue-200/45" />
             </div>
@@ -128,18 +128,18 @@ export default async function PortalToolsPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <div className="glass rounded-2xl p-6 border border-blue-500/20 h-full flex flex-col hover:border-blue-400/40 transition-colors">
+          <div className="rounded-2xl border border-blue-500/20 bg-[#071225] p-6 h-full flex flex-col hover:border-blue-400/40 transition-colors">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
               <ReceiptText className="w-6 h-6 text-blue-300" />
             </div>
             <h2 className="text-white font-black text-xl">Invoice Generator</h2>
-            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat invoice PDF tanpa payment link.</p>
+            <p className="text-blue-200/50 text-sm mt-2 leading-relaxed">Buat invoice PDF mandiri untuk dikirim ke klien, tanpa payment link.</p>
             <p className="text-amber-300 text-sm font-bold mt-5">{invoiceCost} kredit/invoice</p>
             <div className="mt-auto pt-6">
               {toolSettings.invoiceGenerator.enabled ? (
                 <ToolActionButton
                   href={balance < invoiceCost ? "/portal/credits" : "/portal/tools/invoice-generator"}
-                  label={balance < invoiceCost ? "Beli Kredit" : "Gunakan"}
+                  label={balance < invoiceCost ? "Beli Kredit" : "Buat Invoice"}
                   loadingLabel={balance < invoiceCost ? "Membuka..." : "Memuat..."}
                   className={`w-full h-11 rounded-xl font-bold ${balance < invoiceCost ? "bg-amber-500 text-black hover:bg-amber-400" : "bg-blue-600 hover:bg-blue-500 text-white"}`}
                 />
