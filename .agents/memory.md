@@ -82,6 +82,8 @@ user confirms a lasting preference, project decision, or important current state
   UI. Saved-list API routes use raw SQL against `lead_finder_lists` so the flow
   still works if a running dev server has not picked up a regenerated Prisma
   client delegate yet.
+- Portal Lead Finder UI distinguishes fresh searches from saved-list loads, so
+  reopening a saved list does not show the credit-spent success banner.
 - Public paid-tools landing structure now uses `/tools/proposal-generator` and
   `/tools/invoice-generator`; `/tools/lead-finder` redirects to the existing
   `/lead-finder` landing page. The public `/tools` page has a premium tools

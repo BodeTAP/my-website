@@ -652,6 +652,7 @@ export default function PortalLeadFinder({
   const [places, setPlaces] = useState<PlaceLead[]>([]);
   const [fullQuery, setFullQuery] = useState("");
   const [searched, setSearched] = useState(false);
+  const [loadedFromSavedList, setLoadedFromSavedList] = useState(false);
   const [usedBias, setUsedBias] = useState(false);
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -741,8 +742,10 @@ export default function PortalLeadFinder({
     setConfirmOpen(false);
     setLoading(true);
     setError(null);
+    setListMessage(null);
     setPlaces([]);
     setSearched(false);
+    setLoadedFromSavedList(false);
     setShowHistory(false);
 
     try {
@@ -761,6 +764,7 @@ export default function PortalLeadFinder({
       setUsedBias(!!data.usedBias);
       setLastCreditCost(typeof data.creditCost === "number" ? data.creditCost : creditCost);
       setLastMode(data.mode === "deep" ? "deep" : "standard");
+      setLoadedFromSavedList(false);
       setSearched(true);
       setHistory((previous) => {
         const entry: SearchHistory = {
@@ -829,6 +833,7 @@ export default function PortalLeadFinder({
       setPlaces(Array.isArray(list.items) ? list.items as PlaceLead[] : []);
       setFullQuery(list.city ? `${list.query} di ${list.city}` : list.query);
       setSearched(true);
+      setLoadedFromSavedList(true);
       setUsedBias(false);
       setLastMode(list.mode === "deep" ? "deep" : "standard");
       setListMessage(`List "${list.name}" dibuka.`);
@@ -1130,7 +1135,7 @@ export default function PortalLeadFinder({
         </div>
       )}
 
-      {fullQuery && !error && !loading && (
+      {fullQuery && !error && !loading && !loadedFromSavedList && (
         <div className="rounded-2xl bg-green-500/10 border border-green-500/25 px-5 py-4 text-green-100 text-sm">
           {lastMode === "deep" ? "Deep Search selesai" : "Pencarian selesai"}. {lastCreditCost} kredit telah digunakan, saldo terbaru {balance} kredit.
         </div>
