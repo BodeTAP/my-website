@@ -82,6 +82,10 @@ user confirms a lasting preference, project decision, or important current state
   UI. Saved-list API routes use raw SQL against `lead_finder_lists` so the flow
   still works if a running dev server has not picked up a regenerated Prisma
   client delegate yet.
+- Public paid-tools landing structure now uses `/tools/proposal-generator` and
+  `/tools/invoice-generator`; `/tools/lead-finder` redirects to the existing
+  `/lead-finder` landing page. The public `/tools` page has a premium tools
+  section above the free tools grid.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.

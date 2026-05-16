@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles, Search, Coins, Download } from "lucide-react";
+import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles, Search, Coins, FileText, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 
@@ -70,6 +70,36 @@ const tools = [
   },
 ];
 
+const paidTools = [
+  {
+    href: "/lead-finder",
+    icon: Search,
+    color: "blue" as const,
+    label: "Lead Finder",
+    desc: "Temukan prospek bisnis lokal dari Google Maps, filter kontak yang layak dihubungi, simpan list, dan export CSV.",
+    tags: ["Google Maps", "Saved Lists", "Export CSV"],
+    price: "Mulai 5 kredit",
+  },
+  {
+    href: "/tools/proposal-generator",
+    icon: FileText,
+    color: "purple" as const,
+    label: "Proposal Generator",
+    desc: "Buat proposal bisnis profesional dari template, simpan brand kit, lalu download PDF siap kirim ke prospek.",
+    tags: ["Template", "Brand Kit", "PDF"],
+    price: "5 kredit",
+  },
+  {
+    href: "/tools/invoice-generator",
+    icon: ReceiptText,
+    color: "teal" as const,
+    label: "Invoice Generator",
+    desc: "Buat invoice PDF mandiri dengan template desain, PPN 11% opsional, edit detail, duplicate, dan status manual.",
+    tags: ["PPN 11%", "Duplicate", "PDF"],
+    price: "3 kredit",
+  },
+];
+
 const COLOR = {
   blue:   { bg: "bg-blue-600/15",   border: "border-blue-500/30",   text: "text-blue-400",   badge: "bg-blue-500/10 text-blue-300 border-blue-500/20", glow: "bg-blue-600/30" },
   teal:   { bg: "bg-teal-600/15",   border: "border-teal-500/30",   text: "text-teal-400",   badge: "bg-teal-500/10 text-teal-300 border-teal-500/20", glow: "bg-teal-600/30" },
@@ -107,8 +137,76 @@ export default function ToolsPage() {
       </section>
 
       {/* ── Tools Grid ────────────────────────────────────── */}
+      <section className="px-4 py-12 sm:px-6 lg:px-8 relative z-10">
+        <div className="mx-auto max-w-6xl">
+          <FadeUp className="mb-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-amber-300">
+                  <Coins className="h-4 w-4" />
+                  Tools Premium
+                </div>
+                <h2 className="text-3xl font-black text-white sm:text-4xl">Tools berbayar untuk kerja operasional</h2>
+                <p className="mt-3 max-w-2xl text-blue-200/60">
+                  Pakai kredit portal untuk prospecting, proposal, dan invoice PDF. Dirancang untuk workflow klien yang berulang.
+                </p>
+              </div>
+              <Link href="/portal/register" className="w-fit">
+                <Button className="h-11 rounded-xl bg-blue-600 px-5 font-black text-white hover:bg-blue-500">
+                  Buat akun portal
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </FadeUp>
+
+          <StaggerChildren className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {paidTools.map((tool) => {
+              const c = COLOR[tool.color];
+              return (
+                <StaggerItem key={tool.href}>
+                  <HoverCard className="h-full">
+                    <Link href={tool.href} className="group block h-full">
+                      <div className="glass relative flex h-full flex-col overflow-hidden rounded-[28px] border border-amber-500/15 bg-[#050b14] p-7 shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all duration-500 hover:border-amber-400/35">
+                        <div className={`absolute -right-20 -top-20 h-64 w-64 ${c.glow} rounded-full blur-[80px] opacity-0 transition-opacity duration-700 group-hover:opacity-100`} />
+                        <div className="relative z-10 mb-6 flex items-start justify-between gap-4">
+                          <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${c.bg} border border-white/5`}>
+                            <tool.icon className={`h-7 w-7 ${c.text}`} />
+                          </div>
+                          <div className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                            {tool.price}
+                          </div>
+                        </div>
+                        <h3 className="relative z-10 text-2xl font-black text-white">{tool.label}</h3>
+                        <p className="relative z-10 mt-3 flex-1 text-sm leading-relaxed text-blue-200/60">{tool.desc}</p>
+                        <div className="relative z-10 mt-6 flex flex-wrap gap-2">
+                          {tool.tags.map((tag) => (
+                            <span key={tag} className={`rounded-lg border px-3 py-1.5 text-xs font-bold ${c.badge}`}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className={`relative z-10 mt-7 flex items-center gap-2 text-sm font-bold ${c.text} transition-all duration-300 group-hover:gap-4`}>
+                          Lihat landing page <ArrowRight className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </Link>
+                  </HoverCard>
+                </StaggerItem>
+              );
+            })}
+          </StaggerChildren>
+        </div>
+      </section>
+
       <section className="py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-6xl mx-auto">
+          <FadeUp className="mb-8">
+            <h2 className="text-3xl font-black text-white sm:text-4xl">Tools gratis</h2>
+            <p className="mt-3 max-w-2xl text-blue-200/60">
+              Audit ringan dan generator praktis yang bisa digunakan tanpa login.
+            </p>
+          </FadeUp>
           <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tools.map((tool) => {
               const c = COLOR[tool.color];
@@ -135,7 +233,7 @@ export default function ToolsPage() {
                         
                         <div className="flex flex-wrap gap-2.5 mb-8 relative z-10">
                           {tool.tags.map((tag) => (
-                            <span key={tag} className={`textxs font-bold px-3 py-1.5 rounded-lg border ${c.badge} backdrop-blur-md`}>
+                            <span key={tag} className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${c.badge} backdrop-blur-md`}>
                               {tag}
                             </span>
                           ))}
@@ -151,46 +249,6 @@ export default function ToolsPage() {
               );
             })}
           </StaggerChildren>
-        </div>
-      </section>
-
-      {/* Premium Lead Finder */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <FadeUp>
-            <Link href="/lead-finder" className="group block">
-              <div className="grid gap-6 rounded-3xl border border-blue-500/25 bg-blue-500/10 p-6 transition-colors hover:border-blue-400/45 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
-                <div>
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-300">
-                    <Coins className="h-3.5 w-3.5" />
-                    Tool premium
-                  </div>
-                  <h2 className="text-2xl font-black text-white sm:text-3xl">Lead Finder untuk cari prospek bisnis lokal</h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-blue-100/60 sm:text-base">
-                    Temukan bisnis berdasarkan kategori dan area, sortir kontak yang layak dihubungi, lalu export CSV untuk follow up.
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-blue-200/60">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Search className="h-3.5 w-3.5 text-blue-300" />
-                      Google Maps search
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Download className="h-3.5 w-3.5 text-emerald-300" />
-                      Export CSV
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                      Mulai 5 kredit
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-sm font-black text-blue-200 group-hover:text-white">
-                  Lihat landing page
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </div>
-            </Link>
-          </FadeUp>
         </div>
       </section>
 
