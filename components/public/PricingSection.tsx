@@ -100,24 +100,23 @@ const plans = [
 
 export default function PricingSection() {
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-      {/* Background Orbs */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-[-100px] w-[500px] h-[500px] bg-teal-600/5 rounded-full blur-[150px] pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        <FadeUp className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Paket <span className="text-gradient">Harga Transparan</span>
+    <section className="relative px-4 py-20 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <FadeUp className="mb-12 max-w-2xl">
+          <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-blue-200/55">
+            Paket website
+          </p>
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            Harga dibuat jelas sejak awal.
           </h2>
-          <p className="text-blue-200/60 max-w-xl mx-auto mb-5">
-            Pilih paket yang sesuai dengan kebutuhan bisnis Anda. Semua paket sudah termasuk
-            domain, hosting, dan konsultasi gratis sebelum pengerjaan.
+          <p className="mt-4 text-blue-100/58 leading-relaxed">
+            Pilih paket website sesuai kebutuhan. Semua paket sudah termasuk
+            domain, hosting, SSL, dan konsultasi sebelum pengerjaan.
           </p>
           <Link href="/kalkulasi-harga">
-            <span className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm text-blue-300 border border-blue-500/20 hover:border-blue-400/40 transition-colors cursor-pointer">
+            <span className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-blue-200 transition-colors hover:bg-white/[0.06]">
               <Calculator className="w-3.5 h-3.5" />
-              Hitung estimasi harga dengan fitur tambahan →
+              Hitung estimasi dengan fitur tambahan
             </span>
           </Link>
         </FadeUp>
@@ -130,25 +129,22 @@ export default function PricingSection() {
               <StaggerItem key={plan.name} className={plan.featured ? "relative z-10" : "relative z-0"}>
               <HoverCard className="h-full">
               <div
-                className={`relative flex flex-col rounded-2xl p-6 h-full transition-all duration-300 ${
+                className={`relative flex flex-col rounded-xl p-6 h-full transition-all duration-300 ${
                   plan.featured
-                    ? "glass border-2 border-teal-500/60 shadow-[0_0_40px_-10px_rgba(20,184,166,0.3)] lg:scale-105 bg-linear-to-b from-[#0a1224]/90 to-[#060b14]/90"
-                    : "glass border border-white/5 hover:border-blue-500/30 bg-white/[0.02]"
+                    ? "border border-teal-400/45 bg-[#071c24] lg:-translate-y-2"
+                    : "border border-white/8 bg-white/[0.025] hover:border-blue-400/25"
                 }`}
               >
                 {plan.featured && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                    <span className="bg-linear-to-r from-teal-400 to-emerald-500 text-white text-[11px] font-extrabold tracking-wider px-4 py-1.5 rounded-full shadow-lg shadow-teal-500/30 whitespace-nowrap uppercase">
-                      Paling Populer
+                    <span className="rounded-full border border-teal-300/25 bg-teal-400/15 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-teal-100">
+                      Sering dipilih
                     </span>
                   </div>
                 )}
 
                 {/* Header */}
                 <div className="mb-5 relative">
-                  {plan.featured && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl pointer-events-none" />
-                  )}
                   <h3 className="text-white font-bold text-xl mb-1">{plan.name}</h3>
                   <p className="text-blue-200/50 text-xs leading-snug">{plan.tagline}</p>
                 </div>
@@ -190,9 +186,9 @@ export default function PricingSection() {
                   className="block mt-auto relative z-20"
                 >
                   <Button
-                    className={`w-full h-12 font-bold text-sm rounded-xl transition-all ${
+                    className={`w-full h-12 font-bold text-sm rounded-lg transition-all ${
                       plan.featured
-                        ? "bg-linear-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-[0_0_20px_-5px_rgba(20,184,166,0.5)] hover:scale-[1.02]"
+                        ? "bg-teal-500 hover:bg-teal-400 text-[#031011]"
                         : "border border-white/10 bg-white/5 hover:bg-white/10 text-white"
                     }`}
                   >

@@ -15,10 +15,10 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
   brand_default_og_image: "/og-image.png",
 
   home_hero_badge: "Tersedia untuk proyek baru",
-  home_hero_headline: "Website Profesional dan Tools Bisnis untuk Mendatangkan Klien",
+  home_hero_headline: "Website dan Tools Bisnis untuk Membantu Calon Pelanggan Menghubungi Anda",
   home_hero_subheadline:
-    "Bangun website cepat, tampil profesional di Google, lalu gunakan Lead Finder, Proposal Generator, dan Invoice Generator untuk mempercepat proses jualan sampai closing.",
-  home_primary_cta_label: "Konsultasi Website",
+    "MFWEB membantu bisnis lokal menyiapkan website yang jelas, mudah ditemukan, dan didukung tools untuk mencari lead, membuat proposal, serta mengirim invoice PDF.",
+  home_primary_cta_label: "Diskusi Kebutuhan",
   home_primary_cta_url: "/contact",
   home_secondary_cta_label: "Lihat Tools Bisnis",
   home_secondary_cta_url: "/tools",
@@ -33,9 +33,9 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
   social_linkedin_url: "",
 
   seo_default_title_template: "%s | MFWEB",
-  seo_default_title: "Jasa Website Profesional & Tools Bisnis untuk UMKM | MFWEB",
+  seo_default_title: "Jasa Website dan Tools Bisnis untuk UMKM | MFWEB",
   seo_default_description:
-    "MFWEB membantu bisnis lokal punya website profesional, mudah ditemukan di Google, dan memakai tools bisnis untuk cari lead, buat proposal, serta invoice PDF.",
+    "MFWEB membantu bisnis lokal membuat website yang jelas, mudah ditemukan, dan didukung tools untuk cari lead, buat proposal, serta invoice PDF.",
   seo_default_og_image: "/og-image.png",
   seo_canonical_base_url: "https://mfweb.maffisorp.id",
   facebook_pixel_id: "",

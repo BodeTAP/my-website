@@ -100,6 +100,10 @@ user confirms a lasting preference, project decision, or important current state
 - Public homepage positioning now combines website services with premium
   business tools; default hero/SEO copy highlights Lead Finder, Proposal
   Generator, and Invoice Generator alongside website services.
+- Public homepage design direction should feel more grounded and less
+  template/AI-like: fewer glow/glass effects, more concrete operational copy,
+  calmer solid surfaces, and product visuals tied to the actual website/lead/
+  proposal/invoice workflow.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.
