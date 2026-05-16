@@ -93,6 +93,10 @@ user confirms a lasting preference, project decision, or important current state
 - Public navbar uses desktop mega menus for Layanan and Tools, with mobile
   accordion sections for the same groups; the mobile open state uses a nearly
   opaque dark background so hero content does not bleed through.
+- Public footer is structured around Brand, Layanan Website, Tools Bisnis,
+  Perusahaan, and Hubungi Kami; footer links should prioritize valid service
+  routes, premium tools, clickable WhatsApp/email contacts, and clean legal
+  links.
 - Admin Tools now controls Invoice Generator defaults: credit cost, default due
   days, default footer, and whether PPN 11% is included by default. Admin Tools
   also shows usage totals for generated proposals/invoices and credits spent.
