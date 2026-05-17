@@ -149,7 +149,7 @@ export default function PaidToolLanding({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="relative px-4 pt-28 pb-16 sm:px-6 lg:px-8">
+      <section className="relative px-4 pt-16 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <FadeUp>
             <div>

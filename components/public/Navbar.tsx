@@ -120,20 +120,20 @@ const megaMenus: Record<MegaMenuKey, MegaMenu> = {
           {
             label: "Lead Finder",
             href: "/lead-finder",
-            description: "Cari prospek bisnis lokal dan siapkan data untuk outreach WhatsApp.",
+            description: "Cari prospek bisnis lokal dari Google Maps. Coba 1x gratis tanpa login.",
             icon: Search,
             badge: "Populer",
           },
           {
             label: "Proposal Generator",
             href: "/tools/proposal-generator",
-            description: "Buat proposal PDF profesional dari template dan brand kit.",
+            description: "Buat proposal PDF profesional dari template. Coba 1x gratis tanpa login.",
             icon: FileText,
           },
           {
             label: "Invoice Generator",
             href: "/tools/invoice-generator",
-            description: "Buat invoice PDF mandiri dengan template dan PPN 11% opsional.",
+            description: "Buat invoice PDF dengan PPN 11% dan template. Coba 1x gratis tanpa login.",
             icon: ReceiptText,
           },
         ],

@@ -207,8 +207,13 @@ export default async function ToolsPage() {
                           <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${c.bg} border border-white/5`}>
                             <tool.icon className={`h-7 w-7 ${c.text}`} />
                           </div>
-                          <div className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-300">
-                            {tool.price}
+                          <div className="flex flex-col items-end gap-1.5">
+                            <div className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                              {tool.price}
+                            </div>
+                            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
+                              Coba Gratis
+                            </span>
                           </div>
                         </div>
                         <h3 className="relative z-10 text-2xl font-black text-white">{tool.label}</h3>
