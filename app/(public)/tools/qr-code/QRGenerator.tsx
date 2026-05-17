@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Download, QrCode, Link2, MessageCircle, Type, RefreshCw } from "lucide-react";
-
-const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
 
 type Tab = "url" | "whatsapp" | "text";
 

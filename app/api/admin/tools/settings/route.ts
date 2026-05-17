@@ -5,7 +5,6 @@ import { requireApiPermission } from "@/lib/permissions";
 import {
   mergeToolSettingRows,
   normalizeToolSettingValue,
-  TOOL_SETTING_DEFAULTS,
   TOOL_SETTING_KEYS,
   type ToolSettingKey,
 } from "@/lib/toolSettings";

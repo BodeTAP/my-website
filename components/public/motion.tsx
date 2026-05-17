@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useMotionValue, useSpring, useTransform, animate, AnimatePresence } from "framer-motion";
+import { motion, useInView, animate, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -193,7 +193,7 @@ export function CountUp({
   return <span ref={nodeRef} className={className}>{from}{suffix}</span>;
 }
 
-export function AnimatePresenceFade({ children, keyProp }: { children: ReactNode; keyProp: any }) {
+export function AnimatePresenceFade({ children, keyProp }: { children: ReactNode; keyProp: React.Key }) {
   return (
     <AnimatePresence mode="wait">
       <motion.div

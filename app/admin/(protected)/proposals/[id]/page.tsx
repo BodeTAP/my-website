@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Download, MessageCircle, FileText, Send, ScrollText, User, Briefcase, Calendar, PlusCircle } from "lucide-react";
+import { ArrowLeft, Download, MessageCircle, Send, ScrollText, User, Briefcase, PlusCircle } from "lucide-react";
 import ProposalStatusSelect from "./ProposalStatusSelect";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 

@@ -17,14 +17,16 @@ export default function AdminCreditsSearch({
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchParamsRef = useRef(searchParams);
-  searchParamsRef.current = searchParams;
 
   const [q, setQ] = useState(searchParams.get(paramName) ?? "");
   const [isPending, startTransition] = useTransition();
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    setIsTyping(true);
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
+
+  useEffect(() => {
     const timeout = window.setTimeout(() => {
       const params = new URLSearchParams(searchParamsRef.current);
       if (q.trim()) params.set(paramName, q.trim());
@@ -45,7 +47,10 @@ export default function AdminCreditsSearch({
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/30" />
       <Input
         value={q}
-        onChange={(event) => setQ(event.target.value)}
+        onChange={(event) => {
+          setQ(event.target.value);
+          setIsTyping(true);
+        }}
         placeholder={placeholder}
         className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 h-10"
       />

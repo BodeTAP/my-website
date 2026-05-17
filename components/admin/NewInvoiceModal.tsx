@@ -63,7 +63,9 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
   const [lineItems, setLineItems]     = useState<LineItem[]>([{ label: "", amount: 0 }]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    void Promise.resolve().then(() => setMounted(true));
+  }, []);
 
   const total = lineItems.reduce((s, i) => s + (i.amount || 0), 0);
 

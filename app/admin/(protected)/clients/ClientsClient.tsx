@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Check, X, Phone, AlertCircle, Building2, User, Send, LayoutGrid, Receipt } from "lucide-react";
-import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { Pencil, Check, X, Phone, AlertCircle, Building2, User, LayoutGrid, Receipt } from "lucide-react";
+import { FadeUp } from "@/components/public/motion";
 
 type Client = {
   id: string;

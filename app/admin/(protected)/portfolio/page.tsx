@@ -33,6 +33,7 @@ export default async function AdminPortfolioPage() {
               {/* Cover */}
               <div className="relative h-44 bg-linear-to-br from-blue-900/40 to-indigo-900/20 shrink-0">
                 {p.coverImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.coverImage} alt={p.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

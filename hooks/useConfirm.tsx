@@ -21,7 +21,9 @@ export function useConfirm() {
   const [state, setState] = useState<State | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    void Promise.resolve().then(() => setMounted(true));
+  }, []);
 
   const confirm = useCallback(
     (message: string, options: Options = {}): Promise<boolean> =>

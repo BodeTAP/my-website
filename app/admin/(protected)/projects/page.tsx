@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { Badge } from "@/components/ui/badge";
 import NewProjectModal from "@/components/admin/NewProjectModal";
 import ProjectStatusSelect from "./ProjectStatusSelect";
 import DeleteProjectButton from "@/components/admin/DeleteProjectButton";

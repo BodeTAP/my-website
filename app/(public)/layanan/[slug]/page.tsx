@@ -5,7 +5,6 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
-  Smartphone,
   Megaphone,
   Building2,
   ShoppingCart,
@@ -13,8 +12,6 @@ import {
   Star,
   Zap,
   Shield,
-  Globe,
-  BarChart3,
   LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,7 +19,6 @@ import {
   FadeUp,
   StaggerChildren,
   StaggerItem,
-  HoverCard,
   ScaleIn,
 } from "@/components/public/motion";
 import Breadcrumb from "@/components/public/Breadcrumb";

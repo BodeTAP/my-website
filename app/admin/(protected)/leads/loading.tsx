@@ -1,4 +1,4 @@
-import { Skeleton, SkeletonText, SkeletonTitle, SkeletonTable } from "@/components/ui/skeleton";
+import { SkeletonText, SkeletonTitle, SkeletonTable } from "@/components/ui/skeleton";
 
 export default function LeadsLoading() {
   return (

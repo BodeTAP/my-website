@@ -288,8 +288,6 @@ function ModuleToggles({
   selected: string[];
   onChange: (modules: string[]) => void;
 }) {
-  const allSelected = VALID_MODULES.every((m) => selected.includes(m));
-
   const toggle = (mod: string) => {
     if (selected.includes(mod)) {
       onChange(selected.filter((m) => m !== mod));

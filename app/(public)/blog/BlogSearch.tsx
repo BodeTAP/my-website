@@ -12,7 +12,6 @@ export default function BlogSearch({ initialQuery }: { initialQuery: string }) {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    setIsTyping(true);
     const timeout = setTimeout(() => {
       const params = new URLSearchParams(searchParams);
       if (q.trim()) {
@@ -39,7 +38,10 @@ export default function BlogSearch({ initialQuery }: { initialQuery: string }) {
       <input
         type="text"
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setIsTyping(true);
+        }}
         placeholder="Cari artikel..."
         className="w-full rounded-2xl border border-white/10 bg-[#071225] py-3 pl-12 pr-12 text-white placeholder:text-blue-200/25 outline-none transition-colors focus:border-blue-500/40"
       />

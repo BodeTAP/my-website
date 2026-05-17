@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { SubscriptionStatus } from "@prisma/client";
 import MaintenanceClient from "./MaintenanceClient";
 import { requireModule } from "@/lib/permissions";
 
@@ -14,8 +15,8 @@ export default async function MaintenancePage({
   const page = Number(params.page || "1");
   const PER_PAGE = 10;
 
-  const validStatuses = ["ACTIVE", "PAUSED", "CANCELLED"];
-  const finalStatus = validStatuses.includes(status) ? status : undefined;
+  const validStatuses = ["ACTIVE", "PAUSED", "CANCELLED"] satisfies SubscriptionStatus[];
+  const finalStatus = validStatuses.includes(status as SubscriptionStatus) ? (status as SubscriptionStatus) : undefined;
 
   const where = {
     ...(q
@@ -26,7 +27,7 @@ export default async function MaintenancePage({
           ],
         }
       : {}),
-    ...(finalStatus ? { status: finalStatus as any } : {}),
+    ...(finalStatus ? { status: finalStatus } : {}),
   };
 
   const [packages, subscriptions, totalSubs, clients] = await Promise.all([

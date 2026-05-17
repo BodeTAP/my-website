@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import type { TicketStatus } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Headset, Clock, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Headset, Clock, CheckCircle2, type LucideIcon } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import TicketSearch from "./TicketSearch";
 import TicketFilter from "./TicketFilter";
 import TicketPagination from "./TicketPagination";
 import { requireModule } from "@/lib/permissions";
 
-const STATUS_CONFIG: Record<string, { label: string; bg: string; border: string; text: string; icon: any }> = {
+const STATUS_CONFIG: Record<string, { label: string; bg: string; border: string; text: string; icon: LucideIcon }> = {
   OPEN: {
     label: "Terbuka",
     bg: "bg-blue-500/10",
@@ -45,8 +46,8 @@ export default async function TicketsPage({
   const page = Number(params.page || "1");
   const PER_PAGE = 10;
 
-  const validStatuses = ["OPEN", "IN_PROGRESS", "CLOSED"];
-  const finalStatus = validStatuses.includes(status) ? status : undefined;
+  const validStatuses = ["OPEN", "IN_PROGRESS", "CLOSED"] satisfies TicketStatus[];
+  const finalStatus = validStatuses.includes(status as TicketStatus) ? (status as TicketStatus) : undefined;
 
   const where = {
     ...(q
@@ -58,7 +59,7 @@ export default async function TicketsPage({
           ],
         }
       : {}),
-    ...(finalStatus ? { status: finalStatus as any } : {}),
+    ...(finalStatus ? { status: finalStatus } : {}),
   };
 
   const [tickets, total, openTicketsCount] = await Promise.all([

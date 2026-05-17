@@ -39,7 +39,9 @@ export default function NotificationBell() {
   // Position of the fixed dropdown (viewport-relative)
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    void Promise.resolve().then(() => setMounted(true));
+  }, []);
   const btnRef                = useRef<HTMLButtonElement>(null);
   const panelRef              = useRef<HTMLDivElement>(null);
   const router                = useRouter();
@@ -54,7 +56,7 @@ export default function NotificationBell() {
   }, []);
 
   useEffect(() => {
-    void fetchNotifs();
+    void Promise.resolve().then(fetchNotifs);
     const t = setInterval(fetchNotifs, 60_000);
     return () => clearInterval(t);
   }, [fetchNotifs]);

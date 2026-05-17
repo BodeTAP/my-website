@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import {
   Package, Plus, Pencil, Trash2, X, Loader2, Check,
-  RefreshCw, Receipt, ChevronDown, Users,
+  Receipt, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/hooks/useConfirm";
 import { FadeUp } from "@/components/public/motion";
 import MaintenanceSearch from "./MaintenanceSearch";
@@ -224,7 +223,7 @@ export default function MaintenanceClient({
 
   // Sync state when searchParams changes data from server
   useEffect(() => {
-    setSubs(initSubs);
+    void Promise.resolve().then(() => setSubs(initSubs));
   }, [initSubs]);
 
   const handleGenerateInvoice = async (subId: string) => {

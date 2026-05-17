@@ -6,7 +6,6 @@ import {
   CheckCircle, Clock, RotateCcw, X, Copy, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/hooks/useConfirm";
 
 type Form = {
@@ -29,6 +28,17 @@ const STATUS = {
   COMPLETED: { label: "Selesai",  color: "bg-green-500/10 text-green-400 border-green-500/20", icon: CheckCircle },
 };
 
+function Field({ label, value }: { label: string; value?: string | null | string[] }) {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  const display = Array.isArray(value) ? value.join(", ") : value;
+  return (
+    <div className="py-2.5 border-b border-white/5 last:border-0 grid grid-cols-3 gap-3">
+      <span className="text-blue-200/40 text-xs pt-0.5">{label}</span>
+      <span className="text-blue-200/70 text-sm col-span-2 break-words">{display}</span>
+    </div>
+  );
+}
+
 function DetailModal({ form, onClose, onStatusChange }: { form: Form; onClose: () => void; onStatusChange: (id: string, s: string) => void }) {
   const [changing, setChanging] = useState(false);
 
@@ -39,17 +49,6 @@ function DetailModal({ form, onClose, onStatusChange }: { form: Form; onClose: (
     });
     onStatusChange(form.id, status);
     setChanging(false);
-  };
-
-  const Field = ({ label, value }: { label: string; value?: string | null | string[] }) => {
-    if (!value || (Array.isArray(value) && value.length === 0)) return null;
-    const display = Array.isArray(value) ? value.join(", ") : value;
-    return (
-      <div className="py-2.5 border-b border-white/5 last:border-0 grid grid-cols-3 gap-3">
-        <span className="text-blue-200/40 text-xs pt-0.5">{label}</span>
-        <span className="text-blue-200/70 text-sm col-span-2 break-words">{display}</span>
-      </div>
-    );
   };
 
   return (

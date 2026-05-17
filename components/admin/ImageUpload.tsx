@@ -54,6 +54,7 @@ export default function ImageUpload({ value, onChange, aspectRatio = "video", la
       {value ? (
         /* ── Preview ── */
         <div className={`relative ${containerH} rounded-xl overflow-hidden border border-white/10 group`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt="preview" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
             <button

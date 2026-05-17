@@ -145,7 +145,9 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
     } finally { setLoading(false); }
   }, [device.token]);
 
-  useEffect(() => { fetchQR(); }, [fetchQR]);
+  useEffect(() => {
+    void Promise.resolve().then(fetchQR);
+  }, [fetchQR]);
 
   const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -177,6 +179,7 @@ function QRModal({ device, onClose }: { device: Device; onClose: () => void }) {
             </div>
           ) : qr ? (
             <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`data:image/png;base64,${qr}`}
                 alt="QR Code"
@@ -629,7 +632,12 @@ export default function DevicesClient({
     } finally { setSyncing(false); }
   };
 
-  useEffect(() => { if (hasAccountToken) fetchDevices(); else setLoading(false); }, [fetchDevices, hasAccountToken]);
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      if (hasAccountToken) return fetchDevices();
+      setLoading(false);
+    });
+  }, [fetchDevices, hasAccountToken]);
 
   const handleDisconnect = async (device: Device) => {
     if (!confirm(`Disconnect device "${device.name}" (${device.device})?`)) return;

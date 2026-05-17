@@ -31,7 +31,7 @@ export default function LiveChat() {
   const [hint, setHint] = useState(false);
 
   useEffect(() => {
-    setOnline(isOnline());
+    void Promise.resolve().then(() => setOnline(isOnline()));
 
     if (!sessionStorage.getItem("chat_hinted")) {
       const t = setTimeout(() => {

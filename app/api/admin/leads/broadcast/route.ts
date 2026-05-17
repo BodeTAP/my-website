@@ -856,7 +856,7 @@ export async function POST(req: NextRequest) {
 
 // ── Broadcast history ─────────────────────────────────────────────────────────
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const denied = await requireApiPermission("broadcast");
   if (denied) return denied;

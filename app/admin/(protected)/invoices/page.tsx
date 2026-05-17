@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { MessageCircle, Link2, FileWarning, Receipt } from "lucide-react";
+import type { InvoiceStatus } from "@prisma/client";
+import { MessageCircle, FileWarning, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewInvoiceModal from "@/components/admin/NewInvoiceModal";
 import InvoiceStatusToggle from "./InvoiceStatusToggle";
@@ -35,8 +36,8 @@ export default async function InvoicesPage({
   const page = Number(params.page || "1");
   const PER_PAGE = 10;
 
-  const validStatuses = ["UNPAID", "PAID", "EXPIRED", "FAILED"];
-  const finalStatus = validStatuses.includes(status) ? status : undefined;
+  const validStatuses = ["UNPAID", "PAID", "EXPIRED", "FAILED"] satisfies InvoiceStatus[];
+  const finalStatus = validStatuses.includes(status as InvoiceStatus) ? (status as InvoiceStatus) : undefined;
 
   const where = {
     ...(q
@@ -47,7 +48,7 @@ export default async function InvoicesPage({
           ],
         }
       : {}),
-    ...(finalStatus ? { status: finalStatus as any } : {}),
+    ...(finalStatus ? { status: finalStatus } : {}),
   };
 
   const [invoices, total, clients] = await Promise.all([

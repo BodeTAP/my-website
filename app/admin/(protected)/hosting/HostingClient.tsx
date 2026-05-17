@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useTransition } from "react";
 import {
-  Globe, Server, Shield, Plus, Pencil, Trash2, Loader2,
-  AlertTriangle, CheckCircle, Clock, ChevronDown, X, Search,
+  Globe, Plus, Pencil, Trash2, Loader2,
+  AlertTriangle, CheckCircle, Clock, X, Search,
 } from "lucide-react";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import { useSearchParams } from "next/navigation";
@@ -31,7 +31,7 @@ function daysLeft(dateStr: string | null) {
   return Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
-function ExpiryBadge({ dateStr, label }: { dateStr: string | null; label: string }) {
+function ExpiryBadge({ dateStr }: { dateStr: string | null }) {
   if (!dateStr) return <span className="text-white/20 text-xs">—</span>;
   const days = daysLeft(dateStr);
   const date = new Date(dateStr).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
@@ -85,7 +85,9 @@ export default function HostingClient() {
     setLoading(false);
   }
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    void Promise.resolve().then(fetchAll);
+  }, []);
 
   function openAdd() {
     setEditRecord(null);
@@ -285,9 +287,9 @@ export default function HostingClient() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-4"><ExpiryBadge dateStr={r.domainExpiry}  label="Domain" /></td>
-                        <td className="px-5 py-4"><ExpiryBadge dateStr={r.hostingExpiry} label="Hosting" /></td>
-                        <td className="px-5 py-4"><ExpiryBadge dateStr={r.sslExpiry}     label="SSL" /></td>
+                        <td className="px-5 py-4"><ExpiryBadge dateStr={r.domainExpiry} /></td>
+                        <td className="px-5 py-4"><ExpiryBadge dateStr={r.hostingExpiry} /></td>
+                        <td className="px-5 py-4"><ExpiryBadge dateStr={r.sslExpiry} /></td>
                         <td className="px-5 py-4">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                             r.status === "ACTIVE"    ? "bg-green-500/10 text-green-400 border border-green-500/20" :

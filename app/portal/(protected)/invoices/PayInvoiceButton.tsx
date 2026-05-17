@@ -5,8 +5,6 @@ import { CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PayInvoiceButton({
-  invoiceId: _invoiceId,
-  existingPaymentUrl: _existingPaymentUrl,
   invoiceNo,
 }: {
   invoiceId: string;

@@ -7,7 +7,7 @@ import DeleteArticleButton from "./DeleteArticleButton";
 import ArticleSearch from "./ArticleSearch";
 import ArticleFilter from "./ArticleFilter";
 import ArticlePagination from "./ArticlePagination";
-import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { FadeUp } from "@/components/public/motion";
 import { requireModule } from "@/lib/permissions";
 
 const PER_PAGE = 10;

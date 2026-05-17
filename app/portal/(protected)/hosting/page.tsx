@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
-import { Globe, Server, Shield, AlertTriangle, CheckCircle, Clock, MessageCircle } from "lucide-react";
-import Link from "next/link";
+import { Globe, AlertTriangle, CheckCircle, Clock, MessageCircle } from "lucide-react";
 
 const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
 

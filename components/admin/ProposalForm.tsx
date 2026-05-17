@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Plus, Trash2, Loader2, Sparkles, Building2, Package, LayoutGrid, Calendar, Receipt, UserSearch } from "lucide-react";
+import { Check, Plus, Trash2, Loader2, Package, Calendar, Receipt, UserSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp } from "@/components/public/motion";
 
@@ -49,10 +49,11 @@ export default function ProposalForm({
   const [pending, startTransition] = useTransition();
 
   // Client info
+  const defaultLead = defaultLeadId ? leads.find((lead) => lead.id === defaultLeadId) : undefined;
   const [leadId, setLeadId]           = useState(defaultLeadId ?? "");
-  const [clientName, setClientName]   = useState("");
-  const [businessName, setBizName]    = useState("");
-  const [whatsapp, setWhatsapp]       = useState("");
+  const [clientName, setClientName]   = useState(defaultLead?.name ?? "");
+  const [businessName, setBizName]    = useState(defaultLead?.businessName ?? "");
+  const [whatsapp, setWhatsapp]       = useState(defaultLead?.whatsapp ?? "");
 
   // Package
   const [pkgType, setPkgType]         = useState("compro-pro");
@@ -65,25 +66,6 @@ export default function ProposalForm({
   const [notes, setNotes]             = useState("");
   const [error, setError]             = useState("");
 
-  // Auto-fill from lead
-  useEffect(() => {
-    if (!leadId) return;
-    const lead = leads.find(l => l.id === leadId);
-    if (lead) { setClientName(lead.name); setBizName(lead.businessName); setWhatsapp(lead.whatsapp); }
-  }, [leadId, leads]);
-
-  // Remove incompatible addons when package changes
-  useEffect(() => {
-    setAddons(prev => {
-      const next = new Set(prev);
-      for (const id of next) {
-        const a = ADDONS.find(x => x.id === id);
-        if (a?.incompatible?.includes(pkgType)) next.delete(id);
-      }
-      return next;
-    });
-  }, [pkgType]);
-
   const basePkg = PACKAGES[pkgType];
   const basePrice   = basePkg?.price ?? 0;
   const addonTotal  = [...addons].reduce((s, id) => s + (ADDONS.find(a => a.id === id)?.price ?? 0), 0);
@@ -91,7 +73,33 @@ export default function ProposalForm({
   const total       = basePrice + addonTotal + customTotal;
 
   function toggleAddon(id: string) {
-    setAddons(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setAddons(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  }
+
+  function selectLead(nextLeadId: string) {
+    setLeadId(nextLeadId);
+    const lead = leads.find((item) => item.id === nextLeadId);
+    if (!lead) return;
+    setClientName(lead.name);
+    setBizName(lead.businessName);
+    setWhatsapp(lead.whatsapp);
+  }
+
+  function selectPackage(nextPkgType: string) {
+    setPkgType(nextPkgType);
+    setAddons(prev => {
+      const next = new Set(prev);
+      for (const id of next) {
+        const addon = ADDONS.find((item) => item.id === id);
+        if (addon?.incompatible?.includes(nextPkgType)) next.delete(id);
+      }
+      return next;
+    });
   }
 
   function addCustomItem() {
@@ -164,7 +172,7 @@ export default function ProposalForm({
               <div className="relative">
                 <select
                   value={leadId}
-                  onChange={e => setLeadId(e.target.value)}
+                  onChange={e => selectLead(e.target.value)}
                   className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 appearance-none focus:ring-1 focus:ring-teal-500/50 transition-all cursor-pointer"
                 >
                   <option value="" className="bg-[#0a1628]">— Isi Manual —</option>
@@ -222,7 +230,7 @@ export default function ProposalForm({
               const selected = pkgType === key;
               return (
                 <button
-                  key={key} onClick={() => setPkgType(key)}
+                  key={key} onClick={() => selectPackage(key)}
                   className={`relative text-left p-5 rounded-2xl border transition-all overflow-hidden ${
                     selected
                       ? "bg-emerald-600/10 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"

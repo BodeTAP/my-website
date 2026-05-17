@@ -61,7 +61,7 @@ export default function TicketList({
     if (pollingRef.current) clearInterval(pollingRef.current);
     if (!openTicket) return;
 
-    fetchMessages(openTicket);
+    void Promise.resolve().then(() => fetchMessages(openTicket));
     pollingRef.current = setInterval(() => fetchMessages(openTicket), 3000);
     return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
   }, [openTicket, fetchMessages]);

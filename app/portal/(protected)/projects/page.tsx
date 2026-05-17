@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ExternalLink, CheckCircle2, Loader2, Rocket, Clock, MessageSquare } from "lucide-react";
-import { FadeUp, StaggerChildren, StaggerItem, ProgressBar } from "@/components/public/motion";
+import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
 type ProjectStatus = "DRAFTING" | "DEVELOPMENT" | "TESTING" | "LIVE";
 

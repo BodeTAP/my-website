@@ -137,6 +137,15 @@ user confirms a lasting preference, project decision, or important current state
 - Lead Finder Social Scan now treats direct social-profile `websiteUri` values
   (Instagram/Facebook/TikTok/LinkedIn/YouTube/X) as `FOUND` before fetching or
   reading cached scan results.
+- Startup-readiness check on 2026-05-17: `npm run lint`, `npx tsc --noEmit`,
+  `npm run test:run`, and `npm run build` all passed. Lint still reports many
+  warnings, mostly React 19 hook/purity warnings and unused imports/types.
+- On 2026-05-17, lint warnings were cleaned to zero; `npm run lint`,
+  `npx tsc --noEmit`, `npm run test:run`, and `npm run build` all passed after
+  the cleanup. Build still prints non-blocking renderer warnings about
+  unsupported `z-index` and string `width`/`height` values.
+- As of 2026-05-17, `.env` exists locally but is not tracked by Git;
+  `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their
   dashboard/profile workflows.
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 // Mock Upstash Redis — test selalu pakai in-memory fallback
 vi.mock("@upstash/redis", () => ({

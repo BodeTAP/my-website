@@ -100,6 +100,7 @@ export default async function Image() {
             }}
           >
             {/* Using the actual logo */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logoSrc} alt="Logo" width="60" height="60" style={{ objectFit: 'contain' }} />
           </div>
           <div

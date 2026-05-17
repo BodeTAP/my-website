@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { Edit2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function EditProjectModal({ project }: { project: any }) {
+type EditableProject = {
+  id: string;
+  name: string;
+  description: string | null;
+  liveUrl: string | null;
+  notes: string | null;
+};
+
+export default function EditProjectModal({ project }: { project: EditableProject }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -33,7 +41,7 @@ export default function EditProjectModal({ project }: { project: any }) {
       
       setOpen(false);
       router.refresh();
-    } catch (err) {
+    } catch {
       alert("Terjadi kesalahan.");
     } finally {
       setLoading(false);

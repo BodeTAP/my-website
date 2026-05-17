@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import {
   Users, FileText, Briefcase, MessageSquare,
-  TrendingUp, AlertCircle, Repeat2, ChevronRight,
-  PlusCircle, LayoutDashboard, Rocket, BarChart3
+  AlertCircle, Repeat2, ChevronRight,
+  LayoutDashboard, Rocket, BarChart3
 } from "lucide-react";
 import Link from "next/link";
 import { FadeUp, StaggerChildren, StaggerItem, CountUp } from "@/components/public/motion";

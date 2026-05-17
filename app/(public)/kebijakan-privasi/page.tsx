@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 const UPDATED = "27 April 2026";
 
 export default function PrivacyPolicyPage() {

@@ -36,8 +36,6 @@ export default function ProjectStatusSelect({
     router.refresh();
   };
 
-  const current = STATUS_OPTIONS.find((s) => s.value === status);
-
   return (
     <select
       value={status}

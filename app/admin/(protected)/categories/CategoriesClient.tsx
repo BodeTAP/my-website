@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Tag, Plus, Pencil, Trash2, X, Loader2, Check } from "lucide-react";
+import { Tag, Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useConfirm } from "@/hooks/useConfirm";

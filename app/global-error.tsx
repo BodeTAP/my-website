@@ -2,7 +2,6 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
 
 export default function GlobalError({
   error,

@@ -9,14 +9,16 @@ export default function ArticleSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchParamsRef = useRef(searchParams);
-  searchParamsRef.current = searchParams;
 
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [isPending, startTransition] = useTransition();
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    setIsTyping(true);
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       const params = new URLSearchParams(searchParamsRef.current);
       if (q) params.set("q", q);
@@ -36,7 +38,10 @@ export default function ArticleSearch() {
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/30" />
       <Input
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setIsTyping(true);
+        }}
         placeholder="Cari judul artikel..."
         className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 h-10"
       />

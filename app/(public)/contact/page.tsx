@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Send, MessageCircle, CheckCircle, Mail, MapPin, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,6 @@ function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (domainParam) setForm((f) => ({ ...f, domain: domainParam }));
-  }, [domainParam]);
 
   const set =
     (k: keyof typeof form) =>

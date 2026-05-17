@@ -3,7 +3,7 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Loader2, Check, AlertCircle, Save, User, Building, Phone, MapPin, Mail, ImageIcon, Palette, Upload } from "lucide-react";
+import { Camera, Loader2, Check, AlertCircle, Save, User, Building, Phone, MapPin, Mail, ImageIcon, Palette, Upload, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 
@@ -319,7 +319,7 @@ export default function ProfileForm({ profile, brandKit }: { profile: Profile; b
 function Field({
   icon: Icon, label, value, onChange, placeholder, disabled,
 }: {
-  icon: any;
+  icon: LucideIcon;
   label: string;
   value: string;
   onChange?: (v: string) => void;

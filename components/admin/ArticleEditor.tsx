@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -10,7 +10,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import {
   Bold, Italic, List, ListOrdered, Quote, Code,
   Heading2, Heading3, Link2, Image as ImageIcon, Save, Eye, EyeOff, X, Calendar, Clock,
-  Sparkles, Search, Check, AlertCircle, Loader2, Wand2, BarChart3, ImagePlus
+  Sparkles, Search, AlertCircle, Loader2, Wand2, BarChart3, ImagePlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,30 @@ function slugify(str: string) {
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
+}
+
+function ToolbarBtn({
+  onClick,
+  active,
+  children,
+}: {
+  onClick: () => void;
+  active?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`p-2 rounded-lg transition-colors ${
+        active
+          ? "bg-blue-600 text-white"
+          : "text-blue-200/50 hover:text-white hover:bg-white/5"
+      }`}
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function ArticleEditor({
@@ -74,6 +98,7 @@ export default function ArticleEditor({
     : "";
   const [schedMode, setSchedMode]   = useState(!!existingSchedule);
   const [schedDate, setSchedDate]   = useState(existingSchedule);
+  const [minScheduleDate] = useState(() => new Date(Date.now() + 60_000).toISOString().slice(0, 16));
   const [error, setError] = useState("");
 
   // AI Panel State
@@ -297,28 +322,6 @@ export default function ArticleEditor({
     }
   };
 
-  const ToolbarBtn = ({
-    onClick,
-    active,
-    children,
-  }: {
-    onClick: () => void;
-    active?: boolean;
-    children: React.ReactNode;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`p-2 rounded-lg transition-colors ${
-        active
-          ? "bg-blue-600 text-white"
-          : "text-blue-200/50 hover:text-white hover:bg-white/5"
-      }`}
-    >
-      {children}
-    </button>
-  );
-
   return (
     <div className="relative flex flex-col lg:flex-row gap-6">
       {/* Main Column */}
@@ -526,7 +529,7 @@ export default function ArticleEditor({
                 type="datetime-local"
                 value={schedDate}
                 onChange={e => setSchedDate(e.target.value)}
-                min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                min={minScheduleDate}
                 className="flex-1 min-w-40 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500/50 scheme-dark"
               />
               <Button
@@ -726,6 +729,7 @@ export default function ArticleEditor({
                       disabled={aiLoading}
                       className="relative aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-blue-500 group transition-all"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={p.url} alt="Pexels" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-blue-600/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <ImagePlus className="w-5 h-5 text-white" />
@@ -746,5 +750,3 @@ export default function ArticleEditor({
     </div>
   );
 }
-
-
