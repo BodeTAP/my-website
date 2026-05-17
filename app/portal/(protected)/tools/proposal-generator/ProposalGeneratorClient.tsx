@@ -213,6 +213,7 @@ export default function ProposalGeneratorClient({
   const [historyQuery, setHistoryQuery] = useState("");
   const [historyPage, setHistoryPage] = useState(1);
   const [pdfPreviewVersion, setPdfPreviewVersion] = useState(0);
+  const [enhancingKey, setEnhancingKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingMeta, setSavingMeta] = useState(false);
@@ -566,6 +567,36 @@ export default function ProposalGeneratorClient({
     }
   };
 
+  async function enhanceWithAi(key: string, label: string) {
+    const currentText = (formValues[key] ?? "").trim();
+    if (!currentText || currentText.length < 10) return;
+    setEnhancingKey(key);
+    try {
+      const res = await fetch("/api/portal/tools/proposal-generator/ai-enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sectionTitle: label,
+          sectionBody: currentText,
+          context: {
+            prospectName: formValues.prospectName ?? "",
+            businessName: formValues.businessName ?? "",
+            templateName: selectedTemplate?.name ?? "",
+          },
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal");
+      const data = await res.json();
+      if (data.enhanced) {
+        setFormValues((current) => ({ ...current, [key]: data.enhanced }));
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setEnhancingKey(null);
+    }
+  }
+
   const downloadResult = () => {
     if (!result) return;
     const blob = new Blob([proposalToText(result)], { type: "text/plain;charset=utf-8" });
@@ -744,6 +775,17 @@ export default function ProposalGeneratorClient({
                       placeholder={variable.placeholder}
                       className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
                     />
+                  )}
+                  {variable.type === "textarea" && (formValues[variable.key] ?? "").trim().length > 10 && (
+                    <button
+                      type="button"
+                      onClick={() => enhanceWithAi(variable.key, variable.label)}
+                      disabled={enhancingKey === variable.key}
+                      className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-blue-300 hover:text-blue-200 disabled:opacity-50"
+                    >
+                      {enhancingKey === variable.key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      {enhancingKey === variable.key ? "Memperkaya..." : "Perkaya dengan AI"}
+                    </button>
                   )}
                 </div>
               ))}

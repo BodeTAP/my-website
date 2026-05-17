@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/hooks/useConfirm";
-import { ArrowLeft, Brush, Coins, Download, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Brush, Coins, Download, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Sparkles, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type LineItem = {
@@ -128,6 +128,8 @@ export default function InvoiceGeneratorClient({
   const [error, setError] = useState("");
   const [latestInvoice, setLatestInvoice] = useState<GeneratedInvoiceView | null>(initialInvoices[0] ?? null);
   const [design, setDesign] = useState<InvoiceDesign>(initialDesign);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [loadingAiDesc, setLoadingAiDesc] = useState(false);
 
   const [form, setForm] = useState({
     title: "Invoice",
@@ -193,6 +195,29 @@ export default function InvoiceGeneratorClient({
 
   function removeItem(index: number) {
     setLineItems((current) => current.length === 1 ? current : current.filter((_item, itemIndex) => itemIndex !== index));
+  }
+
+  async function suggestDescription() {
+    const firstItem = lineItems[0];
+    if (!firstItem?.description.trim()) return;
+    setLoadingAiDesc(true);
+    try {
+      const res = await fetch("/api/portal/tools/invoice-generator/ai-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keyword: firstItem.description,
+          context: form.billToName ? `untuk ${form.billToName}` : "",
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal");
+      const data = await res.json();
+      setAiSuggestions(data.suggestions ?? []);
+    } catch {
+      // silent
+    } finally {
+      setLoadingAiDesc(false);
+    }
   }
 
   async function generateInvoice() {
@@ -442,10 +467,16 @@ export default function InvoiceGeneratorClient({
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="font-black text-white">Rincian Item</h2>
-                  <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-1.5 text-xs font-black text-blue-200 hover:bg-blue-500/15">
-                    <Plus className="w-3.5 h-3.5" />
-                    Item
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={suggestDescription} disabled={loadingAiDesc || !lineItems[0]?.description.trim()} className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-1.5 text-xs font-black text-purple-200 hover:bg-purple-500/15 disabled:opacity-40">
+                      {loadingAiDesc ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      Saran AI
+                    </button>
+                    <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-1.5 text-xs font-black text-blue-200 hover:bg-blue-500/15">
+                      <Plus className="w-3.5 h-3.5" />
+                      Item
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {lineItems.map((item, index) => (
@@ -463,6 +494,28 @@ export default function InvoiceGeneratorClient({
                   ))}
                 </div>
               </div>
+
+              {aiSuggestions.length > 0 && (
+                <div className="mt-3 rounded-xl border border-purple-500/15 bg-purple-500/[0.04] p-3 space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-purple-300">Saran deskripsi dari AI</p>
+                  {aiSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        updateItem(0, { description: suggestion });
+                        setAiSuggestions([]);
+                      }}
+                      className="block w-full text-left rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2 text-xs text-blue-100/80 hover:bg-white/[0.06] transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                  <button type="button" onClick={() => setAiSuggestions([])} className="text-[10px] text-blue-200/40 hover:text-blue-200/60">
+                    Tutup saran
+                  </button>
+                </div>
+              )}
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <MoneyField label="Diskon" value={form.discount} onChange={(value) => updateForm("discount", value)} />
