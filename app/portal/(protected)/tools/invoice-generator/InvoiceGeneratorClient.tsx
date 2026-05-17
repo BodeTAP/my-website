@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Brush, Coins, Download, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Brush, Coins, Download, Eye, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type LineItem = {
@@ -120,6 +120,7 @@ export default function InvoiceGeneratorClient({
   const [activeTab, setActiveTab] = useState<"create" | "design" | "history">("create");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
   const [savingDesign, setSavingDesign] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState("");
@@ -234,6 +235,37 @@ export default function InvoiceGeneratorClient({
       setError(err instanceof Error ? err.message : "Gagal membuat invoice");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function previewPdf() {
+    setPreviewing(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/portal/tools/invoice-generator/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          lineItems,
+          design,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Gagal membuat preview");
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal membuat preview");
+    } finally {
+      setPreviewing(false);
     }
   }
 
@@ -423,10 +455,16 @@ export default function InvoiceGeneratorClient({
             <TextArea label="Catatan" value={form.notes} onChange={(value) => updateForm("notes", value)} placeholder="Instruksi pembayaran, nomor rekening, atau catatan lain." />
             <TextArea label="Footer" value={form.footer} onChange={(value) => updateForm("footer", value)} />
 
-            <Button type="button" onClick={generateInvoice} disabled={loading || !canGenerate} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ReceiptText className="mr-2 h-4 w-4" />}
-              Buat Invoice ({invoiceCost} kredit)
-            </Button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button type="button" onClick={previewPdf} disabled={previewing || !form.billToName.trim() || lineItems.every((item) => !item.description || item.price <= 0)} className="h-12 rounded-xl border border-white/10 bg-white/10 px-6 font-black text-white hover:bg-white/15">
+                {previewing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
+                Preview PDF
+              </Button>
+              <Button type="button" onClick={generateInvoice} disabled={loading || !canGenerate} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ReceiptText className="mr-2 h-4 w-4" />}
+                Buat Invoice ({invoiceCost} kredit)
+              </Button>
+            </div>
           </section>
 
           <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit space-y-5">
