@@ -194,6 +194,27 @@ export default function InvoiceGeneratorClient({
   }
 
   async function generateInvoice() {
+    // Validasi: nama penerima wajib diisi
+    if (!form.billToName.trim()) {
+      setError("Nama penerima invoice wajib diisi sebelum generate.");
+      return;
+    }
+
+    // Validasi: minimal 1 item dengan deskripsi dan harga
+    const validItems = lineItems.filter((item) => item.description.trim() && item.price > 0);
+    if (validItems.length === 0) {
+      setError("Tambahkan minimal 1 item dengan deskripsi dan harga.");
+      return;
+    }
+
+    // Konfirmasi sebelum generate
+    let confirmMsg = `Buat invoice untuk "${form.billToName}"?\n\n`;
+    confirmMsg += `Total: ${formatRupiah(total)}\n`;
+    confirmMsg += `Item: ${validItems.length} item\n`;
+    confirmMsg += `Kredit yang akan dipotong: ${invoiceCost} kredit.\n\nLanjutkan?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
     setLoading(true);
     setError("");
     setMessage("");

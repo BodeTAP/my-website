@@ -396,6 +396,37 @@ export default function ProposalGeneratorClient({
 
   const generateProposal = async () => {
     if (!selectedTemplate) return;
+
+    // Validasi: minimal nama prospek atau bisnis harus diisi
+    const prospectName = (formValues.prospectName ?? "").trim();
+    const businessName = (formValues.businessName ?? "").trim();
+
+    if (!prospectName && !businessName) {
+      setError("Isi minimal nama calon klien atau nama bisnis sebelum generate.");
+      return;
+    }
+
+    // Konfirmasi sebelum generate (kredit akan dipotong)
+    const filledFields = [
+      prospectName && `Calon klien: ${prospectName}`,
+      businessName && `Bisnis: ${businessName}`,
+      (formValues.whatsapp ?? "").trim() && `WhatsApp: ${formValues.whatsapp}`,
+      (formValues.validUntil ?? "").trim() && `Berlaku: ${formValues.validUntil}`,
+    ].filter(Boolean);
+
+    const emptyVars = templateVariables.filter(
+      (v) => !(formValues[v.key] ?? "").trim()
+    );
+
+    let confirmMsg = `Generate proposal dengan template "${selectedTemplate.name}"?\n\n`;
+    confirmMsg += `Data terisi:\n${filledFields.map((f) => `  ✓ ${f}`).join("\n")}\n`;
+    if (emptyVars.length > 0) {
+      confirmMsg += `\nField kosong (akan tampil kosong di proposal):\n${emptyVars.map((v) => `  ⚠ ${v.label}`).join("\n")}\n`;
+    }
+    confirmMsg += `\nKredit yang akan dipotong: ${proposalCost} kredit.\nLanjutkan?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
     setLoading(true);
     setError("");
     setMessage("");
