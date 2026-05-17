@@ -210,10 +210,10 @@ export default function InvoiceGeneratorClient({
     }
 
     // Konfirmasi sebelum generate
-    const description = `Total: ${formatRupiah(total)}\nItem: ${validItems.length} item\nKredit yang dipotong: ${invoiceCost} kredit.`;
+    const description = `• Total: ${formatRupiah(total)}\n• Item: ${validItems.length} item\n• Kredit dipotong: ${invoiceCost} kredit`;
 
     const ok = await confirm(
-      `Buat invoice untuk "${form.billToName}"?`,
+      `Buat invoice untuk ${form.billToName}?`,
       { description, confirmLabel: "Buat Invoice", variant: "warning" },
     );
     if (!ok) return;

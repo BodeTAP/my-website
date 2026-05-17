@@ -420,15 +420,14 @@ export default function ProposalGeneratorClient({
       (v) => !(formValues[v.key] ?? "").trim()
     );
 
-    let description = `Data terisi: ${filledFields.join(", ")}`;
-    if (emptyVars.length > 0) {
-      description += `\n\nField kosong: ${emptyVars.map((v) => v.label).join(", ")}`;
-    }
-    description += `\n\nKredit yang dipotong: ${proposalCost} kredit.`;
+    const lines: string[] = [];
+    if (filledFields.length > 0) lines.push(`• ${filledFields.join("\n• ")}`);
+    if (emptyVars.length > 0) lines.push(`\nField kosong:\n• ${emptyVars.map((v) => v.label).join("\n• ")}`);
+    lines.push(`\nKredit dipotong: ${proposalCost} kredit`);
 
     const ok = await confirm(
-      `Generate proposal "${selectedTemplate.name}"?`,
-      { description, confirmLabel: "Generate", variant: "warning" },
+      `Generate proposal?`,
+      { description: lines.join("\n"), confirmLabel: "Generate", variant: "warning" },
     );
     if (!ok) return;
 

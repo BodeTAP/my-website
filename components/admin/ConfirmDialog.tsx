@@ -68,7 +68,7 @@ export default function ConfirmDialog({
         <h3 className="text-white font-bold text-xl tracking-tight leading-snug mb-2 relative z-10">{message}</h3>
         
         {description && (
-          <p className="text-blue-200/60 text-sm leading-relaxed mb-8 relative z-10">{description}</p>
+          <p className="text-blue-200/60 text-sm leading-relaxed mb-8 relative z-10 whitespace-pre-line">{description}</p>
         )}
         {!description && <div className="mb-8" />}
 
