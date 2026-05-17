@@ -363,104 +363,116 @@ export default function InvoiceGeneratorClient({
       )}
 
       {activeTab === "create" && (
-        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Template Desain Aktif</p>
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="font-black text-white">{DESIGN_TEMPLATES.find((template) => template.value === design.layout)?.label ?? "Custom"}</h2>
-                  <p className="mt-1 text-sm text-blue-200/45">PDF invoice akan memakai warna, font, logo, dan visibilitas dari tab desain.</p>
-                </div>
-                <button type="button" onClick={() => setActiveTab("design")} className="inline-flex h-10 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 text-sm font-black text-blue-200 hover:bg-blue-500/15">
-                  <Brush className="mr-2 h-4 w-4" />
-                  Edit Desain
-                </button>
+        <div className="space-y-6">
+          {/* Generate button + download (sticky top bar) */}
+          <div className="sticky top-0 z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-white/10 bg-[#071225]/95 backdrop-blur-sm p-4">
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-blue-200/55">
+                <span className="font-bold text-white">{formatRupiah(total)}</span> untuk {form.billToName || "..."}
               </div>
             </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Judul Invoice" value={form.title} onChange={(value) => updateForm("title", value)} />
-              <Field label="Tanggal Invoice" type="date" value={form.issueDate} onChange={(value) => updateForm("issueDate", value)} />
-              <Field label="Jatuh Tempo" type="date" value={form.dueDate} onChange={(value) => updateForm("dueDate", value)} />
-              <Field label="Nama Penerima" value={form.billToName} onChange={(value) => updateForm("billToName", value)} placeholder="Nama perusahaan / klien" />
-              <Field label="Email Penerima" value={form.billToEmail} onChange={(value) => updateForm("billToEmail", value)} />
-              <Field label="Telepon Penerima" value={form.billToPhone} onChange={(value) => updateForm("billToPhone", value)} />
-            </div>
-
-            <TextArea label="Alamat Penerima" value={form.billToAddress} onChange={(value) => updateForm("billToAddress", value)} />
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-black text-white">Rincian Item</h2>
-                <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-1.5 text-xs font-black text-blue-200 hover:bg-blue-500/15">
-                  <Plus className="w-3.5 h-3.5" />
-                  Item
-                </button>
-              </div>
-              <div className="space-y-3">
-                {lineItems.map((item, index) => (
-                  <div key={index} className="grid gap-2 sm:grid-cols-[1fr_90px_150px_36px]">
-                    <input value={item.description} onChange={(event) => updateItem(index, { description: event.target.value })} placeholder="Deskripsi layanan" className="h-11 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
-                    <input type="number" min={1} step={0.01} value={item.quantity} onChange={(event) => updateItem(index, { quantity: Number(event.target.value) })} className="h-11 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-blue-200/35">Rp</span>
-                      <input value={moneyInput(item.price)} onChange={(event) => updateItem(index, { price: parseMoney(event.target.value) })} placeholder="0" className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-right text-sm text-white outline-none focus:border-blue-500/45" />
-                    </div>
-                    <button type="button" onClick={() => removeItem(index)} disabled={lineItems.length === 1} className="flex h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-red-300/70 hover:bg-red-500/10 disabled:opacity-35">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <MoneyField label="Diskon" value={form.discount} onChange={(value) => updateForm("discount", value)} />
-              <Toggle label={`Sertakan PPN 11% (${formatRupiah(taxAmount)})`} checked={form.includeTax} onChange={(checked) => updateForm("includeTax", checked)} />
-            </div>
-
-            <TextArea label="Catatan" value={form.notes} onChange={(value) => updateForm("notes", value)} placeholder="Instruksi pembayaran, nomor rekening, atau catatan lain." />
-            <TextArea label="Footer" value={form.footer} onChange={(value) => updateForm("footer", value)} />
-
-            <Button type="button" onClick={generateInvoice} disabled={loading || !canGenerate} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ReceiptText className="mr-2 h-4 w-4" />}
-              Buat Invoice ({invoiceCost} kredit)
-            </Button>
-          </section>
-
-          <aside className="rounded-2xl border border-white/10 bg-[#071225] p-4 h-fit space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Realtime</p>
+            <div className="flex items-center gap-3">
               {latestInvoice && (
-                <a href={`/api/portal/tools/invoice-generator/${latestInvoice.id}/pdf`} target="_blank" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black text-emerald-200 hover:bg-emerald-500/15">
-                  <Download className="h-3 w-3" />
-                  PDF Terakhir
+                <a href={`/api/portal/tools/invoice-generator/${latestInvoice.id}/pdf`} target="_blank" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 text-sm font-black text-emerald-200 hover:bg-emerald-500/15 transition-colors">
+                  <Download className="h-4 w-4" />
+                  Download PDF Terakhir
                 </a>
               )}
+              <Button type="button" onClick={generateInvoice} disabled={loading || !canGenerate} className="h-11 rounded-xl bg-blue-600 px-5 font-black text-white hover:bg-blue-500">
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ReceiptText className="mr-2 h-4 w-4" />}
+                Buat Invoice ({invoiceCost} kredit)
+              </Button>
             </div>
-            <InvoiceHtmlPreview
-              design={design}
-              fromName={form.fromName || "Nama Bisnis"}
-              fromEmail={form.fromEmail}
-              fromPhone={form.fromPhone}
-              invoiceNo="IG-XXXXXXXX-XXXX"
-              billToName={form.billToName || "Nama Penerima"}
-              billToEmail={form.billToEmail}
-              billToPhone={form.billToPhone}
-              billToAddress={form.billToAddress}
-              issueDate={form.issueDate}
-              dueDate={form.dueDate}
-              lineItems={lineItems}
-              subtotal={subtotal}
-              discount={form.discount}
-              includeTax={form.includeTax}
-              taxAmount={taxAmount}
-              total={total}
-              notes={form.notes}
-              footer={form.footer}
-            />
-          </aside>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            {/* Form */}
+            <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Template Desain Aktif</p>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="font-black text-white">{DESIGN_TEMPLATES.find((template) => template.value === design.layout)?.label ?? "Custom"}</h2>
+                    <p className="mt-1 text-sm text-blue-200/45">PDF invoice akan memakai warna, font, logo, dan visibilitas dari tab desain.</p>
+                  </div>
+                  <button type="button" onClick={() => setActiveTab("design")} className="inline-flex h-10 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 text-sm font-black text-blue-200 hover:bg-blue-500/15">
+                    <Brush className="mr-2 h-4 w-4" />
+                    Edit Desain
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Judul Invoice" value={form.title} onChange={(value) => updateForm("title", value)} />
+                <Field label="Tanggal Invoice" type="date" value={form.issueDate} onChange={(value) => updateForm("issueDate", value)} />
+                <Field label="Jatuh Tempo" type="date" value={form.dueDate} onChange={(value) => updateForm("dueDate", value)} />
+                <Field label="Nama Penerima" value={form.billToName} onChange={(value) => updateForm("billToName", value)} placeholder="Nama perusahaan / klien" />
+                <Field label="Email Penerima" value={form.billToEmail} onChange={(value) => updateForm("billToEmail", value)} />
+                <Field label="Telepon Penerima" value={form.billToPhone} onChange={(value) => updateForm("billToPhone", value)} />
+              </div>
+
+              <TextArea label="Alamat Penerima" value={form.billToAddress} onChange={(value) => updateForm("billToAddress", value)} />
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="font-black text-white">Rincian Item</h2>
+                  <button type="button" onClick={addItem} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-1.5 text-xs font-black text-blue-200 hover:bg-blue-500/15">
+                    <Plus className="w-3.5 h-3.5" />
+                    Item
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {lineItems.map((item, index) => (
+                    <div key={index} className="grid gap-2 sm:grid-cols-[1fr_90px_150px_36px]">
+                      <input value={item.description} onChange={(event) => updateItem(index, { description: event.target.value })} placeholder="Deskripsi layanan" className="h-11 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
+                      <input type="number" min={1} step={0.01} value={item.quantity} onChange={(event) => updateItem(index, { quantity: Number(event.target.value) })} className="h-11 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-blue-200/35">Rp</span>
+                        <input value={moneyInput(item.price)} onChange={(event) => updateItem(index, { price: parseMoney(event.target.value) })} placeholder="0" className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-right text-sm text-white outline-none focus:border-blue-500/45" />
+                      </div>
+                      <button type="button" onClick={() => removeItem(index)} disabled={lineItems.length === 1} className="flex h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-red-300/70 hover:bg-red-500/10 disabled:opacity-35">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <MoneyField label="Diskon" value={form.discount} onChange={(value) => updateForm("discount", value)} />
+                <Toggle label={`Sertakan PPN 11% (${formatRupiah(taxAmount)})`} checked={form.includeTax} onChange={(checked) => updateForm("includeTax", checked)} />
+              </div>
+
+              <TextArea label="Catatan" value={form.notes} onChange={(value) => updateForm("notes", value)} placeholder="Instruksi pembayaran, nomor rekening, atau catatan lain." />
+              <TextArea label="Footer" value={form.footer} onChange={(value) => updateForm("footer", value)} />
+            </section>
+
+            {/* Preview (larger, same column width as form) */}
+            <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit space-y-4 xl:sticky xl:top-20">
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Invoice</p>
+              <InvoiceHtmlPreview
+                design={design}
+                fromName={form.fromName || "Nama Bisnis"}
+                fromEmail={form.fromEmail}
+                fromPhone={form.fromPhone}
+                invoiceNo="IG-XXXXXXXX-XXXX"
+                billToName={form.billToName || "Nama Penerima"}
+                billToEmail={form.billToEmail}
+                billToPhone={form.billToPhone}
+                billToAddress={form.billToAddress}
+                issueDate={form.issueDate}
+                dueDate={form.dueDate}
+                lineItems={lineItems}
+                subtotal={subtotal}
+                discount={form.discount}
+                includeTax={form.includeTax}
+                taxAmount={taxAmount}
+                total={total}
+                notes={form.notes}
+                footer={form.footer}
+              />
+            </aside>
+          </div>
         </div>
       )}
 
@@ -781,9 +793,9 @@ function InvoiceHtmlPreview({
   const fontFamily = design.fontStyle === "serif" ? "Georgia, serif" : design.fontStyle === "mono" ? "'Courier New', monospace" : "system-ui, -apple-system, sans-serif";
 
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10 shadow-lg" style={{ fontFamily, fontSize: "10px" }}>
+    <div className="rounded-xl overflow-hidden border border-white/10 shadow-lg" style={{ fontFamily, fontSize: "11px" }}>
       {/* A4 aspect ratio container */}
-      <div className="bg-white text-slate-900 relative" style={{ aspectRatio: "595/842", overflow: "hidden" }}>
+      <div className="bg-white text-slate-900 relative p-1" style={{ minHeight: "480px" }}>
         {/* Modern layout side accent */}
         {isModern && (
           <div className="absolute left-0 top-0 bottom-0 w-2" style={{ backgroundColor: design.accentColor }} />
@@ -808,15 +820,15 @@ function InvoiceHtmlPreview({
               )}
               {design.showSender && (
                 <>
-                  <p className="font-bold text-[13px] leading-tight" style={{ color: headerTextColor }}>{fromName}</p>
-                  {fromEmail && <p className="mt-0.5" style={{ color: headerMutedColor, fontSize: "7px" }}>{fromEmail}</p>}
-                  {fromPhone && <p style={{ color: headerMutedColor, fontSize: "7px" }}>{fromPhone}</p>}
+                  <p className="font-bold text-sm leading-tight" style={{ color: headerTextColor }}>{fromName}</p>
+                  {fromEmail && <p className="mt-0.5" style={{ color: headerMutedColor, fontSize: "9px" }}>{fromEmail}</p>}
+                  {fromPhone && <p style={{ color: headerMutedColor, fontSize: "9px" }}>{fromPhone}</p>}
                 </>
               )}
             </div>
             <div className="text-right">
-              <p className="font-bold" style={{ color: headerTextColor, fontSize: isPremium ? "20px" : "18px" }}>INVOICE</p>
-              {design.showInvoiceNo && <p style={{ color: headerMutedColor, fontSize: "7px" }}>{invoiceNo}</p>}
+              <p className="font-bold" style={{ color: headerTextColor, fontSize: isPremium ? "22px" : "20px" }}>INVOICE</p>
+              {design.showInvoiceNo && <p style={{ color: headerMutedColor, fontSize: "9px" }}>{invoiceNo}</p>}
             </div>
           </div>
         </div>
@@ -827,20 +839,20 @@ function InvoiceHtmlPreview({
           <div className="flex justify-between gap-4">
             {design.showRecipient && (
               <div>
-                <p className="font-bold uppercase tracking-wider" style={{ color: "#64748b", fontSize: "6px" }}>Ditagihkan Kepada</p>
-                <p className="font-bold mt-0.5" style={{ fontSize: "9px" }}>{billToName}</p>
-                {billToEmail && <p style={{ color: "#64748b", fontSize: "6.5px" }}>{billToEmail}</p>}
-                {billToPhone && <p style={{ color: "#64748b", fontSize: "6.5px" }}>{billToPhone}</p>}
-                {billToAddress && <p style={{ color: "#64748b", fontSize: "6.5px" }} className="max-w-[140px]">{billToAddress}</p>}
+                <p className="font-bold uppercase tracking-wider" style={{ color: "#64748b", fontSize: "8px" }}>Ditagihkan Kepada</p>
+                <p className="font-bold mt-0.5" style={{ fontSize: "11px" }}>{billToName}</p>
+                {billToEmail && <p style={{ color: "#64748b", fontSize: "8px" }}>{billToEmail}</p>}
+                {billToPhone && <p style={{ color: "#64748b", fontSize: "8px" }}>{billToPhone}</p>}
+                {billToAddress && <p style={{ color: "#64748b", fontSize: "8px" }} className="max-w-[180px]">{billToAddress}</p>}
               </div>
             )}
             <div className="text-right">
-              <p className="font-bold uppercase tracking-wider" style={{ color: "#64748b", fontSize: "6px" }}>Tanggal Invoice</p>
-              <p className="font-bold mt-0.5" style={{ fontSize: "8px" }}>{fmtDatePreview(issueDate)}</p>
+              <p className="font-bold uppercase tracking-wider" style={{ color: "#64748b", fontSize: "8px" }}>Tanggal Invoice</p>
+              <p className="font-bold mt-0.5" style={{ fontSize: "10px" }}>{fmtDatePreview(issueDate)}</p>
               {design.showDueDate && (
                 <>
-                  <p className="font-bold uppercase tracking-wider mt-2" style={{ color: "#64748b", fontSize: "6px" }}>Jatuh Tempo</p>
-                  <p className="font-bold mt-0.5" style={{ fontSize: "8px" }}>{fmtDatePreview(dueDate)}</p>
+                  <p className="font-bold uppercase tracking-wider mt-2" style={{ color: "#64748b", fontSize: "8px" }}>Jatuh Tempo</p>
+                  <p className="font-bold mt-0.5" style={{ fontSize: "10px" }}>{fmtDatePreview(dueDate)}</p>
                 </>
               )}
             </div>
@@ -850,23 +862,23 @@ function InvoiceHtmlPreview({
           <div className="border-t" style={{ borderColor: "#cbd5e1" }} />
 
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_32px_52px_56px] gap-1 px-1.5 py-1 rounded" style={{ backgroundColor: isMinimal ? "#f8fafc" : "#f1f5f9" }}>
-            <span className="font-bold uppercase" style={{ color: "#64748b", fontSize: "6px" }}>Deskripsi</span>
-            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "6px" }}>Qty</span>
-            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "6px" }}>Harga</span>
-            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "6px" }}>Jumlah</span>
+          <div className="grid grid-cols-[1fr_32px_60px_64px] gap-1.5 px-2 py-1.5 rounded" style={{ backgroundColor: isMinimal ? "#f8fafc" : "#f1f5f9" }}>
+            <span className="font-bold uppercase" style={{ color: "#64748b", fontSize: "8px" }}>Deskripsi</span>
+            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "8px" }}>Qty</span>
+            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "8px" }}>Harga</span>
+            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "8px" }}>Jumlah</span>
           </div>
 
           {/* Line items */}
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {lineItems.filter((item) => item.description || item.price > 0).map((item, idx) => {
               const amount = Math.round((item.quantity || 1) * (item.price || 0));
               return (
-                <div key={idx} className="grid grid-cols-[1fr_32px_52px_56px] gap-1 px-1.5 py-0.5">
-                  <span className="font-bold truncate" style={{ fontSize: "7.5px" }}>{item.description || `Item ${idx + 1}`}</span>
-                  <span className="text-right" style={{ color: "#64748b", fontSize: "7px" }}>{item.quantity || 1}</span>
-                  <span className="text-right" style={{ color: "#64748b", fontSize: "7px" }}>{formatRupiah(item.price || 0)}</span>
-                  <span className="text-right font-bold" style={{ fontSize: "7px" }}>{formatRupiah(amount)}</span>
+                <div key={idx} className="grid grid-cols-[1fr_32px_60px_64px] gap-1.5 px-2 py-1">
+                  <span className="font-bold truncate" style={{ fontSize: "9px" }}>{item.description || `Item ${idx + 1}`}</span>
+                  <span className="text-right" style={{ color: "#64748b", fontSize: "9px" }}>{item.quantity || 1}</span>
+                  <span className="text-right" style={{ color: "#64748b", fontSize: "9px" }}>{formatRupiah(item.price || 0)}</span>
+                  <span className="text-right font-bold" style={{ fontSize: "9px" }}>{formatRupiah(amount)}</span>
                 </div>
               );
             })}
@@ -876,45 +888,45 @@ function InvoiceHtmlPreview({
           <div className="border-t" style={{ borderColor: "#cbd5e1" }} />
 
           {/* Totals */}
-          <div className="flex flex-col items-end gap-0.5 pr-1">
-            <div className="flex justify-between w-[140px]">
-              <span style={{ color: "#64748b", fontSize: "7px" }}>Subtotal</span>
-              <span style={{ fontSize: "7px" }}>{formatRupiah(subtotal)}</span>
+          <div className="flex flex-col items-end gap-1 pr-1">
+            <div className="flex justify-between w-[160px]">
+              <span style={{ color: "#64748b", fontSize: "9px" }}>Subtotal</span>
+              <span style={{ fontSize: "9px" }}>{formatRupiah(subtotal)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between w-[140px]">
-                <span style={{ color: "#64748b", fontSize: "7px" }}>Diskon</span>
-                <span style={{ fontSize: "7px" }}>-{formatRupiah(discount)}</span>
+              <div className="flex justify-between w-[160px]">
+                <span style={{ color: "#64748b", fontSize: "9px" }}>Diskon</span>
+                <span style={{ fontSize: "9px" }}>-{formatRupiah(discount)}</span>
               </div>
             )}
             {includeTax && taxAmount > 0 && (
-              <div className="flex justify-between w-[140px]">
-                <span style={{ color: "#64748b", fontSize: "7px" }}>PPN 11%</span>
-                <span style={{ fontSize: "7px" }}>{formatRupiah(taxAmount)}</span>
+              <div className="flex justify-between w-[160px]">
+                <span style={{ color: "#64748b", fontSize: "9px" }}>PPN 11%</span>
+                <span style={{ fontSize: "9px" }}>{formatRupiah(taxAmount)}</span>
               </div>
             )}
             {/* Total box */}
-            <div className="flex items-center justify-between w-[150px] mt-1 px-2 py-1.5 rounded" style={{ backgroundColor: isPremium ? design.accentColor : design.primaryColor }}>
-              <span className="font-bold uppercase" style={{ color: "#bfdbfe", fontSize: "6.5px" }}>Total</span>
-              <span className="font-bold" style={{ color: "#ffffff", fontSize: "10px" }}>{formatRupiah(total)}</span>
+            <div className="flex items-center justify-between w-[170px] mt-1.5 px-3 py-2 rounded" style={{ backgroundColor: isPremium ? design.accentColor : design.primaryColor }}>
+              <span className="font-bold uppercase" style={{ color: "#bfdbfe", fontSize: "8px" }}>Total</span>
+              <span className="font-bold" style={{ color: "#ffffff", fontSize: "13px" }}>{formatRupiah(total)}</span>
             </div>
           </div>
 
           {/* Notes */}
           {notes && (
             <div className="mt-2">
-              <p className="font-bold uppercase" style={{ color: "#64748b", fontSize: "6px" }}>Catatan</p>
-              <p className="mt-0.5 leading-relaxed" style={{ color: "#0f172a", fontSize: "6.5px" }}>{notes}</p>
+              <p className="font-bold uppercase" style={{ color: "#64748b", fontSize: "8px" }}>Catatan</p>
+              <p className="mt-0.5 leading-relaxed" style={{ color: "#0f172a", fontSize: "8px" }}>{notes}</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
         {design.showFooter && (
-          <div className="absolute bottom-0 left-0 right-0 px-5 py-2 border-t" style={{ borderColor: "#cbd5e1" }}>
+          <div className="absolute bottom-0 left-0 right-0 px-5 py-2.5 border-t" style={{ borderColor: "#cbd5e1" }}>
             <div className="flex justify-between">
-              <span style={{ color: "#64748b", fontSize: "6px" }}>{footer || "Dokumen dibuat otomatis."}</span>
-              <span style={{ color: "#64748b", fontSize: "6px" }}>Halaman 1 dari 1</span>
+              <span style={{ color: "#64748b", fontSize: "8px" }}>{footer || "Dokumen dibuat otomatis."}</span>
+              <span style={{ color: "#64748b", fontSize: "8px" }}>Halaman 1 dari 1</span>
             </div>
           </div>
         )}
