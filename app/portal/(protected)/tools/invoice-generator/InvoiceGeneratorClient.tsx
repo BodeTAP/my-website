@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Brush, Coins, Download, Eye, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Brush, Coins, Download, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type LineItem = {
@@ -120,7 +120,6 @@ export default function InvoiceGeneratorClient({
   const [activeTab, setActiveTab] = useState<"create" | "design" | "history">("create");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [previewing, setPreviewing] = useState(false);
   const [savingDesign, setSavingDesign] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState("");
@@ -235,37 +234,6 @@ export default function InvoiceGeneratorClient({
       setError(err instanceof Error ? err.message : "Gagal membuat invoice");
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function previewPdf() {
-    setPreviewing(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/portal/tools/invoice-generator/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          lineItems,
-          design,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Gagal membuat preview");
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal membuat preview");
-    } finally {
-      setPreviewing(false);
     }
   }
 
@@ -455,39 +423,43 @@ export default function InvoiceGeneratorClient({
             <TextArea label="Catatan" value={form.notes} onChange={(value) => updateForm("notes", value)} placeholder="Instruksi pembayaran, nomor rekening, atau catatan lain." />
             <TextArea label="Footer" value={form.footer} onChange={(value) => updateForm("footer", value)} />
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button type="button" onClick={previewPdf} disabled={previewing || !form.billToName.trim() || lineItems.every((item) => !item.description || item.price <= 0)} className="h-12 rounded-xl border border-white/10 bg-white/10 px-6 font-black text-white hover:bg-white/15">
-                {previewing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
-                Preview PDF
-              </Button>
-              <Button type="button" onClick={generateInvoice} disabled={loading || !canGenerate} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ReceiptText className="mr-2 h-4 w-4" />}
-                Buat Invoice ({invoiceCost} kredit)
-              </Button>
-            </div>
+            <Button type="button" onClick={generateInvoice} disabled={loading || !canGenerate} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ReceiptText className="mr-2 h-4 w-4" />}
+              Buat Invoice ({invoiceCost} kredit)
+            </Button>
           </section>
 
-          <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit space-y-5">
-            <div>
-              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Ringkas</p>
-              <h2 className="mt-2 text-2xl font-black text-white">{form.title || "Invoice"}</h2>
-              <p className="mt-1 text-sm text-blue-200/45">Untuk {form.billToName || "Nama penerima"}</p>
+          <aside className="rounded-2xl border border-white/10 bg-[#071225] p-4 h-fit space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Preview Realtime</p>
+              {latestInvoice && (
+                <a href={`/api/portal/tools/invoice-generator/${latestInvoice.id}/pdf`} target="_blank" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black text-emerald-200 hover:bg-emerald-500/15">
+                  <Download className="h-3 w-3" />
+                  PDF Terakhir
+                </a>
+              )}
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3 text-sm">
-              <SummaryRow label="Subtotal" value={formatRupiah(subtotal)} />
-              <SummaryRow label="Diskon" value={`-${formatRupiah(form.discount)}`} />
-              <SummaryRow label="PPN 11%" value={form.includeTax ? formatRupiah(taxAmount) : "Tidak disertakan"} />
-              <div className="border-t border-white/10 pt-3 flex items-center justify-between">
-                <span className="text-blue-200/55 font-bold">Total</span>
-                <span className="text-xl font-black text-white">{formatRupiah(total)}</span>
-              </div>
-            </div>
-            {latestInvoice && (
-              <a href={`/api/portal/tools/invoice-generator/${latestInvoice.id}/pdf`} target="_blank" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 text-sm font-black text-white hover:bg-emerald-500">
-                <Download className="mr-2 h-4 w-4" />
-                Download Invoice Terakhir
-              </a>
-            )}
+            <InvoiceHtmlPreview
+              design={design}
+              fromName={form.fromName || "Nama Bisnis"}
+              fromEmail={form.fromEmail}
+              fromPhone={form.fromPhone}
+              invoiceNo="IG-XXXXXXXX-XXXX"
+              billToName={form.billToName || "Nama Penerima"}
+              billToEmail={form.billToEmail}
+              billToPhone={form.billToPhone}
+              billToAddress={form.billToAddress}
+              issueDate={form.issueDate}
+              dueDate={form.dueDate}
+              lineItems={lineItems}
+              subtotal={subtotal}
+              discount={form.discount}
+              includeTax={form.includeTax}
+              taxAmount={taxAmount}
+              total={total}
+              notes={form.notes}
+              footer={form.footer}
+            />
           </aside>
         </div>
       )}
@@ -742,6 +714,211 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-3">
       <span className="text-blue-200/45">{label}</span>
       <span className="font-bold text-blue-100">{value}</span>
+    </div>
+  );
+}
+
+// ─── Realtime HTML Preview (matches PDF output exactly) ──────────────────────
+
+type InvoiceHtmlPreviewProps = {
+  design: InvoiceDesign;
+  fromName: string;
+  fromEmail: string;
+  fromPhone: string;
+  invoiceNo: string;
+  billToName: string;
+  billToEmail: string;
+  billToPhone: string;
+  billToAddress: string;
+  issueDate: string;
+  dueDate: string;
+  lineItems: LineItem[];
+  subtotal: number;
+  discount: number;
+  includeTax: boolean;
+  taxAmount: number;
+  total: number;
+  notes: string;
+  footer: string;
+};
+
+function fmtDatePreview(value: string) {
+  if (!value) return "-";
+  try {
+    return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(value));
+  } catch {
+    return "-";
+  }
+}
+
+function InvoiceHtmlPreview({
+  design,
+  fromName,
+  fromEmail,
+  fromPhone,
+  invoiceNo,
+  billToName,
+  billToEmail,
+  billToPhone,
+  billToAddress,
+  issueDate,
+  dueDate,
+  lineItems,
+  subtotal,
+  discount,
+  includeTax,
+  taxAmount,
+  total,
+  notes,
+  footer,
+}: InvoiceHtmlPreviewProps) {
+  const isMinimal = design.layout === "minimal";
+  const isPremium = design.layout === "premium";
+  const isModern = design.layout === "modern";
+  const headerBg = isMinimal ? "#ffffff" : design.primaryColor;
+  const headerTextColor = isMinimal ? "#0f172a" : "#ffffff";
+  const headerMutedColor = isMinimal ? "#64748b" : "#bfdbfe";
+  const fontFamily = design.fontStyle === "serif" ? "Georgia, serif" : design.fontStyle === "mono" ? "'Courier New', monospace" : "system-ui, -apple-system, sans-serif";
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-white/10 shadow-lg" style={{ fontFamily, fontSize: "10px" }}>
+      {/* A4 aspect ratio container */}
+      <div className="bg-white text-slate-900 relative" style={{ aspectRatio: "595/842", overflow: "hidden" }}>
+        {/* Modern layout side accent */}
+        {isModern && (
+          <div className="absolute left-0 top-0 bottom-0 w-2" style={{ backgroundColor: design.accentColor }} />
+        )}
+
+        {/* Header */}
+        <div
+          className="relative px-5 py-4"
+          style={{ backgroundColor: headerBg, borderBottom: isMinimal ? `2px solid ${design.primaryColor}` : "none" }}
+        >
+          {/* Premium accent bar */}
+          {isPremium && (
+            <div className="absolute top-0 left-0 right-0 h-1.5" style={{ backgroundColor: design.accentColor }} />
+          )}
+
+          <div className="flex items-start justify-between">
+            <div>
+              {/* Logo placeholder */}
+              {design.showLogo && design.logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={design.logoUrl} alt="Logo" className="h-5 w-auto mb-1.5 object-contain" />
+              )}
+              {design.showSender && (
+                <>
+                  <p className="font-bold text-[13px] leading-tight" style={{ color: headerTextColor }}>{fromName}</p>
+                  {fromEmail && <p className="mt-0.5" style={{ color: headerMutedColor, fontSize: "7px" }}>{fromEmail}</p>}
+                  {fromPhone && <p style={{ color: headerMutedColor, fontSize: "7px" }}>{fromPhone}</p>}
+                </>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="font-bold" style={{ color: headerTextColor, fontSize: isPremium ? "20px" : "18px" }}>INVOICE</p>
+              {design.showInvoiceNo && <p style={{ color: headerMutedColor, fontSize: "7px" }}>{invoiceNo}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-3 space-y-3">
+          {/* Bill To + Dates */}
+          <div className="flex justify-between gap-4">
+            {design.showRecipient && (
+              <div>
+                <p className="font-bold uppercase tracking-wider" style={{ color: "#64748b", fontSize: "6px" }}>Ditagihkan Kepada</p>
+                <p className="font-bold mt-0.5" style={{ fontSize: "9px" }}>{billToName}</p>
+                {billToEmail && <p style={{ color: "#64748b", fontSize: "6.5px" }}>{billToEmail}</p>}
+                {billToPhone && <p style={{ color: "#64748b", fontSize: "6.5px" }}>{billToPhone}</p>}
+                {billToAddress && <p style={{ color: "#64748b", fontSize: "6.5px" }} className="max-w-[140px]">{billToAddress}</p>}
+              </div>
+            )}
+            <div className="text-right">
+              <p className="font-bold uppercase tracking-wider" style={{ color: "#64748b", fontSize: "6px" }}>Tanggal Invoice</p>
+              <p className="font-bold mt-0.5" style={{ fontSize: "8px" }}>{fmtDatePreview(issueDate)}</p>
+              {design.showDueDate && (
+                <>
+                  <p className="font-bold uppercase tracking-wider mt-2" style={{ color: "#64748b", fontSize: "6px" }}>Jatuh Tempo</p>
+                  <p className="font-bold mt-0.5" style={{ fontSize: "8px" }}>{fmtDatePreview(dueDate)}</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Separator */}
+          <div className="border-t" style={{ borderColor: "#cbd5e1" }} />
+
+          {/* Table header */}
+          <div className="grid grid-cols-[1fr_32px_52px_56px] gap-1 px-1.5 py-1 rounded" style={{ backgroundColor: isMinimal ? "#f8fafc" : "#f1f5f9" }}>
+            <span className="font-bold uppercase" style={{ color: "#64748b", fontSize: "6px" }}>Deskripsi</span>
+            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "6px" }}>Qty</span>
+            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "6px" }}>Harga</span>
+            <span className="font-bold uppercase text-right" style={{ color: "#64748b", fontSize: "6px" }}>Jumlah</span>
+          </div>
+
+          {/* Line items */}
+          <div className="space-y-0.5">
+            {lineItems.filter((item) => item.description || item.price > 0).map((item, idx) => {
+              const amount = Math.round((item.quantity || 1) * (item.price || 0));
+              return (
+                <div key={idx} className="grid grid-cols-[1fr_32px_52px_56px] gap-1 px-1.5 py-0.5">
+                  <span className="font-bold truncate" style={{ fontSize: "7.5px" }}>{item.description || `Item ${idx + 1}`}</span>
+                  <span className="text-right" style={{ color: "#64748b", fontSize: "7px" }}>{item.quantity || 1}</span>
+                  <span className="text-right" style={{ color: "#64748b", fontSize: "7px" }}>{formatRupiah(item.price || 0)}</span>
+                  <span className="text-right font-bold" style={{ fontSize: "7px" }}>{formatRupiah(amount)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Separator */}
+          <div className="border-t" style={{ borderColor: "#cbd5e1" }} />
+
+          {/* Totals */}
+          <div className="flex flex-col items-end gap-0.5 pr-1">
+            <div className="flex justify-between w-[140px]">
+              <span style={{ color: "#64748b", fontSize: "7px" }}>Subtotal</span>
+              <span style={{ fontSize: "7px" }}>{formatRupiah(subtotal)}</span>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between w-[140px]">
+                <span style={{ color: "#64748b", fontSize: "7px" }}>Diskon</span>
+                <span style={{ fontSize: "7px" }}>-{formatRupiah(discount)}</span>
+              </div>
+            )}
+            {includeTax && taxAmount > 0 && (
+              <div className="flex justify-between w-[140px]">
+                <span style={{ color: "#64748b", fontSize: "7px" }}>PPN 11%</span>
+                <span style={{ fontSize: "7px" }}>{formatRupiah(taxAmount)}</span>
+              </div>
+            )}
+            {/* Total box */}
+            <div className="flex items-center justify-between w-[150px] mt-1 px-2 py-1.5 rounded" style={{ backgroundColor: isPremium ? design.accentColor : design.primaryColor }}>
+              <span className="font-bold uppercase" style={{ color: "#bfdbfe", fontSize: "6.5px" }}>Total</span>
+              <span className="font-bold" style={{ color: "#ffffff", fontSize: "10px" }}>{formatRupiah(total)}</span>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {notes && (
+            <div className="mt-2">
+              <p className="font-bold uppercase" style={{ color: "#64748b", fontSize: "6px" }}>Catatan</p>
+              <p className="mt-0.5 leading-relaxed" style={{ color: "#0f172a", fontSize: "6.5px" }}>{notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {design.showFooter && (
+          <div className="absolute bottom-0 left-0 right-0 px-5 py-2 border-t" style={{ borderColor: "#cbd5e1" }}>
+            <div className="flex justify-between">
+              <span style={{ color: "#64748b", fontSize: "6px" }}>{footer || "Dokumen dibuat otomatis."}</span>
+              <span style={{ color: "#64748b", fontSize: "6px" }}>Halaman 1 dari 1</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
