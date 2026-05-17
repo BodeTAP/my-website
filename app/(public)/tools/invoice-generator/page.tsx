@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Copy, Palette, Percent, ReceiptText } from "lucide-react";
 import PaidToolLanding from "../_components/PaidToolLanding";
 import { getToolSettings } from "@/lib/toolSettings";
+import PublicInvoiceForm from "@/components/public/tools/PublicInvoiceForm";
 
 export const revalidate = 300;
 
@@ -38,7 +39,30 @@ export default async function InvoiceGeneratorLandingPage() {
   const welcomeCredits = settings.signupBonus.enabled ? settings.signupBonus.amount : 0;
 
   return (
-    <PaidToolLanding
+    <>
+      {/* Free-tier public invoice form */}
+      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-black text-white mb-3">
+            Coba Invoice Generator Gratis
+          </h1>
+          <p className="text-sm text-blue-200/50">
+            Buat invoice sederhana langsung tanpa login. Daftar akun untuk fitur lengkap.
+          </p>
+        </div>
+        <PublicInvoiceForm />
+      </section>
+
+      {/* Separator */}
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs font-bold text-blue-200/30 uppercase tracking-widest">Atau daftar untuk fitur lengkap</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+      </div>
+
+      <PaidToolLanding
       eyebrow="Invoice Generator"
       title="Invoice Generator PDF dengan Template dan PPN 11%"
       description={pageDescription}
@@ -120,5 +144,6 @@ export default async function InvoiceGeneratorLandingPage() {
         },
       ]}
     />
+    </>
   );
 }

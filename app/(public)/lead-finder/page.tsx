@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 import { getToolSettings } from "@/lib/toolSettings";
+import PublicLeadFinderForm from "@/components/public/tools/PublicLeadFinderForm";
 
 export const metadata: Metadata = {
   title: "Lead Finder untuk Cari Prospek Bisnis Lokal | MFWEB",
@@ -257,6 +258,21 @@ export default async function LeadFinderLandingPage() {
                 </div>
               </div>
             </div>
+          </FadeUp>
+        </div>
+      </section>
+
+      {/* ── Free Trial Form ─────────────────────────────────── */}
+      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          <FadeUp>
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-black text-white sm:text-3xl">Coba Lead Finder Gratis</h2>
+              <p className="mt-2 text-sm text-blue-200/55">
+                Langsung cari prospek tanpa login. 1 pencarian per hari, maks 5 hasil.
+              </p>
+            </div>
+            <PublicLeadFinderForm />
           </FadeUp>
         </div>
       </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Coins, FileText, Loader2, ReceiptText, Save, Search } from "lucide-react";
+import { AlertTriangle, Coins, FileText, Globe, Loader2, ReceiptText, Save, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ToolSettingKey =
@@ -19,7 +19,14 @@ type ToolSettingKey =
   | "tool_invoice_generator_default_include_tax"
   | "tool_signup_bonus_enabled"
   | "tool_signup_bonus_amount"
-  | "tool_low_credit_warning_threshold";
+  | "tool_low_credit_warning_threshold"
+  | "tool_lead_finder_freemium_enabled"
+  | "tool_lead_finder_freemium_daily_limit"
+  | "tool_lead_finder_freemium_result_cap"
+  | "tool_proposal_generator_freemium_enabled"
+  | "tool_proposal_generator_freemium_monthly_limit"
+  | "tool_invoice_generator_freemium_enabled"
+  | "tool_invoice_generator_freemium_monthly_limit";
 type SettingsRecord = Record<ToolSettingKey, string>;
 
 function asNumber(value: string) {
@@ -275,6 +282,84 @@ export default function ToolSettingsClient({ initialSettings }: { initialSetting
                 <p>Jika saldo klien di bawah angka ini, portal akan menampilkan ajakan membeli kredit.</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Freemium Section */}
+      <div className="border-t border-white/10 px-5 pt-5 pb-2">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10">
+            <Globe className="h-4 w-4 text-emerald-300" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-white">Freemium</h3>
+            <p className="text-sm text-blue-200/45">Kontrol akses gratis untuk tools premium di halaman publik</p>
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-5 px-5 pb-5 xl:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
+          <div className="mb-5 flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-500/25 bg-emerald-500/10">
+              <Search className="h-5 w-5 text-emerald-300" />
+            </div>
+            <div>
+              <h3 className="font-black text-white">Lead Finder Freemium</h3>
+              <p className="mt-1 text-sm text-blue-200/40">Akses gratis pencarian lead di halaman publik.</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <ToggleField
+              checked={settings.tool_lead_finder_freemium_enabled === "true"}
+              onChange={(value) => update("tool_lead_finder_freemium_enabled", value)}
+              label="Lead Finder Freemium"
+              description="Pengunjung publik bisa mencoba Lead Finder tanpa login."
+            />
+            <NumberField label="Pencarian per hari" value={settings.tool_lead_finder_freemium_daily_limit} onChange={(value) => update("tool_lead_finder_freemium_daily_limit", value)} suffix="kali" min={1} />
+            <NumberField label="Maks hasil gratis" value={settings.tool_lead_finder_freemium_result_cap} onChange={(value) => update("tool_lead_finder_freemium_result_cap", value)} suffix="leads" min={1} />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
+          <div className="mb-5 flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-500/25 bg-emerald-500/10">
+              <FileText className="h-5 w-5 text-emerald-300" />
+            </div>
+            <div>
+              <h3 className="font-black text-white">Proposal Generator Freemium</h3>
+              <p className="mt-1 text-sm text-blue-200/40">Akses gratis generate proposal di halaman publik.</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <ToggleField
+              checked={settings.tool_proposal_generator_freemium_enabled === "true"}
+              onChange={(value) => update("tool_proposal_generator_freemium_enabled", value)}
+              label="Proposal Generator Freemium"
+              description="Pengunjung publik bisa mencoba Proposal Generator tanpa login."
+            />
+            <NumberField label="Generate per bulan" value={settings.tool_proposal_generator_freemium_monthly_limit} onChange={(value) => update("tool_proposal_generator_freemium_monthly_limit", value)} suffix="kali" min={1} />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
+          <div className="mb-5 flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-500/25 bg-emerald-500/10">
+              <ReceiptText className="h-5 w-5 text-emerald-300" />
+            </div>
+            <div>
+              <h3 className="font-black text-white">Invoice Generator Freemium</h3>
+              <p className="mt-1 text-sm text-blue-200/40">Akses gratis generate invoice di halaman publik.</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <ToggleField
+              checked={settings.tool_invoice_generator_freemium_enabled === "true"}
+              onChange={(value) => update("tool_invoice_generator_freemium_enabled", value)}
+              label="Invoice Generator Freemium"
+              description="Pengunjung publik bisa mencoba Invoice Generator tanpa login."
+            />
+            <NumberField label="Generate per bulan" value={settings.tool_invoice_generator_freemium_monthly_limit} onChange={(value) => update("tool_invoice_generator_freemium_monthly_limit", value)} suffix="kali" min={1} />
           </div>
         </div>
       </div>

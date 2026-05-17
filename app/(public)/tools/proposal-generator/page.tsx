@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Brain, Download, LayoutTemplate, Palette } from "lucide-react";
 import PaidToolLanding from "../_components/PaidToolLanding";
 import { getToolSettings } from "@/lib/toolSettings";
+import PublicProposalForm from "@/components/public/tools/PublicProposalForm";
 
 export const revalidate = 300;
 
@@ -37,7 +38,31 @@ export default async function ProposalGeneratorLandingPage() {
   const welcomeCredits = settings.signupBonus.enabled ? settings.signupBonus.amount : 0;
 
   return (
-    <PaidToolLanding
+    <>
+      {/* Free-tier proposal form */}
+      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-black text-white mb-3">
+            Coba Proposal Generator Gratis
+          </h1>
+          <p className="text-blue-200/55 text-sm max-w-lg mx-auto">
+            Buat proposal sederhana langsung dari sini tanpa perlu daftar. Hasil berupa PDF dengan watermark.
+          </p>
+        </div>
+        <PublicProposalForm />
+      </section>
+
+      {/* Separator */}
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs font-bold text-blue-200/30 uppercase tracking-widest">Atau daftar untuk fitur lengkap</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+      </div>
+
+      {/* Full landing page */}
+      <PaidToolLanding
       eyebrow="Proposal Generator"
       title="Proposal Generator untuk Buat Proposal PDF Profesional"
       description={pageDescription}
@@ -119,5 +144,6 @@ export default async function ProposalGeneratorLandingPage() {
         },
       ]}
     />
+    </>
   );
 }

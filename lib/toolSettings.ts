@@ -18,6 +18,16 @@ export const TOOL_SETTING_DEFAULTS = {
   tool_signup_bonus_enabled: "true",
   tool_signup_bonus_amount: "15",
   tool_low_credit_warning_threshold: "10",
+  // Freemium: Lead Finder
+  tool_lead_finder_freemium_enabled: "true",
+  tool_lead_finder_freemium_daily_limit: "1",
+  tool_lead_finder_freemium_result_cap: "5",
+  // Freemium: Proposal Generator
+  tool_proposal_generator_freemium_enabled: "true",
+  tool_proposal_generator_freemium_monthly_limit: "1",
+  // Freemium: Invoice Generator
+  tool_invoice_generator_freemium_enabled: "true",
+  tool_invoice_generator_freemium_monthly_limit: "1",
 } as const;
 
 export type ToolSettingKey = keyof typeof TOOL_SETTING_DEFAULTS;
@@ -46,6 +56,21 @@ export type ToolSettings = {
     amount: number;
   };
   lowCreditWarningThreshold: number;
+  freemium: {
+    leadFinder: {
+      enabled: boolean;
+      dailyLimit: number;
+      resultCap: number;
+    };
+    proposalGenerator: {
+      enabled: boolean;
+      monthlyLimit: number;
+    };
+    invoiceGenerator: {
+      enabled: boolean;
+      monthlyLimit: number;
+    };
+  };
 };
 
 export const TOOL_SETTING_KEYS = Object.keys(TOOL_SETTING_DEFAULTS) as ToolSettingKey[];
@@ -130,8 +155,46 @@ export function parseToolSettings(values: Record<ToolSettingKey, string>): ToolS
       values.tool_low_credit_warning_threshold,
       Number(TOOL_SETTING_DEFAULTS.tool_low_credit_warning_threshold),
     ),
+    freemium: {
+      leadFinder: {
+        enabled: parseBoolean(values.tool_lead_finder_freemium_enabled),
+        dailyLimit: parsePositiveInt(
+          values.tool_lead_finder_freemium_daily_limit,
+          Number(TOOL_SETTING_DEFAULTS.tool_lead_finder_freemium_daily_limit),
+          1,
+        ),
+        resultCap: parsePositiveInt(
+          values.tool_lead_finder_freemium_result_cap,
+          Number(TOOL_SETTING_DEFAULTS.tool_lead_finder_freemium_result_cap),
+          1,
+        ),
+      },
+      proposalGenerator: {
+        enabled: parseBoolean(values.tool_proposal_generator_freemium_enabled),
+        monthlyLimit: parsePositiveInt(
+          values.tool_proposal_generator_freemium_monthly_limit,
+          Number(TOOL_SETTING_DEFAULTS.tool_proposal_generator_freemium_monthly_limit),
+          1,
+        ),
+      },
+      invoiceGenerator: {
+        enabled: parseBoolean(values.tool_invoice_generator_freemium_enabled),
+        monthlyLimit: parsePositiveInt(
+          values.tool_invoice_generator_freemium_monthly_limit,
+          Number(TOOL_SETTING_DEFAULTS.tool_invoice_generator_freemium_monthly_limit),
+          1,
+        ),
+      },
+    },
   };
 }
+
+const FREEMIUM_MIN_ONE_KEYS: ReadonlyArray<ToolSettingKey> = [
+  "tool_lead_finder_freemium_daily_limit",
+  "tool_lead_finder_freemium_result_cap",
+  "tool_proposal_generator_freemium_monthly_limit",
+  "tool_invoice_generator_freemium_monthly_limit",
+];
 
 export function normalizeToolSettingValue(key: ToolSettingKey, value: unknown) {
   if (key.endsWith("_enabled") || key === "tool_invoice_generator_default_include_tax") {
@@ -144,16 +207,25 @@ export function normalizeToolSettingValue(key: ToolSettingKey, value: unknown) {
   }
 
   const parsed = Number.parseInt(String(value ?? ""), 10);
-  const min = key === "tool_invoice_generator_default_due_days" ? 1 : 0;
+  const min =
+    key === "tool_invoice_generator_default_due_days" ||
+    FREEMIUM_MIN_ONE_KEYS.includes(key)
+      ? 1
+      : 0;
   if (!Number.isFinite(parsed) || parsed < min) return TOOL_SETTING_DEFAULTS[key];
   return String(Math.min(parsed, 9999));
 }
 
 export async function getToolSettings(): Promise<ToolSettings> {
-  const rows = await prisma.siteSetting.findMany({
-    where: { key: { in: TOOL_SETTING_KEYS } },
-    select: { key: true, value: true },
-  });
+  try {
+    const rows = await prisma.siteSetting.findMany({
+      where: { key: { in: TOOL_SETTING_KEYS } },
+      select: { key: true, value: true },
+    });
 
-  return parseToolSettings(mergeToolSettingRows(rows));
+    return parseToolSettings(mergeToolSettingRows(rows));
+  } catch (err) {
+    console.error("[ToolSettings] Failed to load settings:", err);
+    return parseToolSettings({ ...TOOL_SETTING_DEFAULTS });
+  }
 }

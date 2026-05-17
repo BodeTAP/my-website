@@ -825,3 +825,17 @@ model AiUsageLog {
   @@index([createdAt])
   @@map("ai_usage_logs")
 }
+
+// ─── Freemium Tools ───────────────────────────────────────────────────────────
+
+model AnonymousToolUsage {
+  id        String   @id @default(cuid())
+  ipHash    String   @map("ip_hash")
+  tool      String
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tool, createdAt])
+  @@index([ipHash])
+  @@map("anonymous_tool_usage")
+}
