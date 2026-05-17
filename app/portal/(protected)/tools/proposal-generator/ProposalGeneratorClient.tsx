@@ -212,7 +212,6 @@ export default function ProposalGeneratorClient({
   const [historyPage, setHistoryPage] = useState(1);
   const [pdfPreviewVersion, setPdfPreviewVersion] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [previewing, setPreviewing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingMeta, setSavingMeta] = useState(false);
   const [savingDesign, setSavingDesign] = useState(false);
@@ -392,46 +391,6 @@ export default function ProposalGeneratorClient({
       setError((err as Error).message);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const previewProposalPdf = async () => {
-    if (!selectedTemplate) return;
-    setPreviewing(true);
-    setError("");
-
-    try {
-      const payloadInput = {
-        ...formValues,
-        prospectName: formValues.prospectName ?? "",
-        businessName: formValues.businessName ?? "",
-        whatsapp: formValues.whatsapp ?? "",
-        validUntil: formValues.validUntil ?? "",
-        notes: formValues.notes ?? "",
-      };
-      const res = await fetch("/api/portal/tools/proposal-generator/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templateId: selectedTemplate.id,
-          input: payloadInput,
-          design,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Gagal membuat preview");
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal membuat preview");
-    } finally {
-      setPreviewing(false);
     }
   };
 
@@ -777,24 +736,6 @@ export default function ProposalGeneratorClient({
             )}
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                type="button"
-                disabled={!selectedTemplate || previewing}
-                onClick={previewProposalPdf}
-                className="h-12 rounded-xl border border-white/10 bg-white/10 px-6 font-bold text-white hover:bg-white/15 disabled:opacity-50"
-              >
-                {previewing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Preview...
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-4 h-4 mr-2" />
-                    Preview PDF
-                  </>
-                )}
-              </Button>
               <Button
                 type="button"
                 disabled={!selectedTemplate || !canGenerate || loading}
