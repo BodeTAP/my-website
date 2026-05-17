@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { parseInvoiceDesign } from "@/lib/invoiceDesign";
 import { prisma } from "@/lib/prisma";
 import InvoiceDetailClient, { type InvoiceDetailView } from "./InvoiceDetailClient";
 
@@ -64,6 +65,7 @@ export default async function PortalInvoiceDetailPage({ params }: Params) {
         notes: invoice.notes ?? "",
         footer: invoice.footer ?? "",
         status: invoice.status,
+        design: parseInvoiceDesign(invoice.design),
         createdAt: invoice.createdAt.toISOString(),
       }}
     />

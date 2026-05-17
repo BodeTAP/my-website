@@ -3,13 +3,28 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Copy, Download, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Copy, Download, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type LineItem = {
   description: string;
   quantity: number;
   price: number;
+};
+
+export type InvoiceDesign = {
+  logoUrl: string | null;
+  primaryColor: string;
+  accentColor: string;
+  fontStyle: "sans" | "serif" | "mono";
+  layout: "corporate" | "minimal" | "modern" | "premium";
+  logoPosition: "left" | "center" | "right";
+  showLogo: boolean;
+  showInvoiceNo: boolean;
+  showDueDate: boolean;
+  showSender: boolean;
+  showRecipient: boolean;
+  showFooter: boolean;
 };
 
 export type InvoiceDetailView = {
@@ -32,6 +47,7 @@ export type InvoiceDetailView = {
   notes: string;
   footer: string;
   status: string;
+  design: InvoiceDesign;
   createdAt: string;
 };
 
@@ -42,46 +58,48 @@ const STATUS_OPTIONS = [
   { value: "VOID", label: "Void" },
 ];
 
+const STATUS_STYLE: Record<string, string> = {
+  DRAFT: "border-white/10 bg-white/5 text-blue-100/70",
+  SENT: "border-blue-500/25 bg-blue-500/10 text-blue-200",
+  PAID: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200",
+  VOID: "border-red-500/25 bg-red-500/10 text-red-200",
+};
+
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 }
 
-function moneyInput(value: number) {
-  return value > 0 ? value.toLocaleString("id-ID") : "";
+function fmtDate(value: string) {
+  if (!value) return "-";
+  try {
+    return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(value));
+  } catch {
+    return "-";
+  }
 }
 
-function parseMoney(value: string) {
-  return Number.parseInt(value.replace(/\D/g, "") || "0", 10);
-}
-
-export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoice: InvoiceDetailView }) {
+export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetailView }) {
   const router = useRouter();
-  const [invoice, setInvoice] = useState(initialInvoice);
-  const [lineItems, setLineItems] = useState<LineItem[]>(initialInvoice.lineItems);
-  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState(invoice.status);
+  const [savingStatus, setSavingStatus] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const subtotal = useMemo(
-    () => lineItems.reduce((sum, item) => sum + Math.round((Number(item.quantity) || 0) * (Number(item.price) || 0)), 0),
-    [lineItems],
+    () => invoice.lineItems.reduce((sum, item) => sum + Math.round((item.quantity || 0) * (item.price || 0)), 0),
+    [invoice.lineItems],
   );
   const taxableAmount = Math.max(0, subtotal - invoice.discount);
   const taxAmount = invoice.includeTax ? Math.round(taxableAmount * 0.11) : 0;
   const total = taxableAmount + taxAmount;
 
-  function updateInvoice(key: keyof InvoiceDetailView, value: string | number | boolean) {
-    setInvoice((current) => ({ ...current, [key]: value }));
-  }
+  const design = invoice.design;
 
-  function updateItem(index: number, patch: Partial<LineItem>) {
-    setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
-  }
-
-  async function saveInvoice() {
-    setSaving(true);
+  async function updateStatus(newStatus: string) {
+    setStatus(newStatus);
+    setSavingStatus(true);
     setError("");
     setMessage("");
 
@@ -89,24 +107,22 @@ export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoi
       const res = await fetch(`/api/portal/tools/invoice-generator/${invoice.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...invoice, lineItems }),
+        body: JSON.stringify({ status: newStatus }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan invoice");
-
-      setMessage("Invoice berhasil diperbarui.");
+      if (!res.ok) throw new Error("Gagal mengubah status");
+      setMessage("Status berhasil diperbarui.");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menyimpan invoice");
+      setError(err instanceof Error ? err.message : "Gagal mengubah status");
+      setStatus(invoice.status);
     } finally {
-      setSaving(false);
+      setSavingStatus(false);
     }
   }
 
   async function duplicateInvoice() {
     setDuplicating(true);
     setError("");
-    setMessage("");
 
     try {
       const res = await fetch(`/api/portal/tools/invoice-generator/${invoice.id}/duplicate`, { method: "POST" });
@@ -121,14 +137,13 @@ export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoi
   }
 
   async function deleteInvoice() {
-    if (!window.confirm("Hapus invoice ini?")) return;
+    if (!window.confirm("Hapus invoice ini? Tindakan ini tidak bisa dibatalkan.")) return;
     setDeleting(true);
     setError("");
 
     try {
       const res = await fetch(`/api/portal/tools/invoice-generator/${invoice.id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Gagal menghapus invoice");
+      if (!res.ok) throw new Error("Gagal menghapus invoice");
       router.push("/portal/tools/invoice-generator");
       router.refresh();
     } catch (err) {
@@ -139,24 +154,46 @@ export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoi
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      {/* Header */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <Link href="/portal/tools/invoice-generator" className="inline-flex items-center gap-2 text-sm text-blue-200/55 hover:text-blue-200">
+          <Link href="/portal/tools/invoice-generator" className="inline-flex items-center gap-2 text-sm text-blue-200/55 hover:text-blue-200 mb-3">
             <ArrowLeft className="h-4 w-4" />
             Invoice Generator
           </Link>
-          <h1 className="mt-4 text-2xl font-black text-white">{invoice.invoiceNo}</h1>
-          <p className="mt-1 text-sm text-blue-200/45">Edit detail, status manual, duplikasi, atau unduh PDF.</p>
+          <h1 className="text-2xl font-black text-white">{invoice.invoiceNo}</h1>
+          <p className="mt-1 text-sm text-blue-200/45">{invoice.title} — {fmtDate(invoice.issueDate)}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <a href={`/api/portal/tools/invoice-generator/${invoice.id}/pdf`} target="_blank" className="inline-flex h-10 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 text-sm font-black text-emerald-200 hover:bg-emerald-500/15">
-            <Download className="mr-2 h-4 w-4" />
-            PDF
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Status */}
+          <select
+            value={status}
+            onChange={(e) => updateStatus(e.target.value)}
+            disabled={savingStatus}
+            className={`h-10 rounded-xl border px-3 text-sm font-black outline-none ${STATUS_STYLE[status] ?? STATUS_STYLE.DRAFT}`}
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-[#07111f] text-white">{opt.label}</option>
+            ))}
+          </select>
+          {/* Download */}
+          <a
+            href={`/api/portal/tools/invoice-generator/${invoice.id}/pdf`}
+            target="_blank"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 text-sm font-black text-white transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Download PDF
           </a>
-          <Button type="button" onClick={duplicateInvoice} disabled={duplicating} className="h-10 rounded-xl bg-white/10 text-white hover:bg-white/15">
+          {/* Duplicate */}
+          <Button type="button" onClick={duplicateInvoice} disabled={duplicating} className="h-10 rounded-xl border border-white/10 bg-white/10 text-white hover:bg-white/15">
             {duplicating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Copy className="mr-2 h-4 w-4" />}
             Duplikasi
           </Button>
+          {/* Delete */}
+          <button type="button" onClick={deleteInvoice} disabled={deleting} className="inline-flex h-10 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 px-3 text-sm font-black text-red-200 hover:bg-red-500/15 disabled:opacity-50">
+            {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
@@ -166,137 +203,215 @@ export default function InvoiceDetailClient({ invoice: initialInvoice }: { invoi
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Judul" value={invoice.title} onChange={(value) => updateInvoice("title", value)} />
-            <label className="block">
-              <span className="text-xs font-black uppercase tracking-widest text-blue-200/40">Status</span>
-              <select value={invoice.status} onChange={(event) => updateInvoice("status", event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-blue-500/45">
-                {STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} className="bg-[#07111f] text-white" value={status.value}>{status.label}</option>
-                ))}
-              </select>
-            </label>
-            <Field label="Tanggal Invoice" type="date" value={invoice.issueDate} onChange={(value) => updateInvoice("issueDate", value)} />
-            <Field label="Jatuh Tempo" type="date" value={invoice.dueDate} onChange={(value) => updateInvoice("dueDate", value)} />
-            <Field label="Nama Penerima" value={invoice.billToName} onChange={(value) => updateInvoice("billToName", value)} />
-            <Field label="Email Penerima" value={invoice.billToEmail} onChange={(value) => updateInvoice("billToEmail", value)} />
-            <Field label="Telepon Penerima" value={invoice.billToPhone} onChange={(value) => updateInvoice("billToPhone", value)} />
-            <Field label="Nama Pengirim" value={invoice.fromName} onChange={(value) => updateInvoice("fromName", value)} />
-          </div>
-
-          <TextArea label="Alamat Penerima" value={invoice.billToAddress} onChange={(value) => updateInvoice("billToAddress", value)} />
-          <TextArea label="Alamat Pengirim" value={invoice.fromAddress} onChange={(value) => updateInvoice("fromAddress", value)} />
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="font-black text-white">Rincian Item</h2>
-              <button type="button" onClick={() => setLineItems((current) => [...current, { description: "", quantity: 1, price: 0 }])} className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-1.5 text-xs font-black text-blue-200 hover:bg-blue-500/15">
-                <Plus className="h-3.5 w-3.5" />
-                Item
-              </button>
-            </div>
-            {lineItems.map((item, index) => (
-              <div key={index} className="grid gap-2 sm:grid-cols-[1fr_90px_150px_36px]">
-                <input value={item.description} onChange={(event) => updateItem(index, { description: event.target.value })} placeholder="Deskripsi layanan" className="h-11 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
-                <input type="number" min={1} step={0.01} value={item.quantity} onChange={(event) => updateItem(index, { quantity: Number(event.target.value) })} className="h-11 rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-blue-200/35">Rp</span>
-                  <input value={moneyInput(item.price)} onChange={(event) => updateItem(index, { price: parseMoney(event.target.value) })} className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-right text-sm text-white outline-none focus:border-blue-500/45" />
-                </div>
-                <button type="button" onClick={() => setLineItems((current) => current.length === 1 ? current : current.filter((_item, itemIndex) => itemIndex !== index))} disabled={lineItems.length === 1} className="flex h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-red-300/70 hover:bg-red-500/10 disabled:opacity-35">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <MoneyField label="Diskon" value={invoice.discount} onChange={(value) => updateInvoice("discount", value)} />
-            <Toggle label={`Sertakan PPN 11% (${formatRupiah(taxAmount)})`} checked={invoice.includeTax} onChange={(checked) => updateInvoice("includeTax", checked)} />
-          </div>
-
-          <TextArea label="Catatan" value={invoice.notes} onChange={(value) => updateInvoice("notes", value)} />
-          <TextArea label="Footer" value={invoice.footer} onChange={(value) => updateInvoice("footer", value)} />
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Button type="button" onClick={saveInvoice} disabled={saving} className="h-12 rounded-xl bg-blue-600 px-6 font-black text-white hover:bg-blue-500">
-              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Simpan Perubahan
-            </Button>
-            <button type="button" onClick={deleteInvoice} disabled={deleting} className="inline-flex h-12 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 px-5 text-sm font-black text-red-200 hover:bg-red-500/15 disabled:opacity-50">
-              {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-              Hapus Invoice
-            </button>
-          </div>
-        </section>
-
-        <aside className="rounded-2xl border border-white/10 bg-[#071225] p-5 h-fit space-y-5">
-          <div>
-            <p className="text-xs font-black uppercase tracking-widest text-blue-200/35">Ringkasan</p>
-            <h2 className="mt-2 text-2xl font-black text-white">{invoice.title}</h2>
-            <p className="mt-1 text-sm text-blue-200/45">Untuk {invoice.billToName || "Nama penerima"}</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3 text-sm">
-            <SummaryRow label="Subtotal" value={formatRupiah(subtotal)} />
-            <SummaryRow label="Diskon" value={`-${formatRupiah(invoice.discount)}`} />
-            <SummaryRow label="PPN 11%" value={invoice.includeTax ? formatRupiah(taxAmount) : "Tidak disertakan"} />
-            <div className="border-t border-white/10 pt-3 flex items-center justify-between">
-              <span className="text-blue-200/55 font-bold">Total</span>
-              <span className="text-xl font-black text-white">{formatRupiah(total)}</span>
-            </div>
-          </div>
-        </aside>
+      {/* Invoice Preview (read-only, full width) */}
+      <div className="rounded-2xl border border-white/10 bg-[#071225] p-5">
+        <InvoiceReadOnlyPreview
+          design={design}
+          fromName={invoice.fromName}
+          fromEmail={invoice.fromEmail}
+          fromPhone={invoice.fromPhone}
+          invoiceNo={invoice.invoiceNo}
+          billToName={invoice.billToName}
+          billToEmail={invoice.billToEmail}
+          billToPhone={invoice.billToPhone}
+          billToAddress={invoice.billToAddress}
+          issueDate={invoice.issueDate}
+          dueDate={invoice.dueDate}
+          lineItems={invoice.lineItems}
+          subtotal={subtotal}
+          discount={invoice.discount}
+          includeTax={invoice.includeTax}
+          taxAmount={taxAmount}
+          total={total}
+          notes={invoice.notes}
+          footer={invoice.footer}
+        />
       </div>
     </div>
   );
 }
 
-function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-black uppercase tracking-widest text-blue-200/40">{label}</span>
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-blue-500/45" />
-    </label>
-  );
-}
+// ─── Read-only Invoice Preview (matches PDF output) ──────────────────────────
 
-function MoneyField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+type PreviewProps = {
+  design: InvoiceDesign;
+  fromName: string;
+  fromEmail: string;
+  fromPhone: string;
+  invoiceNo: string;
+  billToName: string;
+  billToEmail: string;
+  billToPhone: string;
+  billToAddress: string;
+  issueDate: string;
+  dueDate: string;
+  lineItems: LineItem[];
+  subtotal: number;
+  discount: number;
+  includeTax: boolean;
+  taxAmount: number;
+  total: number;
+  notes: string;
+  footer: string;
+};
+
+function InvoiceReadOnlyPreview({
+  design,
+  fromName,
+  fromEmail,
+  fromPhone,
+  invoiceNo,
+  billToName,
+  billToEmail,
+  billToPhone,
+  billToAddress,
+  issueDate,
+  dueDate,
+  lineItems,
+  subtotal,
+  discount,
+  includeTax,
+  taxAmount,
+  total,
+  notes,
+  footer,
+}: PreviewProps) {
+  const isMinimal = design.layout === "minimal";
+  const isPremium = design.layout === "premium";
+  const isModern = design.layout === "modern";
+  const headerBg = isMinimal ? "#ffffff" : design.primaryColor;
+  const headerTextColor = isMinimal ? "#0f172a" : "#ffffff";
+  const headerMutedColor = isMinimal ? "#64748b" : "#bfdbfe";
+  const fontFamily = design.fontStyle === "serif" ? "Georgia, serif" : design.fontStyle === "mono" ? "'Courier New', monospace" : "system-ui, -apple-system, sans-serif";
+
   return (
-    <label className="block">
-      <span className="text-xs font-black uppercase tracking-widest text-blue-200/40">{label}</span>
-      <div className="relative mt-2">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-blue-200/35">Rp</span>
-        <input value={moneyInput(value)} onChange={(event) => onChange(parseMoney(event.target.value))} className="h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 text-right text-sm text-white outline-none focus:border-blue-500/45" />
+    <div className="mx-auto max-w-2xl rounded-xl overflow-hidden border border-white/10 shadow-xl" style={{ fontFamily }}>
+      <div className="bg-white text-slate-900 relative">
+        {/* Modern side accent */}
+        {isModern && <div className="absolute left-0 top-0 bottom-0 w-3" style={{ backgroundColor: design.accentColor }} />}
+
+        {/* Header */}
+        <div className="relative px-8 py-6" style={{ backgroundColor: headerBg, borderBottom: isMinimal ? `3px solid ${design.primaryColor}` : "none" }}>
+          {isPremium && <div className="absolute top-0 left-0 right-0 h-2" style={{ backgroundColor: design.accentColor }} />}
+          <div className="flex items-start justify-between">
+            <div>
+              {design.showLogo && design.logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={design.logoUrl} alt="Logo" className="h-8 w-auto mb-2 object-contain" />
+              )}
+              {design.showSender && (
+                <>
+                  <p className="font-bold text-lg" style={{ color: headerTextColor }}>{fromName}</p>
+                  {fromEmail && <p className="text-xs mt-0.5" style={{ color: headerMutedColor }}>{fromEmail}</p>}
+                  {fromPhone && <p className="text-xs" style={{ color: headerMutedColor }}>{fromPhone}</p>}
+                </>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-3xl" style={{ color: headerTextColor }}>INVOICE</p>
+              {design.showInvoiceNo && <p className="text-xs mt-1" style={{ color: headerMutedColor }}>{invoiceNo}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-8 py-6 space-y-5">
+          {/* Bill To + Dates */}
+          <div className="flex justify-between gap-6">
+            {design.showRecipient && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Ditagihkan Kepada</p>
+                <p className="font-bold text-base mt-1">{billToName}</p>
+                {billToEmail && <p className="text-xs text-slate-500">{billToEmail}</p>}
+                {billToPhone && <p className="text-xs text-slate-500">{billToPhone}</p>}
+                {billToAddress && <p className="text-xs text-slate-500 max-w-[240px]">{billToAddress}</p>}
+              </div>
+            )}
+            <div className="text-right">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Tanggal Invoice</p>
+              <p className="font-bold text-sm mt-1">{fmtDate(issueDate)}</p>
+              {design.showDueDate && (
+                <>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-3">Jatuh Tempo</p>
+                  <p className="font-bold text-sm mt-1">{fmtDate(dueDate)}</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Separator */}
+          <div className="border-t border-slate-200" />
+
+          {/* Table */}
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200" style={{ backgroundColor: isMinimal ? "#f8fafc" : "#f1f5f9" }}>
+                <th className="text-left py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Deskripsi</th>
+                <th className="text-center py-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 w-16">Qty</th>
+                <th className="text-right py-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 w-28">Harga</th>
+                <th className="text-right py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 w-32">Jumlah</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lineItems.map((item, idx) => {
+                const amount = Math.round((item.quantity || 1) * (item.price || 0));
+                return (
+                  <tr key={idx} className="border-b border-slate-100">
+                    <td className="py-2.5 px-3 font-medium">{item.description}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-500">{item.quantity}</td>
+                    <td className="py-2.5 px-2 text-right text-slate-500">{formatRupiah(item.price)}</td>
+                    <td className="py-2.5 px-3 text-right font-bold">{formatRupiah(amount)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div className="flex justify-end">
+            <div className="w-64 space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Subtotal</span>
+                <span>{formatRupiah(subtotal)}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Diskon</span>
+                  <span>-{formatRupiah(discount)}</span>
+                </div>
+              )}
+              {includeTax && taxAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">PPN 11%</span>
+                  <span>{formatRupiah(taxAmount)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between px-4 py-3 rounded-lg mt-2" style={{ backgroundColor: isPremium ? design.accentColor : design.primaryColor }}>
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#bfdbfe" }}>Total</span>
+                <span className="text-xl font-black text-white">{formatRupiah(total)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {notes && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Catatan</p>
+              <p className="text-sm text-slate-700 mt-1 whitespace-pre-line">{notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {design.showFooter && (
+          <div className="px-8 py-3 border-t border-slate-200">
+            <div className="flex justify-between text-xs text-slate-400">
+              <span>{footer || "Dokumen dibuat otomatis."}</span>
+              <span>Halaman 1 dari 1</span>
+            </div>
+          </div>
+        )}
       </div>
-    </label>
-  );
-}
-
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {
-  return (
-    <label className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-      <span className="text-sm font-bold text-blue-100/80">{label}</span>
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-5 w-5 accent-blue-500" />
-    </label>
-  );
-}
-
-function TextArea({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-black uppercase tracking-widest text-blue-200/40">{label}</span>
-      <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={3} className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white outline-none focus:border-blue-500/45" />
-    </label>
-  );
-}
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-blue-200/45">{label}</span>
-      <span className="font-bold text-blue-100">{value}</span>
     </div>
   );
 }
