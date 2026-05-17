@@ -142,7 +142,22 @@ function asJson(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
+let defaultTemplatesSeeded = false;
+
 export async function ensureDefaultProposalTemplates() {
+  if (defaultTemplatesSeeded) return;
+
+  // Quick check: if the first default template already exists, skip the full loop
+  const existing = await prisma.proposalTemplate.findFirst({
+    where: { clientId: null, isDefault: true, isActive: true, name: DEFAULT_TEMPLATES[0].name },
+    select: { id: true },
+  });
+
+  if (existing) {
+    defaultTemplatesSeeded = true;
+    return;
+  }
+
   await prisma.proposalTemplate.updateMany({
     where: {
       clientId: null,
@@ -153,7 +168,7 @@ export async function ensureDefaultProposalTemplates() {
   });
 
   for (const template of DEFAULT_TEMPLATES) {
-    const existing = await prisma.proposalTemplate.findFirst({
+    const found = await prisma.proposalTemplate.findFirst({
       where: { clientId: null, isDefault: true, name: template.name },
       select: { id: true },
     });
@@ -168,10 +183,12 @@ export async function ensureDefaultProposalTemplates() {
       isActive: true,
     };
 
-    if (!existing) {
+    if (!found) {
       await prisma.proposalTemplate.create({ data });
     }
   }
+
+  defaultTemplatesSeeded = true;
 }
 
 export async function getVisibleProposalTemplates(clientId: string) {
