@@ -68,10 +68,10 @@ async function getClient() {
   return { status: 200 as const, client: user.client };
 }
 
-async function generateInvoiceNo(clientId: string) {
+async function generateInvoiceNo(_clientId: string) {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const count = await prisma.generatedInvoice.count({ where: { clientId } });
-  return `IG-${date}-${String(count + 1).padStart(3, "0")}`;
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `IG-${date}-${random}`;
 }
 
 export async function GET() {
