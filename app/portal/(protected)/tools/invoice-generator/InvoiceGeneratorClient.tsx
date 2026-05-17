@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useConfirm } from "@/hooks/useConfirm";
 import { ArrowLeft, Brush, Coins, Download, FileText, History, ImageIcon, Loader2, Plus, ReceiptText, Save, Search, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -115,6 +116,7 @@ export default function InvoiceGeneratorClient({
   initialInvoices: GeneratedInvoiceView[];
 }) {
   const router = useRouter();
+  const { confirm, node: confirmDialog } = useConfirm();
   const [balance, setBalance] = useState(initialBalance);
   const [invoices, setInvoices] = useState(initialInvoices);
   const [activeTab, setActiveTab] = useState<"create" | "design" | "history">("create");
@@ -208,12 +210,13 @@ export default function InvoiceGeneratorClient({
     }
 
     // Konfirmasi sebelum generate
-    let confirmMsg = `Buat invoice untuk "${form.billToName}"?\n\n`;
-    confirmMsg += `Total: ${formatRupiah(total)}\n`;
-    confirmMsg += `Item: ${validItems.length} item\n`;
-    confirmMsg += `Kredit yang akan dipotong: ${invoiceCost} kredit.\n\nLanjutkan?`;
+    const description = `Total: ${formatRupiah(total)}\nItem: ${validItems.length} item\nKredit yang dipotong: ${invoiceCost} kredit.`;
 
-    if (!window.confirm(confirmMsg)) return;
+    const ok = await confirm(
+      `Buat invoice untuk "${form.billToName}"?`,
+      { description, confirmLabel: "Buat Invoice", variant: "warning" },
+    );
+    if (!ok) return;
 
     setLoading(true);
     setError("");
@@ -307,6 +310,8 @@ export default function InvoiceGeneratorClient({
   }
 
   return (
+    <>
+    {confirmDialog}
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div className="space-y-3">
@@ -688,6 +693,7 @@ export default function InvoiceGeneratorClient({
         </section>
       )}
     </div>
+    </>
   );
 }
 

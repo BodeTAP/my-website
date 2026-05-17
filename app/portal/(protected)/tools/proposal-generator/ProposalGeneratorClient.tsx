@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useConfirm } from "@/hooks/useConfirm";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -190,6 +191,7 @@ export default function ProposalGeneratorClient({
   proposalCost: number;
 }) {
   const router = useRouter();
+  const { confirm, node: confirmDialog } = useConfirm();
   const [balance, setBalance] = useState(initialBalance);
   const [templates, setTemplates] = useState(initialTemplates);
   const [proposals, setProposals] = useState(initialProposals);
@@ -418,14 +420,17 @@ export default function ProposalGeneratorClient({
       (v) => !(formValues[v.key] ?? "").trim()
     );
 
-    let confirmMsg = `Generate proposal dengan template "${selectedTemplate.name}"?\n\n`;
-    confirmMsg += `Data terisi:\n${filledFields.map((f) => `  ✓ ${f}`).join("\n")}\n`;
+    let description = `Data terisi: ${filledFields.join(", ")}`;
     if (emptyVars.length > 0) {
-      confirmMsg += `\nField kosong (akan tampil kosong di proposal):\n${emptyVars.map((v) => `  ⚠ ${v.label}`).join("\n")}\n`;
+      description += `\n\nField kosong: ${emptyVars.map((v) => v.label).join(", ")}`;
     }
-    confirmMsg += `\nKredit yang akan dipotong: ${proposalCost} kredit.\nLanjutkan?`;
+    description += `\n\nKredit yang dipotong: ${proposalCost} kredit.`;
 
-    if (!window.confirm(confirmMsg)) return;
+    const ok = await confirm(
+      `Generate proposal "${selectedTemplate.name}"?`,
+      { description, confirmLabel: "Generate", variant: "warning" },
+    );
+    if (!ok) return;
 
     setLoading(true);
     setError("");
@@ -574,6 +579,8 @@ export default function ProposalGeneratorClient({
   };
 
   return (
+    <>
+    {confirmDialog}
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div className="space-y-3">
@@ -1446,5 +1453,6 @@ export default function ProposalGeneratorClient({
         </section>
       )}
     </div>
+    </>
   );
 }
