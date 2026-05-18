@@ -10,6 +10,12 @@ type PaywallGateProps = {
   onClose: () => void;
   toolName: string;
   signupBonus?: number;
+  /**
+   * Optional concrete breakdown of what the welcome credits buy.
+   * Example: "3 proposal + 5 invoice + 5x cari leads".
+   * If empty, the bonus chip falls back to "X kredit gratis".
+   */
+  signupBonusBreakdown?: string;
 };
 
 const benefits = [
@@ -24,6 +30,7 @@ export default function PaywallGate({
   onClose,
   toolName,
   signupBonus = 15,
+  signupBonusBreakdown,
 }: PaywallGateProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -73,13 +80,20 @@ export default function PaywallGate({
         </p>
 
         {/* Signup bonus highlight */}
-        <div className="flex items-center gap-2.5 rounded-xl border border-teal-400/20 bg-teal-400/[0.06] px-4 py-3 mb-6">
-          <Sparkles className="w-5 h-5 text-teal-400 shrink-0" />
-          <p className="text-sm text-teal-100 font-medium">
-            Akun baru dapat{" "}
-            <span className="font-bold text-teal-400">{signupBonus} kredit</span>{" "}
-            gratis
-          </p>
+        <div className="rounded-xl border border-teal-400/20 bg-teal-400/[0.06] px-4 py-3 mb-6">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-5 h-5 text-teal-400 shrink-0" />
+            <p className="text-sm text-teal-100 font-medium">
+              Akun baru dapat{" "}
+              <span className="font-bold text-teal-400">{signupBonus} kredit</span>{" "}
+              gratis
+            </p>
+          </div>
+          {signupBonusBreakdown && (
+            <p className="text-xs text-teal-100/70 mt-1.5 ml-7">
+              Cukup untuk {signupBonusBreakdown}
+            </p>
+          )}
         </div>
 
         {/* Benefits list */}

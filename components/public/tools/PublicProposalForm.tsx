@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { FileText, Download, Loader2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { FileText, Download, Loader2, AlertCircle, MessageCircle } from "lucide-react";
 import PaywallGate from "@/components/public/PaywallGate";
+import EmailCaptureModal from "@/components/public/tools/EmailCaptureModal";
+import { buildProposalWaMessage, buildWaShareLink } from "@/lib/waShare";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -26,6 +28,7 @@ type LocalUsage = {
 
 const STORAGE_KEY = "mfweb_freemium_proposal_generator";
 const MONTHLY_LIMIT = 1;
+const DEFAULT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -53,7 +56,6 @@ function isLocalLimitReached(): boolean {
   const usage = getLocalUsage();
   if (!usage) return false;
   if (Date.now() > usage.resetAt) {
-    // Window expired, reset
     localStorage.removeItem(STORAGE_KEY);
     return false;
   }
@@ -64,76 +66,28 @@ function formatRupiah(value: number): string {
   return `Rp ${value.toLocaleString("id-ID")}`;
 }
 
-// ─── PDF Generation ──────────────────────────────────────────────────────────
-
-function generateProposalHTML(proposal: ProposalResult): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${proposal.title}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1a1a2e; position: relative; }
-    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 48px; color: rgba(0,0,0,0.03); white-space: nowrap; pointer-events: none; z-index: 1000; }
-    .header { border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-    .header h1 { font-size: 24px; color: #1e40af; margin-bottom: 8px; }
-    .header p { color: #64748b; font-size: 14px; }
-    .meta { display: flex; justify-content: space-between; margin-bottom: 30px; }
-    .meta-item { font-size: 13px; color: #475569; }
-    .meta-item strong { display: block; font-size: 15px; color: #1a1a2e; margin-top: 4px; }
-    .section { margin-bottom: 24px; }
-    .section h2 { font-size: 16px; color: #1e40af; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
-    .section p { font-size: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap; }
-    .price-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0; }
-    .price-box .label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
-    .price-box .amount { font-size: 28px; font-weight: 700; color: #1e40af; }
-    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center; }
-    @media print { .watermark { position: fixed; } }
-  </style>
-</head>
-<body>
-  <div class="watermark">Dibuat dengan MFWEB - mfweb.maffisorp.id</div>
-  <div class="header">
-    <h1>${proposal.title}</h1>
-    <p>Dari: ${proposal.from}</p>
-  </div>
-  <div class="meta">
-    <div class="meta-item">Kepada<strong>${proposal.to}</strong></div>
-    <div class="meta-item">Tanggal<strong>${new Date(proposal.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</strong></div>
-    <div class="meta-item">Berlaku<strong>${proposal.validDays} hari</strong></div>
-  </div>
-  <div class="section">
-    <h2>Deskripsi Layanan</h2>
-    <p>${proposal.service}</p>
-  </div>
-  <div class="price-box">
-    <div class="label">Total Investasi</div>
-    <div class="amount">${proposal.priceFormatted}</div>
-  </div>
-  <div class="footer">
-    <p>Dokumen ini dibuat menggunakan MFWEB Proposal Generator (Free Tier)</p>
-  </div>
-</body>
-</html>`;
-}
-
-function downloadPDF(proposal: ProposalResult): void {
-  const html = generateProposalHTML(proposal);
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) return;
-  printWindow.document.write(html);
-  printWindow.document.close();
-  // Give the browser a moment to render before triggering print
-  setTimeout(() => {
-    printWindow.print();
-  }, 300);
+function formatResetCountdown(resetAt: number): string {
+  const ms = resetAt - Date.now();
+  if (ms <= 0) return "";
+  const days = Math.ceil(ms / (24 * 60 * 60 * 1000));
+  if (days >= 2) return `${days} hari lagi`;
+  const hours = Math.ceil(ms / (60 * 60 * 1000));
+  if (hours >= 2) return `${hours} jam lagi`;
+  const minutes = Math.max(1, Math.ceil(ms / (60 * 1000)));
+  return `${minutes} menit lagi`;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function PublicProposalForm() {
+type PublicProposalFormProps = {
+  welcomeCredits?: number;
+  welcomeBonusBreakdown?: string;
+};
+
+export default function PublicProposalForm({
+  welcomeCredits = 15,
+  welcomeBonusBreakdown,
+}: PublicProposalFormProps = {}) {
   const [prospectName, setProspectName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
@@ -142,8 +96,41 @@ export default function PublicProposalForm() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ProposalResult | null>(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [disabledNotice, setDisabledNotice] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // Track quota state in React state so we don't call Date.now() during render.
+  // We refresh on mount and after each submission/paywall trigger.
+  const [quotaState, setQuotaState] = useState<{ used: boolean; resetCountdown: string }>({
+    used: false,
+    resetCountdown: "",
+  });
+
+  const refreshQuotaState = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const usage = getLocalUsage();
+    if (!usage) {
+      setQuotaState({ used: false, resetCountdown: "" });
+      return;
+    }
+    const used = Date.now() < usage.resetAt && usage.count >= MONTHLY_LIMIT;
+    setQuotaState({
+      used,
+      resetCountdown: used ? formatResetCountdown(usage.resetAt) : "",
+    });
+  }, []);
+
+  useEffect(() => {
+    // Defer initial sync to next animation frame so the lint rule
+    // (react-hooks/set-state-in-effect) does not flag this as cascading.
+    const id = window.requestAnimationFrame(() => refreshQuotaState());
+    return () => window.cancelAnimationFrame(id);
+  }, [refreshQuotaState]);
+
+  const quotaUsed = quotaState.used;
+  const resetCountdown = quotaState.resetCountdown;
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -152,30 +139,16 @@ export default function PublicProposalForm() {
       setResult(null);
       setDisabledNotice(false);
 
-      // Client-side soft-limit check
       if (isLocalLimitReached()) {
         setPaywallOpen(true);
         return;
       }
 
-      // Validate
       const priceNum = Number(price);
-      if (!prospectName.trim()) {
-        setError("Nama prospek wajib diisi");
-        return;
-      }
-      if (!businessName.trim()) {
-        setError("Nama bisnis wajib diisi");
-        return;
-      }
-      if (!serviceDescription.trim()) {
-        setError("Deskripsi layanan wajib diisi");
-        return;
-      }
-      if (!price || isNaN(priceNum) || priceNum <= 0) {
-        setError("Harga harus berupa angka positif");
-        return;
-      }
+      if (!prospectName.trim()) return setError("Nama prospek wajib diisi");
+      if (!businessName.trim()) return setError("Nama bisnis wajib diisi");
+      if (!serviceDescription.trim()) return setError("Deskripsi layanan wajib diisi");
+      if (!price || isNaN(priceNum) || priceNum <= 0) return setError("Harga harus berupa angka positif");
 
       setLoading(true);
 
@@ -192,10 +165,11 @@ export default function PublicProposalForm() {
         });
 
         if (res.status === 429) {
-          // Rate limited — set localStorage and show paywall
-          const now = Date.now();
-          setLocalUsage({ count: MONTHLY_LIMIT, resetAt: now + 30 * 24 * 60 * 60 * 1000 });
+          const data = await res.json().catch(() => null);
+          const retryAfterMs: number = (data?.retryAfterMs as number) || DEFAULT_WINDOW_MS;
+          setLocalUsage({ count: MONTHLY_LIMIT, resetAt: Date.now() + retryAfterMs });
           setPaywallOpen(true);
+          refreshQuotaState();
           return;
         }
 
@@ -213,16 +187,15 @@ export default function PublicProposalForm() {
         const data = await res.json();
         setResult(data.proposal as ProposalResult);
 
-        // Update localStorage usage
-        const usage = getLocalUsage();
+        const existing = getLocalUsage();
         const now = Date.now();
-        if (usage && now < usage.resetAt) {
-          setLocalUsage({ count: usage.count + 1, resetAt: usage.resetAt });
+        if (existing && now < existing.resetAt) {
+          setLocalUsage({ count: existing.count + 1, resetAt: existing.resetAt });
         } else {
-          setLocalUsage({ count: 1, resetAt: now + 30 * 24 * 60 * 60 * 1000 });
+          setLocalUsage({ count: 1, resetAt: now + DEFAULT_WINDOW_MS });
         }
+        refreshQuotaState();
 
-        // Scroll to result
         setTimeout(() => {
           resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
@@ -232,8 +205,75 @@ export default function PublicProposalForm() {
         setLoading(false);
       }
     },
-    [prospectName, businessName, serviceDescription, price],
+    [prospectName, businessName, serviceDescription, price, refreshQuotaState],
   );
+
+  const triggerPdfDownload = useCallback(
+    async (email: string | null) => {
+      if (!result) return;
+      setDownloading(true);
+      try {
+        const res = await fetch("/api/tools/proposal-generator/pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prospectName: result.to,
+            businessName: result.from,
+            serviceDescription: result.service,
+            price: result.price,
+            validDays: result.validDays,
+            createdAt: result.createdAt,
+            email,
+          }),
+        });
+
+        if (res.status === 429) {
+          setError("Batas download PDF gratis tercapai. Coba lagi nanti atau daftar untuk akses penuh.");
+          return;
+        }
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          setError(data?.error || "Gagal generate PDF. Silakan coba lagi.");
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `proposal-${result.to.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 32) || "freemium"}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Revoke after a tick so Safari/iOS still has time to start the download
+        setTimeout(() => URL.revokeObjectURL(url), 2_000);
+      } catch {
+        setError("Gagal generate PDF. Periksa koneksi internet Anda.");
+      } finally {
+        setDownloading(false);
+        setEmailModalOpen(false);
+      }
+    },
+    [result],
+  );
+
+  const handleDownloadClick = useCallback(() => {
+    if (!result || downloading) return;
+    setEmailModalOpen(true);
+  }, [result, downloading]);
+
+  const handleWaShare = useCallback(() => {
+    if (!result) return;
+    const message = buildProposalWaMessage({
+      prospectName: result.to,
+      businessName: result.from,
+      price: result.price,
+      validDays: result.validDays,
+    });
+    const link = buildWaShareLink(message);
+    window.open(link, "_blank", "noopener,noreferrer");
+  }, [result]);
 
   return (
     <>
@@ -242,11 +282,27 @@ export default function PublicProposalForm() {
         <div className="mb-6 rounded-xl border border-teal-400/20 bg-teal-400/[0.06] px-4 py-3 flex items-center gap-2.5">
           <FileText className="w-5 h-5 text-teal-400 shrink-0" />
           <p className="text-sm text-teal-100 font-medium">
-            Gratis: 1 proposal per bulan (dengan watermark)
+            Gratis: 1 proposal per bulan (PDF dengan watermark)
           </p>
         </div>
 
-        {/* Disabled notice */}
+        {/* Quota used banner — surfaced before the user starts typing */}
+        {quotaUsed && (
+          <div className="mb-6 rounded-xl border border-amber-400/25 bg-amber-400/[0.08] px-4 py-3">
+            <p className="text-sm text-amber-100">
+              <strong className="font-bold text-amber-300">Kuota gratis bulan ini sudah dipakai.</strong>{" "}
+              {resetCountdown ? `Reset ${resetCountdown}, atau ` : ""}
+              <a
+                href="/portal/register"
+                className="text-amber-300 underline underline-offset-2 hover:text-amber-200"
+              >
+                daftar gratis
+              </a>{" "}
+              untuk lanjut sekarang.
+            </p>
+          </div>
+        )}
+
         {disabledNotice && (
           <div className="mb-6 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
@@ -263,7 +319,6 @@ export default function PublicProposalForm() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Prospect Name */}
             <div>
               <label htmlFor="pf-prospect" className="block text-sm font-medium text-blue-100/80 mb-1.5">
                 Nama Prospek
@@ -274,11 +329,11 @@ export default function PublicProposalForm() {
                 value={prospectName}
                 onChange={(e) => setProspectName(e.target.value)}
                 placeholder="PT Contoh Jaya"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors"
+                disabled={!!quotaUsed}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
-            {/* Business Name */}
             <div>
               <label htmlFor="pf-business" className="block text-sm font-medium text-blue-100/80 mb-1.5">
                 Nama Bisnis Anda
@@ -289,12 +344,12 @@ export default function PublicProposalForm() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="Studio Kreatif ABC"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors"
+                disabled={!!quotaUsed}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
-          {/* Service Description */}
           <div>
             <label htmlFor="pf-service" className="block text-sm font-medium text-blue-100/80 mb-1.5">
               Deskripsi Layanan
@@ -305,11 +360,11 @@ export default function PublicProposalForm() {
               onChange={(e) => setServiceDescription(e.target.value)}
               placeholder="Jelaskan layanan yang ditawarkan, scope pekerjaan, dan deliverables..."
               rows={4}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors resize-none"
+              disabled={!!quotaUsed}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
-          {/* Price */}
           <div>
             <label htmlFor="pf-price" className="block text-sm font-medium text-blue-100/80 mb-1.5">
               Harga (Rupiah)
@@ -324,7 +379,8 @@ export default function PublicProposalForm() {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="5000000"
-                className="w-full rounded-lg border border-white/10 bg-white/5 pl-10 pr-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                disabled={!!quotaUsed}
+                className="w-full rounded-lg border border-white/10 bg-white/5 pl-10 pr-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             {price && !isNaN(Number(price)) && Number(price) > 0 && (
@@ -332,7 +388,6 @@ export default function PublicProposalForm() {
             )}
           </div>
 
-          {/* Error */}
           {error && (
             <div className="rounded-lg border border-red-400/20 bg-red-400/[0.06] px-3.5 py-2.5 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
@@ -340,10 +395,9 @@ export default function PublicProposalForm() {
             </div>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !!quotaUsed}
             className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 text-sm font-semibold text-white transition-colors"
           >
             {loading ? (
@@ -358,20 +412,21 @@ export default function PublicProposalForm() {
               </>
             )}
           </button>
+
+          <p className="text-[11px] text-blue-200/35">
+            Data yang kamu input tidak disimpan. Hanya hitungan pemakaian (anonim) yang dicatat untuk batas kuota.
+          </p>
         </form>
 
         {/* Result Card */}
         {result && (
           <div ref={resultRef} className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
-            {/* Result Header */}
             <div className="border-b border-white/10 bg-blue-600/10 px-5 py-4">
               <h3 className="text-lg font-bold text-white">{result.title}</h3>
               <p className="text-sm text-blue-200/60 mt-0.5">Dari: {result.from}</p>
             </div>
 
-            {/* Result Body */}
             <div className="px-5 py-5 space-y-4">
-              {/* Meta row */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                   <p className="text-xs text-blue-200/40 uppercase tracking-wide">Kepada</p>
@@ -393,51 +448,75 @@ export default function PublicProposalForm() {
                 </div>
               </div>
 
-              {/* Service */}
               <div>
                 <p className="text-xs text-blue-200/40 uppercase tracking-wide mb-1">Layanan</p>
                 <p className="text-sm text-blue-100/80 whitespace-pre-wrap leading-relaxed">{result.service}</p>
               </div>
 
-              {/* Price */}
               <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.06] px-4 py-3 text-center">
                 <p className="text-xs text-blue-200/50 mb-0.5">Total Investasi</p>
                 <p className="text-xl font-bold text-blue-300">{result.priceFormatted}</p>
               </div>
 
-              {/* Watermark notice */}
               <div className="rounded-lg border border-amber-400/15 bg-amber-400/[0.04] px-3.5 py-2.5">
                 <p className="text-xs text-amber-200/70">
-                  ⚠️ PDF ini memiliki watermark. Daftar untuk versi tanpa watermark.
+                  PDF gratis menyertakan watermark MFWEB. Daftar untuk versi tanpa watermark dengan logo bisnis Anda.
                 </p>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="border-t border-white/10 px-5 py-4 flex flex-col sm:flex-row gap-3">
+            <div className="border-t border-white/10 px-5 py-4 grid gap-3 sm:grid-cols-2">
               <button
-                onClick={() => downloadPDF(result)}
-                className="flex items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors"
+                onClick={handleDownloadClick}
+                disabled={downloading}
+                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 text-sm font-semibold text-white transition-colors"
               >
-                <Download className="w-4 h-4" />
-                Download PDF (dengan watermark)
+                {downloading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Menyiapkan PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                  </>
+                )}
               </button>
+              <button
+                onClick={handleWaShare}
+                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Kirim via WhatsApp
+              </button>
+            </div>
+
+            <div className="border-t border-white/10 px-5 py-3 text-center">
               <a
                 href="/portal/register"
-                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-colors"
+                className="text-xs text-blue-300 hover:text-blue-200 underline underline-offset-2"
               >
-                Daftar untuk versi tanpa watermark
+                Daftar untuk versi tanpa watermark dan brand kit Anda sendiri →
               </a>
             </div>
           </div>
         )}
       </section>
 
-      {/* Paywall Modal */}
       <PaywallGate
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
         toolName="Proposal Generator"
+        signupBonus={welcomeCredits}
+        signupBonusBreakdown={welcomeBonusBreakdown}
+      />
+
+      <EmailCaptureModal
+        open={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        onConfirm={triggerPdfDownload}
+        toolName="Proposal"
       />
     </>
   );

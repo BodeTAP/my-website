@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Plus, Trash2, Loader2, Download, ReceiptText } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Trash2, Loader2, Download, ReceiptText, MessageCircle } from "lucide-react";
 import PaywallGate from "@/components/public/PaywallGate";
+import EmailCaptureModal from "@/components/public/tools/EmailCaptureModal";
+import { buildInvoiceWaMessage, buildWaShareLink } from "@/lib/waShare";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,6 +44,7 @@ type InvoiceResult = {
 
 const STORAGE_KEY = "mfweb_freemium_invoice_generator";
 const MAX_ITEMS = 10;
+const DEFAULT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -82,16 +85,34 @@ function setLocalUsage(count: number, resetAt: number): void {
 function isLocalLimitReached(): boolean {
   const usage = getLocalUsage();
   if (!usage) return false;
-  // If reset time has passed, limit is no longer active
   if (Date.now() > usage.resetAt) return false;
   return usage.count >= 1;
+}
+
+function formatResetCountdown(resetAt: number): string {
+  const ms = resetAt - Date.now();
+  if (ms <= 0) return "";
+  const days = Math.ceil(ms / (24 * 60 * 60 * 1000));
+  if (days >= 2) return `${days} hari lagi`;
+  const hours = Math.ceil(ms / (60 * 60 * 1000));
+  if (hours >= 2) return `${hours} jam lagi`;
+  const minutes = Math.max(1, Math.ceil(ms / (60 * 1000)));
+  return `${minutes} menit lagi`;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export default function PublicInvoiceForm() {
+type PublicInvoiceFormProps = {
+  welcomeCredits?: number;
+  welcomeBonusBreakdown?: string;
+};
+
+export default function PublicInvoiceForm({
+  welcomeCredits = 15,
+  welcomeBonusBreakdown,
+}: PublicInvoiceFormProps = {}) {
   const [fromName, setFromName] = useState("");
   const [toName, setToName] = useState("");
   const [items, setItems] = useState<LineItem[]>([createEmptyItem()]);
@@ -100,7 +121,36 @@ export default function PublicInvoiceForm() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<InvoiceResult | null>(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [disabledNotice, setDisabledNotice] = useState(false);
+
+  const [quotaState, setQuotaState] = useState<{ used: boolean; resetCountdown: string }>({
+    used: false,
+    resetCountdown: "",
+  });
+
+  const refreshQuotaState = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const usage = getLocalUsage();
+    if (!usage) {
+      setQuotaState({ used: false, resetCountdown: "" });
+      return;
+    }
+    const used = Date.now() < usage.resetAt && usage.count >= 1;
+    setQuotaState({
+      used,
+      resetCountdown: used ? formatResetCountdown(usage.resetAt) : "",
+    });
+  }, []);
+
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => refreshQuotaState());
+    return () => window.cancelAnimationFrame(id);
+  }, [refreshQuotaState]);
+
+  const quotaUsed = quotaState.used;
+  const resetCountdown = quotaState.resetCountdown;
 
   // --- Line item handlers ---
 
@@ -144,7 +194,6 @@ export default function PublicInvoiceForm() {
     e.preventDefault();
     setError(null);
 
-    // localStorage soft-limit check
     if (isLocalLimitReached()) {
       setPaywallOpen(true);
       return;
@@ -169,11 +218,11 @@ export default function PublicInvoiceForm() {
       });
 
       if (res.status === 429) {
-        // Rate limit exceeded — set localStorage flag and show paywall
-        const data = await res.json();
-        const retryAfterMs = data.retryAfterMs || 30 * 24 * 60 * 60 * 1000;
+        const data = await res.json().catch(() => null);
+        const retryAfterMs: number = (data?.retryAfterMs as number) || DEFAULT_WINDOW_MS;
         setLocalUsage(1, Date.now() + retryAfterMs);
         setPaywallOpen(true);
+        refreshQuotaState();
         return;
       }
 
@@ -183,18 +232,20 @@ export default function PublicInvoiceForm() {
       }
 
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Terjadi kesalahan");
+        const data = await res.json().catch(() => null);
+        setError(data?.error || "Terjadi kesalahan");
         return;
       }
 
       const data = await res.json();
       setResult(data.invoice);
 
-      // Update localStorage usage
-      const usage = getLocalUsage();
-      const resetAt = usage?.resetAt || Date.now() + 30 * 24 * 60 * 60 * 1000;
-      setLocalUsage((usage?.count || 0) + 1, resetAt);
+      const existing = getLocalUsage();
+      const resetAt = existing && Date.now() < existing.resetAt
+        ? existing.resetAt
+        : Date.now() + DEFAULT_WINDOW_MS;
+      setLocalUsage((existing?.count || 0) + 1, resetAt);
+      refreshQuotaState();
     } catch {
       setError("Gagal menghubungi server. Coba lagi nanti.");
     } finally {
@@ -202,76 +253,80 @@ export default function PublicInvoiceForm() {
     }
   };
 
-  // --- Print/download handler ---
+  // --- PDF download (real PDF via server) ---
 
-  const handleDownload = () => {
+  const triggerPdfDownload = useCallback(
+    async (email: string | null) => {
+      if (!result) return;
+      setDownloading(true);
+      try {
+        const res = await fetch("/api/tools/invoice-generator/pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            invoiceNo: result.number,
+            fromName: result.from,
+            toName: result.to,
+            items: result.items.map((it) => ({
+              description: it.description,
+              quantity: it.quantity,
+              price: it.price,
+            })),
+            subtotal: result.subtotal,
+            tax: result.tax,
+            total: result.total,
+            includeTax: result.includeTax,
+            createdAt: result.createdAt,
+            email,
+          }),
+        });
+
+        if (res.status === 429) {
+          setError("Batas download PDF gratis tercapai. Coba lagi nanti atau daftar untuk akses penuh.");
+          return;
+        }
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          setError(data?.error || "Gagal generate PDF. Silakan coba lagi.");
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${result.number.toLowerCase()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2_000);
+      } catch {
+        setError("Gagal generate PDF. Periksa koneksi internet Anda.");
+      } finally {
+        setDownloading(false);
+        setEmailModalOpen(false);
+      }
+    },
+    [result],
+  );
+
+  const handleDownloadClick = useCallback(() => {
+    if (!result || downloading) return;
+    setEmailModalOpen(true);
+  }, [result, downloading]);
+
+  const handleWaShare = useCallback(() => {
     if (!result) return;
-
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Invoice ${result.number}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 48px; color: #1a1a2e; position: relative; }
-    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 52px; color: rgba(0,0,0,0.04); white-space: nowrap; pointer-events: none; z-index: 0; }
-    .content { position: relative; z-index: 1; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0d9488; padding-bottom: 16px; margin-bottom: 24px; }
-    .header h1 { font-size: 22px; color: #0d9488; letter-spacing: 2px; }
-    .header .number { font-size: 12px; color: #64748b; margin-top: 4px; }
-    .header .date { font-size: 13px; color: #475569; text-align: right; }
-    .parties { display: flex; gap: 40px; margin-bottom: 28px; }
-    .parties .party { flex: 1; }
-    .parties .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-    .parties .name { font-size: 15px; font-weight: 600; color: #1e293b; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    th { text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-    th:last-child { text-align: right; }
-    td { padding: 12px; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9; }
-    td:nth-child(2) { text-align: center; }
-    td:nth-child(3), td:nth-child(4) { text-align: right; }
-    .totals { margin-left: auto; width: 260px; }
-    .totals .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; color: #475569; }
-    .totals .row.grand { border-top: 2px solid #0d9488; padding-top: 12px; margin-top: 4px; font-size: 16px; font-weight: 700; color: #0d9488; }
-    .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
-    @media print { body { padding: 24px; } .watermark { position: fixed; } }
-  </style>
-</head>
-<body>
-  <div class="watermark">Dibuat dengan MFWEB - mfweb.maffisorp.id</div>
-  <div class="content">
-    <div class="header">
-      <div>
-        <h1>INVOICE</h1>
-        <div class="number">${result.number}</div>
-      </div>
-      <div class="date">${new Date(result.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</div>
-    </div>
-    <div class="parties">
-      <div class="party"><div class="label">Dari</div><div class="name">${result.from}</div></div>
-      <div class="party"><div class="label">Kepada</div><div class="name">${result.to}</div></div>
-    </div>
-    <table>
-      <thead><tr><th>Deskripsi</th><th>Qty</th><th>Harga</th><th>Total</th></tr></thead>
-      <tbody>${result.items.map((item) => `<tr><td>${item.description}</td><td style="text-align:center">${item.quantity}</td><td style="text-align:right">${formatRupiah(item.price)}</td><td style="text-align:right">${item.totalFormatted}</td></tr>`).join("")}</tbody>
-    </table>
-    <div class="totals">
-      <div class="row"><span>Subtotal</span><span>${result.subtotalFormatted}</span></div>
-      ${result.includeTax && result.taxFormatted ? `<div class="row"><span>PPN 11%</span><span>${result.taxFormatted}</span></div>` : ""}
-      <div class="row grand"><span>Total</span><span>${result.totalFormatted}</span></div>
-    </div>
-    <div class="footer">Dibuat dengan MFWEB Invoice Generator (Free Tier) &mdash; mfweb.maffisorp.id</div>
-  </div>
-</body>
-</html>`;
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    setTimeout(() => printWindow.print(), 400);
-  };
+    const message = buildInvoiceWaMessage({
+      invoiceNo: result.number,
+      fromName: result.from,
+      toName: result.to,
+      total: result.total,
+    });
+    const link = buildWaShareLink(message);
+    window.open(link, "_blank", "noopener,noreferrer");
+  }, [result]);
 
   // --- Render ---
 
@@ -282,11 +337,26 @@ export default function PublicInvoiceForm() {
         <p className="text-sm text-emerald-200/80">
           <ReceiptText className="inline w-4 h-4 mr-1.5 -mt-0.5 text-emerald-400" />
           <span className="font-medium text-emerald-100">Gratis:</span>{" "}
-          1 invoice per bulan (dengan watermark)
+          1 invoice per bulan (PDF dengan watermark)
         </p>
       </div>
 
-      {/* Disabled notice */}
+      {quotaUsed && (
+        <div className="mb-6 rounded-xl border border-amber-400/25 bg-amber-400/[0.08] px-4 py-3">
+          <p className="text-sm text-amber-100">
+            <strong className="font-bold text-amber-300">Kuota gratis bulan ini sudah dipakai.</strong>{" "}
+            {resetCountdown ? `Reset ${resetCountdown}, atau ` : ""}
+            <a
+              href="/portal/register"
+              className="text-amber-300 underline underline-offset-2 hover:text-amber-200"
+            >
+              daftar gratis
+            </a>{" "}
+            untuk lanjut sekarang.
+          </p>
+        </div>
+      )}
+
       {disabledNotice && (
         <div className="mb-6 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-3">
           <p className="text-sm text-red-200/80">
@@ -305,7 +375,6 @@ export default function PublicInvoiceForm() {
       {/* Form */}
       {!result && (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Sender & Recipient */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-blue-100/70 mb-1.5">
@@ -317,7 +386,8 @@ export default function PublicInvoiceForm() {
                 onChange={(e) => setFromName(e.target.value)}
                 placeholder="PT Contoh Jaya"
                 required
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors"
+                disabled={!!quotaUsed}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <div>
@@ -330,12 +400,12 @@ export default function PublicInvoiceForm() {
                 onChange={(e) => setToName(e.target.value)}
                 placeholder="CV Maju Bersama"
                 required
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors"
+                disabled={!!quotaUsed}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
-          {/* Line Items */}
           <div>
             <label className="block text-sm font-medium text-blue-100/70 mb-3">
               Item Invoice
@@ -354,7 +424,8 @@ export default function PublicInvoiceForm() {
                     }
                     placeholder={`Item ${idx + 1}`}
                     required
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors"
+                    disabled={!!quotaUsed}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <input
                     type="number"
@@ -369,7 +440,8 @@ export default function PublicInvoiceForm() {
                     min={1}
                     placeholder="Qty"
                     required
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors text-center"
+                    disabled={!!quotaUsed}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors text-center disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <input
                     type="number"
@@ -384,12 +456,13 @@ export default function PublicInvoiceForm() {
                     min={0}
                     placeholder="Harga"
                     required
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors"
+                    disabled={!!quotaUsed}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    disabled={items.length <= 1}
+                    disabled={items.length <= 1 || !!quotaUsed}
                     className="p-2.5 rounded-lg text-red-400/60 hover:text-red-400 hover:bg-red-400/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     aria-label={`Hapus item ${idx + 1}`}
                   >
@@ -399,12 +472,12 @@ export default function PublicInvoiceForm() {
               ))}
             </div>
 
-            {/* Add item button */}
             {items.length < MAX_ITEMS && (
               <button
                 type="button"
                 onClick={addItem}
-                className="mt-3 flex items-center gap-1.5 text-sm text-emerald-400/80 hover:text-emerald-400 transition-colors"
+                disabled={!!quotaUsed}
+                className="mt-3 flex items-center gap-1.5 text-sm text-emerald-400/80 hover:text-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" />
                 Tambah item
@@ -424,7 +497,8 @@ export default function PublicInvoiceForm() {
               role="switch"
               aria-checked={includeTax}
               onClick={() => setIncludeTax(!includeTax)}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-[#071225] ${
+              disabled={!!quotaUsed}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-[#071225] disabled:opacity-50 disabled:cursor-not-allowed ${
                 includeTax ? "bg-emerald-500" : "bg-white/10"
               }`}
             >
@@ -439,7 +513,6 @@ export default function PublicInvoiceForm() {
             </span>
           </div>
 
-          {/* Running totals */}
           <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-blue-200/50">Subtotal</span>
@@ -463,17 +536,15 @@ export default function PublicInvoiceForm() {
             </div>
           </div>
 
-          {/* Error */}
           {error && (
             <p className="text-sm text-red-400 bg-red-400/10 rounded-lg px-3 py-2">
               {error}
             </p>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
-            disabled={loading || disabledNotice}
+            disabled={loading || disabledNotice || !!quotaUsed}
             className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm transition-colors"
           >
             {loading ? (
@@ -488,22 +559,23 @@ export default function PublicInvoiceForm() {
               </>
             )}
           </button>
+
+          <p className="text-[11px] text-blue-200/35">
+            Data yang kamu input tidak disimpan. Hanya hitungan pemakaian (anonim) yang dicatat untuk batas kuota.
+          </p>
         </form>
       )}
 
       {/* Result */}
       {result && (
         <div className="space-y-6">
-          {/* Invoice preview */}
           <div className="relative rounded-xl border border-white/10 bg-white/[0.02] p-6 overflow-hidden print:border-gray-300 print:bg-white">
-            {/* Watermark overlay */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-              <p className="text-4xl sm:text-5xl font-bold text-white/[0.03] -rotate-45 whitespace-nowrap">
-                MFWEB - mfweb.maffisorp.id
+              <p className="text-4xl sm:text-5xl font-bold text-white/[0.05] -rotate-45 whitespace-nowrap">
+                MFWEB - Free Tier
               </p>
             </div>
 
-            {/* Invoice header */}
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -523,7 +595,6 @@ export default function PublicInvoiceForm() {
                 </p>
               </div>
 
-              {/* From / To */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <p className="text-xs text-blue-200/40 print:text-gray-400 mb-0.5">
@@ -543,7 +614,6 @@ export default function PublicInvoiceForm() {
                 </div>
               </div>
 
-              {/* Items table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -586,7 +656,6 @@ export default function PublicInvoiceForm() {
                 </table>
               </div>
 
-              {/* Totals */}
               <div className="mt-4 pt-4 border-t border-white/10 print:border-gray-200 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-blue-200/50 print:text-gray-500">
@@ -616,21 +685,36 @@ export default function PublicInvoiceForm() {
                 </div>
               </div>
 
-              {/* Watermark notice */}
               <p className="mt-4 text-xs text-blue-200/30 print:text-gray-400 italic">
-                Dibuat dengan MFWEB - mfweb.maffisorp.id (watermark free tier)
+                PDF gratis menyertakan watermark MFWEB. Daftar untuk versi tanpa watermark dengan logo bisnis Anda.
               </p>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             <button
-              onClick={handleDownload}
-              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors"
+              onClick={handleDownloadClick}
+              disabled={downloading}
+              className="flex items-center justify-center gap-2 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm transition-colors"
             >
-              <Download className="w-4 h-4" />
-              Download / Print PDF
+              {downloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Menyiapkan PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleWaShare}
+              className="flex items-center justify-center gap-2 h-11 rounded-xl bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 text-emerald-200 font-semibold text-sm transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Kirim via WhatsApp
             </button>
             <button
               onClick={() => {
@@ -640,19 +724,36 @@ export default function PublicInvoiceForm() {
                 setItems([createEmptyItem()]);
                 setIncludeTax(false);
               }}
-              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border border-white/10 hover:bg-white/5 text-blue-100/70 font-medium text-sm transition-colors"
+              className="flex items-center justify-center gap-2 h-11 rounded-xl border border-white/10 hover:bg-white/5 text-blue-100/70 font-medium text-sm transition-colors"
             >
               Buat Invoice Baru
             </button>
           </div>
+
+          <p className="text-center text-xs text-blue-200/40">
+            <a
+              href="/portal/register"
+              className="text-blue-300 hover:text-blue-200 underline underline-offset-2"
+            >
+              Daftar untuk PDF tanpa watermark + logo bisnis Anda →
+            </a>
+          </p>
         </div>
       )}
 
-      {/* Paywall Gate */}
       <PaywallGate
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
         toolName="Invoice Generator"
+        signupBonus={welcomeCredits}
+        signupBonusBreakdown={welcomeBonusBreakdown}
+      />
+
+      <EmailCaptureModal
+        open={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        onConfirm={triggerPdfDownload}
+        toolName="Invoice"
       />
     </section>
   );

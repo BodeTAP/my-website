@@ -51,7 +51,15 @@ function isLocalLimitReached(): boolean {
   return usage.count >= 1;
 }
 
-export default function PublicLeadFinderForm() {
+type PublicLeadFinderFormProps = {
+  welcomeCredits?: number;
+  welcomeBonusBreakdown?: string;
+};
+
+export default function PublicLeadFinderForm({
+  welcomeCredits = 15,
+  welcomeBonusBreakdown,
+}: PublicLeadFinderFormProps = {}) {
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,8 +97,10 @@ export default function PublicLeadFinderForm() {
         });
 
         if (res.status === 429) {
-          // Rate limited — set localStorage flag and show paywall
-          const resetAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+          // Rate limited — get the reset window from the API and persist it.
+          const data = await res.json().catch(() => null);
+          const retryAfterMs: number = (data?.retryAfterMs as number) || 24 * 60 * 60 * 1000;
+          const resetAt = Date.now() + retryAfterMs;
           setLocalUsage({ count: 1, resetAt });
           setShowPaywall(true);
           setLoading(false);
@@ -303,6 +313,8 @@ export default function PublicLeadFinderForm() {
         open={showPaywall}
         onClose={() => setShowPaywall(false)}
         toolName="Lead Finder"
+        signupBonus={welcomeCredits}
+        signupBonusBreakdown={welcomeBonusBreakdown}
       />
     </>
   );
