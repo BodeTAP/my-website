@@ -22,7 +22,6 @@ import {
   FolderOpen,
   Save,
   Search,
-  Sparkles,
   Star,
   Trash2,
   X,
@@ -666,8 +665,6 @@ export default function PortalLeadFinder({
   const [listMessage, setListMessage] = useState<string | null>(null);
   const [savedLists, setSavedLists] = useState<SavedLeadList[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [generatingOutreach, setGeneratingOutreach] = useState<string | null>(null);
-
   const socialScanCost = creditCosts.socialScan ?? DEFAULT_SOCIAL_SCAN_COST;
   const activeSocialScan = socialScanAvailable && socialScanEnabled;
   const creditCost = creditCosts[mode] + (activeSocialScan ? socialScanCost : 0);
@@ -733,33 +730,6 @@ export default function PortalLeadFinder({
       mounted = false;
     };
   }, []);
-
-  async function generateOutreach(lead: { name: string; category?: string; phone?: string }) {
-    setGeneratingOutreach(lead.name);
-    try {
-      const res = await fetch("/api/portal/tools/lead-finder/ai-outreach", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leadName: lead.name,
-          leadCategory: lead.category ?? "",
-          leadCity: city || "",
-          senderBusinessName: "Bisnis Kami",
-          senderService: "pembuatan website dan tools bisnis",
-        }),
-      });
-      if (!res.ok) throw new Error("Gagal");
-      const data = await res.json();
-      if (data.message) {
-        await navigator.clipboard.writeText(data.message);
-        setListMessage("Pesan outreach disalin ke clipboard!");
-      }
-    } catch {
-      // silent
-    } finally {
-      setGeneratingOutreach(null);
-    }
-  }
 
   function requestSearch() {
     if (!query.trim() || insufficient) return;
@@ -1376,18 +1346,6 @@ export default function PortalLeadFinder({
                           </p>
                         ) : (
                           <p className="text-white/20 text-xs mt-1.5 italic">Tidak ada nomor telepon</p>
-                        )}
-
-                        {place.phone && (
-                          <button
-                            type="button"
-                            onClick={() => generateOutreach({ name: place.name, category: place.category, phone: place.phone })}
-                            disabled={generatingOutreach === place.name}
-                            className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-medium text-purple-300 hover:text-purple-200 disabled:opacity-50"
-                          >
-                            {generatingOutreach === place.name ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                            {generatingOutreach === place.name ? "Membuat pesan..." : "Pesan AI"}
-                          </button>
                         )}
 
                         {place.website && (
