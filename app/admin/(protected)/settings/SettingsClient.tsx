@@ -6,7 +6,7 @@ import { AlertTriangle, ChevronDown, Eye, Loader2, RotateCcw, Save, Bot, Setting
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AI_FEATURE_ORDER, AI_FEATURE_SPECS, AI_MODEL_OPTIONS } from "@/lib/aiConfig";
+import { AI_DEFAULTS, AI_FEATURE_ORDER, AI_FEATURE_SPECS, AI_MODEL_OPTIONS } from "@/lib/aiConfig";
 import DevicesClient from "./devices/DevicesClient";
 
 type SettingsTab = "umum" | "seo" | "komunikasi" | "payment" | "ai" | "broadcast";
@@ -967,7 +967,16 @@ export default function SettingsClient({
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-blue-200/70 text-xs">System Prompt</Label>
+                      <div className="flex items-center justify-between gap-2">
+                        <Label className="text-blue-200/70 text-xs">System Prompt</Label>
+                        <button
+                          type="button"
+                          onClick={() => setForm((f) => ({ ...f, [spec.promptKey]: AI_DEFAULTS[spec.promptKey] ?? "" }))}
+                          className="text-[11px] text-blue-200/45 hover:text-white"
+                        >
+                          Reset ke default
+                        </button>
+                      </div>
                       <textarea
                         value={form[spec.promptKey] ?? ""}
                         onChange={setText(spec.promptKey)}
@@ -1075,7 +1084,16 @@ export default function SettingsClient({
               ))}
             </div>
             <div className="space-y-1.5 mt-5">
-              <Label className="text-blue-200/70 text-xs">Prompt Topik Auto Publish</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-blue-200/70 text-xs">Prompt Topik Auto Publish</Label>
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, ai_prompt_auto_publish_topic: AI_DEFAULTS.ai_prompt_auto_publish_topic ?? "" }))}
+                  className="text-[11px] text-blue-200/45 hover:text-white"
+                >
+                  Reset ke default
+                </button>
+              </div>
               <textarea value={form.ai_prompt_auto_publish_topic ?? ""} onChange={setText("ai_prompt_auto_publish_topic")} rows={7}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
             </div>

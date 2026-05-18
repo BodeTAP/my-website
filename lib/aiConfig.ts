@@ -149,9 +149,14 @@ export const AI_FEATURE_ORDER = Object.keys(AI_FEATURE_SPECS) as AiFeature[];
 export const DEFAULT_AI_MODEL: AiModel = "claude-haiku-4-5-20251001";
 
 const MFWEB_CONTEXT = `MFWEB adalah jasa pembuatan website profesional untuk bisnis lokal Indonesia.
-Layanan: website company profile, landing page, toko online, portofolio.
-Target klien: UMKM, pengusaha lokal, bisnis kuliner, klinik, salon, bengkel, properti.
-Harga mulai Rp 800.000. Platform: mfweb.maffisorp.id.`;
+Layanan utama: website company profile, landing page, toko online, portofolio.
+Tools premium di portal klien:
+- Lead Finder: cari calon pelanggan bisnis lokal dari Google Maps, lengkap dengan kontak dan website.
+- Proposal Generator: bikin proposal penawaran profesional untuk closing klien (PDF dengan brand kit sendiri).
+- Invoice Generator: bikin invoice/tagihan profesional untuk klien (PDF, support PPN 11%).
+Target klien: UMKM, pengusaha lokal, freelancer, bisnis kuliner, klinik, salon, bengkel, properti, agensi kecil.
+Harga website mulai Rp 800.000 (landing page) sampai Rp 50.000.000+ (aplikasi web custom).
+Platform: mfweb.maffisorp.id.`;
 
 const DEFAULT_PROMPTS: Record<AiFeature, string> = {
   draftArticle: `You are an expert SEO content writer for Indonesian local businesses.
@@ -219,13 +224,24 @@ Return ONLY the keywords, nothing else.`,
 
 Tulis artikel blog dalam Bahasa Indonesia dengan gaya natural dan conversational.
 
+Variasi topik (rotasi antar kategori, jangan pilih yang sama dengan topik existing):
+- Layanan website MFWEB: tips memilih jasa pembuatan website, perbandingan landing page vs company profile, fitur penting toko online, kesalahan umum saat bikin website bisnis.
+- Harga pembuatan website: berapa biaya bikin landing page UMKM, estimasi harga website company profile, harga toko online di Indonesia, faktor yang menentukan harga website, paket hemat untuk usaha kecil.
+- Tools premium MFWEB:
+  * Lead Finder: cara cari leads bisnis lokal dari Google Maps, strategi prospecting B2B di Indonesia, manfaat database leads untuk freelancer/agensi, cara filter leads berkualitas, follow-up calon klien lewat WhatsApp.
+  * Proposal Generator: cara bikin proposal yang closing-able, struktur proposal jasa yang menarik, contoh proposal website untuk UMKM, kenapa proposal profesional naikkan tingkat closing.
+  * Invoice Generator: cara bikin invoice profesional untuk freelancer, format invoice yang benar di Indonesia, kapan harus pakai PPN 11%, tips invoice agar dibayar tepat waktu, contoh invoice klien.
+- Tips UMKM digital: branding online, SEO dasar, marketing lewat Google Maps, optimasi profil bisnis, content marketing.
+
 Aturan penulisan:
-- Mulai dengan cerita pendek atau skenario yang relatable bagi pemilik UMKM
+- Mulai dengan cerita pendek atau skenario yang relatable bagi pemilik UMKM/freelancer/agensi
 - Gunakan bahasa sehari-hari, hindari kata formal yang kaku
-- Sertakan contoh bisnis nyata: warung makan, bengkel, salon, klinik, toko kelontong
+- Sertakan contoh bisnis nyata: warung makan, bengkel, salon, klinik, toko kelontong, freelancer desain, agensi kecil
 - Gunakan angka spesifik bukan kata seperti "banyak" atau "sering"
 - Variasikan panjang kalimat - campurkan kalimat pendek dan panjang
 - HINDARI: "dalam era", "di tengah", "tentunya", "perlu diketahui", "sangat penting", "tidak dapat dipungkiri", "pada dasarnya"
+- Jika topik membahas tools premium MFWEB, sebutkan tools yang relevan secara natural (jangan terlalu hard-sell) dan ajak pembaca coba versi gratisnya
+- Jika topik membahas harga pembuatan website, gunakan rentang harga realistis: landing page Rp 800.000-2.500.000, company profile Rp 2.500.000-6.000.000, toko online Rp 5.000.000-15.000.000
 - Akhiri dengan 1 actionable step yang bisa langsung dilakukan pembaca
 - Panjang artikel: 900-1200 kata
 
@@ -301,6 +317,14 @@ Pilih 1 topik artikel blog yang:
 - Relevan dengan kebutuhan calon klien MFWEB
 - Berpotensi menarik traffic dari Google
 - Dalam Bahasa Indonesia
+
+Variasikan topik antar kategori berikut (rotasi, jangan terus-menerus pilih kategori yang sama dengan topik existing):
+1. Layanan website MFWEB - tips memilih, fitur penting, kesalahan umum saat bikin website bisnis
+2. Harga pembuatan website - berapa biaya landing page, company profile, toko online, faktor harga
+3. Lead Finder (tool premium MFWEB) - cara cari leads bisnis lokal dari Google Maps, strategi prospecting, follow-up calon klien
+4. Proposal Generator (tool premium MFWEB) - cara bikin proposal closing-able, struktur proposal jasa, contoh proposal
+5. Invoice Generator (tool premium MFWEB) - cara bikin invoice profesional, format invoice Indonesia, PPN 11%, tips invoice tepat waktu
+6. Tips UMKM/freelancer/agensi - branding online, SEO, marketing Google Maps, optimasi profil bisnis
 
 Kategori yang tersedia:
 {categoryList}
