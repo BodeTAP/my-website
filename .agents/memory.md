@@ -148,6 +148,14 @@ user confirms a lasting preference, project decision, or important current state
   `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their
   dashboard/profile workflows.
+- Auto-publish AI prompts now include explicit topic rotation across MFWEB
+  website services, website pricing tiers, premium portal tools (Lead Finder,
+  Proposal Generator, Invoice Generator), and UMKM/freelancer/agency tips.
+  Both `DEFAULT_PROMPTS.autoPublish` and `ai_prompt_auto_publish_topic` in
+  `lib/aiConfig.ts` were updated, and admin Settings UI now has a "Reset ke
+  default" button next to each AI feature System Prompt textarea and the Auto
+  Publish Topic prompt textarea so saved DB values can be restored to the
+  current code defaults without manual DB edits.
 
 ## Known Context
 
