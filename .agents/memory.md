@@ -156,6 +156,31 @@ user confirms a lasting preference, project decision, or important current state
   default" button next to each AI feature System Prompt textarea and the Auto
   Publish Topic prompt textarea so saved DB values can be restored to the
   current code defaults without manual DB edits.
+- Public freemium tools (Proposal Generator, Invoice Generator) now generate
+  real PDF files via `lib/tools/freemiumProposalPdf.ts` and
+  `lib/tools/freemiumInvoicePdf.ts` (pdf-lib, same engine as paid tier) served
+  from `POST /api/tools/proposal-generator/pdf` and
+  `POST /api/tools/invoice-generator/pdf`. Free PDFs carry a strongly visible
+  diagonal watermark (`MFWEB - Free Tier`, opacity 0.12) plus a `FREE TIER`
+  badge top-right and a footer attribution so screenshots remain clearly
+  branded. PDF endpoints rate-limit at 10 downloads / 24h / IP.
+- Each PDF download flow is preceded by an `EmailCaptureModal` that captures
+  an optional email (skippable) and stores it in
+  `anonymous_tool_usage.metadata.email` for marketing follow-up.
+- Each generated freemium document UI exposes a `Kirim via WhatsApp` button
+  that opens `wa.me/?text=...` with a pre-filled message (`lib/waShare.ts`),
+  so UMKM users can hand-attach the PDF in their WA app afterwards.
+- Welcome credit messaging now uses `getWelcomeCreditBreakdown()`
+  (`lib/welcomeCredits.ts`) to render concrete breakdowns like
+  `15 kredit gratis = 3 proposal + 5 invoice + 5x cari leads` across all paid
+  tool landing pages, the public `/tools` page, the Lead Finder landing, and
+  the `PaywallGate` modal.
+- `PublicLeadFinderForm` 429 handler now persists `resetAt` based on the API's
+  `retryAfterMs` instead of a hard-coded 24h to keep client localStorage in
+  sync with the server-side Redis window.
+- `PaidToolLanding` `InvoiceMockup` is rendered with a fresh year and current
+  date so the static landing page doesn't display a stale invoice number to
+  visitors months after deployment.
 
 ## Known Context
 
