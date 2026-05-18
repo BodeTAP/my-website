@@ -3,6 +3,7 @@ import { Copy, Palette, Percent, ReceiptText } from "lucide-react";
 import PaidToolLanding from "../_components/PaidToolLanding";
 import { getToolSettings } from "@/lib/toolSettings";
 import PublicInvoiceForm from "@/components/public/tools/PublicInvoiceForm";
+import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 
 export const revalidate = 300;
 
@@ -37,6 +38,9 @@ export default async function InvoiceGeneratorLandingPage() {
   const creditCost = settings.invoiceGenerator.creditCost;
   const defaultTax = settings.invoiceGenerator.defaultIncludeTax;
   const welcomeCredits = settings.signupBonus.enabled ? settings.signupBonus.amount : 0;
+  const welcomeBonusBreakdown = welcomeCredits > 0
+    ? getWelcomeCreditBreakdown(welcomeCredits, settings).summary
+    : "";
 
   return (
     <>
@@ -50,7 +54,10 @@ export default async function InvoiceGeneratorLandingPage() {
             Buat invoice sederhana langsung tanpa login. Daftar akun untuk fitur lengkap.
           </p>
         </div>
-        <PublicInvoiceForm />
+        <PublicInvoiceForm
+          welcomeCredits={welcomeCredits}
+          welcomeBonusBreakdown={welcomeBonusBreakdown}
+        />
       </section>
 
       {/* Separator */}
@@ -125,6 +132,7 @@ export default async function InvoiceGeneratorLandingPage() {
         },
       ]}
       welcomeCredits={welcomeCredits}
+      welcomeBonusBreakdown={welcomeBonusBreakdown}
       faqs={[
         {
           q: "Apakah invoice ini tersambung ke pembayaran?",

@@ -3,6 +3,7 @@ import { Brain, Download, LayoutTemplate, Palette } from "lucide-react";
 import PaidToolLanding from "../_components/PaidToolLanding";
 import { getToolSettings } from "@/lib/toolSettings";
 import PublicProposalForm from "@/components/public/tools/PublicProposalForm";
+import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 
 export const revalidate = 300;
 
@@ -36,6 +37,9 @@ export default async function ProposalGeneratorLandingPage() {
   const settings = await getToolSettings();
   const creditCost = settings.proposalGenerator.creditCost;
   const welcomeCredits = settings.signupBonus.enabled ? settings.signupBonus.amount : 0;
+  const welcomeBonusBreakdown = welcomeCredits > 0
+    ? getWelcomeCreditBreakdown(welcomeCredits, settings).summary
+    : "";
 
   return (
     <>
@@ -49,7 +53,10 @@ export default async function ProposalGeneratorLandingPage() {
             Buat proposal sederhana langsung dari sini tanpa perlu daftar. Hasil berupa PDF dengan watermark.
           </p>
         </div>
-        <PublicProposalForm />
+        <PublicProposalForm
+          welcomeCredits={welcomeCredits}
+          welcomeBonusBreakdown={welcomeBonusBreakdown}
+        />
       </section>
 
       {/* Separator */}
@@ -125,6 +132,7 @@ export default async function ProposalGeneratorLandingPage() {
         },
       ]}
       welcomeCredits={welcomeCredits}
+      welcomeBonusBreakdown={welcomeBonusBreakdown}
       faqs={[
         {
           q: "Apakah proposal harus tersambung ke pembayaran?",

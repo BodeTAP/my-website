@@ -23,6 +23,7 @@ import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion
 import { prisma } from "@/lib/prisma";
 import { getToolSettings } from "@/lib/toolSettings";
 import PublicLeadFinderForm from "@/components/public/tools/PublicLeadFinderForm";
+import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 
 export const metadata: Metadata = {
   title: "Lead Finder untuk Cari Prospek Bisnis Lokal | MFWEB",
@@ -134,6 +135,7 @@ export default async function LeadFinderLandingPage() {
   const socialScanEnabled = toolSettings.leadFinder.socialScanEnabled;
   const socialScanCost = toolSettings.leadFinder.socialScanCost;
   const welcomeCredits = toolSettings.signupBonus.enabled ? toolSettings.signupBonus.amount : 0;
+  const welcomeBonusBreakdown = welcomeCredits > 0 ? getWelcomeCreditBreakdown(welcomeCredits, toolSettings).summary : "";
   const visibleFeatures = socialScanEnabled ? features : features.filter((feature) => feature.title !== "Social Scan opsional");
   const visibleWorkflows = socialScanEnabled ? workflows : workflows.filter((item) => !item.includes("Social Scan"));
 
@@ -183,7 +185,9 @@ export default async function LeadFinderLandingPage() {
                 {welcomeCredits > 0 && (
                   <span className="inline-flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                    Akun baru dapat {welcomeCredits} kredit gratis
+                    {welcomeBonusBreakdown
+                      ? `${welcomeCredits} kredit gratis = ${welcomeBonusBreakdown}`
+                      : `Akun baru dapat ${welcomeCredits} kredit gratis`}
                   </span>
                 )}
               </div>
@@ -272,7 +276,10 @@ export default async function LeadFinderLandingPage() {
                 Langsung cari prospek tanpa login. 1 pencarian per hari, maks 5 hasil.
               </p>
             </div>
-            <PublicLeadFinderForm />
+            <PublicLeadFinderForm
+              welcomeCredits={welcomeCredits}
+              welcomeBonusBreakdown={welcomeBonusBreakdown}
+            />
           </FadeUp>
         </div>
       </section>
@@ -346,7 +353,11 @@ export default async function LeadFinderLandingPage() {
             <p className="mt-3 text-blue-200/55">
               Standard Search memakai {standardCost} kredit. Deep Search memakai {deepCost} kredit untuk pencarian lebih luas.
               {socialScanEnabled ? ` Social Scan opsional dapat ditambahkan mulai ${socialScanCost} kredit.` : ""}
-              {welcomeCredits > 0 ? ` Akun baru mendapat ${welcomeCredits} kredit gratis untuk mencoba pencarian pertama.` : ""}
+              {welcomeCredits > 0
+                ? welcomeBonusBreakdown
+                  ? ` Akun baru mendapat ${welcomeCredits} kredit gratis (${welcomeBonusBreakdown}).`
+                  : ` Akun baru mendapat ${welcomeCredits} kredit gratis untuk mencoba pencarian pertama.`
+                : ""}
             </p>
           </FadeUp>
 
@@ -455,7 +466,11 @@ export default async function LeadFinderLandingPage() {
             </div>
             <h2 className="text-3xl font-black text-white sm:text-4xl">Siap isi pipeline dengan prospek baru?</h2>
             <p className="mx-auto mt-3 max-w-2xl text-blue-100/65">
-              Buat akun portal{welcomeCredits > 0 ? ` dan dapatkan ${welcomeCredits} kredit gratis` : ""}, lalu mulai riset lead untuk niche dan kota yang Anda targetkan.
+              Buat akun portal{welcomeCredits > 0
+                ? welcomeBonusBreakdown
+                  ? ` dan dapatkan ${welcomeCredits} kredit gratis (${welcomeBonusBreakdown})`
+                  : ` dan dapatkan ${welcomeCredits} kredit gratis`
+                : ""}, lalu mulai riset lead untuk niche dan kota yang Anda targetkan.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href="/portal/register">

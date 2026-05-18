@@ -4,6 +4,7 @@ import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowR
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 import { getToolSettings } from "@/lib/toolSettings";
+import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 
 export const revalidate = 300;
 
@@ -134,6 +135,9 @@ export default async function ToolsPage() {
   const toolSettings = await getToolSettings();
   const paidTools = getPaidTools(toolSettings);
   const welcomeCredits = toolSettings.signupBonus.enabled ? toolSettings.signupBonus.amount : 0;
+  const welcomeBonusBreakdown = welcomeCredits > 0
+    ? getWelcomeCreditBreakdown(welcomeCredits, toolSettings).summary
+    : "";
 
   return (
     <div className="min-h-screen">
@@ -163,7 +167,9 @@ export default async function ToolsPage() {
             <FadeUp delay={0.25}>
               <div className="mx-auto mb-10 inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-200">
                 <Sparkles className="h-4 w-4" />
-                Akun baru dapat {welcomeCredits} kredit gratis untuk mencoba tools premium.
+                {welcomeBonusBreakdown
+                  ? `Akun baru dapat ${welcomeCredits} kredit gratis = ${welcomeBonusBreakdown}.`
+                  : `Akun baru dapat ${welcomeCredits} kredit gratis untuk mencoba tools premium.`}
               </div>
             </FadeUp>
           )}
@@ -183,7 +189,11 @@ export default async function ToolsPage() {
                 <h2 className="text-3xl font-black text-white sm:text-4xl">Tools berbayar untuk kerja operasional</h2>
                 <p className="mt-3 max-w-2xl text-blue-200/60">
                   Pakai kredit portal untuk prospecting, proposal, dan invoice PDF. Dirancang untuk workflow klien yang berulang.
-                  {welcomeCredits > 0 ? ` Daftar akun baru dan mulai dengan ${welcomeCredits} kredit gratis.` : ""}
+                  {welcomeCredits > 0
+                    ? welcomeBonusBreakdown
+                      ? ` Daftar akun baru dan mulai dengan ${welcomeCredits} kredit gratis (${welcomeBonusBreakdown}).`
+                      : ` Daftar akun baru dan mulai dengan ${welcomeCredits} kredit gratis.`
+                    : ""}
                 </p>
               </div>
               <Link href="/portal/register" className="w-fit">

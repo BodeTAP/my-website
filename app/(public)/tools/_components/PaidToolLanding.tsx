@@ -51,6 +51,7 @@ type PaidToolLandingProps = {
   pricing: PricingItem[];
   faqs: Faq[];
   welcomeCredits?: number;
+  welcomeBonusBreakdown?: string;
 };
 
 const accentClass = {
@@ -90,6 +91,7 @@ export default function PaidToolLanding({
   pricing,
   faqs,
   welcomeCredits = 0,
+  welcomeBonusBreakdown = "",
 }: PaidToolLandingProps) {
   const c = accentClass[accent];
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id").replace(/\/$/, "");
@@ -192,7 +194,9 @@ export default function PaidToolLanding({
                 {welcomeCredits > 0 && (
                   <span className="inline-flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                    Akun baru dapat {welcomeCredits} kredit gratis
+                    {welcomeBonusBreakdown
+                      ? `${welcomeCredits} kredit gratis = ${welcomeBonusBreakdown}`
+                      : `Akun baru dapat ${welcomeCredits} kredit gratis`}
                   </span>
                 )}
               </div>
@@ -346,7 +350,11 @@ export default function PaidToolLanding({
             </div>
             <h2 className="text-3xl font-black text-white sm:text-4xl">Siap membuat dokumen lebih cepat?</h2>
             <p className="mx-auto mt-3 max-w-2xl text-blue-100/65">
-              Buat akun portal{welcomeCredits > 0 ? ` dan dapatkan ${welcomeCredits} kredit gratis` : ""}, lalu gunakan tool ini kapan pun diperlukan.
+              Buat akun portal{welcomeCredits > 0
+                ? welcomeBonusBreakdown
+                  ? ` dan dapatkan ${welcomeCredits} kredit gratis (${welcomeBonusBreakdown})`
+                  : ` dan dapatkan ${welcomeCredits} kredit gratis`
+                : ""}, lalu gunakan tool ini kapan pun diperlukan.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href="/portal/register">
@@ -413,13 +421,19 @@ function ProposalMockup({ accent }: { accent: PaidToolLandingProps["accent"] }) 
 
 function InvoiceMockup({ accent }: { accent: PaidToolLandingProps["accent"] }) {
   void accent;
+  // Generate a fresh, plausible-looking invoice number for the visual mock so
+  // the landing page does not look stale months after deploy.
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mockNumber = `INV-${yyyy}-0001`;
+  const issueLabel = today.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   return (
     <div className="relative rounded-3xl border border-white/10 bg-[#06101f] p-3 shadow-2xl shadow-black/40">
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white text-slate-950">
         <div className="flex items-center justify-between px-6 py-5" style={{ background: "#155e75" }}>
           <div>
             <p className="text-xs font-black uppercase tracking-widest text-cyan-100/70">Invoice</p>
-            <h3 className="mt-1 text-2xl font-black text-white">INV-20260516-001</h3>
+            <h3 className="mt-1 text-2xl font-black text-white">{mockNumber}</h3>
           </div>
           <div className="h-12 w-12 rounded-xl bg-white/15 flex items-center justify-center">
             <ReceiptText className="h-6 w-6 text-white" />
@@ -432,8 +446,8 @@ function InvoiceMockup({ accent }: { accent: PaidToolLandingProps["accent"] }) {
               <p className="mt-1 font-black">Ayla Skin Clinic</p>
             </div>
             <div className="rounded-xl bg-slate-100 p-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Jatuh tempo</p>
-              <p className="mt-1 font-black">7 hari</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tanggal</p>
+              <p className="mt-1 font-black">{issueLabel}</p>
             </div>
           </div>
           {[
