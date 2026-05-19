@@ -148,6 +148,16 @@ user confirms a lasting preference, project decision, or important current state
   `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their
   dashboard/profile workflows.
+- Broadcast system improvements (2026-05-20): leads page now uses server-side
+  pagination via GET /api/admin/leads with query params (page, perPage, q,
+  status, consent, hasWebsite, neverContacted, category). LeadsTable no longer
+  loads all leads at once. Advanced filters added: consent WA, has website,
+  business category (8 categories), never contacted. BroadcastModal has a
+  Preview tab showing message with variable substitution for up to 5 leads.
+  BroadcastHistoryModal rebuilt with pagination, CSV export, and per-recipient
+  drill-down (DrillDownModal). Opt-in conversion tracking: waOptInSource now
+  stores the broadcastId that prompted the opt-in
+  (format: fonnte_webhook:broadcast:ID).
 - Auto-publish AI prompts now include explicit topic rotation across MFWEB
   website services, website pricing tiers, premium portal tools (Lead Finder,
   Proposal Generator, Invoice Generator), and UMKM/freelancer/agency tips.
