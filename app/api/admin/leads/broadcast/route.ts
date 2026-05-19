@@ -856,15 +856,47 @@ export async function POST(req: NextRequest) {
 
 // ── Broadcast history ─────────────────────────────────────────────────────────
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const denied = await requireApiPermission("broadcast");
   if (denied) return denied;
 
-  const logs = await prisma.broadcastLog.findMany({
-    orderBy: { sentAt: "desc" },
-    take:    20,
-  });
+  const { searchParams } = req.nextUrl;
+  const page    = Math.max(1, Number(searchParams.get("page") ?? "1"));
+  const perPage = Math.min(100, Math.max(10, Number(searchParams.get("perPage") ?? "20")));
+  const format  = searchParams.get("format") ?? "json";
 
-  return NextResponse.json(logs);
+  const [total, logs] = await Promise.all([
+    prisma.broadcastLog.count(),
+    prisma.broadcastLog.findMany({
+      orderBy: { sentAt: "desc" },
+      skip:  (page - 1) * perPage,
+      take:  perPage,
+    }),
+  ]);
+
+  // CSV export
+  if (format === "csv") {
+    const headers = ["ID", "Tanggal", "Total Lead", "Terkirim", "Gagal", "Dilewati", "Device", "Delay Range", "Pesan (100 char)"];
+    const rows = logs.map((log) => [
+      log.id,
+      new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(log.sentAt)),
+      log.totalLeads,
+      log.sent,
+      log.failed,
+      log.skipped,
+      log.devices,
+      log.delayRange,
+      `"${log.messageSnippet.replace(/"/g, '""')}"`,
+    ].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    return new Response("\uFEFF" + csv, {
+      headers: {
+        "Content-Type": "text/csv;charset=utf-8",
+        "Content-Disposition": `attachment; filename="broadcast-history-${new Date().toISOString().slice(0, 10)}.csv"`,
+      },
+    });
+  }
+
+  return NextResponse.json({ logs, total, page, perPage, totalPages: Math.ceil(total / perPage) });
 }

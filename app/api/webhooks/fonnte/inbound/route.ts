@@ -199,12 +199,25 @@ export async function POST(req: NextRequest) {
       leads.filter((lead) => lead.waOptInStatus !== "OPTED_IN" || lead.doNotContact),
     );
 
+    // Try to find the last broadcast that was sent to this lead for conversion tracking
+    const lastBroadcastRecipient = await prisma.broadcastRecipient.findFirst({
+      where: {
+        leadId: { in: leadIds },
+        status: { in: ["QUEUED", "SENT"] },
+      },
+      orderBy: { createdAt: "desc" },
+      select: { broadcastId: true },
+    });
+    const optInSource = lastBroadcastRecipient
+      ? `fonnte_webhook:broadcast:${lastBroadcastRecipient.broadcastId}`
+      : "fonnte_webhook";
+
     await prisma.lead.updateMany({
       where: { id: { in: leadIds } },
       data: {
         waOptInStatus:  "OPTED_IN",
         waOptInAt:      new Date(),
-        waOptInSource:  "fonnte_webhook",
+        waOptInSource:  optInSource,
         waOptOutAt:     null,
         waOptOutReason: null,
         doNotContact:   false,

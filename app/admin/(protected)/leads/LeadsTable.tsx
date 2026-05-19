@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download, Pencil, History, Clock } from "lucide-react";
+import { MessageCircle, ChevronDown, ScrollText, UserSearch, CheckSquare, Square, Send, X, Loader2, Trash2, Download, Pencil, History, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp } from "@/components/public/motion";
-import { useSearchParams } from "next/navigation";
-import LeadsSearch from "./LeadsSearch";
-import LeadsPagination from "./LeadsPagination";
+import BroadcastHistoryModal from "./BroadcastHistoryModal";
 import type { BroadcastRuntimeSettings, DelayRange } from "@/lib/broadcastSettings";
 
 type Lead = {
@@ -73,6 +71,8 @@ function cooldownRemaining(lastContactedAt: Date | null, cooldownHours: number):
 
 function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; settings: BroadcastRuntimeSettings; onClose: () => void; onDone: () => void }) {
   const [message, setMessage]           = useState(settings.consentTemplate);
+  const [activeTab, setActiveTab]       = useState<"compose" | "preview">("compose");
+  const [previewIdx, setPreviewIdx]     = useState(0);
   const [status, setStatus]             = useState<"idle" | "sending" | "done">("idle");
   const [skipCooldown, setSkipCooldown] = useState(false);
   const [sessionLimit, setSessionLimit] = useState<number>(settings.defaultSessionLimit);
@@ -89,6 +89,15 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
   const consentEligible = leads.filter((l) => !l.doNotContact && l.waOptInStatus !== "OPTED_OUT");
   const eligibleRaw   = skipCooldown ? consentEligible.length : consentEligible.length - consentEligible.filter((l) => isCoolingDown(l.lastContactedAt, settings.cooldownHours)).length;
   const eligibleCount = Math.min(eligibleRaw, sessionLimit, settings.maxSessionLimit);
+
+  // Preview: render message for a specific lead (simplified — no 12-layer variation, just template substitution)
+  const previewLeads = consentEligible.slice(0, Math.min(5, consentEligible.length));
+  const previewLead  = previewLeads[previewIdx] ?? previewLeads[0];
+  const previewMessage = previewLead
+    ? message
+        .replace(/\{name\}/g, previewLead.name)
+        .replace(/\{businessName\}/g, previewLead.businessName)
+    : message;
 
   // Estimate completion time for display
   const estimateSeconds = (count: number, delayRange: string) => {
@@ -151,8 +160,72 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
           </button>
         </div>
 
+        {/* Tabs */}
+        {status !== "done" && (
+          <div className="flex border-b border-white/10">
+            {(["compose", "preview"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                  activeTab === tab
+                    ? "text-white border-b-2 border-indigo-500"
+                    : "text-blue-200/40 hover:text-white"
+                }`}
+              >
+                {tab === "compose" ? "✏️ Tulis Pesan" : "👁️ Preview"}
+              </button>
+            ))}
+          </div>
+        )}
+
         {status !== "done" ? (
           <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Preview tab */}
+            {activeTab === "preview" ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-blue-200/60 text-xs">Preview pesan untuk lead:</p>
+                  <div className="flex items-center gap-1">
+                    {previewLeads.map((l, i) => (
+                      <button
+                        key={l.id}
+                        onClick={() => setPreviewIdx(i)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
+                          previewIdx === i
+                            ? "bg-indigo-600 text-white border-indigo-500/50"
+                            : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                        }`}
+                      >
+                        {l.businessName.slice(0, 12)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {previewLead && (
+                  <div className="bg-[#0a1830] border border-white/10 rounded-2xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-300">
+                        {previewLead.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-white text-xs font-semibold">{previewLead.businessName}</p>
+                        <p className="text-blue-200/40 text-[10px]">{previewLead.whatsapp}</p>
+                      </div>
+                    </div>
+                    <div className="bg-[#1a2f50] rounded-xl rounded-tl-none p-3 max-w-[85%]">
+                      <pre className="text-white text-xs whitespace-pre-wrap font-sans leading-relaxed">
+                        {previewMessage}
+                      </pre>
+                    </div>
+                    <p className="text-blue-200/30 text-[10px] mt-2 italic">
+                      * Preview ini menampilkan substitusi variabel saja. Pesan asli akan divariasikan lebih lanjut oleh sistem (sinonim, emoji, CTA, dll).
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
             {/* Warning banner */}
             <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 space-y-1.5">
               <p className="text-amber-400 text-xs font-semibold">⚠️ Peringatan Risiko Blokir WhatsApp</p>
@@ -272,6 +345,8 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
               </Button>
               <p className="text-blue-200/30 text-xs">Delay adaptif · variasi otomatis · dihandle Fonnte</p>
             </div>
+            </>
+            )}
           </div>
         ) : (
           <div className="p-8 text-center space-y-4">
@@ -344,90 +419,93 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
   );
 }
 
-// ── Broadcast History Modal ────────────────────────────────────────────────────
-type BroadcastLogEntry = {
-  id: string; sentAt: string; totalLeads: number; sent: number;
-  failed: number; skipped: number; devices: number;
-  delayRange: string; messageSnippet: string;
-};
-
-function BroadcastHistoryModal({ onClose }: { onClose: () => void }) {
-  const [logs, setLogs]       = useState<BroadcastLogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/admin/leads/broadcast")
-      .then((r) => r.json())
-      .then((data) => { setLogs(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass rounded-2xl w-full max-w-2xl border border-white/10 shadow-2xl max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
-          <div className="flex items-center gap-2">
-            <History className="w-4 h-4 text-indigo-400" />
-            <h2 className="text-white font-bold">Riwayat Broadcast</h2>
-          </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="overflow-y-auto flex-1 p-4 space-y-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-200/40" />
-            </div>
-          ) : logs.length === 0 ? (
-            <p className="text-blue-200/40 text-sm text-center py-12">Belum ada riwayat broadcast.</p>
-          ) : (
-            logs.map((log) => (
-              <div key={log.id} className="bg-white/5 border border-white/5 rounded-xl p-4 space-y-2">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-white/70 text-xs font-medium flex items-center gap-1.5">
-                    <Clock className="w-3 h-3 text-blue-200/40" />
-                    {new Intl.DateTimeFormat("id-ID", {
-                      day: "2-digit", month: "short", year: "numeric",
-                      hour: "2-digit", minute: "2-digit",
-                    }).format(new Date(log.sentAt))}
-                  </span>
-                  <div className="flex items-center gap-2 text-[11px]">
-                    <span className="text-green-400 font-bold">{log.sent} terkirim</span>
-                    {log.failed > 0 && <span className="text-red-400">{log.failed} gagal</span>}
-                    {log.skipped > 0 && <span className="text-orange-400/70">{log.skipped} dilewati</span>}
-                    <span className="text-blue-200/30">{log.devices} device · {log.delayRange}s</span>
-                  </div>
-                </div>
-                <p className="text-blue-200/40 text-[11px] font-mono truncate">
-                  &ldquo;{log.messageSnippet}{log.messageSnippet.length >= 100 ? "…" : ""}&rdquo;
-                </p>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]; broadcastSettings: BroadcastRuntimeSettings }) {
-  const searchParams = useSearchParams();
+export default function LeadsTable({ broadcastSettings }: { broadcastSettings: BroadcastRuntimeSettings }) {
   const router = useRouter();
-  const q    = searchParams.get("q") ?? "";
-  const page = Number(searchParams.get("page") ?? "1");
-  const [perPage, setPerPage] = useState<number>(10);
+
+  // ── Server-side data state ──────────────────────────────────────────────────
+  const [leads, setLeads]         = useState<Lead[]>([]);
+  const [total, setTotal]         = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading]     = useState(true);
+
+  // ── Filter state ────────────────────────────────────────────────────────────
+  const [page, setPage]           = useState(1);
+  const [perPage, setPerPage]     = useState(25);
+  const [q, setQ]                 = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState<Lead["status"] | "ALL">("ALL");
+  const [consentFilter, setConsentFilter] = useState("ALL");
+  const [hasWebsiteFilter, setHasWebsiteFilter] = useState("ALL");
+  const [neverContacted, setNeverContacted] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const PER_PAGE_OPTIONS = [10, 25, 50, 100];
+  const CATEGORY_OPTIONS = [
+    { value: "ALL", label: "Semua Kategori" },
+    { value: "food", label: "🍜 Kuliner" },
+    { value: "retail", label: "🛍️ Retail" },
+    { value: "health", label: "🏥 Kesehatan" },
+    { value: "beauty", label: "💄 Kecantikan" },
+    { value: "service", label: "🔧 Jasa" },
+    { value: "property", label: "🏠 Properti" },
+    { value: "edu", label: "📚 Pendidikan" },
+  ];
 
-  const [filter, setFilter]       = useState<Lead["status"] | "ALL">("ALL");
-  const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>(
-    Object.fromEntries(leads.map((l) => [l.id, l.status])),
-  );
-  const [consentMap, setConsentMap] = useState<Record<string, Lead["waOptInStatus"]>>(
-    Object.fromEntries(leads.map((l) => [l.id, l.waOptInStatus])),
-  );
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(q), 400);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => setPage(1));
+    return () => window.cancelAnimationFrame(id);
+  }, [debouncedQ, statusFilter, consentFilter, hasWebsiteFilter, neverContacted, categoryFilter, perPage]);
+
+  // Fetch leads from API
+  const fetchLeads = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        perPage: String(perPage),
+        ...(debouncedQ ? { q: debouncedQ } : {}),
+        ...(statusFilter !== "ALL" ? { status: statusFilter } : {}),
+        ...(consentFilter !== "ALL" ? { consent: consentFilter } : {}),
+        ...(hasWebsiteFilter !== "ALL" ? { hasWebsite: hasWebsiteFilter } : {}),
+        ...(neverContacted ? { neverContacted: "true" } : {}),
+        ...(categoryFilter !== "ALL" ? { category: categoryFilter } : {}),
+      });
+      const res = await fetch(`/api/admin/leads?${params}`);
+      const data = await res.json();
+      setLeads(data.leads ?? []);
+      setTotal(data.total ?? 0);
+      setTotalPages(data.totalPages ?? 1);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, perPage, debouncedQ, statusFilter, consentFilter, hasWebsiteFilter, neverContacted, categoryFilter]);
+
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => { void fetchLeads(); });
+    return () => window.cancelAnimationFrame(id);
+  }, [fetchLeads]);
+
+  // ── Local state for optimistic UI ───────────────────────────────────────────
+  const [statusMap, setStatusMap] = useState<Record<string, Lead["status"]>>({});
+  const [consentMap, setConsentMap] = useState<Record<string, Lead["waOptInStatus"]>>({});
+
+  // Sync maps when leads change
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      setStatusMap(Object.fromEntries(leads.map((l) => [l.id, l.status])));
+      setConsentMap(Object.fromEntries(leads.map((l) => [l.id, l.waOptInStatus])));
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [leads]);
+
   const [selected, setSelected]           = useState<Set<string>>(new Set());
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [showHistory, setShowHistory]     = useState(false);
@@ -444,25 +522,16 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
   }, [showStatusMenu]);
+
   const [waTemplate, setWaTemplate]       = useState<string>(() =>
     (typeof window !== "undefined" && localStorage.getItem(WA_TEMPLATE_KEY)) || broadcastSettings.consentTemplate
   );
   const [showTemplateEditor, setShowTemplateEditor] = useState(false);
   const [draftTemplate, setDraftTemplate] = useState(waTemplate);
 
-  const filtered = leads.filter((l) => {
-    const matchSearch = q === "" ||
-      l.name.toLowerCase().includes(q.toLowerCase()) ||
-      (l.businessName?.toLowerCase().includes(q.toLowerCase())) ||
-      (l.domain?.toLowerCase().includes(q.toLowerCase()));
-    const matchStatus = filter === "ALL" || statusMap[l.id] === filter;
-    return matchSearch && matchStatus;
-  });
-
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const startIdx   = filtered.length > 0 ? (page - 1) * perPage + 1 : 0;
-  const endIdx     = Math.min(page * perPage, filtered.length);
-  const paginated  = filtered.slice((page - 1) * perPage, page * perPage);
+  const startIdx = total > 0 ? (page - 1) * perPage + 1 : 0;
+  const endIdx   = Math.min(page * perPage, total);
+  const paginated = leads; // already paginated from server
 
   const updateStatus = async (id: string, status: Lead["status"]) => {
     setStatusMap((m) => ({ ...m, [id]: status }));
@@ -514,7 +583,7 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       setSelected(new Set());
-      router.refresh();
+      void fetchLeads();
     } catch (err) {
       alert((err as Error).message);
     } finally {
@@ -694,35 +763,112 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
         <div className="absolute inset-0 bg-linear-to-b from-indigo-500/5 to-transparent pointer-events-none" />
 
         {/* Filter + Search */}
-        <div className="flex flex-col sm:flex-row gap-4 p-5 border-b border-white/10 relative z-10 items-start sm:items-center">
-          <LeadsSearch />
-          <button onClick={() => { setDraftTemplate(waTemplate); setShowTemplateEditor(true); }}
-            title="Edit template pesan WA manual"
-            className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-green-400 hover:border-green-500/30 transition-all bg-white/5">
-            <Pencil className="w-3 h-3" /> Template WA
-          </button>
-          <button onClick={() => setShowHistory(true)}
-            title="Riwayat broadcast"
-            className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-indigo-400 hover:border-indigo-500/30 transition-all bg-white/5">
-            <History className="w-3 h-3" /> Riwayat
-          </button>
-          <div className="flex gap-2 overflow-x-auto flex-1 w-full pb-2 sm:pb-0">
+        <div className="p-5 border-b border-white/10 relative z-10 space-y-3">
+          {/* Row 1: search + action buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="relative flex-1">
+              <UserSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/30" />
+              <input
+                type="text"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Cari nama, bisnis, nomor, domain..."
+                className="w-full h-10 pl-9 pr-4 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-blue-200/30 focus:border-indigo-500/50 focus:outline-none"
+              />
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={() => setShowAdvancedFilters((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-all ${
+                  showAdvancedFilters || consentFilter !== "ALL" || hasWebsiteFilter !== "ALL" || neverContacted || categoryFilter !== "ALL"
+                    ? "bg-indigo-600/20 border-indigo-500/40 text-indigo-300"
+                    : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                }`}
+              >
+                <Filter className="w-3 h-3" /> Filter
+                {(consentFilter !== "ALL" || hasWebsiteFilter !== "ALL" || neverContacted || categoryFilter !== "ALL") && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                )}
+              </button>
+              <button onClick={() => { setDraftTemplate(waTemplate); setShowTemplateEditor(true); }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-green-400 hover:border-green-500/30 transition-all bg-white/5">
+                <Pencil className="w-3 h-3" /> Template WA
+              </button>
+              <button onClick={() => setShowHistory(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-indigo-400 hover:border-indigo-500/30 transition-all bg-white/5">
+                <History className="w-3 h-3" /> Riwayat
+              </button>
+            </div>
+          </div>
+
+          {/* Row 2: status filter tabs */}
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {(["ALL", "NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
-              <button key={s} onClick={() => setFilter(s)}
+              <button key={s} onClick={() => setStatusFilter(s)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all border ${
-                  filter === s
+                  statusFilter === s
                     ? "bg-indigo-600 text-white border-indigo-500/50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
                     : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white hover:bg-white/10"
                 }`}>
-                {s === "ALL" ? "Semua Prospek" : STATUS_LABELS[s]}
-                {s !== "ALL" && (
-                  <span className={`ml-2 px-1.5 py-0.5 rounded-md text-[10px] font-mono ${filter === s ? "bg-white/20" : "bg-black/20"}`}>
-                    {leads.filter((l) => statusMap[l.id] === s).length}
-                  </span>
-                )}
+                {s === "ALL" ? `Semua (${total})` : STATUS_LABELS[s]}
               </button>
             ))}
           </div>
+
+          {/* Row 3: advanced filters (collapsible) */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <div className="space-y-1">
+                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Consent WA</p>
+                <select
+                  value={consentFilter}
+                  onChange={(e) => setConsentFilter(e.target.value)}
+                  className="w-full h-9 rounded-lg px-2 bg-white/5 border border-white/10 text-white text-xs"
+                >
+                  <option value="ALL" className="bg-[#030914]">Semua</option>
+                  <option value="UNKNOWN" className="bg-[#030914]">Belum opt-in</option>
+                  <option value="OPTED_IN" className="bg-[#030914]">Opt-in</option>
+                  <option value="OPTED_OUT" className="bg-[#030914]">Opt-out</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Website</p>
+                <select
+                  value={hasWebsiteFilter}
+                  onChange={(e) => setHasWebsiteFilter(e.target.value)}
+                  className="w-full h-9 rounded-lg px-2 bg-white/5 border border-white/10 text-white text-xs"
+                >
+                  <option value="ALL" className="bg-[#030914]">Semua</option>
+                  <option value="yes" className="bg-[#030914]">Punya website</option>
+                  <option value="no" className="bg-[#030914]">Belum punya website</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Kategori Bisnis</p>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full h-9 rounded-lg px-2 bg-white/5 border border-white/10 text-white text-xs"
+                >
+                  {CATEGORY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value} className="bg-[#030914]">{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Kontak</p>
+                <label className="flex items-center gap-2 h-9 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={neverContacted}
+                    onChange={(e) => setNeverContacted(e.target.checked)}
+                    className="w-4 h-4 accent-indigo-500"
+                  />
+                  <span className="text-white text-xs">Belum pernah dihubungi</span>
+                </label>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bulk action bar */}
@@ -836,7 +982,16 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-20">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                      <p className="text-blue-200/40 text-sm">Memuat data...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginated.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-20">
                     <div className="flex flex-col items-center justify-center">
@@ -925,10 +1080,10 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
           </table>
         </div>
 
-        {filtered.length > 0 && (
+        {total > 0 && (
           <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
             <p className="text-xs text-blue-200/40 font-medium">
-              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{filtered.length}</span> prospek
+              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> prospek
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-end">
               <div className="flex items-center gap-2">
@@ -937,7 +1092,7 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
                   {PER_PAGE_OPTIONS.map((n) => (
                     <button
                       key={n}
-                      onClick={() => { setPerPage(n); router.push("?page=1" + (q ? `&q=${encodeURIComponent(q)}` : "")); }}
+                      onClick={() => setPerPage(n)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
                         perPage === n
                           ? "bg-indigo-600 text-white border-indigo-500/50"
@@ -949,7 +1104,24 @@ export default function LeadsTable({ leads, broadcastSettings }: { leads: Lead[]
                   ))}
                 </div>
               </div>
-              <LeadsPagination totalPages={totalPages} />
+              {/* Server-side pagination controls */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-1.5 rounded-lg border border-white/10 text-blue-200/50 hover:text-white disabled:opacity-30 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-blue-200/60 text-xs px-2">{page} / {totalPages}</span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="p-1.5 rounded-lg border border-white/10 text-blue-200/50 hover:text-white disabled:opacity-30 transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}

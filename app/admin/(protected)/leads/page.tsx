@@ -9,12 +9,13 @@ import { loadBroadcastSettings } from "@/lib/broadcastSettings.server";
 
 export default async function LeadsPage() {
   await requireModule("leads");
-  const [leads, broadcastSettings] = await Promise.all([
-    prisma.lead.findMany({ orderBy: { createdAt: "desc" } }),
+
+  // Only load aggregate counts server-side — the table fetches paginated data client-side
+  const [totalLeads, newLeadsCount, broadcastSettings] = await Promise.all([
+    prisma.lead.count(),
+    prisma.lead.count({ where: { status: "NEW" } }),
     loadBroadcastSettings(),
   ]);
-
-  const newLeadsCount = leads.filter(l => l.status === "NEW").length;
 
   return (
     <div>
@@ -28,7 +29,7 @@ export default async function LeadsPage() {
             Inbox Leads
           </h1>
           <p className="text-blue-200/60 text-sm mt-2">
-            Mengelola <strong className="text-indigo-400">{leads.length} prospek</strong>, dengan {newLeadsCount} prospek baru menunggu.
+            Mengelola <strong className="text-indigo-400">{totalLeads} prospek</strong>, dengan {newLeadsCount} prospek baru menunggu.
           </p>
         </div>
         <Link href="/admin/leads/finder" className="relative z-10">
@@ -39,7 +40,7 @@ export default async function LeadsPage() {
       </FadeUp>
 
       <div className="relative z-10">
-        <LeadsTable leads={leads} broadcastSettings={broadcastSettings} />
+        <LeadsTable broadcastSettings={broadcastSettings} />
       </div>
     </div>
   );

@@ -3,6 +3,91 @@ import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
+// GET — paginated leads list with filters
+export async function GET(req: NextRequest) {
+  if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireApiPermission("leads");
+  if (denied) return denied;
+
+  const { searchParams } = req.nextUrl;
+  const page    = Math.max(1, Number(searchParams.get("page") ?? "1"));
+  const perPage = Math.min(200, Math.max(10, Number(searchParams.get("perPage") ?? "50")));
+  const q       = searchParams.get("q")?.trim() ?? "";
+  const status  = searchParams.get("status") ?? "ALL";
+  const consent = searchParams.get("consent") ?? "ALL";
+  const hasWebsite = searchParams.get("hasWebsite") ?? "ALL";
+  const neverContacted = searchParams.get("neverContacted") === "true";
+  const category = searchParams.get("category") ?? "ALL";
+
+  // Build where clause
+  type WhereClause = {
+    AND?: object[];
+    OR?: object[];
+    status?: string;
+    waOptInStatus?: string;
+    currentWebsite?: { not: null } | null;
+    lastContactedAt?: null;
+  };
+  const where: WhereClause = {};
+  const andClauses: object[] = [];
+
+  if (q) {
+    andClauses.push({
+      OR: [
+        { name:         { contains: q, mode: "insensitive" } },
+        { businessName: { contains: q, mode: "insensitive" } },
+        { whatsapp:     { contains: q } },
+        { domain:       { contains: q, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if (status !== "ALL") where.status = status;
+  if (consent !== "ALL") where.waOptInStatus = consent;
+  if (hasWebsite === "yes") where.currentWebsite = { not: null };
+  if (hasWebsite === "no")  where.currentWebsite = null;
+  if (neverContacted)       where.lastContactedAt = null;
+
+  // Category filter — uses same keyword detection as broadcast route
+  if (category !== "ALL") {
+    const CATEGORY_KEYWORDS: Record<string, string[]> = {
+      food:     ["resto", "restoran", "warung", "cafe", "kafe", "makan", "kuliner", "bakery", "catering", "kedai", "rumah makan", "food"],
+      retail:   ["toko", "shop", "store", "jualan", "dagang", "olshop", "online shop", "butik", "fashion", "pakaian", "baju", "sepatu"],
+      health:   ["klinik", "dokter", "apotek", "farmasi", "kesehatan", "medis", "rumah sakit", "puskesmas", "fisioterapi"],
+      beauty:   ["salon", "spa", "kecantikan", "barbershop", "barber", "nail", "skincare", "kosmetik", "perawatan"],
+      service:  ["jasa", "servis", "bengkel", "laundry", "cuci", "ekspedisi", "logistik", "travel", "tour", "rental", "sewa"],
+      property: ["properti", "rumah", "kos", "kontrakan", "apartemen", "ruko", "tanah", "agen", "developer"],
+      edu:      ["kursus", "les", "bimbel", "sekolah", "pendidikan", "training", "pelatihan", "akademi"],
+    };
+    const keywords = CATEGORY_KEYWORDS[category];
+    if (keywords) {
+      andClauses.push({
+        OR: keywords.map((kw) => ({ businessName: { contains: kw, mode: "insensitive" } })),
+      });
+    }
+  }
+
+  if (andClauses.length > 0) where.AND = andClauses;
+
+  const [total, leads] = await Promise.all([
+    prisma.lead.count({ where }),
+    prisma.lead.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip:  (page - 1) * perPage,
+      take:  perPage,
+    }),
+  ]);
+
+  return NextResponse.json({
+    leads,
+    total,
+    page,
+    perPage,
+    totalPages: Math.ceil(total / perPage),
+  });
+}
+
 // DELETE — bulk delete leads
 export async function DELETE(req: NextRequest) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
