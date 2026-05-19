@@ -9,6 +9,7 @@ import {
 import { getEnabledAiSettings } from "@/lib/aiSettings";
 import type { AiModel, AiSettings } from "@/lib/aiConfig";
 import { sendWA } from "@/lib/whatsapp";
+import { getAdminPhone, getSiteSettings } from "@/lib/siteSettings";
 
 function generateSlug(title: string): string {
   let slug = title
@@ -169,12 +170,14 @@ async function handleAutoPublish(req: NextRequest) {
     const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
     if (adminPhone && aiSettings.autoPublishNotifyWa) {
       after(async () => {
+        const siteSettings = await getSiteSettings();
+        const phone = getAdminPhone(siteSettings) || adminPhone;
         const categoryName = validCategoryId
           ? categories.find(c => c.id === validCategoryId)?.name ?? "-"
           : "Tanpa Kategori";
 
         await sendWA(
-          adminPhone,
+          phone,
           `Artikel baru dipublish otomatis!\n\n` +
           `${parsed.title}\n` +
           `Kategori: ${categoryName}\n` +

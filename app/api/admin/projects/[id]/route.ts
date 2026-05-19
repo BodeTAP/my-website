@@ -4,7 +4,8 @@ import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendProjectStatusEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
-import { sendWA, waMsg } from "@/lib/whatsapp";
+import { sendWA } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 const STATUS_LABELS: Record<string, string> = {
   DRAFTING:    "Perancangan & Briefing",
@@ -55,7 +56,26 @@ export async function PATCH(req: Request, { params }: Params) {
           .catch((e) => console.error("[Email] project status:", e));
       }
       if (project.client.phone) {
-        await sendWA(project.client.phone, waMsg.projectStatus(clientName, project.name, status));
+        const settings = await getSiteSettings();
+        if (isWaNotifyEnabled(settings, "wa_notify_project_status")) {
+          const PROJECT_STAGE: Record<string, { label: string; desc: string }> = {
+            DRAFTING:    { label: "Perancangan & Briefing", desc: "Tim kami sedang mendiskusikan konsep dan desain website Anda." },
+            DEVELOPMENT: { label: "Pengembangan Website", desc: "Website Anda sedang aktif dikerjakan oleh tim developer kami." },
+            TESTING:     { label: "Testing & Review", desc: "Website sedang diuji coba dan siap untuk review Anda." },
+            LIVE:        { label: "Live! 🚀", desc: "Website Anda sudah resmi diluncurkan. Selamat!" },
+          };
+          const stage = PROJECT_STAGE[status] ?? { label: status, desc: "" };
+          const msg = settings.template_wa_project_status
+            ? renderSettingTemplate(settings.template_wa_project_status, {
+                brandName: settings.brand_name,
+                clientName,
+                projectName: project.name,
+                statusLabel: stage.label,
+                statusDesc: stage.desc,
+              })
+            : `Halo ${clientName}! Update proyek *${project.name}*: ✅ *${stage.label}*\n${stage.desc}\n\nPantau di portal klien.\n\n_${settings.brand_name}_`;
+          await sendWA(project.client.phone, msg);
+        }
       }
     });
   }

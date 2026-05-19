@@ -4,8 +4,8 @@ import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendTicketReplyToClientEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
-import { sendWA, waMsg } from "@/lib/whatsapp";
-import { getSiteSettings, renderSettingTemplate } from "@/lib/siteSettings";
+import { sendWA } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -65,17 +65,19 @@ export async function POST(req: Request, { params }: Params) {
         .catch((e) => console.error("[Email] ticket reply:", e));
     }
     if (ticket.client.phone) {
-      const message = settings.template_wa_ticket_reply
-        ? renderSettingTemplate(settings.template_wa_ticket_reply, {
-            brandName: settings.brand_name,
-            clientName,
-            ticketSubject: ticket.subject,
-            messagePreview: preview,
-            portalUrl: `${settings.brand_site_url}/portal/tickets`,
-          })
-        : waMsg.ticketReply(clientName, ticket.subject, preview);
-      await sendWA(ticket.client.phone, message);
-    }
+        if (isWaNotifyEnabled(settings, "wa_notify_ticket_reply")) {
+          const message = settings.template_wa_ticket_reply
+            ? renderSettingTemplate(settings.template_wa_ticket_reply, {
+                brandName: settings.brand_name,
+                clientName,
+                ticketSubject: ticket.subject,
+                messagePreview: preview,
+                portalUrl: `${settings.brand_site_url}/portal/tickets`,
+              })
+            : `Halo ${clientName}! Tim ${settings.brand_name} telah membalas tiket Anda: ${ticket.subject}\n\n${preview}\n\nCek portal klien untuk balasan lengkap.`;
+          await sendWA(ticket.client.phone, message);
+        }
+      }
   });
 
   return NextResponse.json(message, { status: 201 });

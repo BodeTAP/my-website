@@ -4,8 +4,8 @@ import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { sendInvoiceCreatedEmail, validateEmailConfig } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
-import { sendWA, waMsg } from "@/lib/whatsapp";
-import { getSiteSettings } from "@/lib/siteSettings";
+import { sendWA } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 export async function POST(req: Request) {
   if (await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -81,12 +81,22 @@ export async function POST(req: Request) {
     }
 
     // WhatsApp
-    if (clientPhone) {
+    if (clientPhone && isWaNotifyEnabled(settings, "wa_notify_invoice_new")) {
       const payUrl = `${settings.brand_site_url}/bayar/${invoice.invoiceNo}`;
-      const sent = await sendWA(
-        clientPhone,
-        waMsg.invoiceNew(clientName, invoice.invoiceNo, invoice.amount, invoice.dueDate, payUrl),
-      );
+      const dueLabel = invoice.dueDate
+        ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(invoice.dueDate)
+        : "-";
+      const msg = settings.template_wa_invoice_new
+        ? renderSettingTemplate(settings.template_wa_invoice_new, {
+            brandName: settings.brand_name,
+            clientName,
+            invoiceNo: invoice.invoiceNo,
+            amount: `Rp ${invoice.amount.toLocaleString("id-ID")}`,
+            dueDate: dueLabel,
+            paymentUrl: payUrl,
+          })
+        : `Halo ${clientName}! Invoice ${invoice.invoiceNo} sebesar Rp ${invoice.amount.toLocaleString("id-ID")} telah diterbitkan. Bayar di: ${payUrl}\n\n_${settings.brand_name}_`;
+      const sent = await sendWA(clientPhone, msg);
       if (!sent) {
         console.error(`[WA] Invoice ${invoice.invoiceNo}: gagal kirim ke ${clientPhone}`);
       }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/tripay";
 import { sendWA, waMsg } from "@/lib/whatsapp";
+import { getSiteSettings, renderSettingTemplate, getAdminPhone, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 type InvoiceLineItem = {
   type?: string;
@@ -117,18 +118,26 @@ export async function POST(req: NextRequest) {
     // Send WA notifications after response via after()
     if (invoice && newlyPaid) {
       const clientName  = invoice.client.user.name ?? invoice.client.businessName;
-      const adminPhone  = process.env.ADMIN_WHATSAPP_NUMBER ?? process.env.WHATSAPP_NUMBER;
 
       after(async () => {
-        // WA ke klien (jika ada nomor)
-        if (invoice.client.phone) {
-          await sendWA(
-            invoice.client.phone,
-            waMsg.paymentPaid(clientName, invoice.invoiceNo, invoice.amount, paymentMethod),
-          );
+        const settings = await getSiteSettings();
+        const adminPhone = getAdminPhone(settings);
+
+        // WA ke klien (jika ada nomor dan toggle aktif)
+        if (invoice.client.phone && isWaNotifyEnabled(settings, "wa_notify_payment_paid_client")) {
+          const msg = settings.template_wa_payment_paid
+            ? renderSettingTemplate(settings.template_wa_payment_paid, {
+                brandName: settings.brand_name,
+                clientName,
+                invoiceNo: invoice.invoiceNo,
+                amount: `Rp ${invoice.amount.toLocaleString("id-ID")}`,
+                method: paymentMethod,
+              })
+            : waMsg.paymentPaid(clientName, invoice.invoiceNo, invoice.amount, paymentMethod);
+          await sendWA(invoice.client.phone, msg);
         }
-        // WA ke admin
-        if (adminPhone) {
+        // WA ke admin (jika ada nomor dan toggle aktif)
+        if (adminPhone && isWaNotifyEnabled(settings, "wa_notify_payment_paid_admin")) {
           await sendWA(
             adminPhone,
             waMsg.paymentReceivedAdmin(

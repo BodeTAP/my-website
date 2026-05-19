@@ -4,6 +4,7 @@ import { getTransaction } from "@/lib/tripay";
 import { sendWA, waMsg } from "@/lib/whatsapp";
 import { subHours } from "date-fns";
 import { after } from "next/server";
+import { getSiteSettings, getAdminPhone, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -42,11 +43,12 @@ export async function GET(req: NextRequest) {
         });
 
         after(async () => {
-          const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
-          if (adminPhone) {
+          const settings = await getSiteSettings();
+          const adminPhone = getAdminPhone(settings);
+          if (adminPhone && isWaNotifyEnabled(settings, "wa_notify_payment_paid_admin")) {
             await sendWA(adminPhone, `⚠️ Reconciliation: Invoice ${inv.invoiceNo} ditandai LUNAS (webhook missed)`);
           }
-          if (inv.client.phone) {
+          if (inv.client.phone && isWaNotifyEnabled(settings, "wa_notify_payment_paid_client")) {
             await sendWA(
               inv.client.phone,
               waMsg.paymentPaid(

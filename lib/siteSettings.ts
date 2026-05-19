@@ -57,6 +57,21 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
     "Halo {clientName}! Invoice maintenance {invoiceNo} sebesar {amount} sudah diterbitkan. Bayar di: {paymentUrl}\n\n_{brandName}_",
   template_admin_notification:
     "Notifikasi admin: {eventName}\n\n{details}",
+  template_wa_invoice_new:
+    "Halo {clientName}! 👋\n\nInvoice baru telah diterbitkan untuk Anda.\n\n📄 No. Invoice: *{invoiceNo}*\n💰 Jumlah: *{amount}*\n📅 Jatuh tempo: {dueDate}\n\n💳 Bayar sekarang:\n{paymentUrl}\n\nSilakan cek portal klien untuk detail.\n\n_{brandName}_",
+  template_wa_payment_paid:
+    "Halo {clientName}! 🎉\n\nPembayaran Anda telah *berhasil dikonfirmasi*.\n\n✅ Invoice: *{invoiceNo}*\n💰 Jumlah: *{amount}*\n💳 Metode: {method}\n\nTerima kasih telah mempercayakan website Anda kepada kami.\n\n_{brandName}_",
+  template_wa_project_status:
+    "Halo {clientName}! 👋\n\nUpdate terbaru untuk proyek *{projectName}*:\n\n✅ Status: *{statusLabel}*\n{statusDesc}\n\nPantau progress lengkap di portal klien Anda.\n\n_{brandName}_",
+
+  // WA notification toggles
+  wa_notify_admin_phone: "",
+  wa_notify_invoice_new: "true",
+  wa_notify_payment_paid_client: "true",
+  wa_notify_payment_paid_admin: "true",
+  wa_notify_project_status: "true",
+  wa_notify_ticket_reply: "true",
+  wa_notify_weekly_summary: "true",
 
   invoice_prefix: "INV",
   invoice_valid_days: "7",
@@ -86,6 +101,29 @@ export function renderSettingTemplate(template: string, values: Record<string, s
     (text, [key, value]) => text.replace(new RegExp(`\\{${key}\\}`, "g"), String(value ?? "")),
     template,
   );
+}
+
+/**
+ * Returns the admin WhatsApp number to use for notifications.
+ * Priority: DB setting `wa_notify_admin_phone` → env ADMIN_WHATSAPP_NUMBER → env WHATSAPP_NUMBER
+ */
+export function getAdminPhone(settings: Record<string, string>): string {
+  return (
+    settings.wa_notify_admin_phone?.trim() ||
+    process.env.ADMIN_WHATSAPP_NUMBER?.trim() ||
+    process.env.WHATSAPP_NUMBER?.trim() ||
+    ""
+  );
+}
+
+/**
+ * Returns true if a specific WA notification type is enabled.
+ * Defaults to true if the key is not set (opt-out model).
+ */
+export function isWaNotifyEnabled(settings: Record<string, string>, key: string): boolean {
+  const val = settings[key];
+  if (val === undefined || val === "") return true;
+  return val !== "false" && val !== "0";
 }
 
 export function normalizeSiteSettingValue(key: string, value: unknown): string | null {

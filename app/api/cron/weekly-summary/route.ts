@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendWA } from "@/lib/whatsapp";
 import { subDays } from "date-fns";
 import { after } from "next/server";
+import { getSiteSettings, getAdminPhone, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -34,8 +35,12 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
+  const settings = await getSiteSettings();
+  const adminPhone = getAdminPhone(settings);
   if (!adminPhone) return NextResponse.json({ error: "Admin phone not set" }, { status: 500 });
+  if (!isWaNotifyEnabled(settings, "wa_notify_weekly_summary")) {
+    return NextResponse.json({ skipped: true, reason: "wa_notify_weekly_summary disabled" });
+  }
 
   const leadList = leads.length > 0 
     ? leads.map(l => `- ${l.businessName}`).join("\n")

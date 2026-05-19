@@ -21,7 +21,7 @@ type SectionMeta = {
 const SECTIONS_BY_TAB: Record<SettingsTab, string[]> = {
   umum: ["brand", "homepage", "heroStats"],
   seo: ["seoDefaults", "analytics"],
-  komunikasi: ["emailTemplates", "messageTemplates"],
+  komunikasi: ["emailTemplates", "waNotifications", "messageTemplates"],
   payment: ["paymentBehavior"],
   ai: ["aiModel", "aiFeatures", "aiFeatureConfig", "aiBehavior", "aiAutoPublish", "aiPortal"],
   broadcast: ["waDevices", "broadcastIdentity", "broadcastTemplates", "broadcastConsent", "broadcastGuardrail", "broadcastDelay"],
@@ -43,6 +43,7 @@ const SECTION_META: Record<string, SectionMeta> = {
   seoDefaults: { id: "seoDefaults", tab: "seo", title: "SEO Default", keywords: "seo meta title description og canonical base url" },
   analytics: { id: "analytics", tab: "seo", title: "Analytics", keywords: "analytics google ga pixel facebook tracking" },
   emailTemplates: { id: "emailTemplates", tab: "komunikasi", title: "Template Email", keywords: "email invoice magic link subject body template" },
+  waNotifications: { id: "waNotifications", tab: "komunikasi", title: "Notifikasi WhatsApp", keywords: "whatsapp wa notifikasi toggle nomor admin invoice payment proyek tiket weekly summary" },
   messageTemplates: { id: "messageTemplates", tab: "komunikasi", title: "Template WhatsApp & Admin", keywords: "whatsapp wa reminder ticket hosting maintenance admin notification" },
   paymentBehavior: { id: "paymentBehavior", tab: "payment", title: "Invoice & Payment Behavior", keywords: "invoice payment tripay sandbox live fee reminder schedule masa berlaku instruksi" },
   aiModel: { id: "aiModel", tab: "ai", title: "Model AI", keywords: "ai model claude haiku sonnet" },
@@ -730,6 +731,84 @@ export default function SettingsClient({
                   </div>
                 );
               })}
+            </div>
+          </CollapsibleSection>
+
+          <CollapsibleSection
+            id="waNotifications"
+            title="Notifikasi WhatsApp"
+            description="Nomor admin, toggle per jenis notifikasi, dan template pesan yang bisa dikustomisasi."
+            summary={<SummaryPill>{form.wa_notify_admin_phone ? form.wa_notify_admin_phone : "Nomor dari env"}</SummaryPill>}
+            hidden={!sectionVisible("waNotifications")}
+            open={openSections.waNotifications}
+            onToggle={toggleSection}
+          >
+            {/* Nomor admin */}
+            <div className="space-y-1.5 mb-6">
+              <Label className="text-blue-200/70 text-xs">Nomor WA Admin (untuk notifikasi sistem)</Label>
+              <Input
+                value={form.wa_notify_admin_phone ?? ""}
+                onChange={set("wa_notify_admin_phone")}
+                placeholder="628123456789 (kosong = pakai env ADMIN_WHATSAPP_NUMBER)"
+                className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 font-mono"
+              />
+              <p className="text-[11px] text-blue-200/35">
+                Format internasional tanpa + (contoh: 628123456789). Jika kosong, sistem pakai env var ADMIN_WHATSAPP_NUMBER.
+              </p>
+            </div>
+
+            {/* Toggle per jenis notifikasi */}
+            <div className="mb-6">
+              <p className="text-blue-200/70 text-xs font-medium mb-3">Aktifkan / Nonaktifkan Notifikasi</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[
+                  ["wa_notify_invoice_new", "Invoice baru → klien"],
+                  ["wa_notify_payment_paid_client", "Pembayaran berhasil → klien"],
+                  ["wa_notify_payment_paid_admin", "Pembayaran masuk → admin"],
+                  ["wa_notify_project_status", "Update status proyek → klien"],
+                  ["wa_notify_ticket_reply", "Balasan tiket → klien"],
+                  ["wa_notify_weekly_summary", "Weekly summary → admin"],
+                ].map(([key, label]) => (
+                  <div key={key} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
+                    <span className="text-white text-sm">{label}</span>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
+                      className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
+                        form[key] !== "false" ? "bg-green-600 border-green-500/50" : "bg-white/10 border-white/10"
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        form[key] !== "false" ? "translate-x-5" : "translate-x-0"
+                      }`} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Template yang sebelumnya hardcoded */}
+            <div className="space-y-5">
+              <p className="text-blue-200/70 text-xs font-medium">Template Pesan (kosong = pakai template default)</p>
+              {[
+                ["template_wa_invoice_new", "Invoice Baru ke Klien", TEMPLATE_VARIABLES.invoice],
+                ["template_wa_payment_paid", "Pembayaran Berhasil ke Klien", [...TEMPLATE_VARIABLES.invoice, "{method}"]],
+                ["template_wa_project_status", "Update Status Proyek ke Klien", ["{brandName}", "{clientName}", "{projectName}", "{statusLabel}", "{statusDesc}"]],
+              ].map(([key, label, variables]) => (
+                <div key={key as string} className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Label className="text-blue-200/70 text-xs">{label}</Label>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, [key as string]: savedForm[key as string] ?? "" }))} className="text-[11px] text-blue-200/45 hover:text-white">Reset field</button>
+                      <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[key as string] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-blue-200/60 hover:text-white"><Eye className="h-3 w-3" /> Preview</button>
+                    </div>
+                  </div>
+                  <VariableChips variables={variables as string[]} onPick={(value) => appendVariable(key as string, value)} />
+                  <textarea value={form[key as string] ?? ""} onChange={setText(key as string)} rows={5}
+                    className="field-sizing-content min-h-28 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-500/50 resize-y font-mono" />
+                  <p className="text-right text-[11px] text-blue-200/30">{(form[key as string] ?? "").split("\n").length} baris</p>
+                </div>
+              ))}
             </div>
           </CollapsibleSection>
 

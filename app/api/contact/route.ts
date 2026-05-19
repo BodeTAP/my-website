@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
 import { sendWA, waMsg } from "@/lib/whatsapp";
+import { getSiteSettings, getAdminPhone } from "@/lib/siteSettings";
 
 export async function POST(req: Request) {
   const ip = getClientIP(req);
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
     });
 
     after(async () => {
-      const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER ?? process.env.WHATSAPP_NUMBER;
+      const settings = await getSiteSettings();
+      const adminPhone = getAdminPhone(settings);
       if (adminPhone) {
         await sendWA(
           adminPhone,
