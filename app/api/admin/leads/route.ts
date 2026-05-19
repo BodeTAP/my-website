@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import type { Prisma, LeadStatus, WhatsAppOptInStatus } from "@prisma/client";
+
+const VALID_LEAD_STATUSES = new Set<string>(["NEW", "FOLLOWUP", "DEAL", "CLOSED"]);
+const VALID_CONSENT_STATUSES = new Set<string>(["UNKNOWN", "OPTED_IN", "OPTED_OUT"]);
 
 // GET — paginated leads list with filters
 export async function GET(req: NextRequest) {
@@ -13,23 +17,24 @@ export async function GET(req: NextRequest) {
   const page    = Math.max(1, Number(searchParams.get("page") ?? "1"));
   const perPage = Math.min(200, Math.max(10, Number(searchParams.get("perPage") ?? "50")));
   const q       = searchParams.get("q")?.trim() ?? "";
-  const status  = searchParams.get("status") ?? "ALL";
-  const consent = searchParams.get("consent") ?? "ALL";
+  const rawStatus  = searchParams.get("status") ?? "ALL";
+  const rawConsent = searchParams.get("consent") ?? "ALL";
   const hasWebsite = searchParams.get("hasWebsite") ?? "ALL";
   const neverContacted = searchParams.get("neverContacted") === "true";
   const category = searchParams.get("category") ?? "ALL";
 
-  // Build where clause
-  type WhereClause = {
-    AND?: object[];
-    OR?: object[];
-    status?: string;
-    waOptInStatus?: string;
-    currentWebsite?: { not: null } | null;
-    lastContactedAt?: null;
-  };
-  const where: WhereClause = {};
-  const andClauses: object[] = [];
+  const statusFilter: LeadStatus | undefined =
+    rawStatus !== "ALL" && VALID_LEAD_STATUSES.has(rawStatus)
+      ? (rawStatus as LeadStatus)
+      : undefined;
+
+  const consentFilter: WhatsAppOptInStatus | undefined =
+    rawConsent !== "ALL" && VALID_CONSENT_STATUSES.has(rawConsent)
+      ? (rawConsent as WhatsAppOptInStatus)
+      : undefined;
+
+  // Build where clause using Prisma's generated type
+  const andClauses: Prisma.LeadWhereInput[] = [];
 
   if (q) {
     andClauses.push({
@@ -41,12 +46,6 @@ export async function GET(req: NextRequest) {
       ],
     });
   }
-
-  if (status !== "ALL") where.status = status;
-  if (consent !== "ALL") where.waOptInStatus = consent;
-  if (hasWebsite === "yes") where.currentWebsite = { not: null };
-  if (hasWebsite === "no")  where.currentWebsite = null;
-  if (neverContacted)       where.lastContactedAt = null;
 
   // Category filter — uses same keyword detection as broadcast route
   if (category !== "ALL") {
@@ -67,7 +66,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  if (andClauses.length > 0) where.AND = andClauses;
+  const where: Prisma.LeadWhereInput = {
+    ...(statusFilter !== undefined ? { status: statusFilter } : {}),
+    ...(consentFilter !== undefined ? { waOptInStatus: consentFilter } : {}),
+    ...(hasWebsite === "yes" ? { currentWebsite: { not: null } } : {}),
+    ...(hasWebsite === "no"  ? { currentWebsite: null } : {}),
+    ...(neverContacted ? { lastContactedAt: null } : {}),
+    ...(andClauses.length > 0 ? { AND: andClauses } : {}),
+  };
 
   const [total, leads] = await Promise.all([
     prisma.lead.count({ where }),
