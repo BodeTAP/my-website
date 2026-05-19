@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { normalizePhone, sendWA } from "@/lib/whatsapp";
 import { loadBroadcastSettings } from "@/lib/broadcastSettings.server";
 import { buildKeywordRegex, renderBroadcastTemplate, type BroadcastRuntimeSettings } from "@/lib/broadcastSettings";
+import { getFonnteKeyForDevice } from "@/lib/getFonnteKey";
 
 type WebhookPayload = Record<string, unknown>;
 type MatchedLead = {
@@ -128,6 +129,8 @@ export async function POST(req: NextRequest) {
     const payload = await readWebhookPayload(req);
     const text = pickString(payload, ["message", "Message", "text", "Text", "body", "Body", "content", "msg"]);
     const sender = pickString(payload, ["sender", "Sender", "from", "phone", "whatsapp", "number", "target"]);
+    // `device` = nomor WA device yang menerima pesan (dikirim Fonnte di payload)
+    const deviceNumber = pickString(payload, ["device", "Device", "deviceNumber", "device_number"]) ?? "";
 
     if (!text || !sender) {
       console.warn("[Fonnte Inbound Webhook] Invalid payload", {
@@ -167,11 +170,14 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Resolve the device-specific API key so the reply comes from the same number
+      const deviceApiKey = await getFonnteKeyForDevice(deviceNumber);
+
       const autoReplies = settings.autoReplyOptOut
         ? await Promise.all(
             leadsToAutoReply.map(async (lead) => ({
               leadId: lead.id,
-              sent:   await sendWA(sender, buildOptOutReplyMessage(lead, settings)),
+              sent:   await sendWA(sender, buildOptOutReplyMessage(lead, settings), deviceApiKey),
             })),
           )
         : [];
@@ -205,11 +211,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Resolve the device-specific API key so the reply comes from the same number
+    const deviceApiKey = await getFonnteKeyForDevice(deviceNumber);
+
     const autoReplies = settings.autoReplyOptIn
       ? await Promise.all(
           leadsToAutoReply.map(async (lead) => ({
             leadId: lead.id,
-            sent:   await sendWA(sender, buildOptInPromoMessage(lead, settings)),
+            sent:   await sendWA(sender, buildOptInPromoMessage(lead, settings), deviceApiKey),
           })),
         )
       : [];

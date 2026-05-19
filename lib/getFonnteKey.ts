@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { normalizePhone } from "@/lib/whatsapp";
 
 /**
  * Returns a single active Fonnte API key.
@@ -61,4 +62,38 @@ export async function getFonnteKeys(): Promise<string[]> {
   if (process.env.FONNTE_API_KEY) return [process.env.FONNTE_API_KEY];
 
   return [];
+}
+
+/**
+ * Returns the Fonnte API key for a specific device number.
+ * Used by the inbound webhook to reply from the same device that sent the broadcast.
+ *
+ * Lookup order:
+ * 1. DB `fonnte_device_token_map` — JSON {"628xxx": "TOKEN1", "628yyy": "TOKEN2"}
+ * 2. Fallback to getFonnteKey() (first available key)
+ *
+ * @param deviceNumber - The device phone number from Fonnte webhook payload (field `device`)
+ */
+export async function getFonnteKeyForDevice(deviceNumber: string): Promise<string | undefined> {
+  if (!deviceNumber?.trim()) return getFonnteKey();
+
+  const normalized = normalizePhone(deviceNumber.replace(/@.+$/, ""));
+
+  try {
+    const mapRow = await prisma.siteSetting.findUnique({ where: { key: "fonnte_device_token_map" } });
+    if (mapRow?.value?.trim()) {
+      const map = JSON.parse(mapRow.value) as Record<string, string>;
+      // Try exact normalized match first, then last-8-digits fuzzy match
+      const exactKey = Object.keys(map).find((k) => normalizePhone(k) === normalized);
+      if (exactKey && map[exactKey]) return map[exactKey];
+
+      const lastDigits = normalized.slice(-8);
+      const fuzzyKey = Object.keys(map).find((k) => normalizePhone(k).endsWith(lastDigits));
+      if (fuzzyKey && map[fuzzyKey]) return map[fuzzyKey];
+    }
+  } catch {
+    // JSON parse error or DB error — fall through to default key
+  }
+
+  return getFonnteKey();
 }

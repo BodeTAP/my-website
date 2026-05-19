@@ -1254,6 +1254,30 @@ export default function SettingsClient({
               initialApiKey={form.fonnte_api_key ?? ""}
               initialApiKeys={form.fonnte_api_keys ?? ""}
             />
+
+            {/* Device → Token mapping untuk same-device auto-reply */}
+            <div className="mt-6 space-y-2 border-t border-white/5 pt-5">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-blue-200/70 text-xs">Mapping Device → Token (untuk auto-reply nomor yang sama)</Label>
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, fonnte_device_token_map: savedForm.fonnte_device_token_map ?? "" }))}
+                  className="text-[11px] text-blue-200/45 hover:text-white"
+                >
+                  Reset field
+                </button>
+              </div>
+              <textarea
+                value={form.fonnte_device_token_map ?? ""}
+                onChange={setText("fonnte_device_token_map")}
+                rows={4}
+                placeholder={'{"628111222333": "TOKEN_DEVICE_A", "628444555666": "TOKEN_DEVICE_B"}'}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-blue-500/50 resize-y font-mono placeholder:text-blue-200/20"
+              />
+              <p className="text-[11px] text-blue-200/35">
+                Format JSON: nomor WA device (628xxx) → token Fonnte device tersebut. Dipakai agar auto-reply opt-in/opt-out dikirim dari nomor yang sama dengan yang broadcast. Kosongkan jika hanya pakai 1 device.
+              </p>
+            </div>
           </CollapsibleSection>
 
           <CollapsibleSection

@@ -72,6 +72,9 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
   wa_notify_project_status: "true",
   wa_notify_ticket_reply: "true",
   wa_notify_weekly_summary: "true",
+  // Fonnte device → token mapping for same-device auto-reply
+  // Format JSON: {"628xxx": "TOKEN1", "628yyy": "TOKEN2"}
+  fonnte_device_token_map: "",
 
   invoice_prefix: "INV",
   invoice_valid_days: "7",
