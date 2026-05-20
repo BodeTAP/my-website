@@ -457,7 +457,6 @@ const OPENING_VARIANTS = [
   "Hei",
   "Permisi",
   "Salam kenal",
-  "Halo, selamat",
 ];
 
 function getTimeGreeting(): string {
