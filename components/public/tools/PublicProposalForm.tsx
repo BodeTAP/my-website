@@ -136,6 +136,7 @@ export default function PublicProposalForm({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (loading) return; // guard against double-submit double-charging quota
       setError(null);
       setResult(null);
       setDisabledNotice(false);
@@ -209,7 +210,7 @@ export default function PublicProposalForm({
         setLoading(false);
       }
     },
-    [prospectName, businessName, serviceDescription, price, refreshQuotaState],
+    [loading, prospectName, businessName, serviceDescription, price, refreshQuotaState],
   );
 
   const triggerPdfDownload = useCallback(

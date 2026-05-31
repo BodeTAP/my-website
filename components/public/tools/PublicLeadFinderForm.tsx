@@ -73,6 +73,7 @@ export default function PublicLeadFinderForm({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (loading) return; // guard against double-submit double-charging quota
       setError(null);
       setResults([]);
       setSearched(false);
@@ -138,7 +139,7 @@ export default function PublicLeadFinderForm({
         setLoading(false);
       }
     },
-    [query, city],
+    [loading, query, city],
   );
 
   function renderStars(rating: number) {

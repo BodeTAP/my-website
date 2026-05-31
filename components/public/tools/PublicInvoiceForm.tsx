@@ -193,6 +193,7 @@ export default function PublicInvoiceForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // guard against double-submit double-charging quota
     setError(null);
 
     if (isLocalLimitReached()) {
