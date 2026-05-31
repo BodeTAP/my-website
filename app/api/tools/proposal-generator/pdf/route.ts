@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     if (!prospectName?.trim() || !businessName?.trim() || !serviceDescription?.trim()) {
       return NextResponse.json({ error: "Data proposal tidak lengkap" }, { status: 400 });
     }
-    if (typeof price !== "number" || price <= 0) {
+    if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
       return NextResponse.json({ error: "Harga tidak valid" }, { status: 400 });
     }
 
@@ -75,8 +75,9 @@ export async function POST(req: NextRequest) {
       prospectName: prospectName.trim(),
       businessName: businessName.trim(),
     });
-    // Server-side Vercel Analytics (not blockable by ad blockers)
-    track("freemium_pdf_downloaded_server", {
+    // Server-side Vercel Analytics (not blockable by ad blockers).
+    // Await so the event isn't dropped when the serverless function freezes.
+    await track("freemium_pdf_downloaded_server", {
       tool: "proposal_generator",
       email_captured: validEmail,
     });
@@ -94,6 +95,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[FreemiumProposalPdf] error:", err);
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    return NextResponse.json({ error: "Gagal membuat PDF. Coba lagi." }, { status: 500 });
   }
 }

@@ -109,15 +109,20 @@ async function findLeadsBySender(sender: string): Promise<MatchedLead[]> {
     },
   });
 
-  return possibleLeads
-    .filter((lead) => {
-      const normalizedLead = normalizePhone(lead.whatsapp);
-      return (
-        candidates.includes(lead.whatsapp) ||
-        normalizedLead === normalizedSender ||
-        (lastDigits.length > 0 && normalizedLead.endsWith(lastDigits))
-      );
-    })
+  const matched = possibleLeads.filter((lead) => {
+    const normalizedLead = normalizePhone(lead.whatsapp);
+    return candidates.includes(lead.whatsapp) || normalizedLead === normalizedSender;
+  });
+
+  // Only fall back to fuzzy last-8-digit matching when there is no exact match —
+  // otherwise a different lead that merely shares the last 8 digits could be
+  // wrongly opted-in/out alongside the real sender.
+  if (matched.length > 0) return matched;
+
+  return possibleLeads.filter((lead) => {
+    const normalizedLead = normalizePhone(lead.whatsapp);
+    return lastDigits.length >= 8 && normalizedLead.endsWith(lastDigits);
+  });
 }
 
 export async function POST(req: NextRequest) {

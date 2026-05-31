@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[PublicLeadFinder]", err);
     return NextResponse.json(
-      { error: (err as Error).message },
+      { error: "Terjadi kesalahan saat mencari leads. Coba lagi." },
       { status: 500 },
     );
   }

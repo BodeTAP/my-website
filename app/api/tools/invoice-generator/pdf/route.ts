@@ -85,8 +85,9 @@ export async function POST(req: NextRequest) {
       fromName: fromName.trim(),
       toName: toName.trim(),
     });
-    // Server-side Vercel Analytics (not blockable by ad blockers)
-    track("freemium_pdf_downloaded_server", {
+    // Server-side Vercel Analytics (not blockable by ad blockers).
+    // Await so the event isn't dropped when the serverless function freezes.
+    await track("freemium_pdf_downloaded_server", {
       tool: "invoice_generator",
       email_captured: validEmail,
     });
@@ -104,6 +105,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[FreemiumInvoicePdf] error:", err);
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    return NextResponse.json({ error: "Gagal membuat PDF. Coba lagi." }, { status: 500 });
   }
 }
