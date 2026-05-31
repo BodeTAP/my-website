@@ -144,6 +144,18 @@ user confirms a lasting preference, project decision, or important current state
   `npx tsc --noEmit`, `npm run test:run`, and `npm run build` all passed after
   the cleanup. Build still prints non-blocking renderer warnings about
   unsupported `z-index` and string `width`/`height` values.
+- SEO sitemap/robots (2026-05-31): replaced `next-sitemap` (postbuild) with
+  native Next.js routes `app/sitemap.ts` and `app/robots.ts`. ROOT CAUSE of
+  pages not being indexed by Google: the old `next-sitemap` generated
+  `public/sitemap*.xml` and `public/robots.txt` containing `http://localhost:3000`
+  because `NEXT_PUBLIC_SITE_URL` was localhost at Vercel build time, so Googlebot
+  ignored all URLs. The native routes use a `getSiteUrl()` helper with an
+  anti-localhost guard (falls back to VERCEL_PROJECT_PRODUCTION_URL then
+  https://mfweb.maffisorp.id). Sitemap is now dynamic (revalidate 1h) so
+  auto-published articles appear without redeploy. Removed next-sitemap dep,
+  postbuild script, config, and the stale static public/ files. Do NOT
+  re-add next-sitemap. If sitemap shows wrong domain, check NEXT_PUBLIC_SITE_URL
+  env on Vercel (should be https://mfweb.maffisorp.id, not localhost).
 - As of 2026-05-17, `.env` exists locally but is not tracked by Git;
   `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their
