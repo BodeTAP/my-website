@@ -3,11 +3,18 @@ import { getFonnteKey } from "./getFonnteKey";
 
 const FONNTE_URL = "https://api.fonnte.com/send";
 
-/** Normalize Indonesian phone to 628xxx format (no +, no spaces) */
+/** Normalize Indonesian phone to 628xxx format (no +, no spaces).
+ *  Normalizes purely by leading prefix — no length heuristic — so unusually
+ *  long inputs are still prefixed consistently and caught by length validation
+ *  at the call site instead of silently passing through unprefixed. */
 export function normalizePhone(raw: string): string {
-  let n = raw.replace(/\D/g, "");
-  if (n.startsWith("0")) n = "62" + n.slice(1);
-  if (n.startsWith("8") && n.length <= 13) n = "62" + n;
+  let n = (raw ?? "").replace(/\D/g, "");
+  if (!n) return "";
+  // Strip a leading international "00" (e.g. 0062 → 62).
+  if (n.startsWith("00")) n = n.slice(2);
+  if (n.startsWith("62")) return n;
+  if (n.startsWith("0")) return "62" + n.slice(1);
+  if (n.startsWith("8")) return "62" + n;
   return n;
 }
 

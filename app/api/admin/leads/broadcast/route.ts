@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { requireAdmin } from "@/lib/auth";
 import { requireApiPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { sendWABatchRotated } from "@/lib/whatsapp";
+import { sendWABatchRotated, normalizePhone } from "@/lib/whatsapp";
 import { getFonnteKeys, getFonnteKey } from "@/lib/getFonnteKey";
 import { fonnteValidateNumbers } from "@/lib/fonnte";
 import { loadBroadcastSettings } from "@/lib/broadcastSettings.server";
@@ -627,13 +627,15 @@ export async function POST(req: NextRequest) {
     try {
       const deviceToken = await getFonnteKey();
       if (deviceToken && validLeads.length > 0) {
-        const phones = validLeads.map((l) => l.whatsapp);
+        // Fonnte normalizes targets to 62xxx and returns not_registered in the
+        // same form, so compare on normalized numbers — not raw lead.whatsapp.
+        const phones = validLeads.map((l) => normalizePhone(l.whatsapp));
         const validation = await fonnteValidateNumbers(deviceToken, phones);
         if (validation.status && validation.not_registered.length > 0) {
-          notOnWA = new Set(validation.not_registered);
+          notOnWA = new Set(validation.not_registered.map((n) => normalizePhone(n)));
           // Add unregistered numbers to invalid list for reporting
           validLeads.forEach((l) => {
-            if (notOnWA.has(l.whatsapp)) {
+            if (notOnWA.has(normalizePhone(l.whatsapp))) {
               invalidLeads.push({ ...l, skipReason: "NOT_REGISTERED_ON_WHATSAPP" });
             }
           });
@@ -645,7 +647,7 @@ export async function POST(req: NextRequest) {
 
     // Filter out numbers not on WhatsApp
     const waValidLeads = notOnWA.size > 0
-      ? validLeads.filter((l) => !notOnWA.has(l.whatsapp))
+      ? validLeads.filter((l) => !notOnWA.has(normalizePhone(l.whatsapp)))
       : validLeads;
 
     // 4. Cooldown check

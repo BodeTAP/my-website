@@ -506,7 +506,9 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
     return () => window.cancelAnimationFrame(id);
   }, [leads]);
 
-  const [selected, setSelected]           = useState<Set<string>>(new Set());
+  // Keyed by lead id → full Lead snapshot so selections survive pagination.
+  // Using a Set of ids would lose off-page leads when broadcasting/exporting/deleting.
+  const [selected, setSelected]           = useState<Map<string, Lead>>(new Map());
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [showHistory, setShowHistory]     = useState(false);
   const [deleting, setDeleting]           = useState(false);
@@ -551,26 +553,34 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
     });
   };
 
-  const toggleSelect = (id: string) =>
+  const toggleSelect = (lead: Lead) =>
     setSelected((prev) => {
-      const s = new Set(prev);
-      if (s.has(id)) s.delete(id);
-      else s.add(id);
+      const s = new Map(prev);
+      if (s.has(lead.id)) s.delete(lead.id);
+      else s.set(lead.id, lead);
       return s;
     });
   const toggleAll = () =>
-    setSelected(selected.size === paginated.length ? new Set() : new Set(paginated.map((l) => l.id)));
-
-  const selectedLeads = leads
-    .filter((l) => selected.has(l.id))
-    .map((l) => {
-      const localStatus = consentMap[l.id];
-      const waOptInStatus = localStatus ?? l.waOptInStatus;
-      const doNotContact = localStatus
-        ? waOptInStatus === "OPTED_OUT"
-        : l.doNotContact || waOptInStatus === "OPTED_OUT";
-      return { ...l, waOptInStatus, doNotContact };
+    setSelected((prev) => {
+      const allOnPage = paginated.length > 0 && paginated.every((l) => prev.has(l.id));
+      const s = new Map(prev);
+      if (allOnPage) {
+        // Deselect current page only (keep off-page selections).
+        for (const l of paginated) s.delete(l.id);
+      } else {
+        for (const l of paginated) s.set(l.id, l);
+      }
+      return s;
     });
+
+  const selectedLeads = [...selected.values()].map((l) => {
+    const localStatus = consentMap[l.id];
+    const waOptInStatus = localStatus ?? l.waOptInStatus;
+    const doNotContact = localStatus
+      ? waOptInStatus === "OPTED_OUT"
+      : l.doNotContact || waOptInStatus === "OPTED_OUT";
+    return { ...l, waOptInStatus, doNotContact };
+  });
 
   const handleDelete = async () => {
     if (!window.confirm(`Hapus ${selected.size} lead yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return;
@@ -579,10 +589,10 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
       const res = await fetch("/api/admin/leads", {
         method:  "DELETE",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ ids: [...selected] }),
+        body:    JSON.stringify({ ids: [...selected.keys()] }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
-      setSelected(new Set());
+      setSelected(new Map());
       void fetchLeads();
     } catch (err) {
       alert((err as Error).message);
@@ -596,7 +606,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
     setBulkUpdating(true);
     try {
       await Promise.all(
-        [...selected].map((id) =>
+        [...selected.keys()].map((id) =>
           fetch(`/api/admin/leads/${id}`, {
             method:  "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -607,10 +617,10 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
       // Update local statusMap immediately for instant feedback
       setStatusMap((prev) => {
         const next = { ...prev };
-        for (const id of selected) next[id] = status;
+        for (const id of selected.keys()) next[id] = status;
         return next;
       });
-      setSelected(new Set());
+      setSelected(new Map());
     } catch (err) {
       alert((err as Error).message);
     } finally {
@@ -622,7 +632,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
     setBulkUpdating(true);
     try {
       await Promise.all(
-        [...selected].map((id) =>
+        [...selected.keys()].map((id) =>
           fetch(`/api/admin/leads/${id}`, {
             method:  "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -632,7 +642,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
       );
       setConsentMap((prev) => {
         const next = { ...prev };
-        for (const id of selected) next[id] = waOptInStatus;
+        for (const id of selected.keys()) next[id] = waOptInStatus;
         return next;
       });
     } catch (err) {
@@ -755,7 +765,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
           leads={selectedLeads}
           settings={broadcastSettings}
           onClose={() => setShowBroadcast(false)}
-          onDone={() => { setShowBroadcast(false); setSelected(new Set()); router.refresh(); }}
+          onDone={() => { setShowBroadcast(false); setSelected(new Map()); router.refresh(); }}
         />
       )}
 
@@ -954,7 +964,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                 {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                 Hapus
               </Button>
-              <button onClick={() => setSelected(new Set())} className="text-blue-200/40 hover:text-white transition-colors">
+              <button onClick={() => setSelected(new Map())} className="text-blue-200/40 hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -968,7 +978,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
               <tr className="border-b border-white/10 bg-white/5">
                 <th className="px-4 py-4 w-10">
                   <button onClick={toggleAll} className="text-blue-200/40 hover:text-white transition-colors">
-                    {selected.size === paginated.length && paginated.length > 0
+                    {paginated.length > 0 && paginated.every((l) => selected.has(l.id))
                       ? <CheckSquare className="w-4 h-4 text-indigo-400" />
                       : <Square className="w-4 h-4" />}
                   </button>
@@ -1006,7 +1016,7 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                 paginated.map((l) => (
                   <tr key={l.id} className="hover:bg-white/5 transition-colors group">
                     <td className="px-4 py-4">
-                      <button onClick={() => toggleSelect(l.id)} className="text-blue-200/40 hover:text-indigo-400 transition-colors">
+                      <button onClick={() => toggleSelect(l)} className="text-blue-200/40 hover:text-indigo-400 transition-colors">
                         {selected.has(l.id)
                           ? <CheckSquare className="w-4 h-4 text-indigo-400" />
                           : <Square className="w-4 h-4" />}
