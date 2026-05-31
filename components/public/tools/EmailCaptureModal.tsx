@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowRight, Download, Mail, X } from "lucide-react";
+import { track } from "@vercel/analytics";
 
 type EmailCaptureModalProps = {
   open: boolean;
@@ -68,12 +69,14 @@ export default function EmailCaptureModal({
     }
 
     setSubmitting(true);
+    track("freemium_email_captured", { tool: toolName });
     onConfirm(trimmed);
   };
 
   const handleSkip = () => {
     if (submitting) return;
     setSubmitting(true);
+    track("freemium_email_skipped", { tool: toolName });
     onConfirm(null);
   };
 

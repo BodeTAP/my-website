@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { X, CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
+import { track } from "@vercel/analytics";
 
 type PaywallGateProps = {
   open: boolean;
@@ -109,6 +110,7 @@ export default function PaywallGate({
         {/* Primary CTA */}
         <Link
           href="/portal/register"
+          onClick={() => track("freemium_register_cta_clicked", { tool: toolName, source: "paywall" })}
           className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-colors"
         >
           Buat Akun Gratis

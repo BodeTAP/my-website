@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
 import { hashIP, trackAnonymousUsage } from "@/lib/freemium";
 import { generateFreemiumInvoicePdf } from "@/lib/tools/freemiumInvoicePdf";
+import { track } from "@vercel/analytics/server";
 
 export const runtime = "nodejs";
 
@@ -86,6 +87,11 @@ export async function POST(req: NextRequest) {
       email: validEmail ? trimmedEmail : null,
       fromName: fromName.trim(),
       toName: toName.trim(),
+    });
+    // Server-side Vercel Analytics (not blockable by ad blockers)
+    track("freemium_pdf_downloaded_server", {
+      tool: "invoice_generator",
+      email_captured: validEmail,
     });
 
     const filename = `invoice-${invoiceNo.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 32) || "freemium"}.pdf`;

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Search, MapPin, Loader2, Star, Globe, Phone, Tag, AlertCircle } from "lucide-react";
+import { track } from "@vercel/analytics";
 import PaywallGate from "@/components/public/PaywallGate";
 
 const STORAGE_KEY = "mfweb_freemium_lead_finder";
@@ -83,6 +84,7 @@ export default function PublicLeadFinderForm({
 
       // Client-side soft-limit check
       if (isLocalLimitReached()) {
+        track("freemium_paywall_shown", { tool: "lead_finder", reason: "local_limit" });
         setShowPaywall(true);
         return;
       }
@@ -102,6 +104,7 @@ export default function PublicLeadFinderForm({
           const retryAfterMs: number = (data?.retryAfterMs as number) || 24 * 60 * 60 * 1000;
           const resetAt = Date.now() + retryAfterMs;
           setLocalUsage({ count: 1, resetAt });
+          track("freemium_paywall_shown", { tool: "lead_finder", reason: "server_limit" });
           setShowPaywall(true);
           setLoading(false);
           return;
@@ -123,6 +126,7 @@ export default function PublicLeadFinderForm({
         const data = await res.json();
         setResults(data.places || []);
         setSearched(true);
+        track("freemium_lead_search", { results: data.places?.length ?? 0, has_city: !!city.trim() });
 
         // Update localStorage usage
         const usage = getLocalUsage();

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { FileText, Download, Loader2, AlertCircle, MessageCircle } from "lucide-react";
+import { track } from "@vercel/analytics";
 import PaywallGate from "@/components/public/PaywallGate";
 import EmailCaptureModal from "@/components/public/tools/EmailCaptureModal";
 import { buildProposalWaMessage, buildWaShareLink } from "@/lib/waShare";
@@ -140,6 +141,7 @@ export default function PublicProposalForm({
       setDisabledNotice(false);
 
       if (isLocalLimitReached()) {
+        track("freemium_paywall_shown", { tool: "proposal_generator", reason: "local_limit" });
         setPaywallOpen(true);
         return;
       }
@@ -168,6 +170,7 @@ export default function PublicProposalForm({
           const data = await res.json().catch(() => null);
           const retryAfterMs: number = (data?.retryAfterMs as number) || DEFAULT_WINDOW_MS;
           setLocalUsage({ count: MONTHLY_LIMIT, resetAt: Date.now() + retryAfterMs });
+          track("freemium_paywall_shown", { tool: "proposal_generator", reason: "server_limit" });
           setPaywallOpen(true);
           refreshQuotaState();
           return;
@@ -186,6 +189,7 @@ export default function PublicProposalForm({
 
         const data = await res.json();
         setResult(data.proposal as ProposalResult);
+        track("freemium_proposal_generated", { price_range: priceNum >= 5_000_000 ? "5jt+" : priceNum >= 1_000_000 ? "1-5jt" : "<1jt" });
 
         const existing = getLocalUsage();
         const now = Date.now();
@@ -246,6 +250,7 @@ export default function PublicProposalForm({
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        track("freemium_pdf_downloaded", { tool: "proposal_generator", email_captured: !!email });
         // Revoke after a tick so Safari/iOS still has time to start the download
         setTimeout(() => URL.revokeObjectURL(url), 2_000);
       } catch {
@@ -265,6 +270,7 @@ export default function PublicProposalForm({
 
   const handleWaShare = useCallback(() => {
     if (!result) return;
+    track("freemium_wa_share", { tool: "proposal_generator" });
     const message = buildProposalWaMessage({
       prospectName: result.to,
       businessName: result.from,

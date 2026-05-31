@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Loader2, Download, ReceiptText, MessageCircle } from "lucide-react";
+import { track } from "@vercel/analytics";
 import PaywallGate from "@/components/public/PaywallGate";
 import EmailCaptureModal from "@/components/public/tools/EmailCaptureModal";
 import { buildInvoiceWaMessage, buildWaShareLink } from "@/lib/waShare";
@@ -195,6 +196,7 @@ export default function PublicInvoiceForm({
     setError(null);
 
     if (isLocalLimitReached()) {
+      track("freemium_paywall_shown", { tool: "invoice_generator", reason: "local_limit" });
       setPaywallOpen(true);
       return;
     }
@@ -221,6 +223,7 @@ export default function PublicInvoiceForm({
         const data = await res.json().catch(() => null);
         const retryAfterMs: number = (data?.retryAfterMs as number) || DEFAULT_WINDOW_MS;
         setLocalUsage(1, Date.now() + retryAfterMs);
+        track("freemium_paywall_shown", { tool: "invoice_generator", reason: "server_limit" });
         setPaywallOpen(true);
         refreshQuotaState();
         return;
@@ -239,6 +242,7 @@ export default function PublicInvoiceForm({
 
       const data = await res.json();
       setResult(data.invoice);
+      track("freemium_invoice_generated", { item_count: items.length, include_tax: includeTax });
 
       const existing = getLocalUsage();
       const resetAt = existing && Date.now() < existing.resetAt
@@ -300,6 +304,7 @@ export default function PublicInvoiceForm({
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        track("freemium_pdf_downloaded", { tool: "invoice_generator", email_captured: !!email });
         setTimeout(() => URL.revokeObjectURL(url), 2_000);
       } catch {
         setError("Gagal generate PDF. Periksa koneksi internet Anda.");
@@ -318,6 +323,7 @@ export default function PublicInvoiceForm({
 
   const handleWaShare = useCallback(() => {
     if (!result) return;
+    track("freemium_wa_share", { tool: "invoice_generator" });
     const message = buildInvoiceWaMessage({
       invoiceNo: result.number,
       fromName: result.from,
