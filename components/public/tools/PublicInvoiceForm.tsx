@@ -45,6 +45,7 @@ type InvoiceResult = {
 
 const STORAGE_KEY = "mfweb_freemium_invoice_generator";
 const MAX_ITEMS = 10;
+const DEFAULT_MONTHLY_LIMIT = 1;
 const DEFAULT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
@@ -83,11 +84,11 @@ function setLocalUsage(count: number, resetAt: number): void {
   }
 }
 
-function isLocalLimitReached(): boolean {
+function isLocalLimitReached(limit: number): boolean {
   const usage = getLocalUsage();
   if (!usage) return false;
   if (Date.now() > usage.resetAt) return false;
-  return usage.count >= 1;
+  return usage.count >= limit;
 }
 
 function formatResetCountdown(resetAt: number): string {
@@ -108,11 +109,13 @@ function formatResetCountdown(resetAt: number): string {
 type PublicInvoiceFormProps = {
   welcomeCredits?: number;
   welcomeBonusBreakdown?: string;
+  freemiumLimit?: number;
 };
 
 export default function PublicInvoiceForm({
   welcomeCredits = 15,
   welcomeBonusBreakdown,
+  freemiumLimit = DEFAULT_MONTHLY_LIMIT,
 }: PublicInvoiceFormProps = {}) {
   const [fromName, setFromName] = useState("");
   const [toName, setToName] = useState("");
@@ -138,12 +141,12 @@ export default function PublicInvoiceForm({
       setQuotaState({ used: false, resetCountdown: "" });
       return;
     }
-    const used = Date.now() < usage.resetAt && usage.count >= 1;
+    const used = Date.now() < usage.resetAt && usage.count >= freemiumLimit;
     setQuotaState({
       used,
       resetCountdown: used ? formatResetCountdown(usage.resetAt) : "",
     });
-  }, []);
+  }, [freemiumLimit]);
 
   useEffect(() => {
     const id = window.requestAnimationFrame(() => refreshQuotaState());
@@ -196,7 +199,7 @@ export default function PublicInvoiceForm({
     if (loading) return; // guard against double-submit double-charging quota
     setError(null);
 
-    if (isLocalLimitReached()) {
+    if (isLocalLimitReached(freemiumLimit)) {
       track("freemium_paywall_shown", { tool: "invoice_generator", reason: "local_limit" });
       setPaywallOpen(true);
       return;

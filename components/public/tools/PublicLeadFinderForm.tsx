@@ -41,7 +41,7 @@ function setLocalUsage(usage: FreemiumUsage): void {
   }
 }
 
-function isLocalLimitReached(): boolean {
+function isLocalLimitReached(limit: number): boolean {
   const usage = getLocalUsage();
   if (!usage) return false;
   if (Date.now() > usage.resetAt) {
@@ -49,17 +49,19 @@ function isLocalLimitReached(): boolean {
     localStorage.removeItem(STORAGE_KEY);
     return false;
   }
-  return usage.count >= 1;
+  return usage.count >= limit;
 }
 
 type PublicLeadFinderFormProps = {
   welcomeCredits?: number;
   welcomeBonusBreakdown?: string;
+  freemiumLimit?: number;
 };
 
 export default function PublicLeadFinderForm({
   welcomeCredits = 15,
   welcomeBonusBreakdown,
+  freemiumLimit = 1,
 }: PublicLeadFinderFormProps = {}) {
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
@@ -84,7 +86,7 @@ export default function PublicLeadFinderForm({
       }
 
       // Client-side soft-limit check
-      if (isLocalLimitReached()) {
+      if (isLocalLimitReached(freemiumLimit)) {
         track("freemium_paywall_shown", { tool: "lead_finder", reason: "local_limit" });
         setShowPaywall(true);
         return;
@@ -139,7 +141,7 @@ export default function PublicLeadFinderForm({
         setLoading(false);
       }
     },
-    [loading, query, city],
+    [loading, query, city, freemiumLimit],
   );
 
   function renderStars(rating: number) {

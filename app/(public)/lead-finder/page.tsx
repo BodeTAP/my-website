@@ -279,6 +279,7 @@ export default async function LeadFinderLandingPage() {
             <PublicLeadFinderForm
               welcomeCredits={welcomeCredits}
               welcomeBonusBreakdown={welcomeBonusBreakdown}
+              freemiumLimit={toolSettings.freemium.leadFinder.dailyLimit}
             />
           </FadeUp>
         </div>

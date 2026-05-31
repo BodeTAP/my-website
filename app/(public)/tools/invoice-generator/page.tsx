@@ -57,6 +57,7 @@ export default async function InvoiceGeneratorLandingPage() {
         <PublicInvoiceForm
           welcomeCredits={welcomeCredits}
           welcomeBonusBreakdown={welcomeBonusBreakdown}
+          freemiumLimit={settings.freemium.invoiceGenerator.monthlyLimit}
         />
       </section>
 

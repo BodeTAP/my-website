@@ -56,6 +56,7 @@ export default async function ProposalGeneratorLandingPage() {
         <PublicProposalForm
           welcomeCredits={welcomeCredits}
           welcomeBonusBreakdown={welcomeBonusBreakdown}
+          freemiumLimit={settings.freemium.proposalGenerator.monthlyLimit}
         />
       </section>
 

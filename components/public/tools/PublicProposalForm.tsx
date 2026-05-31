@@ -28,7 +28,7 @@ type LocalUsage = {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = "mfweb_freemium_proposal_generator";
-const MONTHLY_LIMIT = 1;
+const DEFAULT_MONTHLY_LIMIT = 1;
 const DEFAULT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -53,14 +53,14 @@ function setLocalUsage(usage: LocalUsage): void {
   }
 }
 
-function isLocalLimitReached(): boolean {
+function isLocalLimitReached(limit: number): boolean {
   const usage = getLocalUsage();
   if (!usage) return false;
   if (Date.now() > usage.resetAt) {
     localStorage.removeItem(STORAGE_KEY);
     return false;
   }
-  return usage.count >= MONTHLY_LIMIT;
+  return usage.count >= limit;
 }
 
 function formatRupiah(value: number): string {
@@ -83,11 +83,13 @@ function formatResetCountdown(resetAt: number): string {
 type PublicProposalFormProps = {
   welcomeCredits?: number;
   welcomeBonusBreakdown?: string;
+  freemiumLimit?: number;
 };
 
 export default function PublicProposalForm({
   welcomeCredits = 15,
   welcomeBonusBreakdown,
+  freemiumLimit = DEFAULT_MONTHLY_LIMIT,
 }: PublicProposalFormProps = {}) {
   const [prospectName, setProspectName] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -116,12 +118,12 @@ export default function PublicProposalForm({
       setQuotaState({ used: false, resetCountdown: "" });
       return;
     }
-    const used = Date.now() < usage.resetAt && usage.count >= MONTHLY_LIMIT;
+    const used = Date.now() < usage.resetAt && usage.count >= freemiumLimit;
     setQuotaState({
       used,
       resetCountdown: used ? formatResetCountdown(usage.resetAt) : "",
     });
-  }, []);
+  }, [freemiumLimit]);
 
   useEffect(() => {
     // Defer initial sync to next animation frame so the lint rule
@@ -141,7 +143,7 @@ export default function PublicProposalForm({
       setResult(null);
       setDisabledNotice(false);
 
-      if (isLocalLimitReached()) {
+      if (isLocalLimitReached(freemiumLimit)) {
         track("freemium_paywall_shown", { tool: "proposal_generator", reason: "local_limit" });
         setPaywallOpen(true);
         return;
@@ -170,7 +172,7 @@ export default function PublicProposalForm({
         if (res.status === 429) {
           const data = await res.json().catch(() => null);
           const retryAfterMs: number = (data?.retryAfterMs as number) || DEFAULT_WINDOW_MS;
-          setLocalUsage({ count: MONTHLY_LIMIT, resetAt: Date.now() + retryAfterMs });
+          setLocalUsage({ count: freemiumLimit, resetAt: Date.now() + retryAfterMs });
           track("freemium_paywall_shown", { tool: "proposal_generator", reason: "server_limit" });
           setPaywallOpen(true);
           refreshQuotaState();
@@ -210,7 +212,7 @@ export default function PublicProposalForm({
         setLoading(false);
       }
     },
-    [loading, prospectName, businessName, serviceDescription, price, refreshQuotaState],
+    [loading, prospectName, businessName, serviceDescription, price, freemiumLimit, refreshQuotaState],
   );
 
   const triggerPdfDownload = useCallback(
