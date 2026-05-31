@@ -58,8 +58,6 @@ next-env.d.ts
 .vercel
 
 # next-sitemap (generated at build time)
-public/robots.txt
-public/sitemap*.xml
 public/uploads/
 
 # Claude Code internal files
