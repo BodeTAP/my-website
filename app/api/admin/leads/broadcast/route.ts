@@ -235,6 +235,23 @@ function varyBusinessName(businessName: string, seed: number): string {
 // ── Paragraph shuffler ────────────────────────────────────────────────────────
 
 /**
+ * Deterministic PRNG (mulberry32). Produces a well-distributed sequence of
+ * floats in [0, 1) from a single 32-bit seed, so derived index choices are
+ * close to uniform — unlike a raw linear `seed * k % n`, which biases toward
+ * certain permutations.
+ */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
  * Shuffle the order of bullet-point lines within a paragraph block.
  * Only shuffles lines that start with a bullet emoji or "✅/☑️/etc."
  * Leaves non-bullet lines (greeting, footer, etc.) in place.
@@ -250,10 +267,12 @@ function shuffleBulletLines(text: string, seed: number): string {
 
   if (bulletIndices.length < 3) return text; // not enough bullets to shuffle
 
-  // Fisher-Yates with deterministic seed
+  // Fisher-Yates with a deterministic, well-distributed PRNG so every
+  // permutation is roughly equally likely (better humanization / anti-pattern).
+  const rand = mulberry32(seed >>> 0);
   const bullets = bulletIndices.map((i) => lines[i]);
   for (let i = bullets.length - 1; i > 0; i--) {
-    const j = (seed * (i + 3) + 7) % (i + 1);
+    const j = Math.floor(rand() * (i + 1));
     [bullets[i], bullets[j]] = [bullets[j], bullets[i]];
   }
   bulletIndices.forEach((lineIdx, i) => { lines[lineIdx] = bullets[i]; });
