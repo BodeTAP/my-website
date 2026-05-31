@@ -203,6 +203,38 @@ user confirms a lasting preference, project decision, or important current state
 - `PaidToolLanding` `InvoiceMockup` is rendered with a fresh year and current
   date so the static landing page doesn't display a stale invoice number to
   visitors months after deployment.
+- Codebase bug audit (2026-06-01): completed a full HIGH/MEDIUM/LOW bug audit
+  and fixed everything. All commits are local only (NOT pushed). Final state:
+  `npx tsc --noEmit`, `npm run lint` (7 pre-existing warnings, intentional),
+  `npm run test:run` (61 tests), and `npm run build` all pass. Key fixes:
+  - PDF WinAnsi crash: emoji/CJK/non-Latin-1 chars in user input no longer
+    throw in pdf-lib `drawText`. New shared helper `lib/tools/pdfText.ts`
+    (`sanitizeWinAnsi`) applied to freemium + paid PDF generators
+    (`freemiumInvoicePdf`, `freemiumProposalPdf`, `invoicePdf`, `proposalPdf`).
+  - Leads table (`LeadsTable.tsx`): selection now a `Map<id, Lead>` so
+    broadcast/export/delete keep off-page selections across pagination.
+  - `normalizePhone` (`lib/whatsapp.ts`): prefix-based normalization, no length
+    heuristic; validate final length at call sites.
+  - Broadcast Fonnte validate: compare `not_registered` using `normalizePhone`
+    on BOTH sides (was raw `08…` vs `62…`, never matched).
+  - Cron/webhook hardening: fail-closed auth (weekly-summary,
+    payment-reconcile), invoice status race guard, idempotent credit top-up,
+    tripay EXPIRED/FAILED guard (`status: { not: "PAID" }`).
+  - Freemium: `lib/rateLimit.ts` self-heals lost Redis TTL (was permanent
+    lockout) + `refundRateLimit`/`refundFreemiumQuota`; lead-finder refunds
+    quota on upstream failure; double-submit guard on all 3 public forms;
+    client soft-limit now reads admin-configured limit (was hardcoded 1),
+    threaded via `freemiumLimit` prop.
+  - `app/layout.tsx`: `safeMetadataBase()` guards invalid DB-configured site
+    URL so metadata generation can't 500 every page.
+  - Broadcast variation: reachable opener variants, `replaceAll` for business
+    name, word-boundary opt-out detection, whole-broadcast conversion rate
+    (server aggregate `optInCount`), mulberry32 PRNG for uniform bullet shuffle.
+  - Webhooks: device-status parses JSON/form/raw + seconds-or-ms timestamp;
+    inbound prefers exact lead match over fuzzy last-8-digit (avoids wrong
+    opt-in/out).
+  - PDF routes: `await track()` server analytics; generic client error messages
+    (no raw error leakage); invoice PDF recomputes totals server-side.
 
 ## Known Context
 
