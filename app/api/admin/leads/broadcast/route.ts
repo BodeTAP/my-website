@@ -423,7 +423,9 @@ function buildPersonalizedOpener(lead: LeadContext, index: number): string {
       `Sudah punya website untuk ${bizName} belum?`,
       `${bizName} sudah hadir secara online belum?`,
     ];
-    return questions[index % questions.length];
+    // index is always a multiple of 3 here, so `index % length` collapses to 0;
+    // divide first so all three variants are reachable.
+    return questions[Math.floor(index / 3) % questions.length];
   }
   // 70%: stat-based hook with varied number format
   const stat = STAT_VARIANTS[index % STAT_VARIANTS.length];
@@ -515,7 +517,7 @@ function varyMessage(
 
   // ── Layer 7: Category-specific context + website acknowledgment ──
   const contextLine = buildWebsiteContext(lead, s)
-    .replace(lead.businessName, varyBusinessName(lead.businessName, s + 9));
+    .replaceAll(lead.businessName, varyBusinessName(lead.businessName, s + 9));
   const footerIdx = result.lastIndexOf(`\n\n_${settings.brandName}`);
   if (footerIdx !== -1) {
     result = result.slice(0, footerIdx) + "\n\n" + contextLine + result.slice(footerIdx);
@@ -554,7 +556,16 @@ function varyMessage(
 
 function appendOptOutInstruction(message: string, settings: BroadcastRuntimeSettings): string {
   const optOutWord = settings.optOutKeywords[0]?.toUpperCase() ?? "STOP";
-  if (settings.optOutKeywords.some((keyword) => message.toLowerCase().includes(keyword.toLowerCase()))) {
+  // Match the keyword as a whole word — a bare substring check could match the
+  // keyword inside an unrelated word and wrongly drop the compliance line.
+  const lower = message.toLowerCase();
+  const alreadyHasOptOut = settings.optOutKeywords.some((keyword) => {
+    const kw = keyword.trim().toLowerCase();
+    if (!kw) return false;
+    const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(lower);
+  });
+  if (alreadyHasOptOut) {
     return message;
   }
   return `${message}\n\nBalas ${optOutWord} jika tidak ingin menerima pesan lagi.`;

@@ -50,10 +50,21 @@ export async function GET(req: NextRequest, { params }: Params) {
     }),
   ]);
 
+  // Conversion metric must be computed across the whole broadcast, not just the
+  // current page — otherwise optInCount/sent is mismatched (page subset over full sent).
+  const optInCount = await prisma.broadcastRecipient.count({
+    where: {
+      broadcastId: id,
+      status: { in: ["QUEUED", "SENT"] },
+      lead: { is: { waOptInStatus: "OPTED_IN" } },
+    },
+  });
+
   return NextResponse.json({
     log,
     recipients,
     total,
+    optInCount,
     page,
     perPage,
     totalPages: Math.ceil(total / perPage),

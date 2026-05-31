@@ -47,6 +47,7 @@ const SKIP_REASON_LABELS: Record<string, string> = {
 function DrillDownModal({ log, onClose }: { log: BroadcastLogEntry; onClose: () => void }) {
   const [recipients, setRecipients] = useState<RecipientEntry[]>([]);
   const [total, setTotal]           = useState(0);
+  const [optInCount, setOptInCount] = useState(0);
   const [page, setPage]             = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading]       = useState(true);
@@ -62,6 +63,7 @@ function DrillDownModal({ log, onClose }: { log: BroadcastLogEntry; onClose: () 
       const data = await res.json();
       setRecipients(data.recipients ?? []);
       setTotal(data.total ?? 0);
+      setOptInCount(data.optInCount ?? 0);
       setTotalPages(data.totalPages ?? 1);
     } finally {
       setLoading(false);
@@ -78,10 +80,7 @@ function DrillDownModal({ log, onClose }: { log: BroadcastLogEntry; onClose: () 
     setPage(1);
   };
 
-  // Count opt-ins that happened after this broadcast (conversion tracking)
-  const optInCount = recipients.filter(
-    (r) => r.lead?.waOptInStatus === "OPTED_IN" && (r.status === "QUEUED" || r.status === "SENT")
-  ).length;
+  // optInCount comes from the server (whole-broadcast aggregate), not the current page.
 
   if (typeof document === "undefined") return null;
 
