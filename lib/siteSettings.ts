@@ -101,7 +101,9 @@ export async function getSiteSettings(): Promise<Record<string, string>> {
 
 export function renderSettingTemplate(template: string, values: Record<string, string | number | null | undefined>) {
   return Object.entries(values).reduce(
-    (text, [key, value]) => text.replace(new RegExp(`\\{${key}\\}`, "g"), String(value ?? "")),
+    // Use a replacer function so `$`, `$&`, `$1` etc. in user-supplied values
+    // (e.g. clientName, ticketSubject) are treated literally, not as replacement patterns.
+    (text, [key, value]) => text.replace(new RegExp(`\\{${key}\\}`, "g"), () => String(value ?? "")),
     template,
   );
 }

@@ -32,6 +32,10 @@ export async function POST(req: Request, { params }: Params) {
   const { id: ticketId } = await params;
   const { body, status } = await req.json();
 
+  if (typeof body !== "string" || !body.trim()) {
+    return NextResponse.json({ error: "Isi balasan tidak boleh kosong" }, { status: 400 });
+  }
+
   const user = await prisma.user.findUnique({ where: { email: session.user!.email! } });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 400 });
 

@@ -30,19 +30,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 2. Check freemium quota (IP-based rate limit)
-  const quota = await checkFreemiumQuota(req, "proposal_generator");
-  if (!quota.allowed) {
-    return NextResponse.json(
-      {
-        error: "Batas penggunaan gratis tercapai. Daftar akun untuk akses penuh.",
-        retryAfterMs: quota.retryAfterMs,
-      },
-      { status: 429 },
-    );
-  }
-
-  // 3. Parse and validate input
+  // 2. Parse and validate input BEFORE consuming quota — a malformed request
+  //    must not burn the user's (or shared IP's) monthly allowance.
   let body: unknown;
   try {
     body = await req.json();
@@ -66,8 +55,20 @@ export async function POST(req: NextRequest) {
   if (!serviceDescription?.trim()) {
     return NextResponse.json({ error: "serviceDescription wajib diisi" }, { status: 400 });
   }
-  if (price == null || typeof price !== "number" || price <= 0) {
+  if (price == null || typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
     return NextResponse.json({ error: "price wajib berupa angka positif" }, { status: 400 });
+  }
+
+  // 3. Check freemium quota (IP-based rate limit) — only after validation passes.
+  const quota = await checkFreemiumQuota(req, "proposal_generator");
+  if (!quota.allowed) {
+    return NextResponse.json(
+      {
+        error: "Batas penggunaan gratis tercapai. Daftar akun untuk akses penuh.",
+        retryAfterMs: quota.retryAfterMs,
+      },
+      { status: 429 },
+    );
   }
 
   // 4. Generate simplified proposal content (no AI)

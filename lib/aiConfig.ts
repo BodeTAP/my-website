@@ -476,7 +476,8 @@ function value(settings: Partial<Record<string, string>>, key: string) {
 
 function renderPromptTemplate(template: string, replacements: Record<string, string | number | boolean | null | undefined>) {
   return Object.entries(replacements).reduce(
-    (text, [key, replacement]) => text.replace(new RegExp(`\\{${key}\\}`, "g"), String(replacement ?? "")),
+    // Replacer function so `$`/`$&`/`$1` in dynamic values (article titles, category names) stay literal.
+    (text, [key, replacement]) => text.replace(new RegExp(`\\{${key}\\}`, "g"), () => String(replacement ?? "")),
     template,
   );
 }

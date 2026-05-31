@@ -19,6 +19,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Klien, nomor invoice, dan jumlah wajib diisi." }, { status: 400 });
   }
 
+  const amountNum = Math.round(Number(amount));
+  if (!Number.isFinite(amountNum) || amountNum <= 0) {
+    return NextResponse.json({ error: "Jumlah tagihan harus berupa angka positif." }, { status: 400 });
+  }
+
   // Only allow alphanumeric, hyphens, and dots — blocks any special chars in headers/PDF
   if (!/^[A-Z0-9\-\.]{3,30}$/i.test(invoiceNo.trim())) {
     return NextResponse.json({ error: "Nomor invoice hanya boleh mengandung huruf, angka, dan tanda hubung." }, { status: 400 });
@@ -34,7 +39,7 @@ export async function POST(req: Request) {
       clientId,
       invoiceNo: invoiceNo.trim(),
       description: description?.trim() || null,
-      amount: Math.round(Number(amount)),
+      amount: amountNum,
       lineItems: Array.isArray(lineItems) ? lineItems : [],
       dueDate: dueDate ? new Date(dueDate) : new Date(Date.now() + Number.parseInt(settings.invoice_valid_days || "7", 10) * 24 * 60 * 60 * 1000),
       whatsappMsg: customWaMsg?.trim() || null,

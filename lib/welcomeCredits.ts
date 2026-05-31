@@ -5,15 +5,17 @@ import type { ToolSettings } from "@/lib/toolSettings";
  * actually buy. Used in landing pages and the freemium paywall to make
  * "X kredit gratis" feel tangible to non-technical users (UMKM, freelancer).
  *
- * Strategy: pick a balanced split — a couple of proposals, a couple of
- * invoices, and a few standard lead searches — so each tool is represented.
- * Returns at most 3 chunks, joined with "+".
+ * Strategy (greedy, representation-first):
+ *   1. Reserve 1 of each tool the user can afford, so every tool shows up.
+ *   2. Spend the leftover credits on lead searches (cheapest, highest volume),
+ *      then top up invoices, then proposals.
+ * This avoids the previous bug where fixed percentage sub-budgets floored to
+ * zero (e.g. 30% of 15 = 4 credits, /5 per proposal = 0 proposals).
  *
- * Examples:
- *   15 credits, costs (proposal 5, invoice 3, lead 2):
- *     -> "3 proposal + 5 invoice + 5x cari leads"
- *   5 credits, costs (proposal 5, invoice 3, lead 2):
- *     -> "1 proposal" (because everything else does not fit)
+ * Examples (proposal 5, invoice 3, lead 2):
+ *   15 credits -> "1 proposal + 1 invoice + 3x cari leads"  (5+3+6 = 14, +1 leftover)
+ *   5 credits  -> "1 proposal"
+ *   2 credits  -> "1x cari leads"
  */
 export function getWelcomeCreditBreakdown(
   amount: number,
@@ -25,35 +27,47 @@ export function getWelcomeCreditBreakdown(
   const invoiceCost = Math.max(1, settings.invoiceGenerator.creditCost);
   const leadCost = Math.max(1, settings.leadFinder.standardCost);
 
-  // Target balanced split: try ~30% proposals, ~25% invoices, ~45% lead searches.
   let remaining = amount;
+  let proposals = 0;
+  let invoices = 0;
+  let leads = 0;
+
+  // Step 1: reserve one of each affordable tool so all three are represented.
+  if (remaining >= proposalCost) {
+    proposals += 1;
+    remaining -= proposalCost;
+  }
+  if (remaining >= invoiceCost) {
+    invoices += 1;
+    remaining -= invoiceCost;
+  }
+  if (remaining >= leadCost) {
+    leads += 1;
+    remaining -= leadCost;
+  }
+
+  // Step 2: spend leftovers greedily on lead searches (cheapest, most volume).
+  if (leadCost > 0 && remaining >= leadCost) {
+    const extra = Math.floor(remaining / leadCost);
+    leads += extra;
+    remaining -= extra * leadCost;
+  }
+  // Step 3: any remaining credits top up invoices, then proposals.
+  if (invoiceCost > 0 && remaining >= invoiceCost) {
+    const extra = Math.floor(remaining / invoiceCost);
+    invoices += extra;
+    remaining -= extra * invoiceCost;
+  }
+  if (proposalCost > 0 && remaining >= proposalCost) {
+    const extra = Math.floor(remaining / proposalCost);
+    proposals += extra;
+    remaining -= extra * proposalCost;
+  }
+
   const items: string[] = [];
-
-  const proposalBudget = Math.floor(amount * 0.30);
-  const proposalCount = Math.floor(proposalBudget / proposalCost);
-  if (proposalCount > 0) {
-    items.push(`${proposalCount} proposal`);
-    remaining -= proposalCount * proposalCost;
-  }
-
-  const invoiceBudget = Math.floor(amount * 0.25);
-  const invoiceCount = Math.floor(invoiceBudget / invoiceCost);
-  if (invoiceCount > 0) {
-    items.push(`${invoiceCount} invoice`);
-    remaining -= invoiceCount * invoiceCost;
-  }
-
-  const leadCount = Math.floor(remaining / leadCost);
-  if (leadCount > 0) {
-    items.push(`${leadCount}x cari leads`);
-  }
-
-  // Fallback: if nothing fits, show whatever single tool is buyable.
-  if (items.length === 0) {
-    if (amount >= proposalCost) items.push("1 proposal");
-    else if (amount >= invoiceCost) items.push("1 invoice");
-    else if (amount >= leadCost) items.push("1x cari leads");
-  }
+  if (proposals > 0) items.push(`${proposals} proposal`);
+  if (invoices > 0) items.push(`${invoices} invoice`);
+  if (leads > 0) items.push(`${leads}x cari leads`);
 
   return {
     items,
