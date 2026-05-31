@@ -152,9 +152,9 @@ export async function POST(req: NextRequest) {
       });
     }
   } else {
-    // EXPIRED or FAILED — just update status, no WA needed
+    // EXPIRED or FAILED — never revert an already-PAID invoice (late/duplicate callback).
     await prisma.invoice.updateMany({
-      where: { tripayRef: reference },
+      where: { tripayRef: reference, status: { not: "PAID" } },
       data:  { status: mappedStatus as "EXPIRED" | "FAILED" },
     });
     console.log(`[Tripay Webhook] Invoice ${reference} → ${mappedStatus}`);

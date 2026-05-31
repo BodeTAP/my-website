@@ -167,11 +167,11 @@ async function handleAutoPublish(req: NextRequest) {
       },
     });
 
-    const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER;
-    if (adminPhone && aiSettings.autoPublishNotifyWa) {
+    if (aiSettings.autoPublishNotifyWa) {
       after(async () => {
         const siteSettings = await getSiteSettings();
-        const phone = getAdminPhone(siteSettings) || adminPhone;
+        const phone = getAdminPhone(siteSettings);
+        if (!phone) return;
         const categoryName = validCategoryId
           ? categories.find(c => c.id === validCategoryId)?.name ?? "-"
           : "Tanpa Kategori";

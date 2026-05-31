@@ -6,8 +6,9 @@ import { after } from "next/server";
 import { getSiteSettings, getAdminPhone, isWaNotifyEnabled } from "@/lib/siteSettings";
 
 export async function GET(req: NextRequest) {
+  const secret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!secret || authHeader !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
