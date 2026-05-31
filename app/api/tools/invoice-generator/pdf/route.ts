@@ -31,9 +31,6 @@ export async function POST(req: NextRequest) {
       fromName,
       toName,
       items,
-      subtotal,
-      tax,
-      total,
       includeTax,
       createdAt,
       email,
@@ -42,9 +39,6 @@ export async function POST(req: NextRequest) {
       fromName?: string;
       toName?: string;
       items?: Array<{ description: string; quantity: number; price: number }>;
-      subtotal?: number;
-      tax?: number;
-      total?: number;
       includeTax?: boolean;
       createdAt?: string;
       email?: string;
@@ -56,26 +50,29 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Item invoice tidak boleh kosong" }, { status: 400 });
     }
-    if (
-      typeof subtotal !== "number" ||
-      typeof total !== "number" ||
-      typeof tax !== "number"
-    ) {
-      return NextResponse.json({ error: "Total invoice tidak valid" }, { status: 400 });
-    }
+
+    // Recompute totals server-side from line items — never trust client-supplied
+    // subtotal/tax/total (they could disagree with the items and print mismatched figures).
+    const safeItems = items.map((it) => ({
+      description: String(it.description ?? "").trim(),
+      quantity: Math.max(0, Number(it.quantity) || 0),
+      price: Math.max(0, Number(it.price) || 0),
+    }));
+    const computedSubtotal = safeItems.reduce(
+      (sum, it) => sum + Math.round(it.quantity * it.price),
+      0,
+    );
+    const computedTax = includeTax ? Math.round(computedSubtotal * 0.11) : 0;
+    const computedTotal = computedSubtotal + computedTax;
 
     const pdfBytes = await generateFreemiumInvoicePdf({
       invoiceNo: invoiceNo.trim(),
       fromName: fromName.trim(),
       toName: toName.trim(),
-      items: items.map((it) => ({
-        description: String(it.description ?? "").trim(),
-        quantity: Number(it.quantity) || 0,
-        price: Number(it.price) || 0,
-      })),
-      subtotal,
-      tax,
-      total,
+      items: safeItems,
+      subtotal: computedSubtotal,
+      tax: computedTax,
+      total: computedTotal,
       includeTax: !!includeTax,
       createdAt: createdAt ? new Date(createdAt) : new Date(),
     });

@@ -3,6 +3,7 @@ import "server-only";
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFImage, type PDFPage } from "pdf-lib";
 import type { ProposalDesign } from "@/lib/proposalDesign";
 import type { GeneratedProposalContent } from "@/lib/proposalTemplates";
+import { sanitizeWinAnsi } from "./pdfText";
 
 export type GenerateProposalPdfParams = {
   title: string;
@@ -47,7 +48,7 @@ function formatCurrencyText(value: string) {
 
 function wrapText(text: string, font: PDFFont, size: number, maxWidth: number) {
   const lines: string[] = [];
-  const paragraphs = text.split(/\n+/);
+  const paragraphs = sanitizeWinAnsi(text).split(/\n+/);
 
   for (const paragraph of paragraphs) {
     const words = paragraph.split(/\s+/).filter(Boolean);
@@ -146,7 +147,7 @@ export async function generateProposalPdf(params: GenerateProposalPdfParams): Pr
   };
 
   const text = (value: string, x: number, yPos: number, size: number, font = reg, color = C.text) => {
-    page.drawText(value, { x, y: yPos, size, font, color });
+    page.drawText(sanitizeWinAnsi(value), { x, y: yPos, size, font, color });
   };
 
   const headerHeight = design.layout === "bold" ? 142 : design.layout === "minimal" ? 96 : 118;
@@ -184,7 +185,7 @@ export async function generateProposalPdf(params: GenerateProposalPdfParams): Pr
   const titleWidth = bold.widthOfTextAtSize("PROPOSAL", titleSize);
   const titleY = logo && logoDims && design.logoPosition === "right" ? brandY - 48 : brandY - 4;
   text("PROPOSAL", W - ML - titleWidth, titleY, titleSize, bold, headerText);
-  const noText = proposalNo || "PREVIEW";
+  const noText = sanitizeWinAnsi(proposalNo || "PREVIEW");
   if (design.showProposalNo) {
     const noWidth = reg.widthOfTextAtSize(noText, 8);
     text(noText, W - ML - noWidth, titleY - 20, 8, reg, headerMuted);

@@ -2,6 +2,8 @@ import "server-only";
 
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 
+import { sanitizeWinAnsi } from "./pdfText";
+
 export type FreemiumProposalPdfParams = {
   prospectName: string;
   businessName: string;
@@ -94,7 +96,10 @@ function drawWatermark(page: PDFPage, font: PDFFont, pageWidth: number, pageHeig
 }
 
 export async function generateFreemiumProposalPdf(params: FreemiumProposalPdfParams): Promise<Uint8Array> {
-  const { prospectName, businessName, serviceDescription, price, validDays, createdAt } = params;
+  const prospectName = sanitizeWinAnsi(params.prospectName);
+  const businessName = sanitizeWinAnsi(params.businessName);
+  const serviceDescription = sanitizeWinAnsi(params.serviceDescription);
+  const { price, validDays, createdAt } = params;
 
   const doc = await PDFDocument.create();
   const W = 595;

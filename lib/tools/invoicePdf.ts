@@ -4,6 +4,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFImage, type PDFP
 import { readFile } from "fs/promises";
 import path from "path";
 import type { InvoiceDesign } from "@/lib/invoiceDesign";
+import { sanitizeWinAnsi } from "./pdfText";
 
 export type GenerateInvoicePdfParams = {
   invoiceNo: string;
@@ -157,11 +158,11 @@ export async function generateInvoicePdf(params: GenerateInvoicePdfParams): Prom
   };
 
   const text = (value: unknown, x: number, yPos: number, size: number, font = regular, color = C.text) => {
-    page.drawText(String(value ?? ""), { x, y: yPos, size, font, color });
+    page.drawText(sanitizeWinAnsi(value), { x, y: yPos, size, font, color });
   };
 
   const textRight = (value: unknown, rightX: number, yPos: number, size: number, font = regular, color = C.text) => {
-    const safe = String(value ?? "");
+    const safe = sanitizeWinAnsi(value);
     page.drawText(safe, { x: rightX - font.widthOfTextAtSize(safe, size), y: yPos, size, font, color });
   };
 
@@ -332,7 +333,7 @@ export async function generateInvoicePdf(params: GenerateInvoicePdfParams): Prom
         thickness: 0.5,
         color: C.border,
       });
-      pdfPage.drawText(footer ?? "Dokumen dibuat otomatis.", {
+      pdfPage.drawText(sanitizeWinAnsi(footer ?? "Dokumen dibuat otomatis."), {
         x: ML,
         y: 30,
         size: 7,
