@@ -19,14 +19,25 @@ export async function rateLimit(
   windowMs: number,
 ): Promise<{ allowed: boolean; remaining: number; retryAfterMs: number }> {
   if (redis) {
-    const windowSec = Math.ceil(windowMs / 1000);
+    const windowSec = Math.max(1, Math.ceil(windowMs / 1000));
     const current = await redis.incr(key);
-    // Set TTL only on first request so the window doesn't reset on every hit
-    if (current === 1) await redis.expire(key, windowSec);
+    // Set TTL only on first request so the window doesn't reset on every hit.
+    if (current === 1) {
+      await redis.expire(key, windowSec);
+    } else {
+      // Self-heal: if a previous expire call was lost (network blip between
+      // incr/expire), the key would have no TTL and lock the user out forever.
+      // Re-apply the window whenever we find a key without an expiry.
+      const ttl = await redis.ttl(key);
+      if (ttl < 0) await redis.expire(key, windowSec);
+    }
 
     if (current > limit) {
       const ttl = await redis.ttl(key);
-      return { allowed: false, remaining: 0, retryAfterMs: Math.max(ttl, 0) * 1000 };
+      // ttl === -1 → key has no expiry (should have been healed above); use the
+      // full window as a safe fallback rather than 0 (which implies "retry now").
+      const retrySec = ttl >= 0 ? ttl : windowSec;
+      return { allowed: false, remaining: 0, retryAfterMs: retrySec * 1000 };
     }
     return { allowed: true, remaining: limit - current, retryAfterMs: 0 };
   }
@@ -54,4 +65,25 @@ export function getClientIP(req: Request): string {
     return parts[parts.length - 1].trim();
   }
   return req.headers.get("x-real-ip") ?? "unknown";
+}
+
+/**
+ * Refunds one unit of a previously consumed rate-limit slot. Use this when an
+ * operation was counted (via rateLimit) but then failed before delivering
+ * value, so the user isn't penalized for our error. Never drops below zero.
+ */
+export async function refundRateLimit(key: string): Promise<void> {
+  try {
+    if (redis) {
+      const current = await redis.get<number>(key);
+      if (typeof current === "number" && current > 0) {
+        await redis.decr(key);
+      }
+      return;
+    }
+    const entry = store.get(key);
+    if (entry && entry.count > 0) entry.count--;
+  } catch {
+    // Best-effort refund — never throw from cleanup.
+  }
 }

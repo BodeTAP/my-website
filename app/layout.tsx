@@ -23,6 +23,23 @@ function absoluteUrl(baseUrl: string, pathOrUrl: string) {
   }
 }
 
+/**
+ * Resolves a usable metadataBase URL. The candidate can come from DB-editable
+ * settings, so guard against an invalid value crashing metadata generation
+ * (which would 500 every page) by falling back to the known site URL.
+ */
+function safeMetadataBase(candidate: string): URL {
+  try {
+    return new URL(candidate);
+  } catch {
+    try {
+      return new URL(SITE_URL);
+    } catch {
+      return new URL("https://mfweb.maffisorp.id");
+    }
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const siteUrl = settings.seo_canonical_base_url || settings.brand_site_url || SITE_URL;
@@ -47,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "web developer Indonesia",
       settings.brand_name,
     ],
-    metadataBase: new URL(siteUrl),
+    metadataBase: safeMetadataBase(siteUrl),
     alternates: { canonical: "/" },
     openGraph: {
       type: "website",

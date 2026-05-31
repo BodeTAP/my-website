@@ -4,7 +4,7 @@ import { createHash } from "crypto";
 
 import { Prisma } from "@prisma/client";
 
-import { rateLimit, getClientIP } from "@/lib/rateLimit";
+import { rateLimit, getClientIP, refundRateLimit } from "@/lib/rateLimit";
 import { getToolSettings } from "@/lib/toolSettings";
 import { prisma } from "@/lib/prisma";
 
@@ -103,6 +103,19 @@ export async function checkFreemiumQuota(
   );
 
   return { allowed, remaining, retryAfterMs, ipHash };
+}
+
+/**
+ * Refunds a previously consumed freemium quota slot for the given tool + IP hash.
+ * Call this when the request was counted by `checkFreemiumQuota` but the
+ * operation failed (e.g. upstream search error) so the user is not charged for
+ * an outcome they never received.
+ */
+export async function refundFreemiumQuota(
+  tool: FreemiumTool,
+  ipHash: string,
+): Promise<void> {
+  await refundRateLimit(`freemium:${tool}:${ipHash}`);
 }
 
 /**

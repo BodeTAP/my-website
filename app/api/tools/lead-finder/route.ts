@@ -4,6 +4,7 @@ import {
   checkFreemiumQuota,
   getFreemiumSettings,
   trackAnonymousUsage,
+  refundFreemiumQuota,
 } from "@/lib/freemium";
 import { executeLeadFinderSearch } from "@/lib/tools/leadFinderCore";
 import { normalizePhone } from "@/lib/whatsapp";
@@ -45,14 +46,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Execute search with capped results
+    // 4. Execute search with capped results. Quota was already consumed in step 3,
+    //    so refund it if the upstream search fails — don't charge for our errors.
     const resultCap = settings.resultCap ?? 5;
-    const searchResult = await executeLeadFinderSearch({
-      query: query.trim(),
-      city: city.trim(),
-      mode: "standard",
-      maxResults: resultCap,
-    });
+    let searchResult;
+    try {
+      searchResult = await executeLeadFinderSearch({
+        query: query.trim(),
+        city: city.trim(),
+        mode: "standard",
+        maxResults: resultCap,
+      });
+    } catch (searchErr) {
+      await refundFreemiumQuota("lead_finder", quota.ipHash);
+      throw searchErr;
+    }
 
     const { places, fullQuery } = searchResult;
 
