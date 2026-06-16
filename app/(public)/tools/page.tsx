@@ -1,8 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles, Search, Coins, FileText, ReceiptText } from "lucide-react";
+import {
+  ArrowRight,
+  Calculator,
+  Coins,
+  FileText,
+  Gauge,
+  QrCode,
+  ReceiptText,
+  Search,
+  SearchCheck,
+  Tags,
+  TrendingUp,
+  Wand2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { JsonLd, buildBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import { getToolSettings } from "@/lib/toolSettings";
@@ -11,9 +23,9 @@ import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
-const pageTitle = "Tools Gratis & Premium untuk Website, Lead, Proposal, Invoice";
+const pageTitle = "Tools Website, Lead, Proposal, dan Invoice";
 const pageDescription =
-  "Gunakan tools gratis dan premium MFWEB untuk audit website, cari lead, buat proposal PDF, invoice PDF, QR code, estimasi harga, dan optimasi bisnis.";
+  "Katalog tools MFWEB untuk cek website, cari lead, membuat proposal PDF, invoice PDF, QR code, estimasi harga, dan audit ringan.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -35,62 +47,63 @@ export const metadata: Metadata = {
     images: ["/opengraph-image"],
   },
 };
-const tools = [
+
+const freeTools = [
   {
     href: "/tools/cek-kecepatan",
     icon: Gauge,
-    color: "blue" as const,
+    tone: "blue" as const,
     label: "Cek Kecepatan Website",
-    desc: "Audit performa website Anda dengan Google PageSpeed Insights. Dapatkan metrik kecepatan dan rekomendasi teknis seketika.",
-    tags: ["Core Web Vitals", "Mobile & Desktop", "Skor Performa"],
+    desc: "Cek performa, Core Web Vitals, dan catatan teknis dari PageSpeed Insights.",
+    tags: ["Performa", "Core Web Vitals"],
   },
   {
     href: "/tools/cek-seo",
     icon: SearchCheck,
-    color: "teal" as const,
+    tone: "teal" as const,
     label: "Cek SEO Score",
-    desc: "Analisis belasan faktor SEO On-Page krusial — termasuk title, meta description, hierarki heading, tag OG, hingga HTTPS.",
-    tags: ["On-Page SEO", "Schema Markup", "Saran Optimasi"],
-  },
-  {
-    href: "/tools/generator-nama",
-    icon: Wand2,
-    color: "purple" as const,
-    label: "Generator Nama Bisnis",
-    desc: "Cari ide nama bisnis dan slogan dari beberapa gaya kata. Cocok untuk tahap awal validasi brand.",
-    tags: ["10+ Industri", "Pilihan Gaya Kata", "Slogan Unik"],
-  },
-  {
-    href: "/tools/qr-code",
-    icon: QrCode,
-    color: "green" as const,
-    label: "Generator QR Code",
-    desc: "Buat QR Code resolusi tinggi untuk menautkan menu, website, atau chat WhatsApp langsung. Bebas unduh tanpa registrasi.",
-    tags: ["URL / Link", "Format WhatsApp", "Resolusi Tinggi"],
-  },
-  {
-    href: "/tools/roi-website",
-    icon: TrendingUp,
-    color: "teal" as const,
-    label: "Kalkulator ROI Digital",
-    desc: "Hitung perkiraan dampak website terhadap lead, omzet, dan waktu balik modal dengan asumsi yang bisa Anda ubah.",
-    tags: ["Estimasi Revenue", "Payback Period", "Konversi Prospek"],
+    desc: "Audit title, meta description, heading, OG tags, HTTPS, dan schema dasar.",
+    tags: ["On-page", "Schema"],
   },
   {
     href: "/tools/cek-meta-tags",
     icon: Tags,
-    color: "purple" as const,
-    label: "Cek Meta Tags Sosial",
-    desc: "Intip bagaimana tautan website Anda ditampilkan saat dibagikan ke Google Search, Facebook, Twitter, dan WhatsApp.",
-    tags: ["Card Preview", "Twitter Card", "Resolusi Gambar"],
+    tone: "amber" as const,
+    label: "Cek Meta Tags",
+    desc: "Lihat preview Google dan sosial media sebelum link dibagikan.",
+    tags: ["Preview", "Open Graph"],
   },
   {
     href: "/tools/estimasi-harga",
     icon: Calculator,
-    color: "green" as const,
+    tone: "emerald" as const,
     label: "Estimasi Harga Website",
-    desc: "Dapatkan estimasi biaya website dari pilihan jenis bisnis, fitur, dan timeline pengerjaan.",
-    tags: ["Estimasi Awal", "Breakdown Biaya", "Rekomendasi Paket"],
+    desc: "Dapatkan estimasi awal dari jenis website, fitur, dan timeline.",
+    tags: ["Estimasi", "Brief awal"],
+  },
+  {
+    href: "/tools/qr-code",
+    icon: QrCode,
+    tone: "blue" as const,
+    label: "Generator QR Code",
+    desc: "Buat QR untuk URL, WhatsApp, atau teks sederhana tanpa login.",
+    tags: ["QR", "Download PNG"],
+  },
+  {
+    href: "/tools/roi-website",
+    icon: TrendingUp,
+    tone: "teal" as const,
+    label: "Kalkulator ROI Website",
+    desc: "Hitung potensi lead, omzet, dan waktu balik modal dari website.",
+    tags: ["ROI", "Revenue"],
+  },
+  {
+    href: "/tools/generator-nama",
+    icon: Wand2,
+    tone: "slate" as const,
+    label: "Generator Nama Bisnis",
+    desc: "Cari opsi nama dan slogan untuk tahap awal validasi brand.",
+    tags: ["Nama", "Slogan"],
   },
 ];
 
@@ -99,247 +112,246 @@ function getPaidTools(settings: Awaited<ReturnType<typeof getToolSettings>>) {
     {
       href: "/lead-finder",
       icon: Search,
-      color: "blue" as const,
+      tone: "blue" as const,
       label: "Lead Finder",
-      desc: "Temukan prospek bisnis lokal dari Google Maps, filter kontak yang layak dihubungi, simpan list, dan export CSV.",
-      tags: ["Google Maps", "Saved Lists", "Export CSV"],
+      desc: "Cari prospek bisnis lokal, simpan list, dan export CSV untuk follow up.",
+      tags: ["Google Maps", "Saved lists", "CSV"],
       price: `Mulai ${settings.leadFinder.standardCost} kredit`,
     },
     {
       href: "/tools/proposal-generator",
       icon: FileText,
-      color: "purple" as const,
+      tone: "amber" as const,
       label: "Proposal Generator",
-      desc: "Buat proposal bisnis profesional dari template, simpan brand kit, lalu download PDF siap kirim ke prospek.",
-      tags: ["Template", "Brand Kit", "PDF"],
+      desc: "Buat proposal PDF dengan template, brand kit, dan riwayat dokumen.",
+      tags: ["Template", "Brand kit", "PDF"],
       price: `${settings.proposalGenerator.creditCost} kredit`,
     },
     {
       href: "/tools/invoice-generator",
       icon: ReceiptText,
-      color: "teal" as const,
+      tone: "teal" as const,
       label: "Invoice Generator",
-      desc: "Buat invoice PDF mandiri dengan template desain, PPN 11% opsional, edit detail, duplicate, dan status manual.",
+      desc: "Buat invoice PDF dengan item layanan, diskon, PPN 11%, dan status manual.",
       tags: ["PPN 11%", "Duplicate", "PDF"],
       price: `${settings.invoiceGenerator.creditCost} kredit`,
     },
   ];
 }
 
-const COLOR = {
-  blue:   { bg: "bg-blue-600/15",   border: "border-blue-500/30",   text: "text-blue-400",   badge: "bg-blue-500/10 text-blue-300 border-blue-500/20", glow: "bg-blue-600/30" },
-  teal:   { bg: "bg-teal-600/15",   border: "border-teal-500/30",   text: "text-teal-400",   badge: "bg-teal-500/10 text-teal-300 border-teal-500/20", glow: "bg-teal-600/30" },
-  purple: { bg: "bg-purple-600/15", border: "border-purple-500/30", text: "text-purple-400", badge: "bg-purple-500/10 text-purple-300 border-purple-500/20", glow: "bg-purple-600/30" },
-  green:  { bg: "bg-green-600/15",  border: "border-green-500/30",  text: "text-green-400",  badge: "bg-green-500/10 text-green-300 border-green-500/20", glow: "bg-green-600/30" },
+const TONE = {
+  blue: {
+    icon: "text-blue-300",
+    iconBox: "border-blue-500/20 bg-blue-500/10",
+    chip: "border-blue-500/15 bg-blue-500/10 text-blue-200/70",
+  },
+  teal: {
+    icon: "text-teal-300",
+    iconBox: "border-teal-500/20 bg-teal-500/10",
+    chip: "border-teal-500/15 bg-teal-500/10 text-teal-200/70",
+  },
+  amber: {
+    icon: "text-amber-300",
+    iconBox: "border-amber-500/20 bg-amber-500/10",
+    chip: "border-amber-500/15 bg-amber-500/10 text-amber-200/70",
+  },
+  emerald: {
+    icon: "text-emerald-300",
+    iconBox: "border-emerald-500/20 bg-emerald-500/10",
+    chip: "border-emerald-500/15 bg-emerald-500/10 text-emerald-200/70",
+  },
+  slate: {
+    icon: "text-slate-200",
+    iconBox: "border-white/12 bg-white/[0.04]",
+    chip: "border-white/10 bg-white/[0.035] text-blue-100/60",
+  },
 };
 
 export default async function ToolsPage() {
   const toolSettings = await getToolSettings();
   const paidTools = getPaidTools(toolSettings);
   const welcomeCredits = toolSettings.signupBonus.enabled ? toolSettings.signupBonus.amount : 0;
-  const welcomeBonusBreakdown = welcomeCredits > 0
-    ? getWelcomeCreditBreakdown(welcomeCredits, toolSettings).summary
-    : "";
+  const welcomeBonusBreakdown =
+    welcomeCredits > 0 ? getWelcomeCreditBreakdown(welcomeCredits, toolSettings).summary : "";
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Beranda", item: SITE_URL },
     { name: "Tools", item: `${SITE_URL}/tools` },
   ]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#020611]">
       <JsonLd id="json-ld-breadcrumb-tools" data={breadcrumbJsonLd} />
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto relative z-10 mb-10">
-          <Breadcrumb items={[{ label: "Tools" }]} />
-        </div>
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <FadeUp delay={0}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">
-              <Wrench className="w-4 h-4 text-teal-400" />
-              Tools MFWEB
-            </div>
-          </FadeUp>
 
-          <FadeUp delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
-              Tools untuk cek website, cari prospek, dan membuat dokumen bisnis
-            </h1>
-          </FadeUp>
-
-          <FadeUp delay={0.2}>
-            <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-              Gunakan tools gratis untuk audit ringan, atau tools premium di portal
-              untuk lead finder, proposal PDF, dan invoice PDF.
-            </p>
-          </FadeUp>
-          {welcomeCredits > 0 && (
-            <FadeUp delay={0.25}>
-              <div className="mx-auto mb-10 inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-200">
-                <Sparkles className="h-4 w-4" />
-                {welcomeBonusBreakdown
-                  ? `Akun baru dapat ${welcomeCredits} kredit gratis = ${welcomeBonusBreakdown}.`
-                  : `Akun baru dapat ${welcomeCredits} kredit gratis untuk mencoba tools premium.`}
-              </div>
-            </FadeUp>
-          )}
-        </div>
-      </section>
-
-      {/* ── Tools Grid ────────────────────────────────────── */}
-      <section className="px-4 py-12 sm:px-6 lg:px-8 relative z-10">
+      <section className="border-b border-white/8 px-4 pb-12 pt-28 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <FadeUp className="mb-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-amber-300">
-                  <Coins className="h-4 w-4" />
-                  Tools Premium
+          <Breadcrumb items={[{ label: "Tools" }]} />
+
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200/45">
+                Katalog Tools
+              </p>
+              <h1 className="mt-4 max-w-3xl text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+                Tools praktis untuk cek website dan merapikan proses sales
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-blue-100/60">
+                Pilih tool sesuai pekerjaan hari ini: audit ringan, cari prospek, buat proposal,
+                atau siapkan invoice PDF.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-[#071225] p-4">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+                  <Coins className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-white">Akun portal</p>
+                  <p className="mt-1 text-sm leading-relaxed text-blue-100/55">
+                    Tools premium memakai kredit. Tools gratis bisa dipakai tanpa login.
+                  </p>
+                  {welcomeCredits > 0 && (
+                    <p className="mt-3 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-200">
+                      {welcomeBonusBreakdown
+                        ? `${welcomeCredits} kredit gratis: ${welcomeBonusBreakdown}.`
+                        : `${welcomeCredits} kredit gratis untuk akun baru.`}
+                    </p>
+                  )}
                 </div>
-                <h2 className="text-3xl font-black text-white sm:text-4xl">Tools berbayar untuk kerja operasional</h2>
-                <p className="mt-3 max-w-2xl text-blue-200/60">
-                  Pakai kredit portal untuk prospecting, proposal, dan invoice PDF. Dirancang untuk workflow klien yang berulang.
-                  {welcomeCredits > 0
-                    ? welcomeBonusBreakdown
-                      ? ` Daftar akun baru dan mulai dengan ${welcomeCredits} kredit gratis (${welcomeBonusBreakdown}).`
-                      : ` Daftar akun baru dan mulai dengan ${welcomeCredits} kredit gratis.`
-                    : ""}
-                </p>
               </div>
-              <Link href="/portal/register" className="w-fit">
-                <Button className="h-11 rounded-xl bg-blue-600 px-5 font-black text-white hover:bg-blue-500">
-                  Buat akun portal
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
             </div>
-          </FadeUp>
+          </div>
+        </div>
+      </section>
 
-          <StaggerChildren className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200/55">
+                Premium
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-white">Tools untuk pekerjaan berulang</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-blue-100/55">
+                Dipakai dari portal klien, menyimpan data kerja, dan cocok untuk rutinitas sales atau administrasi.
+              </p>
+            </div>
+            <Link href="/portal/register" className="w-fit">
+              <Button className="h-10 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-500">
+                Buat akun
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
             {paidTools.map((tool) => {
-              const c = COLOR[tool.color];
+              const Icon = tool.icon;
+              const tone = TONE[tool.tone];
+
               return (
-                <StaggerItem key={tool.href}>
-                  <HoverCard className="h-full">
-                    <Link href={tool.href} className="group block h-full">
-                      <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-amber-500/15 bg-[#071225] p-7 transition-colors duration-300 hover:border-amber-400/35">
-                        <div className="relative z-10 mb-6 flex items-start justify-between gap-4">
-                          <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${c.bg} border border-white/5`}>
-                            <tool.icon className={`h-7 w-7 ${c.text}`} />
-                          </div>
-                          <div className="flex flex-col items-end gap-1.5">
-                            <div className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-300">
-                              {tool.price}
-                            </div>
-                            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
-                              Coba Gratis
-                            </span>
-                          </div>
-                        </div>
-                        <h3 className="relative z-10 text-2xl font-black text-white">{tool.label}</h3>
-                        <p className="relative z-10 mt-3 flex-1 text-sm leading-relaxed text-blue-200/60">{tool.desc}</p>
-                        <div className="relative z-10 mt-6 flex flex-wrap gap-2">
-                          {tool.tags.map((tag) => (
-                            <span key={tag} className={`rounded-lg border px-3 py-1.5 text-xs font-bold ${c.badge}`}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <div className={`relative z-10 mt-7 flex items-center gap-2 text-sm font-bold ${c.text} transition-all duration-300 group-hover:gap-4`}>
-                          Lihat landing page <ArrowRight className="h-4 w-4" />
-                        </div>
-                      </div>
-                    </Link>
-                  </HoverCard>
-                </StaggerItem>
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className="group flex min-h-[220px] flex-col rounded-lg border border-white/10 bg-[#071225] p-4 transition-colors hover:border-white/20 hover:bg-[#0a1629]"
+                >
+                  <div className="mb-4 flex items-start justify-between gap-3">
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${tone.iconBox}`}>
+                      <Icon className={`h-5 w-5 ${tone.icon}`} />
+                    </span>
+                    <span className="rounded-md border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-200">
+                      {tool.price}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white">{tool.label}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-blue-100/55">{tool.desc}</p>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {tool.tags.map((tag) => (
+                      <span key={tag} className={`rounded-md border px-2 py-1 text-[11px] font-medium ${tone.chip}`}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-blue-200/70 transition-colors group-hover:text-blue-200">
+                    Lihat detail
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </Link>
               );
             })}
-          </StaggerChildren>
+          </div>
         </div>
       </section>
 
-      <section className="py-12 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <FadeUp className="mb-8">
-            <h2 className="text-3xl font-black text-white sm:text-4xl">Tools gratis</h2>
-            <p className="mt-3 max-w-2xl text-blue-200/60">
-              Audit ringan dan generator praktis yang bisa digunakan tanpa login.
+      <section className="border-t border-white/8 bg-[#06111f] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200/45">
+              Gratis
             </p>
-          </FadeUp>
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {tools.map((tool) => {
-              const c = COLOR[tool.color];
-              return (
-                <StaggerItem key={tool.href}>
-                  <HoverCard className="h-full">
-                    <Link href={tool.href} className="group block h-full">
-                      <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#071225] p-8 transition-colors duration-300 hover:border-white/20">
-                        <div className="flex justify-between items-start mb-8 relative z-10">
-                          <div className={`w-16 h-16 rounded-2xl ${c.bg} border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg`}>
-                            <tool.icon className={`w-8 h-8 ${c.text}`} />
-                          </div>
-                          <div className="bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                            <Sparkles className="w-3 h-3 text-green-400" />
-                            <span className="text-[10px] font-bold text-green-400 tracking-widest uppercase">Gratis</span>
-                          </div>
-                        </div>
-                        
-                        <h2 className="text-white font-black text-2xl mb-4 relative z-10">{tool.label}</h2>
-                        <p className="text-blue-200/60 text-base leading-relaxed mb-8 flex-1 relative z-10">{tool.desc}</p>
-                        
-                        <div className="flex flex-wrap gap-2.5 mb-8 relative z-10">
-                          {tool.tags.map((tag) => (
-                            <span key={tag} className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${c.badge} backdrop-blur-md`}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+            <h2 className="mt-2 text-2xl font-bold text-white">Tools cepat tanpa login</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-blue-100/55">
+              Untuk cek awal sebelum menentukan prioritas perbaikan atau menghubungi tim.
+            </p>
+          </div>
 
-                        <div className={`flex items-center gap-2 text-sm font-bold ${c.text} group-hover:gap-4 transition-all duration-300 relative z-10 mt-auto`}>
-                          Gunakan Tool Ini <ArrowRight className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </Link>
-                  </HoverCard>
-                </StaggerItem>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {freeTools.map((tool) => {
+              const Icon = tool.icon;
+              const tone = TONE[tool.tone];
+
+              return (
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className="group grid min-h-[130px] grid-cols-[auto_1fr_auto] gap-3 rounded-lg border border-white/10 bg-[#071225] p-4 transition-colors hover:border-white/20 hover:bg-[#0a1629]"
+                >
+                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${tone.iconBox}`}>
+                    <Icon className={`h-5 w-5 ${tone.icon}`} />
+                  </span>
+                  <span>
+                    <span className="block font-semibold text-white">{tool.label}</span>
+                    <span className="mt-1 block text-sm leading-relaxed text-blue-100/52">{tool.desc}</span>
+                    <span className="mt-3 flex flex-wrap gap-1.5">
+                      {tool.tags.map((tag) => (
+                        <span key={tag} className={`rounded-md border px-2 py-1 text-[11px] font-medium ${tone.chip}`}>
+                          {tag}
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                  <ArrowRight className="mt-1 h-4 w-4 text-blue-200/35 transition-colors group-hover:text-blue-200" />
+                </Link>
               );
             })}
-          </StaggerChildren>
+          </div>
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────── */}
-      <section className="py-32 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <ScaleIn>
-            <div className="rounded-2xl border border-white/10 bg-[#071225] p-10 sm:p-16">
-              <FadeUp className="relative">
-                <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-                  Butuh audit yang lebih rapi?
-                </h2>
-              </FadeUp>
-              <FadeUp delay={0.1} className="relative">
-                <p className="text-blue-200/60 mb-12 text-lg max-w-2xl mx-auto leading-relaxed">
-                  Jika hasil tools menunjukkan banyak catatan, kami bisa bantu cek
-                  manual dan susun prioritas perbaikan yang paling berdampak.
-                </p>
-              </FadeUp>
-              <FadeUp delay={0.2} className="relative">
-                <div className="flex flex-col sm:flex-row justify-center gap-5">
-                  <Link href="/contact">
-                    <Button size="lg" className="bg-teal-600 hover:bg-teal-500 text-white px-10 h-14 text-base font-bold transition-colors rounded-xl group">
-                      Konsultasi website <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                  <Link href="/layanan">
-                    <Button size="lg" variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10 h-14 px-10 text-base font-bold rounded-xl hover:border-white/20 transition-colors">
-                      Lihat layanan
-                    </Button>
-                  </Link>
-                </div>
-              </FadeUp>
-            </div>
-          </ScaleIn>
+      <section className="border-t border-white/8 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Butuh dibantu membaca hasilnya?</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-blue-100/55">
+              Kirim hasil audit atau kebutuhan website. Kami bantu susun prioritas yang paling masuk akal.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/contact">
+              <Button className="h-10 rounded-lg bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-500">
+                Konsultasi
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/layanan">
+              <Button
+                variant="outline"
+                className="h-10 rounded-lg border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-white hover:bg-white/[0.07]"
+              >
+                Lihat layanan
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

@@ -174,6 +174,12 @@ user confirms a lasting preference, project decision, or important current state
   were removed from public metadata, and proposal/invoice generator landing
   pages now have one H1. Validation after the patch: `npm run lint` passed with
   the 7 known warnings, `npx tsc --noEmit` passed, and `npm run build` passed.
+- Public `/tools` UI polish (2026-06-16): redesigned the page as a compact,
+  grounded catalog with shorter hero, solid dark bands, smaller 8px-radius
+  cards, denser premium/free tool lists, less glow/animation/AI-like marketing
+  copy, and practical CTAs. Validation: `npm run lint` passed with the 7 known
+  warnings, `npx tsc --noEmit` passed, `npm run build` passed, and local
+  `/tools` returned 200 on the dev server.
 - As of 2026-05-17, `.env` exists locally but is not tracked by Git;
   `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their
