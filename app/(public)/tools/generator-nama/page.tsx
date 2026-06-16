@@ -4,7 +4,7 @@ import Breadcrumb from "@/components/public/Breadcrumb";
 import { getAiSettings } from "@/lib/aiSettings";
 
 export const metadata: Metadata = {
-  title: "Generator Nama Bisnis & Slogan Gratis | MFWEB",
+  title: "Generator Nama Bisnis & Slogan Gratis",
   description:
     "Generate ratusan ide nama bisnis dan slogan dalam hitungan detik. Gratis, instan, sesuai industri dan gaya yang Anda pilih.",
   alternates: { canonical: "/tools/generator-nama" },

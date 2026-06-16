@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
 import type { Metadata } from "next";
 import {
   ArrowRight,
@@ -24,9 +23,10 @@ import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings, SITE_SETTING_DEFAULTS } from "@/lib/siteSettings";
 import { getToolSettings } from "@/lib/toolSettings";
+import { JsonLd } from "@/components/public/JsonLd";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
-const pageTitle = "Jasa Website dan Tools Bisnis untuk UMKM | MFWEB";
+const pageTitle = "Jasa Website dan Tools Bisnis untuk UMKM";
 const pageDescription =
   "MFWEB membantu bisnis lokal membuat website yang jelas, mudah ditemukan, dan didukung tools untuk cari lead, buat proposal, serta invoice PDF.";
 
@@ -787,21 +787,9 @@ export default async function HomePage() {
         </div>
       </section>
       {/* JSON-LD Structured Data */}
-      <Script
-        id="json-ld-faq"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-      <Script
-        id="json-ld-business"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
-      />
-      <Script
-        id="json-ld-tools"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(toolsJsonLd) }}
-      />
+      <JsonLd id="json-ld-faq" data={faqJsonLd} />
+      <JsonLd id="json-ld-business" data={localBusinessJsonLd} />
+      <JsonLd id="json-ld-tools" data={toolsJsonLd} />
     </div>
   );
 }

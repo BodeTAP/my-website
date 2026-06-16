@@ -3,7 +3,7 @@ import MetaChecker from "./MetaChecker";
 import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Cek Meta Tags Website — Preview Google & Sosmed Gratis | MFWEB",
+  title: "Cek Meta Tags Website — Preview Google & Sosmed Gratis",
   description: "Lihat meta tags website Anda dan preview tampilan di Google Search, Facebook, dan WhatsApp. Cek title, description, og:image, dan lainnya secara instan.",
   alternates: { canonical: "/tools/cek-meta-tags" },
 };

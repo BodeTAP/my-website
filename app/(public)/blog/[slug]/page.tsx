@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
 import { Calendar, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import ReadingProgress from "@/components/public/ReadingProgress";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { FadeUp, FadeIn, ScaleIn } from "@/components/public/motion";
+import { JsonLd } from "@/components/public/JsonLd";
 
 function estimateReadTime(html: string): number {
   const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -272,16 +272,8 @@ export default async function ArticlePage({ params }: Params) {
         </div>
 
         {/* JSON-LD Structured Data */}
-        <Script
-          id="json-ld-article"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
-        />
-        <Script
-          id="json-ld-breadcrumb"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-        />
+        <JsonLd id="json-ld-article" data={articleJsonLd} />
+        <JsonLd id="json-ld-breadcrumb" data={breadcrumbJsonLd} />
       </div>
     </div>
   );

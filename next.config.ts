@@ -68,6 +68,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  async redirects() {
+    return [
+      {
+        source: "/sitemap-0.xml",
+        destination: "/sitemap.xml",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import {
   ArrowRight,
   CheckCircle,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
 
@@ -68,14 +68,10 @@ const checks = [
 ];
 
 export default function AboutPage() {
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Beranda", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Tentang Kami", item: `${SITE_URL}/about` },
-    ],
-  };
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Beranda", item: SITE_URL },
+    { name: "Tentang Kami", item: `${SITE_URL}/about` },
+  ]);
 
   return (
     <div className="bg-[#020611]">
@@ -237,11 +233,7 @@ export default function AboutPage() {
         </FadeUp>
       </section>
 
-      <Script
-        id="json-ld-breadcrumb-about"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+      <JsonLd id="json-ld-breadcrumb-about" data={breadcrumbJsonLd} />
     </div>
   );
 }

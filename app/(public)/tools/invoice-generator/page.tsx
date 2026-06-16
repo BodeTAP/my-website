@@ -8,7 +8,7 @@ import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
-const pageTitle = "Invoice Generator PDF dengan Template dan PPN 11% | MFWEB";
+const pageTitle = "Invoice Generator PDF dengan Template dan PPN 11%";
 const pageDescription =
   "Buat invoice PDF cepat dengan template desain, brand kit, PPN 11% opsional, duplicate invoice, edit detail, status manual, dan download PDF.";
 
@@ -47,9 +47,9 @@ export default async function InvoiceGeneratorLandingPage() {
       {/* Free-tier public invoice form */}
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-3">
+          <h2 className="text-3xl sm:text-4xl font-black text-white mb-3">
             Coba Invoice Generator Gratis
-          </h1>
+          </h2>
           <p className="text-sm text-blue-200/50">
             Buat invoice sederhana langsung tanpa login. Daftar akun untuk fitur lengkap.
           </p>

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import { JsonLd } from "@/components/public/JsonLd";
 
 type Feature = {
   icon: LucideIcon;
@@ -132,12 +133,18 @@ export default function PaidToolLanding({
         {
           "@type": "ListItem",
           position: 1,
+          name: "Beranda",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
           name: "Tools",
           item: `${siteUrl}/tools`,
         },
         {
           "@type": "ListItem",
-          position: 2,
+          position: 3,
           name: eyebrow,
           item: pageUrl,
         },
@@ -147,10 +154,7 @@ export default function PaidToolLanding({
 
   return (
     <div className="min-h-screen overflow-x-clip">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id={`json-ld-${mockup}-landing`} data={jsonLd} />
       <section className="relative px-4 pt-16 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <FadeUp>

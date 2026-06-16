@@ -4,7 +4,7 @@ import PricingEstimator from "./PricingEstimator";
 import { getAiSettings } from "@/lib/aiSettings";
 
 export const metadata: Metadata = {
-  title: "Estimasi Harga Pembuatan Website Gratis | MFWEB",
+  title: "Estimasi Harga Pembuatan Website Gratis",
   description:
     "Dapatkan estimasi biaya pembuatan website secara instan menggunakan AI. Gratis, tanpa registrasi. Pilih jenis bisnis, fitur, dan timeline Anda.",
   alternates: { canonical: "/tools/estimasi-harga" },

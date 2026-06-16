@@ -3,7 +3,7 @@ import QRGenerator from "./QRGenerator";
 import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Generator QR Code Gratis — URL, WhatsApp, Teks | MFWEB",
+  title: "Generator QR Code Gratis — URL, WhatsApp, Teks",
   description: "Buat QR Code gratis untuk URL website, nomor WhatsApp, atau teks apapun. Langsung download PNG, tanpa daftar.",
   alternates: { canonical: "/tools/qr-code" },
 };

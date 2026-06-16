@@ -2,21 +2,32 @@ import type { Metadata } from "next";
 import PriceCalculator from "./PriceCalculator";
 import { FadeUp } from "@/components/public/motion";
 import { Calculator } from "lucide-react";
+import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/public/JsonLd";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
 
 export const metadata: Metadata = {
-  title: "Kalkulator Estimasi Harga Website — MFWEB",
+  title: "Kalkulator Estimasi Harga Website",
   description: "Hitung estimasi biaya pembuatan website untuk bisnis Anda secara instan. Pilih tipe website dan fitur yang dibutuhkan.",
   alternates: { canonical: "/kalkulasi-harga" },
 };
 
 export default function KalkulasiPage() {
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Beranda", item: SITE_URL },
+    { name: "Kalkulasi Harga", item: `${SITE_URL}/kalkulasi-harga` },
+  ]);
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#030914]">
+      <JsonLd id="json-ld-breadcrumb-kalkulasi-harga" data={breadcrumbJsonLd} />
       {/* Background Orbs */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-600/20 to-indigo-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" />
       
       <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto">
+          <Breadcrumb items={[{ label: "Kalkulasi Harga" }]} />
           
           <FadeUp delay={0} className="text-center mb-16">
             <div className="inline-flex items-center gap-2 glass px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-blue-300 mb-8 border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)] bg-blue-500/5">

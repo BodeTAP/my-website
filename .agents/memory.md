@@ -156,6 +156,24 @@ user confirms a lasting preference, project decision, or important current state
   postbuild script, config, and the stale static public/ files. Do NOT
   re-add next-sitemap. If sitemap shows wrong domain, check NEXT_PUBLIC_SITE_URL
   env on Vercel (should be https://mfweb.maffisorp.id, not localhost).
+- SEO audit (2026-06-16): live `/sitemap.xml` returns 200 with 68 URLs and all
+  submitted URLs checked return 200 with matching canonicals. Old
+  `/sitemap-0.xml` returns 404 and should be removed from Search Console or
+  redirected. Two noindex pages (`/kebijakan-privasi`, `/ketentuan-layanan`)
+  are still in the sitemap. Breadcrumb coverage is inconsistent: `/contact`,
+  `/kalkulasi-harga`, `/tools`, and `/lead-finder` have no BreadcrumbList;
+  some pages mix microdata with JSON-LD, and some JSON-LD uses `next/script`,
+  which can appear in the React Flight payload instead of direct HTML. Several
+  title tags duplicate the brand suffix as `| MFWEB | MFWEB`; proposal and
+  invoice generator landing pages each have two H1s.
+- SEO fixes applied (2026-06-16): `/sitemap-0.xml` redirects to
+  `/sitemap.xml`, legal noindex pages were removed from `app/sitemap.ts`,
+  public JSON-LD now uses native escaped scripts via
+  `components/public/JsonLd.tsx`, breadcrumb JSON-LD was added to `/contact`,
+  `/kalkulasi-harga`, `/tools`, and `/lead-finder`, duplicate title suffixes
+  were removed from public metadata, and proposal/invoice generator landing
+  pages now have one H1. Validation after the patch: `npm run lint` passed with
+  the 7 known warnings, `npx tsc --noEmit` passed, and `npm run build` passed.
 - As of 2026-05-17, `.env` exists locally but is not tracked by Git;
   `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their
@@ -240,6 +258,8 @@ user confirms a lasting preference, project decision, or important current state
 
 - Follow `AGENTS.md` for stack rules, commands, auth middleware constraints, and
   framework gotchas.
+- As of 2026-06-16, `middleware.ts` is not present in the working tree; the
+  auth guard lives directly in `proxy.ts`.
 - Do not store real credentials, tokens, private customer data, or other secrets
   in this memory file.
 - If portal pages become dim/unclickable after sidebar changes, inspect

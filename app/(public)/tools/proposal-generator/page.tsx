@@ -8,7 +8,7 @@ import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
-const pageTitle = "Proposal Generator untuk Buat Proposal PDF Profesional | MFWEB";
+const pageTitle = "Proposal Generator untuk Buat Proposal PDF Profesional";
 const pageDescription =
   "Buat proposal PDF profesional dengan template, brand kit, konten terarah, dan riwayat dokumen langsung dari portal klien MFWEB.";
 
@@ -46,9 +46,9 @@ export default async function ProposalGeneratorLandingPage() {
       {/* Free-tier proposal form */}
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-3">
+          <h2 className="text-3xl sm:text-4xl font-black text-white mb-3">
             Coba Proposal Generator Gratis
-          </h1>
+          </h2>
           <p className="text-blue-200/55 text-sm max-w-lg mx-auto">
             Buat proposal sederhana langsung dari sini tanpa perlu daftar. Hasil berupa PDF dengan watermark.
           </p>

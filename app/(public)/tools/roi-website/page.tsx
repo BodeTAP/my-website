@@ -3,7 +3,7 @@ import ROICalculator from "./ROICalculator";
 import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Kalkulator ROI Website Bisnis — Hitung Keuntungan | MFWEB",
+  title: "Kalkulator ROI Website Bisnis — Hitung Keuntungan",
   description: "Hitung estimasi keuntungan dan ROI jika bisnis Anda memiliki website. Masukkan estimasi pengunjung, conversion rate, dan nilai order untuk melihat potensi revenue.",
   alternates: { canonical: "/tools/roi-website" },
 };

@@ -3,7 +3,7 @@ import SpeedChecker from "./SpeedChecker";
 import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Cek Kecepatan Website Gratis — PageSpeed Insights | MFWEB",
+  title: "Cek Kecepatan Website Gratis — PageSpeed Insights",
   description:
     "Cek kecepatan dan performa website Anda secara gratis menggunakan Google PageSpeed Insights. Dapatkan Core Web Vitals dan rekomendasi perbaikan instan.",
   alternates: { canonical: "/tools/cek-kecepatan" },

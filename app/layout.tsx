@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { FacebookPixel } from "@/components/public/FacebookPixel";
 import { GoogleAnalytics } from "@/components/public/GoogleAnalytics";
+import { JsonLd } from "@/components/public/JsonLd";
 import { getSiteSettings } from "@/lib/siteSettings";
 import "./globals.css";
 
@@ -144,10 +145,7 @@ export default async function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <JsonLd id="json-ld-site" data={jsonLd} />
         {children}
         <Analytics />
         <FacebookPixel pixelId={settings.facebook_pixel_id ?? ""} />

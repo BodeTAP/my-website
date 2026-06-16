@@ -3,7 +3,7 @@ import SeoChecker from "./SeoChecker";
 import Breadcrumb from "@/components/public/Breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Cek SEO Score Website Gratis — Analisis On-Page | MFWEB",
+  title: "Cek SEO Score Website Gratis — Analisis On-Page",
   description:
     "Analisis SEO website Anda secara gratis. Cek 13 faktor SEO penting termasuk title, meta description, H1, OG tags, HTTPS, schema markup, dan lainnya.",
   alternates: { canonical: "/tools/cek-seo" },

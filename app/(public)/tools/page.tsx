@@ -3,13 +3,15 @@ import Link from "next/link";
 import { Gauge, SearchCheck, Wand2, QrCode, TrendingUp, Tags, Calculator, ArrowRight, Wrench, Sparkles, Search, Coins, FileText, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
+import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import { getToolSettings } from "@/lib/toolSettings";
 import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 
 export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
-const pageTitle = "Tools Gratis & Premium untuk Website, Lead, Proposal, Invoice | MFWEB";
+const pageTitle = "Tools Gratis & Premium untuk Website, Lead, Proposal, Invoice";
 const pageDescription =
   "Gunakan tools gratis dan premium MFWEB untuk audit website, cari lead, buat proposal PDF, invoice PDF, QR code, estimasi harga, dan optimasi bisnis.";
 
@@ -138,11 +140,19 @@ export default async function ToolsPage() {
   const welcomeBonusBreakdown = welcomeCredits > 0
     ? getWelcomeCreditBreakdown(welcomeCredits, toolSettings).summary
     : "";
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Beranda", item: SITE_URL },
+    { name: "Tools", item: `${SITE_URL}/tools` },
+  ]);
 
   return (
     <div className="min-h-screen">
+      <JsonLd id="json-ld-breadcrumb-tools" data={breadcrumbJsonLd} />
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto relative z-10 mb-10">
+          <Breadcrumb items={[{ label: "Tools" }]} />
+        </div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <FadeUp delay={0}>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">
@@ -335,5 +345,3 @@ export default async function ToolsPage() {
     </div>
   );
 }
-
-

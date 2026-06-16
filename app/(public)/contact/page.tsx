@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StaggerChildren, StaggerItem, FadeUp, ScaleIn, SlideIn } from "@/components/public/motion";
+import Breadcrumb from "@/components/public/Breadcrumb";
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -192,6 +193,9 @@ export default function ContactPage() {
     <div className="min-h-screen">
       {/* ── Header ──────────────────────────────────────────── */}
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto relative z-10 mb-10">
+          <Breadcrumb items={[{ label: "Kontak" }]} />
+        </div>
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <FadeUp delay={0}>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">

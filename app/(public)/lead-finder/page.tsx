@@ -20,13 +20,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeUp, StaggerChildren, StaggerItem } from "@/components/public/motion";
+import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import { prisma } from "@/lib/prisma";
 import { getToolSettings } from "@/lib/toolSettings";
 import PublicLeadFinderForm from "@/components/public/tools/PublicLeadFinderForm";
 import { getWelcomeCreditBreakdown } from "@/lib/welcomeCredits";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mfweb.maffisorp.id";
+
 export const metadata: Metadata = {
-  title: "Lead Finder untuk Cari Prospek Bisnis Lokal | MFWEB",
+  title: "Lead Finder untuk Cari Prospek Bisnis Lokal",
   description:
     "Temukan prospek bisnis lokal dari Google Maps, sortir kontak yang layak dihubungi, export CSV, dan bangun pipeline sales lebih cepat dengan Lead Finder MFWEB.",
   alternates: { canonical: "/lead-finder" },
@@ -138,10 +142,18 @@ export default async function LeadFinderLandingPage() {
   const welcomeBonusBreakdown = welcomeCredits > 0 ? getWelcomeCreditBreakdown(welcomeCredits, toolSettings).summary : "";
   const visibleFeatures = socialScanEnabled ? features : features.filter((feature) => feature.title !== "Social Scan opsional");
   const visibleWorkflows = socialScanEnabled ? workflows : workflows.filter((item) => !item.includes("Social Scan"));
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Beranda", item: SITE_URL },
+    { name: "Lead Finder", item: `${SITE_URL}/lead-finder` },
+  ]);
 
   return (
     <div className="min-h-screen overflow-x-clip">
+      <JsonLd id="json-ld-breadcrumb-lead-finder" data={breadcrumbJsonLd} />
       <section className="relative px-4 pt-28 pb-16 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-10 max-w-7xl">
+          <Breadcrumb items={[{ label: "Lead Finder" }]} />
+        </div>
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <FadeUp>
             <div>

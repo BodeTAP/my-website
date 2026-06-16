@@ -26,6 +26,7 @@ import {
   ScaleIn,
   HoverCard,
 } from "@/components/public/motion";
+import { JsonLd } from "@/components/public/JsonLd";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     "Layanan lengkap MFWEB: pembuatan landing page, company profile, toko online, dan optimasi SEO. Mulai dari Rp 800K, termasuk domain dan hosting gratis.",
   alternates: { canonical: "/layanan" },
   openGraph: {
-    title: "Jasa Pembuatan Website & Layanan Digital | MFWEB",
+    title: "Jasa Pembuatan Website & Layanan Digital",
     description:
       "Landing page, company profile, toko online, optimasi SEO. Mulai Rp 800K, termasuk domain + hosting.",
   },
@@ -614,14 +615,8 @@ export default function LayananPage() {
         </div>
       </section>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
-      />
+      <JsonLd id="json-ld-breadcrumb-layanan" data={breadcrumbJsonLd} />
+      <JsonLd id="json-ld-service-layanan" data={serviceJsonLd} />
     </div>
   );
 }

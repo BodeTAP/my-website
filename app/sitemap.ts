@@ -44,8 +44,6 @@ const STATIC_ROUTES: Array<{ path: string; changeFrequency: MetadataRoute.Sitema
   { path: "/tools/estimasi-harga",      changeFrequency: "monthly", priority: 0.6 },
   { path: "/tools/qr-code",             changeFrequency: "monthly", priority: 0.6 },
   { path: "/tools/roi-website",         changeFrequency: "monthly", priority: 0.6 },
-  { path: "/kebijakan-privasi",         changeFrequency: "yearly",  priority: 0.3 },
-  { path: "/ketentuan-layanan",         changeFrequency: "yearly",  priority: 0.3 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

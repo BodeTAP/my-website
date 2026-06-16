@@ -12,7 +12,7 @@ type Params = { params: Promise<{ invoiceNo: string }> };
 type LineItem = { label: string; amount: number };
 
 export const metadata: Metadata = {
-  title: "Pembayaran Invoice — MFWEB",
+  title: "Pembayaran Invoice",
   robots: { index: false, follow: false },
 };
 

@@ -22,6 +22,7 @@ import {
   ScaleIn,
 } from "@/components/public/motion";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd } from "@/components/public/JsonLd";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mfweb.maffisorp.id";
@@ -52,7 +53,7 @@ const services: Record<string, ServiceData> = {
     slug: "landing-page",
     title: "Landing Page",
     metaTitle:
-      "Jasa Pembuatan Landing Page Profesional | Mulai Rp 800K — MFWEB",
+      "Jasa Pembuatan Landing Page Profesional | Mulai Rp 800K",
     metaDesc:
       "Jasa pembuatan landing page yang mengkonversi pengunjung menjadi pelanggan. Desain persuasif, cepat, mobile-friendly. Mulai Rp 800K termasuk domain & hosting.",
     heroTitle: "Landing Page yang Mengubah Pengunjung Menjadi Pelanggan",
@@ -137,7 +138,7 @@ const services: Record<string, ServiceData> = {
   "company-profile": {
     slug: "company-profile",
     title: "Company Profile",
-    metaTitle: "Jasa Pembuatan Website Company Profile Profesional | MFWEB",
+    metaTitle: "Jasa Pembuatan Website Company Profile Profesional",
     metaDesc:
       "Website company profile profesional untuk bisnis lokal Indonesia. Desain custom, SEO-friendly, dashboard admin. Mulai Rp 1,5 juta termasuk domain & hosting.",
     heroTitle: "Website Company Profile yang Membangun Kepercayaan Pelanggan",
@@ -222,7 +223,7 @@ const services: Record<string, ServiceData> = {
   "toko-online": {
     slug: "toko-online",
     title: "Toko Online",
-    metaTitle: "Jasa Pembuatan Toko Online / E-Commerce Profesional | MFWEB",
+    metaTitle: "Jasa Pembuatan Toko Online / E-Commerce Profesional",
     metaDesc:
       "Jasa pembuatan toko online lengkap dengan sistem pembayaran, manajemen produk, dan dashboard admin. Mulai Rp 5,4 juta. Siap berjualan 24 jam online.",
     heroTitle: "Toko Online Siap Berjualan 24 Jam, 7 Hari Seminggu",
@@ -309,7 +310,7 @@ const services: Record<string, ServiceData> = {
   "optimasi-seo": {
     slug: "optimasi-seo",
     title: "SEO & Artikel",
-    metaTitle: "Jasa SEO Bergaransi & Artikel SEO Friendly | MFWEB",
+    metaTitle: "Jasa SEO Bergaransi & Artikel SEO Friendly",
     metaDesc:
       "Layanan SEO Bergaransi halaman 1 Google dan penulisan artikel SEO original bebas plagiat. Tingkatkan trafik organik untuk bisnis lokal Anda.",
     heroTitle: "Layanan SEO Bergaransi Tembus Halaman 1 Google",
@@ -395,7 +396,7 @@ const services: Record<string, ServiceData> = {
     slug: "aplikasi-web",
     title: "Aplikasi Web Bisnis",
     metaTitle:
-      "Jasa Pembuatan Aplikasi Web Bisnis — Kasir, Booking, Member | MFWEB",
+      "Jasa Pembuatan Aplikasi Web Bisnis — Kasir, Booking, Member",
     metaDesc:
       "Jasa pembuatan aplikasi web bisnis: sistem kasir & inventori, booking online, portal member, dan sistem custom. Mulai Rp 5 juta. Konsultasi gratis.",
     heroTitle: "Aplikasi Web yang Mengotomasi Operasional Bisnis Anda",
@@ -580,10 +581,7 @@ export default async function ServiceDetailPage({ params }: Params) {
 
   return (
     <div>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id={`json-ld-service-${slug}`} data={jsonLd} />
 
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
