@@ -6,13 +6,62 @@ import { requireModule } from "@/lib/permissions";
 
 export default async function AdminClientsPage() {
   await requireModule("clients");
-  const clients = await prisma.client.findMany({
+  const rawClients = await prisma.client.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       user: { select: { name: true, email: true } },
-      _count: { select: { projects: true, invoices: true } },
+      accountManager: { select: { id: true, name: true, email: true } },
+      credit: { select: { balance: true, updatedAt: true } },
+      invoices: {
+        where: { status: "UNPAID" },
+        select: { id: true, amount: true, dueDate: true, status: true },
+      },
+      tickets: {
+        where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
+        select: { id: true, status: true },
+      },
+      hostingRecords: {
+        select: {
+          id: true,
+          domainName: true,
+          domainExpiry: true,
+          hostingExpiry: true,
+          sslExpiry: true,
+          status: true,
+        },
+      },
+      _count: {
+        select: {
+          projects: true,
+          invoices: true,
+          tickets: true,
+          hostingRecords: true,
+          generatedProposals: true,
+          generatedInvoices: true,
+          leadFinderLists: true,
+        },
+      },
     },
   });
+  const clients = rawClients.map((client) => ({
+    ...client,
+    createdAt: client.createdAt.toISOString(),
+    updatedAt: client.updatedAt.toISOString(),
+    lastContactedAt: client.lastContactedAt?.toISOString() ?? null,
+    credit: client.credit
+      ? { balance: client.credit.balance, updatedAt: client.credit.updatedAt.toISOString() }
+      : null,
+    invoices: client.invoices.map((invoice) => ({
+      ...invoice,
+      dueDate: invoice.dueDate?.toISOString() ?? null,
+    })),
+    hostingRecords: client.hostingRecords.map((record) => ({
+      ...record,
+      domainExpiry: record.domainExpiry?.toISOString() ?? null,
+      hostingExpiry: record.hostingExpiry?.toISOString() ?? null,
+      sslExpiry: record.sslExpiry?.toISOString() ?? null,
+    })),
+  }));
 
   return (
     <div>

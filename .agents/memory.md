@@ -180,6 +180,18 @@ user confirms a lasting preference, project decision, or important current state
   copy, and practical CTAs. Validation: `npm run lint` passed with the 7 known
   warnings, `npx tsc --noEmit` passed, `npm run build` passed, and local
   `/tools` returned 200 on the dev server.
+- Admin Clients detail upgrade (2026-06-17): `Client` now has account-detail
+  fields for status, PIC, billing email, alternate phone, city/province,
+  contact preference/hours, source, tags, internal notes, account manager, and
+  last contacted time. Added migration
+  `20260617090000_add_client_account_details`, expanded
+  `/api/admin/clients/[id]`, rebuilt `/admin/clients` as an operational list,
+  and added `/admin/clients/[id]` with profile editing plus billing, services,
+  tools, support, portal access, and health-risk summaries. Validation:
+  `npx tsc --noEmit`, `npm run lint` (7 known warnings), `npm run test:run`
+  (61 tests), and `npm run build` all passed. On 2026-06-17, the migration SQL
+  was applied manually with `prisma db execute` to the Neon DB from `.env` and
+  marked applied with `prisma migrate resolve`.
 - As of 2026-05-17, `.env` exists locally but is not tracked by Git;
   `.env.example` is tracked.
 - Current active work is product polish for the client portal tools and their

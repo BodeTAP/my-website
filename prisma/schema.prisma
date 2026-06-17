@@ -22,6 +22,7 @@ model User {
   accounts        Account[]
   sessions        Session[]
   client          Client?
+  managedClients  Client[]         @relation("ClientAccountManager")
   adminPermission AdminPermission?
 
   @@map("users")
@@ -312,31 +313,48 @@ model Proposal {
 // ─── Client Portal ────────────────────────────────────────────────────────────
 
 model Client {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  businessName String
-  phone        String?
-  address      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String            @id @default(cuid())
+  userId           String            @unique
+  businessName     String
+  status           ClientStatus      @default(ACTIVE)
+  phone            String?
+  alternatePhone   String?
+  picName          String?
+  picRole          String?
+  billingEmail     String?
+  address          String?
+  city             String?
+  province         String?
+  preferredContact ContactPreference @default(WHATSAPP)
+  contactHours     String?
+  source           String?
+  tags             String[]          @default([])
+  internalNotes    String?           @db.Text
+  accountManagerId String?
+  lastContactedAt  DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
-  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projects       Project[]
-  invoices       Invoice[]
-  tickets        Ticket[]
-  subscriptions  Subscription[]
-  onboardings    OnboardingForm[]
-  notifications  Notification[]
-  hostingRecords HostingRecord[]
-  credit         ClientCredit?
-  creditTxs      CreditTransaction[]
-  proposalTemplates ProposalTemplate[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountManager     User?               @relation("ClientAccountManager", fields: [accountManagerId], references: [id], onDelete: SetNull)
+  projects           Project[]
+  invoices           Invoice[]
+  tickets            Ticket[]
+  subscriptions      Subscription[]
+  onboardings        OnboardingForm[]
+  notifications      Notification[]
+  hostingRecords     HostingRecord[]
+  credit             ClientCredit?
+  creditTxs          CreditTransaction[]
+  proposalTemplates  ProposalTemplate[]
   generatedProposals GeneratedProposal[]
-  generatedInvoices GeneratedInvoice[]
-  leadFinderLists LeadFinderList[]
-  proposalBrandKit ProposalBrandKit?
-  invoiceBrandKit InvoiceBrandKit?
+  generatedInvoices  GeneratedInvoice[]
+  leadFinderLists    LeadFinderList[]
+  proposalBrandKit   ProposalBrandKit?
+  invoiceBrandKit    InvoiceBrandKit?
 
+  @@index([accountManagerId])
+  @@index([status])
   @@map("clients")
 }
 
@@ -399,10 +417,10 @@ model ProposalTemplate {
 }
 
 model GeneratedProposal {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   clientId     String
   templateId   String?
-  proposalNo   String?  @unique
+  proposalNo   String?   @unique
   title        String
   prospectName String?
   businessName String?
@@ -413,9 +431,9 @@ model GeneratedProposal {
   design       Json?
   input        Json
   content      Json
-  status       String   @default("DRAFT")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  status       String    @default("DRAFT")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   client   Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   template ProposalTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
@@ -425,10 +443,10 @@ model GeneratedProposal {
 }
 
 model GeneratedInvoice {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   clientId      String
-  invoiceNo     String   @unique
-  templateName   String?
+  invoiceNo     String    @unique
+  templateName  String?
   title         String
   fromName      String
   fromEmail     String?
@@ -442,16 +460,16 @@ model GeneratedInvoice {
   dueDate       DateTime?
   lineItems     Json
   subtotal      Int
-  discount      Int      @default(0)
+  discount      Int       @default(0)
   taxLabel      String?
-  taxAmount     Int      @default(0)
+  taxAmount     Int       @default(0)
   total         Int
-  notes         String?  @db.Text
-  footer        String?  @db.Text
+  notes         String?   @db.Text
+  footer        String?   @db.Text
   design        Json?
-  status        String   @default("DRAFT")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status        String    @default("DRAFT")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
@@ -460,22 +478,22 @@ model GeneratedInvoice {
 }
 
 model InvoiceBrandKit {
-  id             String   @id @default(cuid())
-  clientId       String   @unique
-  logoUrl        String?
-  primaryColor   String   @default("#1d4ed8")
-  accentColor    String   @default("#0d9488")
-  fontStyle      String   @default("sans")
-  layout         String   @default("corporate")
-  logoPosition   String   @default("left")
-  showLogo       Boolean  @default(true)
-  showInvoiceNo  Boolean  @default(true)
-  showDueDate    Boolean  @default(true)
-  showSender     Boolean  @default(true)
-  showRecipient  Boolean  @default(true)
-  showFooter     Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  clientId      String   @unique
+  logoUrl       String?
+  primaryColor  String   @default("#1d4ed8")
+  accentColor   String   @default("#0d9488")
+  fontStyle     String   @default("sans")
+  layout        String   @default("corporate")
+  logoPosition  String   @default("left")
+  showLogo      Boolean  @default(true)
+  showInvoiceNo Boolean  @default(true)
+  showDueDate   Boolean  @default(true)
+  showSender    Boolean  @default(true)
+  showRecipient Boolean  @default(true)
+  showFooter    Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
@@ -576,6 +594,19 @@ model TicketMessage {
 enum Role {
   ADMIN
   CLIENT
+}
+
+enum ClientStatus {
+  ACTIVE
+  FOLLOW_UP
+  INACTIVE
+  CHURNED
+}
+
+enum ContactPreference {
+  WHATSAPP
+  EMAIL
+  PHONE
 }
 
 enum ArticleStatus {
