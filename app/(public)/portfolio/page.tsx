@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Globe, TrendingUp, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard, ScaleIn } from "@/components/public/motion";
@@ -21,9 +22,15 @@ export default async function PortfolioPage() {
   const portfolios = await prisma.portfolio.findMany({
     orderBy: [{ order: "asc" }, { createdAt: "desc" }],
   }).catch(() => []);
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Portfolio", path: "/portfolio" },
+  ]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-portfolio" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <Breadcrumb items={[{ label: "Portfolio" }]} />
         {/* Header */}
@@ -147,6 +154,7 @@ export default async function PortfolioPage() {
           </div>
         </ScaleIn>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ROICalculator from "./ROICalculator";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
 export const metadata: Metadata = {
   title: "Kalkulator ROI Website Bisnis — Hitung Keuntungan",
@@ -9,8 +10,16 @@ export const metadata: Metadata = {
 };
 
 export default function ROIPage() {
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Kalkulator ROI Website", path: "/tools/roi-website" },
+  ]);
+
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-roi-website" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Kalkulator ROI Website" }]} />
         <div className="text-center mb-12">
@@ -27,6 +36,7 @@ export default function ROIPage() {
         </div>
         <ROICalculator />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

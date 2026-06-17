@@ -4,6 +4,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight, X, LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import { FadeUp, StaggerChildren, StaggerItem, HoverCard } from "@/components/public/motion";
 import BlogSearch from "./BlogSearch";
 import { Suspense } from "react";
@@ -25,6 +26,10 @@ export default async function BlogPage({
   const { category, q, view = "grid", page = "1" } = await searchParams;
   const currentPage = Math.max(1, parseInt(page, 10) || 1);
   const isListView = view === "list";
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Blog", path: "/blog" },
+  ]);
 
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
 
@@ -50,7 +55,9 @@ export default async function BlogPage({
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-blog" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <Breadcrumb items={[{ label: "Blog" }]} />
         <div className="text-center mb-10">
@@ -137,7 +144,8 @@ export default async function BlogPage({
           <ArticlesGrid category={category} q={q} view={view} currentPage={currentPage} />
         </Suspense>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

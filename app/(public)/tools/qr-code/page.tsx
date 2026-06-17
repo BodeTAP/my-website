@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import QRGenerator from "./QRGenerator";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
 export const metadata: Metadata = {
   title: "Generator QR Code Gratis — URL, WhatsApp, Teks",
@@ -9,8 +10,16 @@ export const metadata: Metadata = {
 };
 
 export default function QRCodePage() {
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Generator QR Code", path: "/tools/qr-code" },
+  ]);
+
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-qr-code" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Generator QR Code" }]} />
         <div className="text-center mb-12">
@@ -27,6 +36,7 @@ export default function QRCodePage() {
         </div>
         <QRGenerator />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

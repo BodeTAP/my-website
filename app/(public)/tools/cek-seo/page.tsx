@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SeoChecker from "./SeoChecker";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
 export const metadata: Metadata = {
   title: "Cek SEO Score Website Gratis — Analisis On-Page",
@@ -10,8 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function CekSeoPage() {
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Cek SEO Score", path: "/tools/cek-seo" },
+  ]);
+
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-cek-seo" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Cek SEO Score" }]} />
         <div className="text-center mb-12">
@@ -27,6 +36,7 @@ export default function CekSeoPage() {
         </div>
         <SeoChecker />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

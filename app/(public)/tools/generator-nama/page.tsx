@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import NameGenerator from "./NameGenerator";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import { getAiSettings } from "@/lib/aiSettings";
 
 export const metadata: Metadata = {
@@ -12,9 +13,16 @@ export const metadata: Metadata = {
 
 export default async function GeneratorNamaPage() {
   const aiSettings = await getAiSettings();
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Generator Nama Bisnis", path: "/tools/generator-nama" },
+  ]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-generator-nama" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Generator Nama Bisnis" }]} />
         <div className="text-center mb-12">
@@ -40,6 +48,7 @@ export default async function GeneratorNamaPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

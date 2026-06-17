@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SpeedChecker from "./SpeedChecker";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
 export const metadata: Metadata = {
   title: "Cek Kecepatan Website Gratis — PageSpeed Insights",
@@ -10,8 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function CekKecepatanPage() {
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Cek Kecepatan Website", path: "/tools/cek-kecepatan" },
+  ]);
+
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-cek-kecepatan" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Cek Kecepatan Website" }]} />
         <div className="text-center mb-12">
@@ -28,6 +37,7 @@ export default function CekKecepatanPage() {
         </div>
         <SpeedChecker />
       </div>
-    </div>
+      </div>
+    </>
   );
 }

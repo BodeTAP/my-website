@@ -174,6 +174,16 @@ user confirms a lasting preference, project decision, or important current state
   were removed from public metadata, and proposal/invoice generator landing
   pages now have one H1. Validation after the patch: `npm run lint` passed with
   the 7 known warnings, `npx tsc --noEmit` passed, and `npm run build` passed.
+- Breadcrumb coverage fix (2026-06-18): public visual breadcrumbs no longer emit
+  microdata, to avoid duplicate breadcrumb items in Search Console. JSON-LD
+  breadcrumbs were added to `/blog`, `/portfolio`, and all free tool pages in
+  the sitemap (`/tools/cek-kecepatan`, `/tools/cek-seo`,
+  `/tools/cek-meta-tags`, `/tools/generator-nama`, `/tools/estimasi-harga`,
+  `/tools/qr-code`, `/tools/roi-website`) using
+  `buildPublicBreadcrumbJsonLd()`. Local checks found `BreadcrumbList` on all
+  public sitemap routes tested, including one dynamic blog URL. Validation:
+  `npx tsc --noEmit`, `npm run lint` (7 known warnings), and `npm run build`
+  passed.
 - Public `/tools` UI polish (2026-06-16): redesigned the page as a compact,
   grounded catalog with shorter hero, solid dark bands, smaller 8px-radius
   cards, denser premium/free tool lists, less glow/animation/AI-like marketing

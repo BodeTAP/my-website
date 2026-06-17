@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 import PricingEstimator from "./PricingEstimator";
 import { getAiSettings } from "@/lib/aiSettings";
 
@@ -12,9 +13,16 @@ export const metadata: Metadata = {
 
 export default async function EstimasiHargaPage() {
   const aiSettings = await getAiSettings();
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Estimasi Harga Website", path: "/tools/estimasi-harga" },
+  ]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-estimasi-harga" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Estimasi Harga Website" }]} />
 
@@ -45,6 +53,7 @@ export default async function EstimasiHargaPage() {
           Estimasi bersifat indikatif. Harga final ditentukan setelah konsultasi dan analisis kebutuhan lengkap.
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

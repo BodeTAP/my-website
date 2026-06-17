@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import MetaChecker from "./MetaChecker";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import { JsonLd, buildPublicBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
 export const metadata: Metadata = {
   title: "Cek Meta Tags Website — Preview Google & Sosmed Gratis",
@@ -9,8 +10,16 @@ export const metadata: Metadata = {
 };
 
 export default function CekMetaTagsPage() {
+  const breadcrumbJsonLd = buildPublicBreadcrumbJsonLd([
+    { name: "Beranda", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Cek Meta Tags", path: "/tools/cek-meta-tags" },
+  ]);
+
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <>
+      <JsonLd id="json-ld-breadcrumb-cek-meta-tags" data={breadcrumbJsonLd} />
+      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Cek Meta Tags" }]} />
         <div className="text-center mb-12">
@@ -27,6 +36,7 @@ export default function CekMetaTagsPage() {
         </div>
         <MetaChecker />
       </div>
-    </div>
+      </div>
+    </>
   );
 }
