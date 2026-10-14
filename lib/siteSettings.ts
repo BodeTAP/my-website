@@ -10,8 +10,8 @@ export const SITE_SETTING_DEFAULTS: Record<string, string> = {
   brand_business_address: "Jl. Brigadir Jenderal Katamso No.14, Kp. Dalem, Kec. Kota, Kota Kediri, Jawa Timur",
   brand_legal_name: "MFWEB",
   brand_footer_text: "MFWEB. All rights reserved.",
-  brand_logo_url: "/logo.png",
-  brand_favicon_url: "/favicon.ico",
+  brand_logo_url: "/logo.svg",
+  brand_favicon_url: "/favicon.svg",
   brand_default_og_image: "/og-image.png",
 
   home_hero_badge: "Tersedia untuk proyek baru",

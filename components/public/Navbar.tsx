@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { BrandLogoIcon } from "@/components/brand/BrandLogo";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -303,10 +303,10 @@ export default function Navbar() {
         onMouseLeave={() => setActiveMega(null)}
       >
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <Image src="/logo.png" alt="MFWEB" width={36} height={36} className="h-9 w-auto" />
-          <span className="font-bold text-white text-lg tracking-wide">
-            MF<span className="text-blue-400">WEB</span>
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <BrandLogoIcon size={34} variant="dark" />
+          <span className="font-black text-white text-lg tracking-tight">
+            MF<span className="text-zinc-400">WEB</span>
           </span>
         </Link>
 

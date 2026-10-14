@@ -53,6 +53,11 @@ user confirms a lasting preference, project decision, or important current state
   toggles. PDF preview/download should use the same renderer.
 - Proposal PDFs should automatically format plain large numeric costs as Rupiah,
   e.g. `1500000` -> `Rp 1.500.000`.
+- On 2026-10-15, complete project rebrand to "White & Grey / Monochrome Minimalist"
+  was initiated; Concept 02 (The Minimalist Viewport) selected as official MFWEB logo.
+- Logo assets include `components/brand/BrandLogo.tsx`, `public/logo.svg`,
+  `public/logo-dark.svg`, `public/favicon.svg`, and high-res `public/logo.png` &
+  `app/icon.png`. Typography styling uses Obsidian Black "MF" + Titanium Grey "WEB".
 
 ## Current Focus
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { BrandLogoIcon } from "@/components/brand/BrandLogo";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -78,11 +78,11 @@ export default function PortalRegisterPage() {
         {/* Logo */}
         <FadeUp delay={0}>
           <div className="text-center mb-10 group">
-            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 mb-5">
-              <Image src="/logo.png" alt="MFWEB" width={32} height={32} className="relative z-10 drop-shadow-lg" />
+            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 mb-5 shadow-xs">
+              <BrandLogoIcon size={34} variant="dark" />
             </div>
-            <h1 className="text-white font-black text-3xl tracking-tight">MFWEB</h1>
-            <p className="text-indigo-300/70 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Pendaftaran Klien</p>
+            <h1 className="text-white font-black text-3xl tracking-tight">MF<span className="text-zinc-400">WEB</span></h1>
+            <p className="text-zinc-400 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Pendaftaran Klien</p>
           </div>
         </FadeUp>
 

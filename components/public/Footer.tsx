@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { BrandLogoIcon } from "@/components/brand/BrandLogo";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { getSiteSettings } from "@/lib/siteSettings";
 
@@ -58,17 +58,11 @@ export default async function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 lg:gap-8">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Image
-                  src={settings.brand_logo_url || "/logo.png"}
-                  alt={settings.brand_name}
-                  width={24}
-                  height={24}
-                  className="brightness-0 invert"
-                />
+              <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-md">
+                <BrandLogoIcon size={24} variant="dark" />
               </div>
-              <span className="font-bold text-xl text-white tracking-wide">
-                {settings.brand_name}
+              <span className="font-black text-xl text-white tracking-tight">
+                MF<span className="text-zinc-400">WEB</span>
               </span>
             </div>
 

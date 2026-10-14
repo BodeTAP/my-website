@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandLogoIcon } from "@/components/brand/BrandLogo";
 import { Mail, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,9 +38,11 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <Image src="/logo.png" alt="MFWEB" width={48} height={48} className="mx-auto mb-4" />
-          <h1 className="text-white font-bold text-xl">MFWEB</h1>
-          <p className="text-blue-200/50 text-sm mt-1">Portal Klien</p>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 mb-4 shadow-xs">
+            <BrandLogoIcon size={34} variant="dark" />
+          </div>
+          <h1 className="text-white font-black text-2xl tracking-tight">MF<span className="text-zinc-400">WEB</span></h1>
+          <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mt-1">Portal Klien</p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-[#071225] p-8">

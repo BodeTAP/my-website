@@ -4,6 +4,7 @@ import { useState, useEffect, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { BrandLogoIcon } from "@/components/brand/BrandLogo";
 import { signOut } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
@@ -58,11 +59,11 @@ const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
     >
     <motion.div
       layout
-      className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-500/25 overflow-hidden"
+      className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden"
       animate={{ rotate: collapsed ? -8 : 0, scale: collapsed ? 0.96 : 1 }}
       transition={SIDEBAR_SPRING}
     >
-      <Image src="/logo.png" alt="MFWEB" width={24} height={24} className="shrink-0 relative z-10" style={{ width: 24, height: 24 }} />
+      <BrandLogoIcon size={24} variant="dark" className="shrink-0 relative z-10" />
     </motion.div>
     <motion.div
       aria-hidden={collapsed}
@@ -75,8 +76,8 @@ const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
       }}
       transition={SIDEBAR_FADE}
     >
-      <p className="text-white text-base font-black tracking-wide">MFWEB</p>
-      <p className="text-blue-300/70 text-[10px] font-bold uppercase tracking-wider mt-0.5">Portal Klien</p>
+      <p className="text-white text-base font-black tracking-tight">MF<span className="text-zinc-400">WEB</span></p>
+      <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider mt-0.5">Portal Klien</p>
     </motion.div>
     </Link>
   </motion.div>
@@ -508,8 +509,8 @@ export default function PortalShell({
           </button>
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/portal/dashboard" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="MFWEB" width={24} height={24} style={{ width: 24, height: 24 }} />
-              <span className="text-white font-black tracking-wide">Portal</span>
+              <BrandLogoIcon size={24} variant="dark" />
+              <span className="text-white font-black tracking-tight">MF<span className="text-zinc-400">WEB</span></span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
