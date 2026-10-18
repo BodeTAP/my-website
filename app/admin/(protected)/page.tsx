@@ -71,10 +71,10 @@ export default async function AdminDashboard({
   const monthName = now.toLocaleDateString("id-ID", { month: "long" });
 
   const pipeline = [
-    { label: "Baru",       count: leadNew,      color: "bg-blue-500",    text: "text-blue-400",    href: "/admin/leads" },
-    { label: "Follow-up",  count: leadFollowup, color: "bg-amber-500",   text: "text-amber-400",   href: "/admin/leads" },
-    { label: "Deal",       count: leadDeal,      color: "bg-green-500",   text: "text-green-400",   href: "/admin/leads" },
-    { label: "Selesai",    count: leadClosed,    color: "bg-white/20",    text: "text-blue-200/50", href: "/admin/leads" },
+    { label: "Baru",       count: leadNew,      color: "bg-slate-800",    text: "text-slate-900",   href: "/admin/leads" },
+    { label: "Follow-up",  count: leadFollowup, color: "bg-amber-500",   text: "text-amber-700",   href: "/admin/leads" },
+    { label: "Deal",       count: leadDeal,      color: "bg-emerald-600", text: "text-emerald-700", href: "/admin/leads" },
+    { label: "Selesai",    count: leadClosed,    color: "bg-slate-400",    text: "text-slate-600",   href: "/admin/leads" },
   ];
 
   // Prepare Chart Data
@@ -90,32 +90,33 @@ export default async function AdminDashboard({
   const maxAmount = Math.max(...chartData.map(d => d.amount), 1);
 
   return (
-    <div>
+    <div className="space-y-6">
       {isDenied && (
-        <div className="mb-6 flex items-center gap-3 px-5 py-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-300">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-400" />
-          <p className="text-sm font-medium">Akses ditolak: Anda tidak memiliki izin untuk modul ini.</p>
+        <div className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 shadow-xs">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+          <p className="text-sm font-semibold">Akses ditolak: Anda tidak memiliki izin untuk modul ini.</p>
         </div>
       )}
-      <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-600/20 rounded-full blur-[60px] pointer-events-none" />
-        <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-            <LayoutDashboard className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+
+      {/* Header */}
+      <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <LayoutDashboard className="w-7 h-7 sm:w-8 sm:h-8 text-slate-800" />
             Dashboard Utama
           </h1>
-          <p className="text-blue-200/60 text-sm mt-1">{greeting}, Admin MFWEB.</p>
+          <p className="text-slate-500 text-sm mt-1">{greeting}, Admin MFWEB.</p>
         </div>
         
         {/* Health Widget */}
-        <div className="relative z-10 flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-3 px-4 py-2 glass rounded-xl border border-white/10 self-start sm:self-center shadow-lg">
-            <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${tripayStatus?.value === "ok" ? "bg-green-500 shadow-[0_0_10px_#22c55e]" : "bg-red-500 shadow-[0_0_10px_#ef4444]"}`} />
-            <span className="text-[11px] font-bold tracking-wide uppercase text-white/80">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2.5 px-3.5 py-2 bg-white rounded-xl border border-slate-200 shadow-2xs self-start sm:self-center">
+            <div className={`w-2 h-2 rounded-full ${tripayStatus?.value === "ok" ? "bg-emerald-500 ring-4 ring-emerald-100" : "bg-rose-500 ring-4 ring-rose-100"}`} />
+            <span className="text-xs font-semibold text-slate-700">
               Tripay: {tripayStatus?.value === "ok" ? "Aman" : "Gangguan"}
             </span>
             {tripayLastAlert && (
-              <span className="text-[10px] text-blue-200/40 border-l border-white/10 pl-3">
+              <span className="text-[11px] text-slate-400 border-l border-slate-200 pl-2.5 font-medium">
                 Cek: {timeAgo(new Date(tripayLastAlert.value))}
               </span>
             )}
@@ -125,24 +126,23 @@ export default async function AdminDashboard({
 
       <StaggerChildren stagger={0.05}>
         {/* Row 1 — Operations */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Leads Baru",    value: leadNew,      icon: Users,         color: "text-blue-400",   bg: "bg-blue-500/10", border: "hover:border-blue-500/50",   glow: "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]", href: "/admin/leads"    },
-            { label: "Proyek Aktif",  value: projects,     icon: Briefcase,     color: "text-amber-400",  bg: "bg-amber-500/10", border: "hover:border-amber-500/50", glow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]", href: "/admin/projects" },
-            { label: "Tiket Terbuka", value: openTickets,  icon: MessageSquare, color: "text-green-400",  bg: "bg-green-500/10", border: "hover:border-green-500/50", glow: "group-hover:shadow-[0_0_20px_rgba(34,197,94,0.15)]", href: "/admin/tickets"  },
-            { label: "Total Artikel", value: articles,     icon: FileText,      color: "text-violet-400", bg: "bg-violet-500/10", border: "hover:border-violet-500/50", glow: "group-hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]", href: "/admin/articles" },
+            { label: "Leads Baru",    value: leadNew,      icon: Users,         color: "text-slate-800",   bg: "bg-slate-100",  href: "/admin/leads"    },
+            { label: "Proyek Aktif",  value: projects,     icon: Briefcase,     color: "text-amber-700",  bg: "bg-amber-50",   href: "/admin/projects" },
+            { label: "Tiket Terbuka", value: openTickets,  icon: MessageSquare, color: "text-emerald-700",bg: "bg-emerald-50", href: "/admin/tickets"  },
+            { label: "Total Artikel", value: articles,     icon: FileText,      color: "text-indigo-700", bg: "bg-indigo-50",  href: "/admin/articles" },
           ].map((s) => (
             <StaggerItem key={s.label}>
               <Link href={s.href} className="group block h-full">
-                <div className={`glass h-full rounded-3xl p-5 border border-white/5 transition-all duration-300 ${s.border} ${s.glow} relative overflow-hidden`}>
-                  <div className={`absolute -right-4 -top-4 w-20 h-20 rounded-full blur-[30px] opacity-20 ${s.bg} transition-opacity group-hover:opacity-100`} />
-                  <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center mb-4 relative z-10 ring-1 ring-white/5`}>
+                <div className="h-full rounded-2xl p-5 bg-white border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all duration-200">
+                  <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center mb-4 transition-transform group-hover:scale-105`}>
                     <s.icon className={`w-5 h-5 ${s.color}`} />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-1 tracking-tight relative z-10">
+                  <div className="text-3xl font-bold text-slate-900 mb-1 tracking-tight">
                     <CountUp from={0} to={s.value} />
                   </div>
-                  <div className="text-blue-200/50 text-xs sm:text-sm font-medium relative z-10">{s.label}</div>
+                  <div className="text-slate-500 text-xs sm:text-sm font-medium">{s.label}</div>
                 </div>
               </Link>
             </StaggerItem>
@@ -150,56 +150,52 @@ export default async function AdminDashboard({
         </div>
 
         {/* Row 2 — Chart & Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           
           {/* Revenue Chart */}
           <StaggerItem className="lg:col-span-2">
-            <div className="glass rounded-3xl p-5 sm:p-7 border border-white/5 relative overflow-hidden h-full flex flex-col group">
-              <div className="absolute -top-32 -right-32 w-64 h-64 bg-teal-500/10 blur-[80px] rounded-full pointer-events-none group-hover:bg-teal-500/20 transition-colors duration-700" />
-              
-              <div className="flex items-start justify-between relative z-10 mb-6">
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-xs h-full flex flex-col">
+              <div className="flex items-start justify-between mb-6">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="w-5 h-5 text-teal-400" />
-                    <h2 className="text-white font-bold text-lg tracking-tight">Tren Pendapatan</h2>
+                  <div className="flex items-center gap-2 mb-1">
+                    <BarChart3 className="w-5 h-5 text-slate-800" />
+                    <h2 className="text-slate-900 font-bold text-lg tracking-tight">Tren Pendapatan</h2>
                   </div>
-                  <p className="text-blue-200/50 text-sm">Grafik penerimaan 6 bulan terakhir</p>
+                  <p className="text-slate-500 text-sm">Grafik penerimaan 6 bulan terakhir</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-teal-400 tracking-tight">{formatRp(paidAmount)}</p>
-                  <p className="text-teal-400/60 text-xs font-medium uppercase tracking-wider mt-1">Bulan {monthName}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{formatRp(paidAmount)}</p>
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mt-0.5">Bulan {monthName}</p>
                 </div>
               </div>
 
               {/* Pure CSS Bar Chart */}
-              <div className="flex-1 min-h-[160px] flex items-end gap-2 sm:gap-4 mt-auto relative z-10 pt-4">
+              <div className="flex-1 min-h-[170px] flex items-end gap-2 sm:gap-4 mt-auto relative pt-6 pb-1">
                 {/* Horizontal guide lines */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
-                  <div className="w-full h-px bg-white/20 border-dashed border-t" />
-                  <div className="w-full h-px bg-white/20 border-dashed border-t" />
-                  <div className="w-full h-px bg-white/20 border-dashed border-t" />
+                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
+                  <div className="w-full h-px border-t border-dashed border-slate-200" />
+                  <div className="w-full h-px border-t border-dashed border-slate-200" />
+                  <div className="w-full h-px border-t border-dashed border-slate-200" />
                 </div>
                 
                 {chartData.map((d, i) => {
                   const isCurrentMonth = i === chartData.length - 1;
-                  const heightPercent = maxAmount === 1 ? 0 : Math.max((d.amount / maxAmount) * 100, 2);
+                  const heightPercent = maxAmount === 1 ? 0 : Math.max((d.amount / maxAmount) * 100, 3);
                   return (
-                    <div key={d.month} className="flex-1 flex flex-col items-center gap-3 relative group/bar cursor-default">
+                    <div key={d.month} className="flex-1 flex flex-col items-center gap-3 relative group/bar cursor-default z-10">
                       {/* Tooltip */}
-                      <div className="absolute -top-10 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-[#020611] border border-white/10 text-white text-xs py-1 px-2.5 rounded-lg whitespace-nowrap z-20 pointer-events-none shadow-xl">
+                      <div className="absolute -top-9 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-slate-900 text-white text-xs font-semibold py-1 px-2.5 rounded-lg whitespace-nowrap z-20 pointer-events-none shadow-md">
                         {formatRp(d.amount)}
                       </div>
                       
                       <div className="w-full relative h-32 sm:h-40 flex items-end">
                         <div 
-                          className={`w-full rounded-t-md transition-all duration-1000 ease-out relative overflow-hidden group-hover/bar:brightness-125
-                            ${isCurrentMonth ? 'bg-gradient-to-t from-teal-500/20 to-teal-400/80 shadow-[0_0_15px_rgba(45,212,191,0.2)]' : 'bg-gradient-to-t from-white/5 to-white/20'}`}
+                          className={`w-full rounded-t-md transition-all duration-700 ease-out
+                            ${isCurrentMonth ? 'bg-[#1E242E] shadow-xs' : 'bg-slate-200 group-hover/bar:bg-slate-300'}`}
                           style={{ height: `${heightPercent}%` }}
-                        >
-                          <div className={`absolute top-0 inset-x-0 h-1 sm:h-1.5 opacity-50 ${isCurrentMonth ? 'bg-white' : 'bg-white/40'}`} />
-                        </div>
+                        />
                       </div>
-                      <span className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isCurrentMonth ? 'text-teal-400' : 'text-blue-200/40'}`}>
+                      <span className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${isCurrentMonth ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
                         {d.month}
                       </span>
                     </div>
@@ -212,34 +208,32 @@ export default async function AdminDashboard({
           {/* Right Column Metrics */}
           <div className="flex flex-col gap-4 h-full">
             <StaggerItem className="flex-1">
-              <div className="glass rounded-3xl p-5 border border-white/5 relative overflow-hidden group h-full flex flex-col justify-center">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-[50px] rounded-full pointer-events-none group-hover:bg-orange-500/20 transition-colors duration-700" />
-                <div className="flex items-center gap-3 mb-3 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 ring-1 ring-orange-500/20 flex items-center justify-center shrink-0">
-                    <AlertCircle className="w-5 h-5 text-orange-400" />
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs h-full flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                    <AlertCircle className="w-5 h-5" />
                   </div>
-                  <span className="text-blue-200/60 font-medium text-sm">Tagihan Pending</span>
+                  <span className="text-slate-600 font-medium text-sm">Tagihan Pending</span>
                 </div>
-                <div className="text-3xl font-bold text-white tracking-tight relative z-10 mb-1">{formatRp(unpaidAmount)}</div>
-                <Link href="/admin/invoices" className="text-blue-400 text-xs hover:text-blue-300 transition-colors inline-flex items-center gap-1 relative z-10 mt-auto pt-2">
+                <div className="text-3xl font-bold text-slate-900 tracking-tight mb-1">{formatRp(unpaidAmount)}</div>
+                <Link href="/admin/invoices" className="text-slate-700 hover:text-slate-900 text-xs font-semibold transition-colors inline-flex items-center gap-1 mt-auto pt-2">
                   Lihat semua tagihan <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
             </StaggerItem>
 
             <StaggerItem className="flex-1">
-              <div className="glass rounded-3xl p-5 border border-white/5 relative overflow-hidden group h-full flex flex-col justify-center">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] rounded-full pointer-events-none group-hover:bg-purple-500/20 transition-colors duration-700" />
-                <div className="flex items-center gap-3 mb-3 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center shrink-0">
-                    <Repeat2 className="w-5 h-5 text-purple-400" />
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs h-full flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                    <Repeat2 className="w-5 h-5" />
                   </div>
-                  <span className="text-blue-200/60 font-medium text-sm">Maintenance Aktif (WaaS)</span>
+                  <span className="text-slate-600 font-medium text-sm">Maintenance Aktif (WaaS)</span>
                 </div>
-                <div className="text-3xl font-bold text-white tracking-tight relative z-10 mb-1">
-                  <CountUp from={0} to={activeSubs} /> <span className="text-blue-200/30 text-lg font-normal">Klien</span>
+                <div className="text-3xl font-bold text-slate-900 tracking-tight mb-1">
+                  <CountUp from={0} to={activeSubs} /> <span className="text-slate-400 text-base font-normal">Klien</span>
                 </div>
-                <Link href="/admin/maintenance" className="text-purple-400 text-xs hover:text-purple-300 transition-colors inline-flex items-center gap-1 relative z-10 mt-auto pt-2">
+                <Link href="/admin/maintenance" className="text-slate-700 hover:text-slate-900 text-xs font-semibold transition-colors inline-flex items-center gap-1 mt-auto pt-2">
                   Kelola langganan <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -252,45 +246,45 @@ export default async function AdminDashboard({
           
           {/* Recent leads */}
           <StaggerItem className="lg:col-span-3">
-            <div className="glass rounded-3xl p-6 sm:p-8 h-full border border-white/5">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                    <Rocket className="w-4 h-4 text-blue-400" />
+            <div className="bg-white rounded-2xl p-6 sm:p-7 h-full border border-slate-200/90 shadow-xs">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <Rocket className="w-4 h-4 text-slate-700" />
                   </div>
-                  <h2 className="text-white font-bold text-lg">Leads Terbaru</h2>
+                  <h2 className="text-slate-900 font-bold text-lg">Leads Terbaru</h2>
                 </div>
-                <Link href="/admin/leads" className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors bg-blue-500/10 px-3 py-1.5 rounded-full">
-                  Semua Leads <ChevronRight className="w-4 h-4" />
+                <Link href="/admin/leads" className="text-slate-700 hover:text-slate-900 text-xs font-semibold flex items-center gap-1 transition-colors bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl">
+                  Semua Leads <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
               
               {recentLeads.length === 0 ? (
-                <div className="py-10 text-center border-2 border-dashed border-white/10 rounded-2xl">
-                  <p className="text-blue-200/40 text-sm">Belum ada leads masuk bulan ini.</p>
+                <div className="py-10 text-center border border-dashed border-slate-200 rounded-xl">
+                  <p className="text-slate-400 text-sm">Belum ada leads masuk bulan ini.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {recentLeads.map((l) => (
-                    <div key={l.id} className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors flex items-center justify-between gap-4 group">
+                    <div key={l.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-colors flex items-center justify-between gap-4 group">
                       <div className="min-w-0">
-                        <p className="text-white text-sm font-bold truncate group-hover:text-blue-300 transition-colors">{l.name}</p>
-                        <p className="text-blue-200/50 text-xs truncate mt-0.5 flex items-center gap-1.5">
+                        <p className="text-slate-900 text-sm font-semibold truncate group-hover:text-slate-700 transition-colors">{l.name}</p>
+                        <p className="text-slate-500 text-xs truncate mt-0.5 flex items-center gap-1.5">
                           <span>{l.businessName}</span>
-                          <span className="w-1 h-1 rounded-full bg-blue-200/20" />
+                          <span className="w-1 h-1 rounded-full bg-slate-300" />
                           <span>{l.whatsapp}</span>
                         </p>
                       </div>
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
-                          l.status === "NEW"      ? "bg-blue-500/20 text-blue-400 border border-blue-500/20"
-                          : l.status === "FOLLOWUP" ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
-                          : l.status === "DEAL"   ? "bg-green-500/20 text-green-400 border border-green-500/20"
-                          : "bg-white/5 text-blue-200/40 border border-white/10"
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
+                          l.status === "NEW"        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                          : l.status === "FOLLOWUP" ? "bg-amber-50 text-amber-700 border border-amber-200"
+                          : l.status === "DEAL"     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}>
                           {l.status === "NEW" ? "Baru" : l.status === "FOLLOWUP" ? "Follow-up" : l.status === "DEAL" ? "Deal" : "Selesai"}
                         </span>
-                        <span className="text-blue-200/30 text-[10px] font-medium">{timeAgo(l.createdAt)}</span>
+                        <span className="text-slate-400 text-[10px] font-medium">{timeAgo(l.createdAt)}</span>
                       </div>
                     </div>
                   ))}
@@ -301,22 +295,20 @@ export default async function AdminDashboard({
 
           {/* Lead pipeline */}
           <StaggerItem className="lg:col-span-2">
-            <div className="glass rounded-3xl p-6 sm:p-8 h-full border border-white/5 relative overflow-hidden">
-              <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-green-500/10 blur-[80px] rounded-full pointer-events-none" />
+            <div className="bg-white rounded-2xl p-6 sm:p-7 h-full border border-slate-200/90 shadow-xs">
+              <h2 className="text-slate-900 font-bold text-lg mb-1">Pipeline Leads</h2>
+              <p className="text-slate-500 text-sm mb-6">Total <strong className="text-slate-900">{totalLeads}</strong> leads tercatat di sistem.</p>
               
-              <h2 className="text-white font-bold text-lg mb-1 relative z-10">Pipeline Leads</h2>
-              <p className="text-blue-200/50 text-sm mb-6 relative z-10">Total <strong className="text-blue-300">{totalLeads}</strong> leads tercatat di sistem.</p>
-              
-              <div className="space-y-5 relative z-10">
+              <div className="space-y-4">
                 {pipeline.map((p) => (
                   <div key={p.label}>
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="text-blue-200/70 text-sm font-medium">{p.label}</span>
-                      <span className={`text-base font-bold ${p.text}`}>{p.count}</span>
+                    <div className="flex justify-between items-end mb-1.5">
+                      <span className="text-slate-600 text-xs font-medium">{p.label}</span>
+                      <span className={`text-sm font-bold ${p.text}`}>{p.count}</span>
                     </div>
-                    <div className="h-2.5 bg-[#050b14] ring-1 ring-white/10 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
                       <div
-                        className={`h-full ${p.color} rounded-full transition-all duration-1000 ease-out`}
+                        className={`h-full ${p.color} rounded-full transition-all duration-700 ease-out`}
                         style={{ width: totalLeads > 0 ? `${(p.count / totalLeads) * 100}%` : "0%" }}
                       />
                     </div>
@@ -325,16 +317,16 @@ export default async function AdminDashboard({
               </div>
 
               {totalLeads > 0 && (
-                <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 gap-4 relative z-10">
-                  <div className="bg-white/5 p-4 rounded-2xl">
-                    <p className="text-blue-200/50 text-xs font-medium mb-1 uppercase tracking-wider">Conversion Rate</p>
-                    <p className="text-white font-bold text-3xl"><CountUp from={0} to={convRate} />%</p>
-                    <p className="text-green-400 text-[10px] mt-1 font-semibold">LEAD → DEAL</p>
+                <div className="mt-7 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3">
+                  <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
+                    <p className="text-slate-500 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">Conversion Rate</p>
+                    <p className="text-slate-900 font-bold text-2xl"><CountUp from={0} to={convRate} />%</p>
+                    <p className="text-emerald-700 text-[10px] mt-1 font-semibold">LEAD → DEAL</p>
                   </div>
-                  <div className="bg-white/5 p-4 rounded-2xl">
-                    <p className="text-blue-200/50 text-xs font-medium mb-1 uppercase tracking-wider">Leads Aktif</p>
-                    <p className="text-white font-bold text-3xl"><CountUp from={0} to={leadNew + leadFollowup} /></p>
-                    <p className="text-amber-400 text-[10px] mt-1 font-semibold">BUTUH TINDAK LANJUT</p>
+                  <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl">
+                    <p className="text-slate-500 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">Leads Aktif</p>
+                    <p className="text-slate-900 font-bold text-2xl"><CountUp from={0} to={leadNew + leadFollowup} /></p>
+                    <p className="text-amber-700 text-[10px] mt-1 font-semibold">BUTUH TINDAK LANJUT</p>
                   </div>
                 </div>
               )}

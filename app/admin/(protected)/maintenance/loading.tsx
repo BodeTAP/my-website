@@ -10,7 +10,7 @@ export default function MaintenanceLoading() {
         </div>
       </div>
 
-      <div className="flex gap-4 mb-6 border-b border-white/10">
+      <div className="flex gap-4 mb-6 border-b border-slate-200">
         <Skeleton className="h-10 w-32 rounded-t-xl" />
         <Skeleton className="h-10 w-32 rounded-t-xl" />
       </div>

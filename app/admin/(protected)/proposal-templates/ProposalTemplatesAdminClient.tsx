@@ -149,48 +149,48 @@ export default function ProposalTemplatesAdminClient({ initialTemplates }: { ini
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[430px_1fr] gap-6">
-      <section className="glass rounded-3xl border border-white/10 p-5 space-y-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-white font-black text-lg">Template Bawaan</h2>
-            <p className="text-blue-200/45 text-sm mt-1">{templates.filter((template) => template.isActive).length} aktif</p>
+            <h2 className="text-slate-900 font-bold text-lg">Template Bawaan</h2>
+            <p className="text-slate-500 text-sm mt-1">{templates.filter((template) => template.isActive).length} aktif</p>
           </div>
-          <Button type="button" onClick={() => setDraft(emptyDraft())} className="rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button type="button" onClick={() => setDraft(emptyDraft())} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-semibold shadow-xs">
+            <Plus className="w-4 h-4 mr-1.5" />
             Baru
           </Button>
         </div>
 
         {(message || error) && (
-          <div className={`rounded-2xl border px-4 py-3 text-sm font-bold ${error ? "bg-red-500/10 border-red-500/25 text-red-200" : "bg-emerald-500/10 border-emerald-500/25 text-emerald-200"}`}>
+          <div className={`rounded-xl border px-4 py-3 text-sm font-semibold ${error ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800"}`}>
             {error || message}
           </div>
         )}
 
         <div className="space-y-3">
           {templates.map((template) => (
-            <div key={template.id} className={`rounded-2xl border p-4 ${template.isActive ? "bg-[#07111f]/80 border-white/10" : "bg-white/[0.03] border-white/5 opacity-60"}`}>
+            <div key={template.id} className={`rounded-xl border p-4 transition-colors ${template.isActive ? "bg-white border-slate-200 shadow-2xs hover:border-slate-300" : "bg-slate-50 border-slate-200 opacity-60"}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-white font-black">{template.name}</p>
-                  <p className="text-blue-200/40 text-sm mt-1">{template.category}</p>
+                  <p className="text-slate-900 font-bold">{template.name}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">{template.category}</p>
                 </div>
-                <span className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-wider border ${template.isActive ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-200" : "bg-white/5 border-white/10 text-blue-200/40"}`}>
+                <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${template.isActive ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-slate-100 border-slate-200 text-slate-500"}`}>
                   {template.isActive ? "Aktif" : "Nonaktif"}
                 </span>
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
-                <Button type="button" onClick={() => editTemplate(template)} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
-                  <Pencil className="w-4 h-4 mr-2" />
+                <Button type="button" onClick={() => editTemplate(template)} className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs text-xs font-semibold">
+                  <Pencil className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
                   Edit
                 </Button>
-                <Button type="button" onClick={() => duplicateTemplate(template)} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
-                  <Copy className="w-4 h-4 mr-2" />
+                <Button type="button" onClick={() => duplicateTemplate(template)} className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs text-xs font-semibold">
+                  <Copy className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
                   Duplikat
                 </Button>
                 {template.isActive && (
-                  <Button type="button" disabled={saving} onClick={() => deactivateTemplate(template.id)} className="rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-200 border border-red-500/20">
-                    <Trash2 className="w-4 h-4 mr-2" />
+                  <Button type="button" disabled={saving} onClick={() => deactivateTemplate(template.id)} className="rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold">
+                    <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                     Nonaktifkan
                   </Button>
                 )}
@@ -200,37 +200,37 @@ export default function ProposalTemplatesAdminClient({ initialTemplates }: { ini
         </div>
       </section>
 
-      <section className="glass rounded-3xl border border-blue-500/20 p-5 space-y-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-5 shadow-xs">
         <div>
-          <h2 className="text-white font-black text-lg">{draft.id ? "Edit Template" : "Template Baru"}</h2>
-          <p className="text-blue-200/45 text-sm mt-1">Template aktif akan tampil sebagai template bawaan di portal klien.</p>
+          <h2 className="text-slate-900 font-bold text-lg">{draft.id ? "Edit Template" : "Template Baru"}</h2>
+          <p className="text-slate-500 text-sm mt-1">Template aktif akan tampil sebagai template bawaan di portal klien.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_120px] gap-3">
-          <input value={draft.name} onChange={(event) => updateDraft({ name: event.target.value })} placeholder="Nama template" className="h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500" />
-          <input value={draft.category} onChange={(event) => updateDraft({ category: event.target.value })} placeholder="Kategori" className="h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500" />
-          <label className="h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white flex items-center gap-2">
-            <input type="checkbox" checked={draft.isActive} onChange={(event) => updateDraft({ isActive: event.target.checked })} className="accent-blue-500" />
+          <input value={draft.name} onChange={(event) => updateDraft({ name: event.target.value })} placeholder="Nama template" className="h-11 rounded-xl bg-slate-50 border border-slate-200 px-3.5 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900" />
+          <input value={draft.category} onChange={(event) => updateDraft({ category: event.target.value })} placeholder="Kategori" className="h-11 rounded-xl bg-slate-50 border border-slate-200 px-3.5 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900" />
+          <label className="h-11 rounded-xl bg-slate-50 border border-slate-200 px-3.5 text-slate-900 text-sm flex items-center gap-2 font-medium">
+            <input type="checkbox" checked={draft.isActive} onChange={(event) => updateDraft({ isActive: event.target.checked })} className="accent-slate-900" />
             Aktif
           </label>
         </div>
 
-        <textarea value={draft.description} onChange={(event) => updateDraft({ description: event.target.value })} placeholder="Deskripsi singkat" rows={2} className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none" />
+        <textarea value={draft.description} onChange={(event) => updateDraft({ description: event.target.value })} placeholder="Deskripsi singkat" rows={2} className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-none" />
 
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-white font-black">Field Brief</h3>
-            <Button type="button" onClick={() => updateDraft({ variables: [...draft.variables, { key: "", label: "", placeholder: "" }] })} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
-              <Plus className="w-4 h-4 mr-2" />
+            <h3 className="text-slate-900 font-bold text-sm">Field Brief</h3>
+            <Button type="button" onClick={() => updateDraft({ variables: [...draft.variables, { key: "", label: "", placeholder: "" }] })} className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs text-xs font-semibold">
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
               Field
             </Button>
           </div>
           {draft.variables.map((variable, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-2">
-              <input value={variable.key} onChange={(event) => updateDraft({ variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, key: event.target.value } : item) })} placeholder="key" className="h-11 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500" />
-              <input value={variable.label} onChange={(event) => updateDraft({ variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item) })} placeholder="Label" className="h-11 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500" />
-              <input value={variable.placeholder ?? ""} onChange={(event) => updateDraft({ variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, placeholder: event.target.value } : item) })} placeholder="Placeholder" className="h-11 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500" />
-              <button type="button" onClick={() => updateDraft({ variables: draft.variables.filter((_item, itemIndex) => itemIndex !== index) })} className="h-11 w-11 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/15 flex items-center justify-center" aria-label="Hapus field">
+              <input value={variable.key} onChange={(event) => updateDraft({ variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, key: event.target.value } : item) })} placeholder="key" className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900" />
+              <input value={variable.label} onChange={(event) => updateDraft({ variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item) })} placeholder="Label" className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900" />
+              <input value={variable.placeholder ?? ""} onChange={(event) => updateDraft({ variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, placeholder: event.target.value } : item) })} placeholder="Placeholder" className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900" />
+              <button type="button" onClick={() => updateDraft({ variables: draft.variables.filter((_item, itemIndex) => itemIndex !== index) })} className="h-10 w-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 flex items-center justify-center transition-colors" aria-label="Hapus field">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -239,26 +239,26 @@ export default function ProposalTemplatesAdminClient({ initialTemplates }: { ini
 
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-white font-black">Section Proposal</h3>
-            <Button type="button" onClick={() => updateDraft({ sections: [...draft.sections, { title: "", body: "" }] })} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
-              <Plus className="w-4 h-4 mr-2" />
+            <h3 className="text-slate-900 font-bold text-sm">Section Proposal</h3>
+            <Button type="button" onClick={() => updateDraft({ sections: [...draft.sections, { title: "", body: "" }] })} className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs text-xs font-semibold">
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
               Section
             </Button>
           </div>
           {draft.sections.map((section, index) => (
-            <div key={index} className="rounded-2xl bg-[#07111f]/70 border border-white/10 p-4 space-y-3">
+            <div key={index} className="rounded-xl bg-slate-50 border border-slate-200 p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <input value={section.title} onChange={(event) => updateDraft({ sections: draft.sections.map((item, itemIndex) => itemIndex === index ? { ...item, title: event.target.value } : item) })} placeholder="Judul section" className="h-11 flex-1 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500" />
-                <button type="button" onClick={() => updateDraft({ sections: draft.sections.filter((_item, itemIndex) => itemIndex !== index) })} className="h-11 w-11 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/15 flex items-center justify-center" aria-label="Hapus section">
+                <input value={section.title} onChange={(event) => updateDraft({ sections: draft.sections.map((item, itemIndex) => itemIndex === index ? { ...item, title: event.target.value } : item) })} placeholder="Judul section" className="h-10 flex-1 rounded-xl bg-white border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:ring-1 focus:ring-slate-900" />
+                <button type="button" onClick={() => updateDraft({ sections: draft.sections.filter((_item, itemIndex) => itemIndex !== index) })} className="h-10 w-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 flex items-center justify-center transition-colors" aria-label="Hapus section">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <textarea value={section.body} onChange={(event) => updateDraft({ sections: draft.sections.map((item, itemIndex) => itemIndex === index ? { ...item, body: event.target.value } : item) })} placeholder="Isi section. Gunakan placeholder seperti {{businessName}}." rows={5} className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none" />
+              <textarea value={section.body} onChange={(event) => updateDraft({ sections: draft.sections.map((item, itemIndex) => itemIndex === index ? { ...item, body: event.target.value } : item) })} placeholder="Isi section. Gunakan placeholder seperti {{businessName}}." rows={4} className="w-full rounded-xl bg-white border border-slate-200 px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 text-sm outline-none focus:ring-1 focus:ring-slate-900 resize-none" />
             </div>
           ))}
         </div>
 
-        <Button type="button" disabled={saving} onClick={saveTemplate} className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold">
+        <Button type="button" disabled={saving} onClick={saveTemplate} className="w-full h-11 rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-semibold shadow-xs">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
           Simpan Template
         </Button>

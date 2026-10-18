@@ -32,7 +32,7 @@ export default function DeleteInvoiceButton({ invoiceId, invoiceNo }: { invoiceI
         variant="ghost"
         disabled={loading}
         onClick={handleDelete}
-        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
+        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 h-8 px-2 rounded-lg transition-colors"
       >
         {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
       </Button>

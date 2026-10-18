@@ -100,43 +100,41 @@ function CollapsibleSection({
 
   return (
     <section
-      className={`glass group rounded-2xl border overflow-hidden transition-[border-color,box-shadow,background-color,transform] duration-300 ease-out ${
+      className={`bg-white rounded-2xl border transition-[border-color,box-shadow] duration-200 overflow-hidden ${
         open
-          ? "border-blue-400/20 bg-white/[0.035] shadow-[0_18px_60px_rgba(37,99,235,0.10)]"
-          : "border-white/5 hover:border-white/10"
+          ? "border-slate-300 shadow-xs"
+          : "border-slate-200 hover:border-slate-300 shadow-2xs"
       }`}
     >
       <button
         type="button"
         onClick={() => onToggle(id)}
-        className="relative w-full flex items-start justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition-colors duration-300"
+        className="relative w-full flex items-start justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50/50 transition-colors"
         aria-expanded={open}
         aria-controls={`${id}-panel`}
       >
-        <span className={`absolute left-0 top-4 h-8 w-1 rounded-r-full bg-blue-400 transition-all duration-300 ${open ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50"}`} />
+        <span className={`absolute left-0 top-4 h-8 w-1 rounded-r-full bg-[#1E242E] transition-all duration-200 ${open ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50"}`} />
         <span className="min-w-0">
-          <span className={`block font-semibold text-base transition-colors duration-300 ${open ? "text-white" : "text-blue-50/90"}`}>{title}</span>
-          {description && <span className={`block text-sm mt-1 leading-relaxed transition-colors duration-300 ${open ? "text-blue-100/55" : "text-blue-200/40"}`}>{description}</span>}
+          <span className="block font-bold text-base text-slate-900">{title}</span>
+          {description && <span className="block text-sm mt-0.5 leading-relaxed text-slate-500">{description}</span>}
           {!open && summary && <span className="mt-3 flex flex-wrap gap-2">{summary}</span>}
         </span>
-        <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ${
-          open ? "border-blue-400/30 bg-blue-500/15 shadow-[0_0_18px_rgba(59,130,246,0.20)]" : "border-white/10 bg-white/5 group-hover:bg-white/10"
+        <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ${
+          open ? "border-slate-300 bg-slate-100 text-slate-900" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
         }`}>
-          <ChevronDown className={`h-4 w-4 text-blue-100/80 transition-transform duration-300 ease-out ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ease-out ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
       <div
         id={`${id}-panel`}
         aria-hidden={!open}
         inert={!open}
-        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+        className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className={`border-t border-white/5 px-5 py-5 transition-[transform,filter] duration-300 ease-out ${
-            open ? "translate-y-0 blur-0" : "-translate-y-2 blur-[1px]"
-          }`}>
+          <div className="border-t border-slate-100 px-5 py-5 bg-white">
             {children}
           </div>
         </div>
@@ -147,7 +145,7 @@ function CollapsibleSection({
 
 function SummaryPill({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-blue-100/70">
+    <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
       {children}
     </span>
   );
@@ -167,7 +165,7 @@ function VariableChips({
           key={variable}
           type="button"
           onClick={() => onPick(variable)}
-          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono text-[11px] text-blue-100/70 transition-colors hover:border-blue-400/30 hover:bg-blue-500/10 hover:text-white"
+          className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-900 shadow-2xs"
         >
           {variable}
         </button>
@@ -403,13 +401,13 @@ export default function SettingsClient({
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 pb-28">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
-            <SettingsIcon className="w-5 h-5 text-blue-400" />
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800">
+            <SettingsIcon className="w-5 h-5 text-slate-700" />
           </div>
           Pengaturan & Konfigurasi
         </h1>
-        <p className="text-blue-200/50 text-sm mt-2">Kelola identitas brand, konten public site, SEO, template komunikasi, payment, AI, dan broadcast WhatsApp.</p>
+        <p className="text-slate-500 text-sm mt-1.5">Kelola identitas brand, konten public site, SEO, template komunikasi, payment, AI, dan broadcast WhatsApp.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
@@ -417,13 +415,13 @@ export default function SettingsClient({
           <select
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value as SettingsTab)}
-            className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none lg:hidden"
+            className="mb-3 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-xs outline-none lg:hidden"
           >
             {SETTINGS_TABS.map((tab) => (
-              <option key={tab.id} value={tab.id} className="bg-[#030914]">{tab.label}</option>
+              <option key={tab.id} value={tab.id} className="bg-white text-slate-900">{tab.label}</option>
             ))}
           </select>
-          <div className="hidden rounded-2xl border border-white/5 bg-white/[0.03] p-2 lg:block">
+          <div className="hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xs lg:block">
             {SETTINGS_TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -431,8 +429,8 @@ export default function SettingsClient({
                 onClick={() => setActiveTab(tab.id)}
                 className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition-all last:mb-0 ${
                   activeTab === tab.id
-                    ? "bg-blue-500/15 text-white ring-1 ring-blue-400/20"
-                    : "text-blue-100/55 hover:bg-white/5 hover:text-white"
+                    ? "bg-[#1E242E] text-white shadow-xs font-semibold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium"
                 }`}
               >
                 {tab.id === "umum" && <SettingsIcon className="h-4 w-4" />}
@@ -448,29 +446,29 @@ export default function SettingsClient({
         </aside>
 
         <main className="min-w-0 space-y-6">
-          <div className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 space-y-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs space-y-3">
             <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
               <div className="relative w-full xl:max-w-xl">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-200/35" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={settingsQuery}
                   onChange={(e) => setSettingsQuery(e.target.value)}
                   placeholder="Cari setting: WhatsApp, SEO, invoice, prompt..."
-                  className="h-10 border-white/10 bg-black/20 pl-9 text-white placeholder:text-blue-200/25"
+                  className="h-10 border-slate-200 bg-slate-50 pl-9 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" onClick={() => setActiveSectionsOpen(true)} className="h-8 px-3 text-xs border-white/10 bg-white/5 text-blue-100 hover:bg-white/10">
+                <Button type="button" variant="outline" onClick={() => setActiveSectionsOpen(true)} className="h-8 px-3 text-xs border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs rounded-lg">
                   Buka semua
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setActiveSectionsOpen(false)} className="h-8 px-3 text-xs border-white/10 bg-white/5 text-blue-100 hover:bg-white/10">
+                <Button type="button" variant="outline" onClick={() => setActiveSectionsOpen(false)} className="h-8 px-3 text-xs border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs rounded-lg">
                   Tutup semua
                 </Button>
               </div>
             </div>
             {normalizedQuery && (
-              <div className="flex flex-wrap items-center gap-2 border-t border-white/5 pt-3">
-                <span className="text-xs text-blue-200/40">Hasil:</span>
+              <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                <span className="text-xs text-slate-500">Hasil:</span>
                 {matchingSections.length > 0 ? matchingSections.map((section) => (
                   <button
                     key={section.id}
@@ -478,22 +476,23 @@ export default function SettingsClient({
                     onClick={() => openSectionFromSearch(section)}
                     className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                       section.tab === activeTab
-                        ? "border-blue-400/30 bg-blue-500/10 text-blue-100"
-                        : "border-white/10 bg-white/5 text-blue-200/60 hover:text-white"
+                        ? "border-slate-300 bg-slate-100 text-slate-900 font-medium"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     }`}
                   >
                     {section.title}
                   </button>
                 )) : (
-                  <span className="text-xs text-blue-200/40">Tidak ada section yang cocok.</span>
+                  <span className="text-xs text-slate-400">Tidak ada section yang cocok.</span>
                 )}
               </div>
             )}
-            <p className="text-blue-200/35 text-xs">
+            <p className="text-slate-400 text-xs">
               Section bisa dibuka-tutup. Cari nama fitur untuk lompat ke section terkait.
             </p>
           </div>
 
+      {/* Tab: Umum */}
       {/* Tab: Umum */}
       {activeTab === "umum" && (
         <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -518,15 +517,23 @@ export default function SettingsClient({
                 ["brand_footer_text", "Footer Text", "MFWEB. All rights reserved."],
               ].map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
-                  <Input value={form[key] ?? ""} onChange={set(key)} placeholder={placeholder}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                  />
                 </div>
               ))}
               <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-blue-200/70 text-xs">Alamat / Bisnis Legal</Label>
-                <textarea value={form.brand_business_address ?? ""} onChange={setText("brand_business_address")} rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 outline-none focus:border-blue-500/50 resize-y" />
+                <Label className="text-slate-700 font-medium text-xs">Alamat / Bisnis Legal</Label>
+                <textarea
+                  value={form.brand_business_address ?? ""}
+                  onChange={setText("brand_business_address")}
+                  rows={3}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y"
+                />
               </div>
             </div>
           </CollapsibleSection>
@@ -556,21 +563,33 @@ export default function SettingsClient({
                   ["social_linkedin_url", "LinkedIn URL", ""],
                 ].map(([key, label, placeholder]) => (
                   <div key={key} className="space-y-1.5">
-                    <Label className="text-blue-200/70 text-xs">{label}</Label>
-                    <Input value={form[key] ?? ""} onChange={set(key)} placeholder={placeholder}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
+                    <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                    <Input
+                      value={form[key] ?? ""}
+                      onChange={set(key)}
+                      placeholder={placeholder}
+                      className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                    />
                   </div>
                 ))}
               </div>
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Headline Utama</Label>
-                <textarea value={form.home_hero_headline ?? ""} onChange={setText("home_hero_headline")} rows={2}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500/50 resize-y" />
+                <Label className="text-slate-700 font-medium text-xs">Headline Utama</Label>
+                <textarea
+                  value={form.home_hero_headline ?? ""}
+                  onChange={setText("home_hero_headline")}
+                  rows={2}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Subheadline Utama</Label>
-                <textarea value={form.home_hero_subheadline ?? ""} onChange={setText("home_hero_subheadline")} rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500/50 resize-y" />
+                <Label className="text-slate-700 font-medium text-xs">Subheadline Utama</Label>
+                <textarea
+                  value={form.home_hero_subheadline ?? ""}
+                  onChange={setText("home_hero_subheadline")}
+                  rows={3}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y"
+                />
               </div>
             </div>
           </CollapsibleSection>
@@ -586,27 +605,27 @@ export default function SettingsClient({
           >
             <div className="grid sm:grid-cols-3 gap-6">
               {stats.map((s, idx) => (
-                <div key={s.numKey} className="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-4">
-                  <div className="flex items-center gap-2 text-blue-200/50 font-medium text-xs mb-2">
-                    <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-white">{idx + 1}</span>
+                <div key={s.numKey} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="flex items-center gap-2 text-slate-600 font-medium text-xs mb-2">
+                    <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-700 font-bold">{idx + 1}</span>
                     {s.title}
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-blue-200/70 text-xs">Nilai (Angka)</Label>
+                    <Label className="text-slate-700 font-medium text-xs">Nilai (Angka)</Label>
                     <Input
                       value={form[s.numKey] ?? ""}
                       onChange={set(s.numKey)}
                       placeholder="50+"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 text-lg font-bold"
+                      className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 text-lg font-bold rounded-xl focus:outline-none focus:ring-1 focus:ring-slate-900"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-blue-200/70 text-xs">Label (Teks Bawah)</Label>
+                    <Label className="text-slate-700 font-medium text-xs">Label (Teks Bawah)</Label>
                     <Input
                       value={form[s.labelKey] ?? ""}
                       onChange={set(s.labelKey)}
                       placeholder="Proyek selesai"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                      className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                     />
                   </div>
                 </div>
@@ -614,14 +633,14 @@ export default function SettingsClient({
             </div>
           </CollapsibleSection>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-3 rounded-xl border border-rose-200">{error}</p>}
 
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+            <Button type="submit" disabled={loading} className="bg-[#1E242E] hover:bg-slate-800 text-white px-8 h-11 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Pengaturan
             </Button>
-            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+            {saved && <span className="text-emerald-600 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Tersimpan</span>}
           </div>
         </form>
       )}
@@ -645,15 +664,23 @@ export default function SettingsClient({
                 ["seo_canonical_base_url", "Canonical Base URL", "https://mfweb.maffisorp.id"],
               ].map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
-                  <Input value={form[key] ?? ""} onChange={set(key)} placeholder={placeholder}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                  />
                 </div>
               ))}
               <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-blue-200/70 text-xs">Default Meta Description</Label>
-                <textarea value={form.seo_default_description ?? ""} onChange={setText("seo_default_description")} rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-sky-500/50 resize-y" />
+                <Label className="text-slate-700 font-medium text-xs">Default Meta Description</Label>
+                <textarea
+                  value={form.seo_default_description ?? ""}
+                  onChange={setText("seo_default_description")}
+                  rows={3}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y"
+                />
               </div>
             </div>
           </CollapsibleSection>
@@ -669,25 +696,33 @@ export default function SettingsClient({
           >
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Facebook Pixel ID</Label>
-                <Input value={form.facebook_pixel_id ?? ""} onChange={set("facebook_pixel_id")} placeholder="123456789012345"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
+                <Label className="text-slate-700 font-medium text-xs">Facebook Pixel ID</Label>
+                <Input
+                  value={form.facebook_pixel_id ?? ""}
+                  onChange={set("facebook_pixel_id")}
+                  placeholder="123456789012345"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Google Analytics ID</Label>
-                <Input value={form.google_analytics_id ?? ""} onChange={set("google_analytics_id")} placeholder="G-XXXXXXXXXX"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
+                <Label className="text-slate-700 font-medium text-xs">Google Analytics ID</Label>
+                <Input
+                  value={form.google_analytics_id ?? ""}
+                  onChange={set("google_analytics_id")}
+                  placeholder="G-XXXXXXXXXX"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                />
               </div>
             </div>
           </CollapsibleSection>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-3 rounded-xl border border-rose-200">{error}</p>}
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={loading} className="bg-sky-600 hover:bg-sky-500 text-white px-8 h-11 rounded-xl">
+            <Button type="submit" disabled={loading} className="bg-[#1E242E] hover:bg-slate-800 text-white px-8 h-11 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan SEO
             </Button>
-            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+            {saved && <span className="text-emerald-600 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Tersimpan</span>}
           </div>
         </form>
       )}
@@ -714,20 +749,28 @@ export default function SettingsClient({
                 return (
                   <div key={settingKey} className="space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <Label className="text-blue-200/70 text-xs">{label}</Label>
+                      <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => setForm((f) => ({ ...f, [settingKey]: savedForm[settingKey] ?? "" }))} className="text-[11px] text-blue-200/45 hover:text-white">Reset field</button>
-                        <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[settingKey] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-blue-200/60 hover:text-white"><Eye className="h-3 w-3" /> Preview</button>
+                        <button type="button" onClick={() => setForm((f) => ({ ...f, [settingKey]: savedForm[settingKey] ?? "" }))} className="text-[11px] text-slate-400 hover:text-slate-900">Reset field</button>
+                        <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[settingKey] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900"><Eye className="h-3 w-3" /> Preview</button>
                       </div>
                     </div>
                     <VariableChips variables={variables as string[]} onPick={(value) => appendVariable(settingKey, value)} />
                     {rows === 1 ? (
-                      <Input value={form[settingKey] ?? ""} onChange={set(settingKey)} className="bg-white/5 border-white/10 text-white" />
+                      <Input
+                        value={form[settingKey] ?? ""}
+                        onChange={set(settingKey)}
+                        className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                      />
                     ) : (
-                      <textarea value={form[settingKey] ?? ""} onChange={setText(settingKey)} rows={rows as number}
-                        className="field-sizing-content min-h-28 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-500/50 resize-y font-mono" />
+                      <textarea
+                        value={form[settingKey] ?? ""}
+                        onChange={setText(settingKey)}
+                        rows={rows as number}
+                        className="field-sizing-content min-h-28 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono"
+                      />
                     )}
-                    <p className="text-right text-[11px] text-blue-200/30">{(form[settingKey] ?? "").split("\n").length} baris</p>
+                    <p className="text-right text-[11px] text-slate-400">{(form[settingKey] ?? "").split("\n").length} baris</p>
                   </div>
                 );
               })}
@@ -745,21 +788,21 @@ export default function SettingsClient({
           >
             {/* Nomor admin */}
             <div className="space-y-1.5 mb-6">
-              <Label className="text-blue-200/70 text-xs">Nomor WA Admin (untuk notifikasi sistem)</Label>
+              <Label className="text-slate-700 font-medium text-xs">Nomor WA Admin (untuk notifikasi sistem)</Label>
               <Input
                 value={form.wa_notify_admin_phone ?? ""}
                 onChange={set("wa_notify_admin_phone")}
                 placeholder="628123456789 (kosong = pakai env ADMIN_WHATSAPP_NUMBER)"
-                className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 font-mono"
+                className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 font-mono rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
               />
-              <p className="text-[11px] text-blue-200/35">
+              <p className="text-[11px] text-slate-500">
                 Format internasional tanpa + (contoh: 628123456789). Jika kosong, sistem pakai env var ADMIN_WHATSAPP_NUMBER.
               </p>
             </div>
 
             {/* Toggle per jenis notifikasi */}
             <div className="mb-6">
-              <p className="text-blue-200/70 text-xs font-medium mb-3">Aktifkan / Nonaktifkan Notifikasi</p>
+              <p className="text-slate-700 text-xs font-semibold mb-3">Aktifkan / Nonaktifkan Notifikasi</p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {[
                   ["wa_notify_invoice_new", "Invoice baru → klien"],
@@ -769,16 +812,16 @@ export default function SettingsClient({
                   ["wa_notify_ticket_reply", "Balasan tiket → klien"],
                   ["wa_notify_weekly_summary", "Weekly summary → admin"],
                 ].map(([key, label]) => (
-                  <div key={key} className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
-                    <span className="text-white text-sm">{label}</span>
+                  <div key={key} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-slate-800 text-sm font-medium">{label}</span>
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
                       className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
-                        form[key] !== "false" ? "bg-green-600 border-green-500/50" : "bg-white/10 border-white/10"
+                        form[key] !== "false" ? "bg-emerald-600 border-emerald-600" : "bg-slate-200 border-slate-300"
                       }`}
                     >
-                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                         form[key] !== "false" ? "translate-x-5" : "translate-x-0"
                       }`} />
                     </button>
@@ -789,7 +832,7 @@ export default function SettingsClient({
 
             {/* Template yang sebelumnya hardcoded */}
             <div className="space-y-5">
-              <p className="text-blue-200/70 text-xs font-medium">Template Pesan (kosong = pakai template default)</p>
+              <p className="text-slate-700 text-xs font-semibold">Template Pesan (kosong = pakai template default)</p>
               {[
                 ["template_wa_invoice_new", "Invoice Baru ke Klien", TEMPLATE_VARIABLES.invoice],
                 ["template_wa_payment_paid", "Pembayaran Berhasil ke Klien", [...TEMPLATE_VARIABLES.invoice, "{method}"]],
@@ -797,16 +840,20 @@ export default function SettingsClient({
               ].map(([key, label, variables]) => (
                 <div key={key as string} className="space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Label className="text-blue-200/70 text-xs">{label}</Label>
+                    <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                     <div className="flex items-center gap-2">
-                      <button type="button" onClick={() => setForm((f) => ({ ...f, [key as string]: savedForm[key as string] ?? "" }))} className="text-[11px] text-blue-200/45 hover:text-white">Reset field</button>
-                      <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[key as string] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-blue-200/60 hover:text-white"><Eye className="h-3 w-3" /> Preview</button>
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, [key as string]: savedForm[key as string] ?? "" }))} className="text-[11px] text-slate-400 hover:text-slate-900">Reset field</button>
+                      <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[key as string] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900"><Eye className="h-3 w-3" /> Preview</button>
                     </div>
                   </div>
                   <VariableChips variables={variables as string[]} onPick={(value) => appendVariable(key as string, value)} />
-                  <textarea value={form[key as string] ?? ""} onChange={setText(key as string)} rows={5}
-                    className="field-sizing-content min-h-28 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-500/50 resize-y font-mono" />
-                  <p className="text-right text-[11px] text-blue-200/30">{(form[key as string] ?? "").split("\n").length} baris</p>
+                  <textarea
+                    value={form[key as string] ?? ""}
+                    onChange={setText(key as string)}
+                    rows={5}
+                    className="field-sizing-content min-h-28 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono"
+                  />
+                  <p className="text-right text-[11px] text-slate-400">{(form[key as string] ?? "").split("\n").length} baris</p>
                 </div>
               ))}
             </div>
@@ -831,28 +878,32 @@ export default function SettingsClient({
               ].map(([key, label, variables]) => (
                 <div key={key as string} className="space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Label className="text-blue-200/70 text-xs">{label}</Label>
+                    <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                     <div className="flex items-center gap-2">
-                      <button type="button" onClick={() => setForm((f) => ({ ...f, [key as string]: savedForm[key as string] ?? "" }))} className="text-[11px] text-blue-200/45 hover:text-white">Reset field</button>
-                      <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[key as string] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-blue-200/60 hover:text-white"><Eye className="h-3 w-3" /> Preview</button>
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, [key as string]: savedForm[key as string] ?? "" }))} className="text-[11px] text-slate-400 hover:text-slate-900">Reset field</button>
+                      <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[key as string] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900"><Eye className="h-3 w-3" /> Preview</button>
                     </div>
                   </div>
                   <VariableChips variables={variables as string[]} onPick={(value) => appendVariable(key as string, value)} />
-                  <textarea value={form[key as string] ?? ""} onChange={setText(key as string)} rows={5}
-                    className="field-sizing-content min-h-28 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-amber-500/50 resize-y font-mono" />
-                  <p className="text-right text-[11px] text-blue-200/30">{(form[key as string] ?? "").split("\n").length} baris</p>
+                  <textarea
+                    value={form[key as string] ?? ""}
+                    onChange={setText(key as string)}
+                    rows={5}
+                    className="field-sizing-content min-h-28 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono"
+                  />
+                  <p className="text-right text-[11px] text-slate-400">{(form[key as string] ?? "").split("\n").length} baris</p>
                 </div>
               ))}
             </div>
           </CollapsibleSection>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-3 rounded-xl border border-rose-200">{error}</p>}
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={loading} className="bg-amber-600 hover:bg-amber-500 text-white px-8 h-11 rounded-xl">
+            <Button type="submit" disabled={loading} className="bg-[#1E242E] hover:bg-slate-800 text-white px-8 h-11 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Template
             </Button>
-            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+            {saved && <span className="text-emerald-600 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Tersimpan</span>}
           </div>
         </form>
       )}
@@ -875,43 +926,57 @@ export default function SettingsClient({
                 ["invoice_reminder_schedule_days", "Reminder Schedule", "7,3,1,0,-3"],
               ].map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
-                  <Input value={form[key] ?? ""} onChange={set(key)} placeholder={placeholder}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20" />
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                  />
                 </div>
               ))}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Payment Gateway Mode</Label>
-                <select value={form.payment_gateway_mode ?? "live"} onChange={(e) => setForm((f) => ({ ...f, payment_gateway_mode: e.target.value }))}
-                  className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-sm">
-                  <option value="live" className="bg-[#030914]">Live</option>
-                  <option value="sandbox" className="bg-[#030914]">Sandbox</option>
+                <Label className="text-slate-700 font-medium text-xs">Payment Gateway Mode</Label>
+                <select
+                  value={form.payment_gateway_mode ?? "live"}
+                  onChange={(e) => setForm((f) => ({ ...f, payment_gateway_mode: e.target.value }))}
+                  className="w-full h-10 rounded-xl px-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
+                >
+                  <option value="live" className="bg-white text-slate-900">Live</option>
+                  <option value="sandbox" className="bg-white text-slate-900">Sandbox</option>
                 </select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Fee Handling</Label>
-                <select value={form.payment_fee_handling ?? "customer"} onChange={(e) => setForm((f) => ({ ...f, payment_fee_handling: e.target.value }))}
-                  className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-sm">
-                  <option value="customer" className="bg-[#030914]">Dibebankan ke customer</option>
-                  <option value="merchant" className="bg-[#030914]">Ditanggung merchant</option>
-                  <option value="split" className="bg-[#030914]">Split / sesuai gateway</option>
+                <Label className="text-slate-700 font-medium text-xs">Fee Handling</Label>
+                <select
+                  value={form.payment_fee_handling ?? "customer"}
+                  onChange={(e) => setForm((f) => ({ ...f, payment_fee_handling: e.target.value }))}
+                  className="w-full h-10 rounded-xl px-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
+                >
+                  <option value="customer" className="bg-white text-slate-900">Dibebankan ke customer</option>
+                  <option value="merchant" className="bg-white text-slate-900">Ditanggung merchant</option>
+                  <option value="split" className="bg-white text-slate-900">Split / sesuai gateway</option>
                 </select>
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-blue-200/70 text-xs">Default Payment Instructions</Label>
-                <textarea value={form.payment_default_instructions ?? ""} onChange={setText("payment_default_instructions")} rows={5}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-orange-500/50 resize-y" />
+                <Label className="text-slate-700 font-medium text-xs">Default Payment Instructions</Label>
+                <textarea
+                  value={form.payment_default_instructions ?? ""}
+                  onChange={setText("payment_default_instructions")}
+                  rows={5}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y"
+                />
               </div>
             </div>
           </CollapsibleSection>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-3 rounded-xl border border-rose-200">{error}</p>}
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={loading} className="bg-orange-600 hover:bg-orange-500 text-white px-8 h-11 rounded-xl">
+            <Button type="submit" disabled={loading} className="bg-[#1E242E] hover:bg-slate-800 text-white px-8 h-11 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Payment
             </Button>
-            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+            {saved && <span className="text-emerald-600 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Tersimpan</span>}
           </div>
         </form>
       )}
@@ -931,19 +996,24 @@ export default function SettingsClient({
           >
             <div className="grid sm:grid-cols-2 gap-4">
               {AI_MODEL_OPTIONS.map((m) => (
-                <button key={m.value} type="button"
+                <button
+                  key={m.value}
+                  type="button"
                   onClick={() => setForm((f) => ({ ...f, ai_model: m.value }))}
                   className={`text-left p-4 rounded-2xl border transition-all ${
                     form.ai_model === m.value
-                      ? "border-purple-500/50 bg-purple-500/10"
-                      : "border-white/10 bg-black/20 hover:border-white/20"
-                  }`}>
+                      ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-800 shadow-2xs"
+                  }`}
+                >
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="text-white font-semibold text-sm">{m.label}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${m.badgeColor}`}>{m.badge}</span>
+                    <span className={`font-semibold text-sm ${form.ai_model === m.value ? "text-white" : "text-slate-900"}`}>{m.label}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${
+                      form.ai_model === m.value ? "border-white/20 bg-white/10 text-white" : m.badgeColor
+                    }`}>{m.badge}</span>
                   </div>
-                  <p className="text-blue-200/50 text-xs">{m.desc}</p>
-                  <p className="text-blue-200/30 text-[10px] mt-1 font-mono">{m.value}</p>
+                  <p className={`text-xs ${form.ai_model === m.value ? "text-slate-300" : "text-slate-500"}`}>{m.desc}</p>
+                  <p className={`text-[10px] mt-1 font-mono ${form.ai_model === m.value ? "text-slate-400" : "text-slate-400"}`}>{m.value}</p>
                 </button>
               ))}
             </div>
@@ -966,19 +1036,21 @@ export default function SettingsClient({
                 { key: "ai_feature_name_generator",    label: "Generator Nama Bisnis",          desc: "Tool publik generator nama bisnis & slogan." },
                 { key: "ai_feature_pricing_estimator", label: "Estimasi Harga Website",         desc: "Tool publik estimasi harga pembuatan website." },
               ].map((feat) => (
-                <div key={feat.key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                <div key={feat.key} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
                   <div>
-                    <p className="text-white text-sm font-medium">{feat.label}</p>
-                    <p className="text-blue-200/40 text-xs mt-0.5">{feat.desc}</p>
+                    <p className="text-slate-800 text-sm font-semibold">{feat.label}</p>
+                    <p className="text-slate-500 text-xs mt-0.5">{feat.desc}</p>
                   </div>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => setForm((f) => ({ ...f, [feat.key]: f[feat.key] === "false" ? "true" : "false" }))}
                     className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
                       form[feat.key] !== "false"
-                        ? "bg-purple-600 border-purple-500/50"
-                        : "bg-white/10 border-white/10"
-                    }`}>
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        ? "bg-emerald-600 border-emerald-600"
+                        : "bg-slate-200 border-slate-300"
+                    }`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                       form[feat.key] !== "false" ? "translate-x-5" : "translate-x-0"
                     }`} />
                   </button>
@@ -1000,58 +1072,75 @@ export default function SettingsClient({
               {AI_FEATURE_ORDER.map((feature) => {
                 const spec = AI_FEATURE_SPECS[feature];
                 return (
-                  <div key={feature} className="bg-black/20 rounded-2xl border border-white/5 p-4 space-y-4">
+                  <div key={feature} className="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-4">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <p className="text-white text-sm font-semibold">{spec.label}</p>
-                        <p className="text-blue-200/40 text-xs mt-0.5">{spec.desc}</p>
+                        <p className="text-slate-900 text-sm font-semibold">{spec.label}</p>
+                        <p className="text-slate-500 text-xs mt-0.5">{spec.desc}</p>
                       </div>
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => setForm((f) => ({ ...f, [spec.featureKey]: f[spec.featureKey] === "false" ? "true" : "false" }))}
                         className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
                           form[spec.featureKey] !== "false"
-                            ? "bg-purple-600 border-purple-500/50"
-                            : "bg-white/10 border-white/10"
-                        }`}>
-                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                            ? "bg-emerald-600 border-emerald-600"
+                            : "bg-slate-200 border-slate-300"
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                           form[spec.featureKey] !== "false" ? "translate-x-5" : "translate-x-0"
                         }`} />
                       </button>
                     </div>
                     <div className="grid sm:grid-cols-4 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-blue-200/70 text-xs">Model</Label>
+                        <Label className="text-slate-700 font-medium text-xs">Model</Label>
                         <select
                           value={form[spec.modelKey] ?? ""}
                           onChange={(e) => setForm((f) => ({ ...f, [spec.modelKey]: e.target.value }))}
-                          className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-xs"
+                          className="w-full h-10 rounded-xl px-3 bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
                         >
-                          <option value="" className="bg-[#030914]">Ikuti global</option>
+                          <option value="" className="bg-white text-slate-900">Ikuti global</option>
                           {AI_MODEL_OPTIONS.map((model) => (
-                            <option key={model.value} value={model.value} className="bg-[#030914]">{model.label}</option>
+                            <option key={model.value} value={model.value} className="bg-white text-slate-900">{model.label}</option>
                           ))}
                         </select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-blue-200/70 text-xs">Max Token</Label>
-                        <Input type="number" value={form[spec.maxTokensKey] ?? ""} onChange={set(spec.maxTokensKey)} className="bg-white/5 border-white/10 text-white" />
+                        <Label className="text-slate-700 font-medium text-xs">Max Token</Label>
+                        <Input
+                          type="number"
+                          value={form[spec.maxTokensKey] ?? ""}
+                          onChange={set(spec.maxTokensKey)}
+                          className="bg-white border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-1 focus:ring-slate-900 text-xs"
+                        />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-blue-200/70 text-xs">Limit</Label>
-                        <Input type="number" value={form[spec.rateLimitKey] ?? ""} onChange={set(spec.rateLimitKey)} className="bg-white/5 border-white/10 text-white" />
+                        <Label className="text-slate-700 font-medium text-xs">Limit</Label>
+                        <Input
+                          type="number"
+                          value={form[spec.rateLimitKey] ?? ""}
+                          onChange={set(spec.rateLimitKey)}
+                          className="bg-white border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-1 focus:ring-slate-900 text-xs"
+                        />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-blue-200/70 text-xs">Window (menit)</Label>
-                        <Input type="number" value={form[spec.rateWindowKey] ?? ""} onChange={set(spec.rateWindowKey)} className="bg-white/5 border-white/10 text-white" />
+                        <Label className="text-slate-700 font-medium text-xs">Window (menit)</Label>
+                        <Input
+                          type="number"
+                          value={form[spec.rateWindowKey] ?? ""}
+                          onChange={set(spec.rateWindowKey)}
+                          className="bg-white border-slate-200 text-slate-900 rounded-xl focus:outline-none focus:ring-1 focus:ring-slate-900 text-xs"
+                        />
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between gap-2">
-                        <Label className="text-blue-200/70 text-xs">System Prompt</Label>
+                        <Label className="text-slate-700 font-medium text-xs">System Prompt</Label>
                         <button
                           type="button"
                           onClick={() => setForm((f) => ({ ...f, [spec.promptKey]: AI_DEFAULTS[spec.promptKey] ?? "" }))}
-                          className="text-[11px] text-blue-200/45 hover:text-white"
+                          className="text-[11px] text-slate-400 hover:text-slate-900"
                         >
                           Reset ke default
                         </button>
@@ -1060,7 +1149,7 @@ export default function SettingsClient({
                         value={form[spec.promptKey] ?? ""}
                         onChange={setText(spec.promptKey)}
                         rows={feature === "portalChat" || feature === "draftReply" || feature === "coverImage" ? 5 : 8}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-blue-200/20 outline-none focus:border-purple-500/50 resize-y font-mono"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-xs placeholder:text-slate-400 outline-none focus:ring-1 focus:ring-slate-900 resize-y font-mono"
                       />
                     </div>
                   </div>
@@ -1086,30 +1175,36 @@ export default function SettingsClient({
                 ["ai_article_max_keywords", "Maks Keyword"],
               ].map(([key, label]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
-                  <Input value={form[key] ?? ""} onChange={set(key)} className="bg-white/5 border-white/10 text-white" />
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                  />
                 </div>
               ))}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Usage Logging</Label>
+                <Label className="text-slate-700 font-medium text-xs">Usage Logging</Label>
                 <select
                   value={form.ai_usage_logging ?? "database"}
                   onChange={(e) => setForm((f) => ({ ...f, ai_usage_logging: e.target.value }))}
-                  className="w-full h-10 rounded-md px-3 bg-white/5 border border-white/10 text-white text-sm"
+                  className="w-full h-10 rounded-xl px-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
                 >
-                  <option value="database" className="bg-[#030914]">Database + Console</option>
-                  <option value="console" className="bg-[#030914]">Console only</option>
-                  <option value="off" className="bg-[#030914]">Off</option>
+                  <option value="database" className="bg-white text-slate-900">Database + Console</option>
+                  <option value="console" className="bg-white text-slate-900">Console only</option>
+                  <option value="off" className="bg-white text-slate-900">Off</option>
                 </select>
               </div>
-              <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
-                <span className="text-white text-sm font-medium">Retry JSON invalid</span>
-                <button type="button"
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <span className="text-slate-800 text-sm font-medium">Retry JSON invalid</span>
+                <button
+                  type="button"
                   onClick={() => setForm((f) => ({ ...f, ai_json_retry_enabled: f.ai_json_retry_enabled === "false" ? "true" : "false" }))}
                   className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
-                    form.ai_json_retry_enabled !== "false" ? "bg-purple-600 border-purple-500/50" : "bg-white/10 border-white/10"
-                  }`}>
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    form.ai_json_retry_enabled !== "false" ? "bg-emerald-600 border-emerald-600" : "bg-slate-200 border-slate-300"
+                  }`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                     form.ai_json_retry_enabled !== "false" ? "translate-x-5" : "translate-x-0"
                   }`} />
                 </button>
@@ -1139,8 +1234,12 @@ export default function SettingsClient({
                 ["ai_cover_fallback_keyword", "Fallback Keyword"],
               ].map(([key, label]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
-                  <Input value={form[key] ?? ""} onChange={set(key)} className="bg-white/5 border-white/10 text-white" />
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                  />
                 </div>
               ))}
               {[
@@ -1148,14 +1247,16 @@ export default function SettingsClient({
                 ["ai_auto_publish_notify_wa", "Notifikasi WA"],
                 ["ai_cover_translate_keywords", "Translate keyword cover"],
               ].map(([key, label]) => (
-                <div key={key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
-                  <span className="text-white text-sm font-medium">{label}</span>
-                  <button type="button"
+                <div key={key} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <span className="text-slate-800 text-sm font-medium">{label}</span>
+                  <button
+                    type="button"
                     onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
                     className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
-                      form[key] !== "false" ? "bg-purple-600 border-purple-500/50" : "bg-white/10 border-white/10"
-                    }`}>
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      form[key] !== "false" ? "bg-emerald-600 border-emerald-600" : "bg-slate-200 border-slate-300"
+                    }`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                       form[key] !== "false" ? "translate-x-5" : "translate-x-0"
                     }`} />
                   </button>
@@ -1164,17 +1265,21 @@ export default function SettingsClient({
             </div>
             <div className="space-y-1.5 mt-5">
               <div className="flex items-center justify-between gap-2">
-                <Label className="text-blue-200/70 text-xs">Prompt Topik Auto Publish</Label>
+                <Label className="text-slate-700 font-medium text-xs">Prompt Topik Auto Publish</Label>
                 <button
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, ai_prompt_auto_publish_topic: AI_DEFAULTS.ai_prompt_auto_publish_topic ?? "" }))}
-                  className="text-[11px] text-blue-200/45 hover:text-white"
+                  className="text-[11px] text-slate-400 hover:text-slate-900"
                 >
                   Reset ke default
                 </button>
               </div>
-              <textarea value={form.ai_prompt_auto_publish_topic ?? ""} onChange={setText("ai_prompt_auto_publish_topic")} rows={7}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
+              <textarea
+                value={form.ai_prompt_auto_publish_topic ?? ""}
+                onChange={setText("ai_prompt_auto_publish_topic")}
+                rows={7}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-xs outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono"
+              />
             </div>
           </CollapsibleSection>
 
@@ -1194,8 +1299,12 @@ export default function SettingsClient({
                 ["ai_portal_fallback_answer", "Fallback Jawaban"],
               ].map(([key, label]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
-                  <Input value={form[key] ?? ""} onChange={set(key)} className="bg-white/5 border-white/10 text-white" />
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
+                  <Input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
+                  />
                 </div>
               ))}
               {[
@@ -1203,14 +1312,16 @@ export default function SettingsClient({
                 ["ai_portal_include_invoices", "Context invoice"],
                 ["ai_portal_include_tickets", "Context tiket"],
               ].map(([key, label]) => (
-                <div key={key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
-                  <span className="text-white text-sm font-medium">{label}</span>
-                  <button type="button"
+                <div key={key} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <span className="text-slate-800 text-sm font-medium">{label}</span>
+                  <button
+                    type="button"
                     onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
                     className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
-                      form[key] !== "false" ? "bg-purple-600 border-purple-500/50" : "bg-white/10 border-white/10"
-                    }`}>
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      form[key] !== "false" ? "bg-emerald-600 border-emerald-600" : "bg-slate-200 border-slate-300"
+                    }`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                       form[key] !== "false" ? "translate-x-5" : "translate-x-0"
                     }`} />
                   </button>
@@ -1218,20 +1329,24 @@ export default function SettingsClient({
               ))}
             </div>
             <div className="space-y-1.5 mt-5">
-              <Label className="text-blue-200/70 text-xs">Pricing Guide Estimator</Label>
-              <textarea value={form.ai_pricing_guide ?? ""} onChange={setText("ai_pricing_guide")} rows={8}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-purple-500/50 resize-y font-mono" />
+              <Label className="text-slate-700 font-medium text-xs">Pricing Guide Estimator</Label>
+              <textarea
+                value={form.ai_pricing_guide ?? ""}
+                onChange={setText("ai_pricing_guide")}
+                rows={8}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-xs outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono"
+              />
             </div>
           </CollapsibleSection>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-3 rounded-xl border border-rose-200">{error}</p>}
 
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(147,51,234,0.3)]">
+            <Button type="submit" disabled={loading} className="bg-[#1E242E] hover:bg-slate-800 text-white px-8 h-11 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Pengaturan AI
             </Button>
-            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+            {saved && <span className="text-emerald-600 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Tersimpan</span>}
           </div>
         </form>
       )}
@@ -1256,13 +1371,13 @@ export default function SettingsClient({
             />
 
             {/* Device → Token mapping untuk same-device auto-reply */}
-            <div className="mt-6 space-y-2 border-t border-white/5 pt-5">
+            <div className="mt-6 space-y-2 border-t border-slate-200 pt-5">
               <div className="flex items-center justify-between gap-2">
-                <Label className="text-blue-200/70 text-xs">Mapping Device → Token (untuk auto-reply nomor yang sama)</Label>
+                <Label className="text-slate-700 font-medium text-xs">Mapping Device → Token (untuk auto-reply nomor yang sama)</Label>
                 <button
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, fonnte_device_token_map: savedForm.fonnte_device_token_map ?? "" }))}
-                  className="text-[11px] text-blue-200/45 hover:text-white"
+                  className="text-[11px] text-slate-400 hover:text-slate-900"
                 >
                   Reset field
                 </button>
@@ -1272,9 +1387,9 @@ export default function SettingsClient({
                 onChange={setText("fonnte_device_token_map")}
                 rows={4}
                 placeholder={'{"628111222333": "TOKEN_DEVICE_A", "628444555666": "TOKEN_DEVICE_B"}'}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-blue-500/50 resize-y font-mono placeholder:text-blue-200/20"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-xs outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono placeholder:text-slate-400"
               />
-              <p className="text-[11px] text-blue-200/35">
+              <p className="text-[11px] text-slate-500">
                 Format JSON: nomor WA device (628xxx) → token Fonnte device tersebut. Dipakai agar auto-reply opt-in/opt-out dikirim dari nomor yang sama dengan yang broadcast. Kosongkan jika hanya pakai 1 device.
               </p>
             </div>
@@ -1297,12 +1412,12 @@ export default function SettingsClient({
                 ["broadcast_footer_text", "Footer Pesan", "{brandName} - {websiteUrl}"],
               ].map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                   <Input
                     value={form[key] ?? ""}
                     onChange={set(key)}
                     placeholder={placeholder}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                   />
                 </div>
               ))}
@@ -1328,10 +1443,10 @@ export default function SettingsClient({
                 return (
                   <div key={settingKey} className="space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <Label className="text-blue-200/70 text-xs">{label}</Label>
+                      <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => setForm((f) => ({ ...f, [settingKey]: savedForm[settingKey] ?? "" }))} className="text-[11px] text-blue-200/45 hover:text-white">Reset field</button>
-                        <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[settingKey] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-blue-200/60 hover:text-white"><Eye className="h-3 w-3" /> Preview</button>
+                        <button type="button" onClick={() => setForm((f) => ({ ...f, [settingKey]: savedForm[settingKey] ?? "" }))} className="text-[11px] text-slate-400 hover:text-slate-900">Reset field</button>
+                        <button type="button" onClick={() => setPreview({ title: label as string, body: renderPreview(form[settingKey] ?? "", PREVIEW_VALUES) })} className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900"><Eye className="h-3 w-3" /> Preview</button>
                       </div>
                     </div>
                     <VariableChips variables={TEMPLATE_VARIABLES.broadcast} onPick={(value) => appendVariable(settingKey, value)} />
@@ -1339,9 +1454,9 @@ export default function SettingsClient({
                       value={form[settingKey] ?? ""}
                       onChange={setText(settingKey)}
                       rows={rows as number}
-                      className="field-sizing-content min-h-28 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 outline-none focus:border-green-500/50 resize-y font-mono"
+                      className="field-sizing-content min-h-28 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-y font-mono"
                     />
-                    <p className="text-right text-[11px] text-blue-200/30">{(form[settingKey] ?? "").split("\n").length} baris</p>
+                    <p className="text-right text-[11px] text-slate-400">{(form[settingKey] ?? "").split("\n").length} baris</p>
                   </div>
                 );
               })}
@@ -1359,37 +1474,39 @@ export default function SettingsClient({
           >
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Keyword Opt-in</Label>
+                <Label className="text-slate-700 font-medium text-xs">Keyword Opt-in</Label>
                 <Input
                   value={form.broadcast_opt_in_keywords ?? ""}
                   onChange={set("broadcast_opt_in_keywords")}
                   placeholder="ya,setuju,boleh,info"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Keyword Opt-out</Label>
+                <Label className="text-slate-700 font-medium text-xs">Keyword Opt-out</Label>
                 <Input
                   value={form.broadcast_opt_out_keywords ?? ""}
                   onChange={set("broadcast_opt_out_keywords")}
                   placeholder="stop,berhenti,batal"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                 />
               </div>
               {[
                 ["broadcast_auto_reply_opt_in", "Kirim promo otomatis setelah opt-in"],
                 ["broadcast_auto_reply_opt_out", "Kirim konfirmasi setelah opt-out"],
               ].map(([key, label]) => (
-                <div key={key} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
-                  <span className="text-white text-sm font-medium">{label}</span>
-                  <button type="button"
+                <div key={key} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                  <span className="text-slate-800 text-sm font-semibold">{label}</span>
+                  <button
+                    type="button"
                     onClick={() => setForm((f) => ({ ...f, [key]: f[key] === "false" ? "true" : "false" }))}
                     className={`relative w-11 h-6 rounded-full border transition-all shrink-0 ${
                       form[key] !== "false"
-                        ? "bg-green-600 border-green-500/50"
-                        : "bg-white/10 border-white/10"
-                    }`}>
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        ? "bg-emerald-600 border-emerald-600"
+                        : "bg-slate-200 border-slate-300"
+                    }`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${
                       form[key] !== "false" ? "translate-x-5" : "translate-x-0"
                     }`} />
                   </button>
@@ -1420,13 +1537,13 @@ export default function SettingsClient({
                 ["broadcast_burst_pause_max_seconds", "Pause Maksimum (detik)", "180"],
               ].map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                   <Input
                     type="number"
                     value={form[key] ?? ""}
                     onChange={set(key)}
                     placeholder={placeholder}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                   />
                 </div>
               ))}
@@ -1436,7 +1553,7 @@ export default function SettingsClient({
           <CollapsibleSection
             id="broadcastDelay"
             title="Delay Antar Pesan"
-            description={<>Format rentang detik: <code className="text-blue-300">min-max</code>. Contoh: <code className="text-blue-300">20-50</code>.</>}
+            description={<>Format rentang detik: <code className="text-slate-800 font-semibold">min-max</code>. Contoh: <code className="text-slate-800 font-semibold">20-50</code>.</>}
             summary={sectionSummary.broadcastDelay}
             hidden={!sectionVisible("broadcastDelay")}
             open={openSections.broadcastDelay}
@@ -1449,63 +1566,63 @@ export default function SettingsClient({
                 ["broadcast_delay_large", "11+ Lead", "30-70"],
               ].map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">{label}</Label>
+                  <Label className="text-slate-700 font-medium text-xs">{label}</Label>
                   <Input
                     value={form[key] ?? ""}
                     onChange={set(key)}
                     placeholder={placeholder}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 text-sm"
                   />
                 </div>
               ))}
             </div>
           </CollapsibleSection>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-3 rounded-xl border border-rose-200">{error}</p>}
 
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={loading} className="bg-green-600 hover:bg-green-500 text-white px-8 h-11 rounded-xl shadow-[0_0_15px_rgba(22,163,74,0.3)]">
+            <Button type="submit" disabled={loading} className="bg-[#1E242E] hover:bg-slate-800 text-white px-8 h-11 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Pengaturan Broadcast
             </Button>
-            {saved && <span className="text-green-400 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Tersimpan</span>}
+            {saved && <span className="text-emerald-600 text-sm font-medium flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Tersimpan</span>}
           </div>
         </form>
       )}
         </main>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#030914]/85 px-4 py-3 backdrop-blur-xl lg:left-72">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-xl lg:left-64 shadow-lg">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm">
             {error ? (
               <>
-                <AlertTriangle className="h-4 w-4 shrink-0 text-red-300" />
-                <span className="line-clamp-2 text-red-200">{error}</span>
+                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />
+                <span className="line-clamp-2 text-rose-600">{error}</span>
               </>
             ) : saved ? (
               <>
-                <span className="h-2 w-2 rounded-full bg-green-400" />
-                <span className="text-green-300">Pengaturan tersimpan.</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-emerald-700 font-medium">Pengaturan tersimpan.</span>
               </>
             ) : hasChanges ? (
               <>
-                <span className="h-2 w-2 rounded-full bg-amber-400" />
-                <span className="text-amber-100/80">Ada perubahan yang belum disimpan.</span>
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="text-amber-700 font-medium">Ada perubahan yang belum disimpan.</span>
               </>
             ) : (
               <>
-                <span className="h-2 w-2 rounded-full bg-blue-400/60" />
-                <span className="text-blue-100/55">Tidak ada perubahan baru.</span>
+                <span className="h-2 w-2 rounded-full bg-slate-300" />
+                <span className="text-slate-500">Tidak ada perubahan baru.</span>
               </>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" disabled={!hasChanges || loading} onClick={resetChanges} className="h-10 border-white/10 bg-white/5 text-blue-100 hover:bg-white/10">
+            <Button type="button" variant="outline" disabled={!hasChanges || loading} onClick={resetChanges} className="h-10 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs rounded-xl font-medium">
               <RotateCcw className="mr-2 h-4 w-4" />
               Reset
             </Button>
-            <Button type="button" disabled={!hasChanges || loading} onClick={() => void saveSettings()} className="h-10 bg-blue-600 px-6 text-white hover:bg-blue-500">
+            <Button type="button" disabled={!hasChanges || loading} onClick={() => void saveSettings()} className="h-10 bg-[#1E242E] hover:bg-slate-800 text-white px-6 rounded-xl shadow-xs font-semibold">
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Simpan
             </Button>
@@ -1514,18 +1631,18 @@ export default function SettingsClient({
       </div>
 
       {preview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#071120] shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs" role="dialog" aria-modal="true">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
               <div>
-                <h2 className="text-base font-semibold text-white">Preview Template</h2>
-                <p className="mt-1 text-xs text-blue-200/45">{preview.title}</p>
+                <h2 className="text-base font-semibold text-slate-900">Preview Template</h2>
+                <p className="mt-0.5 text-xs text-slate-500">{preview.title}</p>
               </div>
-              <button type="button" onClick={() => setPreview(null)} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-blue-100 hover:bg-white/10">
+              <button type="button" onClick={() => setPreview(null)} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 shadow-2xs font-medium">
                 Tutup
               </button>
             </div>
-            <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap px-5 py-4 font-sans text-sm leading-7 text-blue-50/85">
+            <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap px-5 py-4 font-sans text-sm leading-7 text-slate-700 bg-slate-50 rounded-b-2xl">
               {preview.body || "Template kosong."}
             </pre>
           </div>

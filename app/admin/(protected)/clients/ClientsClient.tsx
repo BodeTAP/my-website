@@ -72,10 +72,10 @@ type Client = {
 };
 
 const STATUS_META: Record<ClientStatus, { label: string; className: string }> = {
-  ACTIVE: { label: "Aktif", className: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300" },
-  FOLLOW_UP: { label: "Follow-up", className: "border-amber-500/25 bg-amber-500/10 text-amber-300" },
-  INACTIVE: { label: "Pasif", className: "border-white/10 bg-white/5 text-blue-200/55" },
-  CHURNED: { label: "Churned", className: "border-red-500/25 bg-red-500/10 text-red-300" },
+  ACTIVE: { label: "Aktif", className: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  FOLLOW_UP: { label: "Follow-up", className: "border-amber-200 bg-amber-50 text-amber-700" },
+  INACTIVE: { label: "Pasif", className: "border-slate-200 bg-slate-100 text-slate-600" },
+  CHURNED: { label: "Churned", className: "border-rose-200 bg-rose-50 text-rose-700" },
 };
 
 function formatRp(amount: number) {
@@ -115,12 +115,12 @@ function getOverdueInvoices(client: Client) {
 
 function RiskBadge({ tone, children }: { tone: "red" | "amber" | "blue"; children: ReactNode }) {
   const classes = {
-    red: "border-red-500/25 bg-red-500/10 text-red-300",
-    amber: "border-amber-500/25 bg-amber-500/10 text-amber-300",
-    blue: "border-sky-500/25 bg-sky-500/10 text-sky-300",
+    red: "border-rose-200 bg-rose-50 text-rose-700",
+    amber: "border-amber-200 bg-amber-50 text-amber-700",
+    blue: "border-slate-200 bg-slate-100 text-slate-700",
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${classes[tone]}`}>
+    <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono ${classes[tone]}`}>
       {children}
     </span>
   );
@@ -148,19 +148,19 @@ function PhoneCell({ client }: { client: Client }) {
     return (
       <div className="flex items-center gap-2 group/phone w-fit">
         {client.phone ? (
-          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5">
-            <Phone className="h-3.5 w-3.5 text-sky-400" />
-            <span className="font-mono text-sm text-blue-100">{client.phone}</span>
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5">
+            <Phone className="h-3.5 w-3.5 text-slate-600" />
+            <span className="font-mono text-xs font-semibold text-slate-900">{client.phone}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-amber-300">
-            <AlertCircle className="h-3.5 w-3.5" />
-            <span className="text-xs font-semibold">WA kosong</span>
+          <div className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800">
+            <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
+            <span className="text-xs font-semibold font-mono">WA kosong</span>
           </div>
         )}
         <button
           onClick={() => setEditing(true)}
-          className="rounded-lg border border-sky-500/20 bg-sky-500/10 p-2 text-sky-300 opacity-100 transition-colors hover:bg-sky-500/20 sm:opacity-0 sm:group-hover/phone:opacity-100"
+          className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 shadow-2xs hover:text-slate-900 hover:bg-slate-50 transition-colors"
           title="Edit nomor WhatsApp"
         >
           <Pencil className="h-3.5 w-3.5" />
@@ -180,19 +180,19 @@ function PhoneCell({ client }: { client: Client }) {
           if (event.key === "Escape") setEditing(false);
         }}
         placeholder="08xxxxxxxxxx"
-        className="w-44 rounded-lg border border-sky-500/40 bg-black/35 px-3 py-2 font-mono text-sm text-white outline-none focus:ring-2 focus:ring-sky-500/20"
+        className="w-44 rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
       />
-      <button onClick={save} disabled={saving} className="rounded-lg bg-emerald-600 p-2 text-white transition-colors hover:bg-emerald-500 disabled:opacity-50">
-        <Check className="h-4 w-4" />
+      <button onClick={save} disabled={saving} className="rounded-lg bg-[#1E242E] p-1.5 text-white transition-colors hover:bg-slate-800 disabled:opacity-50 shadow-xs">
+        <Check className="h-3.5 w-3.5" />
       </button>
       <button
         onClick={() => {
           setValue(client.phone ?? "");
           setEditing(false);
         }}
-        className="rounded-lg border border-white/10 bg-white/5 p-2 text-white transition-colors hover:bg-white/10"
+        className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 transition-colors hover:bg-slate-50 shadow-2xs"
       >
-        <X className="h-4 w-4" />
+        <X className="h-3.5 w-3.5" />
       </button>
     </div>
   );
@@ -209,7 +209,7 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
   }, [clients]);
 
   return (
-    <FadeUp delay={0.2} className="space-y-5">
+    <FadeUp delay={0.2} className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <SummaryTile icon={Building2} label="Total klien" value={clients.length} />
         <SummaryTile icon={Phone} label="WA kosong" value={summary.noPhone} tone={summary.noPhone > 0 ? "amber" : "default"} />
@@ -219,38 +219,38 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
       </div>
 
       {summary.noPhone > 0 && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-500/25 bg-amber-500/10 p-4">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
           <div>
-            <h3 className="font-bold text-amber-200">{summary.noPhone} klien belum punya nomor WhatsApp</h3>
-            <p className="mt-1 text-sm leading-relaxed text-amber-100/70">
+            <h3 className="font-bold text-amber-900 text-sm">{summary.noPhone} klien belum punya nomor WhatsApp</h3>
+            <p className="mt-0.5 text-xs leading-relaxed text-amber-800">
               Notifikasi invoice, project update, dan reminder otomatis tidak akan terkirim ke klien ini.
             </p>
           </div>
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-[#071225]">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/[0.03]">
-                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-blue-200/45">Klien</th>
-                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-blue-200/45">Kontak</th>
-                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-blue-200/45">Status & Risiko</th>
-                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-blue-200/45">Operasional</th>
-                <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-wide text-blue-200/45">Aksi</th>
+              <tr className="border-b border-slate-100 bg-slate-50/60">
+                <th className="px-5 py-3.5 text-left text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">Klien</th>
+                <th className="px-5 py-3.5 text-left text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">Kontak</th>
+                <th className="px-5 py-3.5 text-left text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">Status & Risiko</th>
+                <th className="px-5 py-3.5 text-left text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">Operasional</th>
+                <th className="px-5 py-3.5 text-right text-[11px] font-mono font-medium uppercase tracking-wider text-slate-500">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {clients.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-16 text-center">
-                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                      <User className="h-7 w-7 text-blue-200/30" />
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">
+                      <User className="h-6 w-6" />
                     </div>
-                    <p className="font-semibold text-blue-100">Belum ada klien yang terdaftar.</p>
-                    <p className="mt-1 text-xs text-blue-200/40">Klien akan muncul setelah dibuat dari portal, invoice, atau onboarding.</p>
+                    <p className="font-bold text-slate-800 text-sm">Belum ada klien yang terdaftar.</p>
+                    <p className="mt-1 text-xs text-slate-400 font-mono">Klien akan muncul setelah dibuat dari portal, invoice, atau onboarding.</p>
                   </td>
                 </tr>
               ) : (
@@ -263,28 +263,28 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
                   const displayName = client.picName || client.user.name || "Tanpa nama PIC";
 
                   return (
-                    <tr key={client.id} className="group hover:bg-white/[0.03]">
+                    <tr key={client.id} className="group hover:bg-slate-50/70 transition-colors">
                       <td className="px-5 py-5 align-top">
                         <div className="flex gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-sky-500/20 bg-sky-500/10">
-                            <Building2 className="h-5 w-5 text-sky-300" />
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-700">
+                            <Building2 className="h-5 w-5 text-slate-700" />
                           </div>
                           <div className="min-w-0">
-                            <Link href={`/admin/clients/${client.id}`} className="font-bold text-white transition-colors hover:text-sky-300">
+                            <Link href={`/admin/clients/${client.id}`} className="font-bold text-slate-900 transition-colors hover:text-slate-700 text-base">
                               {client.businessName}
                             </Link>
-                            <p className="mt-1 flex items-center gap-1.5 text-xs text-blue-200/55">
-                              <User className="h-3.5 w-3.5 text-sky-300/70" />
+                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                              <User className="h-3.5 w-3.5 text-slate-400" />
                               {displayName}{client.picRole ? ` - ${client.picRole}` : ""}
                             </p>
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {client.tags.slice(0, 3).map((tag) => (
-                                <span key={tag} className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-blue-100/65">
+                                <span key={tag} className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-700 font-medium">
                                   {tag}
                                 </span>
                               ))}
                               {client.source && (
-                                <span className="rounded-md border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-200/80">
+                                <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-700 font-medium">
                                   {client.source}
                                 </span>
                               )}
@@ -295,19 +295,19 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
                       <td className="px-5 py-5 align-top">
                         <div className="space-y-2">
                           <PhoneCell client={client} />
-                          <p className="flex items-center gap-1.5 text-xs text-blue-200/45">
-                            <Mail className="h-3.5 w-3.5" />
+                          <p className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
+                            <Mail className="h-3.5 w-3.5 text-slate-400" />
                             {client.billingEmail || client.user.email}
                           </p>
-                          <p className="flex items-center gap-1.5 text-xs text-blue-200/45">
-                            <MapPin className="h-3.5 w-3.5" />
+                          <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                            <MapPin className="h-3.5 w-3.5 text-slate-400" />
                             {[client.city, client.province].filter(Boolean).join(", ") || client.address || "Lokasi belum diisi"}
                           </p>
                         </div>
                       </td>
                       <td className="px-5 py-5 align-top">
                         <div className="space-y-2">
-                          <span className={`inline-flex rounded-md border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${status.className}`}>
+                          <span className={`inline-flex rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider font-mono ${status.className}`}>
                             {status.label}
                           </span>
                           <div className="flex flex-wrap gap-1.5">
@@ -317,13 +317,13 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
                             {expiring > 0 && <RiskBadge tone="amber">{expiring} aset expiring</RiskBadge>}
                             {lowCredit && <RiskBadge tone="amber">kredit rendah</RiskBadge>}
                           </div>
-                          <p className="text-xs text-blue-200/35">
+                          <p className="text-xs text-slate-400 font-mono">
                             Update {formatDate(client.updatedAt)}
                           </p>
                         </div>
                       </td>
                       <td className="px-5 py-5 align-top">
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-1.5">
                           <MiniStat icon={Wallet} label="Kredit" value={creditBalance.toString()} tone={lowCredit ? "amber" : "default"} />
                           <MiniStat icon={LayoutGrid} label="Proyek" value={client._count.projects.toString()} />
                           <MiniStat icon={Receipt} label="Invoice" value={client._count.invoices.toString()} />
@@ -332,7 +332,7 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
                           <MiniStat icon={Search} label="Lead list" value={client._count.leadFinderLists.toString()} />
                         </div>
                         {overdue.length > 0 && (
-                          <p className="mt-2 text-xs font-semibold text-red-300">
+                          <p className="mt-2 text-xs font-semibold text-rose-600 font-mono">
                             Outstanding {formatRp(overdue.reduce((sum, invoice) => sum + invoice.amount, 0))}
                           </p>
                         )}
@@ -340,13 +340,13 @@ export default function ClientsClient({ clients }: { clients: Client[] }) {
                       <td className="px-5 py-5 text-right align-top">
                         <Link
                           href={`/admin/clients/${client.id}`}
-                          className="inline-flex items-center gap-2 rounded-lg border border-sky-500/25 bg-sky-500/10 px-3 py-2 text-xs font-bold text-sky-200 transition-colors hover:bg-sky-500/20"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-800 bg-[#1E242E] hover:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors"
                         >
                           Detail
                           <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                         {client.accountManager && (
-                          <p className="mt-3 text-[11px] text-blue-200/35">
+                          <p className="mt-2 text-[10px] text-slate-400 font-mono">
                             AM: {client.accountManager.name || client.accountManager.email}
                           </p>
                         )}
@@ -375,18 +375,18 @@ function SummaryTile({
   tone?: "default" | "amber" | "red";
 }) {
   const toneClass = {
-    default: "border-white/10 bg-[#071225] text-white",
-    amber: "border-amber-500/25 bg-amber-500/10 text-amber-200",
-    red: "border-red-500/25 bg-red-500/10 text-red-200",
+    default: "border-slate-200 bg-white text-slate-900 shadow-xs",
+    amber: "border-amber-200 bg-amber-50/70 text-amber-900 shadow-xs",
+    red: "border-rose-200 bg-rose-50/70 text-rose-900 shadow-xs",
   };
   return (
-    <div className={`rounded-lg border p-4 ${toneClass[tone]}`}>
+    <div className={`rounded-2xl border p-4 ${toneClass[tone]}`}>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-200/45">{label}</p>
-          <p className="mt-1 text-2xl font-black">{value}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">{label}</p>
+          <p className="mt-1 text-2xl font-bold font-mono tracking-tight">{value}</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
           <Icon className="h-5 w-5 text-current" />
         </div>
       </div>
@@ -406,12 +406,12 @@ function MiniStat({
   tone?: "default" | "amber";
 }) {
   return (
-    <div className={`rounded-lg border px-2.5 py-2 ${tone === "amber" ? "border-amber-500/20 bg-amber-500/10" : "border-white/10 bg-white/[0.03]"}`}>
-      <div className="flex items-center gap-1.5 text-blue-200/45">
-        <Icon className="h-3.5 w-3.5" />
-        <span className="text-[10px] font-semibold uppercase tracking-wide">{label}</span>
+    <div className={`rounded-xl border px-2.5 py-1.5 shadow-2xs ${tone === "amber" ? "border-amber-200 bg-amber-50/70" : "border-slate-200 bg-slate-50/70"}`}>
+      <div className="flex items-center gap-1.5 text-slate-500">
+        <Icon className="h-3 w-3" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider font-mono">{label}</span>
       </div>
-      <p className={`mt-1 text-sm font-black ${tone === "amber" ? "text-amber-300" : "text-white"}`}>{value}</p>
+      <p className={`mt-0.5 text-xs font-bold font-mono ${tone === "amber" ? "text-amber-800" : "text-slate-900"}`}>{value}</p>
     </div>
   );
 }

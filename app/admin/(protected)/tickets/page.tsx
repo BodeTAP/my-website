@@ -13,23 +13,23 @@ import { requireModule } from "@/lib/permissions";
 const STATUS_CONFIG: Record<string, { label: string; bg: string; border: string; text: string; icon: LucideIcon }> = {
   OPEN: {
     label: "Terbuka",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
-    text: "text-blue-400",
+    bg: "bg-sky-50",
+    border: "border-sky-200",
+    text: "text-sky-700",
     icon: MessageSquare,
   },
   IN_PROGRESS: {
     label: "Diproses",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    text: "text-amber-400",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    text: "text-amber-700",
     icon: Clock,
   },
   CLOSED: {
     label: "Selesai",
-    bg: "bg-white/5",
-    border: "border-white/10",
-    text: "text-blue-200/40",
+    bg: "bg-slate-100",
+    border: "border-slate-200",
+    text: "text-slate-600",
     icon: CheckCircle2,
   },
 };
@@ -84,22 +84,21 @@ export default async function TicketsPage({
   return (
     <div>
       <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-pink-600/20 rounded-full blur-[60px] pointer-events-none" />
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-pink-500/10 flex items-center justify-center ring-1 ring-pink-500/20">
-              <Headset className="w-5 h-5 text-pink-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+              <Headset className="w-5 h-5 text-slate-700" />
             </div>
             Tiket Bantuan
           </h1>
-          <p className="text-blue-200/60 text-sm mt-2">
-            Anda memiliki <strong className="text-pink-400">{openTicketsCount} tiket terbuka</strong> yang membutuhkan respons.
+          <p className="text-slate-500 text-sm mt-2">
+            Anda memiliki <strong className="text-slate-900 font-semibold">{openTicketsCount} tiket terbuka</strong> yang membutuhkan respons.
           </p>
         </div>
       </FadeUp>
 
       <FadeUp delay={0.1}>
-        <div className="glass rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between border border-white/5 relative z-10">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between shadow-xs relative z-10">
           <TicketSearch />
           <TicketFilter />
         </div>
@@ -108,11 +107,11 @@ export default async function TicketsPage({
       <StaggerChildren stagger={0.05} className="space-y-4 relative z-10">
         {tickets.length === 0 ? (
           <StaggerItem>
-            <div className="glass rounded-3xl p-16 text-center border border-white/5 flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                <CheckCircle2 className="w-8 h-8 text-blue-200/20" />
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/40 p-16 text-center flex flex-col items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-3 shadow-2xs text-slate-400">
+                <CheckCircle2 className="w-7 h-7" />
               </div>
-              <p className="text-blue-200/50 font-medium">Hore! Belum ada keluhan atau tiket bantuan masuk.</p>
+              <p className="text-slate-500 font-medium text-sm">Hore! Belum ada keluhan atau tiket bantuan masuk.</p>
             </div>
           </StaggerItem>
         ) : (
@@ -122,14 +121,11 @@ export default async function TicketsPage({
             
             return (
               <StaggerItem key={t.id}>
-                <div className={`glass rounded-2xl p-5 sm:p-6 border border-white/5 hover:border-pink-500/30 hover:bg-white/5 transition-all group relative overflow-hidden`}>
-                  {/* Subtle hover gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/0 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs hover:border-slate-300 transition-all group relative overflow-hidden">
                   <div className="flex flex-col sm:flex-row gap-4 sm:items-center relative z-10">
                     
                     {/* Status Indicator */}
-                    <div className={`w-12 h-12 rounded-2xl ${config.bg} flex items-center justify-center shrink-0 ring-1 ${config.border}`}>
+                    <div className={`w-12 h-12 rounded-2xl ${config.bg} flex items-center justify-center shrink-0 border ${config.border}`}>
                       <StatusIcon className={`w-5 h-5 ${config.text}`} />
                     </div>
 
@@ -138,25 +134,25 @@ export default async function TicketsPage({
                         <Badge variant="outline" className={`${config.text} ${config.border} ${config.bg} px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold`}>
                           {config.label}
                         </Badge>
-                        <span className="text-blue-200/30 text-xs font-mono">#{t.id.slice(-6)}</span>
-                        <span className="text-blue-200/30 text-xs sm:hidden ml-auto">
+                        <span className="text-slate-400 text-xs font-mono">#{t.id.slice(-6)}</span>
+                        <span className="text-slate-400 text-xs sm:hidden ml-auto">
                           {new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short" }).format(new Date(t.updatedAt))}
                         </span>
                       </div>
                       
-                      <h3 className="text-white font-bold text-lg leading-tight mb-1 group-hover:text-pink-300 transition-colors truncate">
+                      <h3 className="text-slate-900 font-bold text-lg leading-tight mb-1 group-hover:text-slate-700 transition-colors truncate">
                         {t.subject}
                       </h3>
                       
-                      <div className="flex items-center gap-2 text-blue-200/50 text-xs">
-                        <span className="font-semibold text-blue-200/70">{t.client.businessName}</span>
-                        <span className="w-1 h-1 rounded-full bg-blue-200/20" />
+                      <div className="flex items-center gap-2 text-slate-500 text-xs">
+                        <span className="font-semibold text-slate-700">{t.client.businessName}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-300" />
                         <span className="truncate">{t.client.user.email}</span>
                       </div>
                       
                       {t.messages[0] && (
-                        <div className="mt-3 bg-black/20 p-3 rounded-xl border border-white/5">
-                          <p className="text-blue-200/60 text-xs line-clamp-2 italic leading-relaxed">
+                        <div className="mt-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <p className="text-slate-600 text-xs line-clamp-2 italic leading-relaxed">
                             &quot;{t.messages[0].body}&quot;
                           </p>
                         </div>
@@ -164,11 +160,11 @@ export default async function TicketsPage({
                     </div>
 
                     <div className="flex items-center sm:flex-col sm:items-end justify-between gap-3 shrink-0 mt-2 sm:mt-0">
-                      <span className="text-blue-200/40 text-xs font-medium hidden sm:block">
+                      <span className="text-slate-400 text-xs font-medium hidden sm:block">
                         {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(t.updatedAt))}
                       </span>
                       <Link href={`/admin/tickets/${t.id}`}>
-                        <Button className="bg-pink-600/10 hover:bg-pink-500 text-pink-400 hover:text-white border border-pink-500/20 shadow-none hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] transition-all px-6 h-10">
+                        <Button className="bg-[#1E242E] hover:bg-slate-800 text-white font-semibold rounded-xl h-10 px-5 shadow-xs transition-colors">
                           <MessageSquare className="w-4 h-4 mr-2" />
                           {t.status === "OPEN" ? "Beri Balasan" : "Lihat Obrolan"}
                         </Button>
@@ -185,9 +181,9 @@ export default async function TicketsPage({
 
       {total > 0 && (
         <FadeUp delay={0.3}>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10 mt-6">
-            <p className="text-xs text-blue-200/40 font-medium">
-              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> tiket
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:px-6 shadow-xs relative z-10 mt-6">
+            <p className="text-xs text-slate-500 font-medium">
+              Menampilkan <span className="text-slate-900 font-semibold">{startIdx}-{endIdx}</span> dari <span className="text-slate-900 font-semibold">{total}</span> tiket
             </p>
             <TicketPagination totalPages={totalPages} />
           </div>

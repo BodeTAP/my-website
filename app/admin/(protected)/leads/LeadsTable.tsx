@@ -31,10 +31,10 @@ const STATUS_LABELS: Record<Lead["status"], string> = {
 };
 
 const STATUS_COLORS: Record<Lead["status"], string> = {
-  NEW:      "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-  FOLLOWUP: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  DEAL:     "bg-green-500/15 text-green-400 border-green-500/30",
-  CLOSED:   "bg-white/5 text-blue-200/50 border-white/10",
+  NEW:      "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+  FOLLOWUP: "bg-amber-50 text-amber-700 border-amber-200/80",
+  DEAL:     "bg-blue-50 text-blue-700 border-blue-200/80",
+  CLOSED:   "bg-slate-100 text-slate-600 border-slate-200",
 };
 
 const WA_TEMPLATE_KEY  = "mfweb_wa_manual_template";
@@ -50,9 +50,9 @@ const CONSENT_LABELS: Record<Lead["waOptInStatus"], string> = {
 };
 
 const CONSENT_COLORS: Record<Lead["waOptInStatus"], string> = {
-  UNKNOWN:   "bg-slate-500/10 text-slate-300 border-slate-500/20",
-  OPTED_IN:  "bg-emerald-500/10 text-emerald-300 border-emerald-500/25",
-  OPTED_OUT: "bg-red-500/10 text-red-300 border-red-500/25",
+  UNKNOWN:   "bg-slate-100 text-slate-600 border-slate-200",
+  OPTED_IN:  "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+  OPTED_OUT: "bg-rose-50 text-rose-700 border-rose-200/80",
 };
 
 function isCoolingDown(lastContactedAt: Date | null, cooldownHours: number): boolean {
@@ -148,32 +148,32 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass rounded-2xl w-full max-w-lg border border-white/10 shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={onClose} />
+      <div className="relative bg-white rounded-3xl w-full max-w-lg border border-slate-200 shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
           <div>
-            <h2 className="text-white font-bold">Broadcast WhatsApp</h2>
-            <p className="text-blue-200/50 text-xs mt-0.5">{leads.length} lead dipilih · gunakan {"{name}"} atau {"{businessName}"}</p>
+            <h2 className="text-slate-900 font-bold text-base tracking-tight">Broadcast WhatsApp</h2>
+            <p className="text-slate-500 text-xs mt-0.5 font-mono">{leads.length} lead dipilih · gunakan {"{name}"} atau {"{businessName}"}</p>
           </div>
-          <button onClick={onClose} className="text-blue-200/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
         {status !== "done" && (
-          <div className="flex border-b border-white/10">
+          <div className="flex border-b border-slate-100 bg-slate-50/30">
             {(["compose", "preview"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                   activeTab === tab
-                    ? "text-white border-b-2 border-indigo-500"
-                    : "text-blue-200/40 hover:text-white"
+                    ? "text-slate-900 border-b-2 border-slate-900 bg-white"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                {tab === "compose" ? "✏️ Tulis Pesan" : "👁️ Preview"}
+                {tab === "compose" ? "Tulis Pesan" : "Preview"}
               </button>
             ))}
           </div>
@@ -185,16 +185,16 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
             {activeTab === "preview" ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-blue-200/60 text-xs">Preview pesan untuk lead:</p>
+                  <p className="text-slate-600 text-xs font-medium">Preview pesan untuk lead:</p>
                   <div className="flex items-center gap-1">
                     {previewLeads.map((l, i) => (
                       <button
                         key={l.id}
                         onClick={() => setPreviewIdx(i)}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all ${
                           previewIdx === i
-                            ? "bg-indigo-600 text-white border-indigo-500/50"
-                            : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                            ? "bg-[#1E242E] text-white border-slate-800 shadow-xs"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                         }`}
                       >
                         {l.businessName.slice(0, 12)}
@@ -203,23 +203,23 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
                   </div>
                 </div>
                 {previewLead && (
-                  <div className="bg-[#0a1830] border border-white/10 rounded-2xl p-4">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-300">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold font-mono">
                         {previewLead.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-white text-xs font-semibold">{previewLead.businessName}</p>
-                        <p className="text-blue-200/40 text-[10px]">{previewLead.whatsapp}</p>
+                        <p className="text-slate-900 text-xs font-semibold">{previewLead.businessName}</p>
+                        <p className="text-slate-400 text-[10px] font-mono">{previewLead.whatsapp}</p>
                       </div>
                     </div>
-                    <div className="bg-[#1a2f50] rounded-xl rounded-tl-none p-3 max-w-[85%]">
-                      <pre className="text-white text-xs whitespace-pre-wrap font-sans leading-relaxed">
+                    <div className="bg-white border border-slate-200 rounded-xl rounded-tl-none p-3 max-w-[85%] shadow-2xs">
+                      <pre className="text-slate-800 text-xs whitespace-pre-wrap font-sans leading-relaxed">
                         {previewMessage}
                       </pre>
                     </div>
-                    <p className="text-blue-200/30 text-[10px] mt-2 italic">
-                      * Preview ini menampilkan substitusi variabel saja. Pesan asli akan divariasikan lebih lanjut oleh sistem (sinonim, emoji, CTA, dll).
+                    <p className="text-slate-400 text-[10px] mt-2 italic font-mono">
+                      * Preview menampilkan substitusi variabel. Pesan terkirim akan divariasikan otomatis oleh sistem.
                     </p>
                   </div>
                 )}
@@ -227,9 +227,9 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
             ) : (
               <>
             {/* Warning banner */}
-            <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 space-y-1.5">
-              <p className="text-amber-400 text-xs font-semibold">⚠️ Peringatan Risiko Blokir WhatsApp</p>
-              <ul className="text-amber-300/70 text-[11px] space-y-1 list-disc ml-4">
+            <div className="bg-amber-50/80 border border-amber-200 rounded-xl px-4 py-3 space-y-1.5">
+              <p className="text-amber-800 text-xs font-semibold">⚠️ Peringatan Risiko Blokir WhatsApp</p>
+              <ul className="text-amber-700 text-[11px] space-y-1 list-disc ml-4">
                 <li>Gunakan nomor WA <strong>khusus broadcast</strong>, bukan nomor utama bisnis</li>
                 <li>Broadcast hanya diizinkan <strong>{String(settings.allowedStartHour).padStart(2, "0")}.00-{String(settings.allowedEndHour).padStart(2, "0")}.00 WIB</strong></li>
                 <li>Pesan dikirim dengan jeda <strong>{previewDelay} detik acak</strong> antar nomor (adaptif)</li>
@@ -239,18 +239,18 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
             </div>
 
             {consentBlocked.length > 0 && (
-              <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-3 space-y-2">
-                <p className="text-red-300 text-xs font-semibold">
+              <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 space-y-2">
+                <p className="text-rose-700 text-xs font-semibold">
                   {consentBlocked.length} lead opt-out atau do-not-contact
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {consentBlocked.slice(0, 12).map((l) => (
-                    <span key={l.id} className="text-[10px] bg-red-500/10 border border-red-500/20 text-red-200/70 px-2 py-0.5 rounded-full">
+                    <span key={l.id} className="text-[10px] bg-rose-100/70 border border-rose-200 text-rose-800 px-2 py-0.5 rounded-full font-mono">
                       {l.businessName} · {CONSENT_LABELS[l.waOptInStatus]}
                     </span>
                   ))}
                   {consentBlocked.length > 12 && (
-                    <span className="text-[10px] text-red-200/50 px-2 py-0.5">
+                    <span className="text-[10px] text-rose-500 px-2 py-0.5 font-mono">
                       +{consentBlocked.length - 12} lainnya
                     </span>
                   )}
@@ -259,13 +259,13 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
             )}
 
             {/* Session limit control */}
-            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 space-y-2">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-blue-200/70 text-xs font-medium">Batas per sesi</span>
-                <span className="text-white text-xs font-bold tabular-nums">
+                <span className="text-slate-700 text-xs font-medium">Batas per sesi</span>
+                <span className="text-slate-900 text-xs font-bold tabular-nums font-mono">
                   {eligibleCount} dari {eligibleRaw} lead
                   {eligibleRaw > eligibleCount && (
-                    <span className="ml-1.5 text-amber-400/70 font-normal">
+                    <span className="ml-1.5 text-amber-700 font-normal">
                       ({eligibleRaw - eligibleCount} dilewati)
                     </span>
                   )}
@@ -278,20 +278,20 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
                 step={5}
                 value={Math.min(sessionLimit, Math.max(Math.min(eligibleRaw, settings.maxSessionLimit), 5))}
                 onChange={(e) => setSessionLimit(Number(e.target.value))}
-                className="w-full accent-indigo-500 h-1.5"
+                className="w-full accent-slate-900 h-1.5"
               />
-              <div className="flex justify-between text-[10px] text-blue-200/30">
+              <div className="flex justify-between text-[10px] text-slate-400 font-mono">
                 <span>5 (aman)</span>
-                <span className="text-blue-200/50">Default: {settings.defaultSessionLimit}/sesi</span>
+                <span className="text-slate-600 font-medium">Default: {settings.defaultSessionLimit}/sesi</span>
                 <span>{Math.max(Math.min(eligibleRaw, settings.maxSessionLimit), 5)} (maks)</span>
               </div>
             </div>
 
             {/* ETA preview */}
             {eligibleCount > 0 && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-2.5 flex items-center justify-between">
-                <span className="text-blue-200/60 text-xs">Estimasi selesai:</span>
-                <span className="text-blue-300 text-xs font-semibold">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                <span className="text-slate-500 text-xs font-medium">Estimasi selesai:</span>
+                <span className="text-slate-900 text-xs font-semibold font-mono">
                   ~{previewEta >= 60
                     ? `${Math.floor(previewEta / 60)} menit ${previewEta % 60} detik`
                     : `${previewEta} detik`}
@@ -301,30 +301,30 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
 
             {/* Cooldown info */}
             {coolingLeads.length > 0 && (
-              <div className="bg-orange-500/10 border border-orange-500/25 rounded-xl px-4 py-3 space-y-2">
-                <p className="text-orange-400 text-xs font-semibold flex items-center gap-1.5">
+              <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 space-y-2">
+                <p className="text-orange-800 text-xs font-semibold flex items-center gap-1.5">
                   🕐 {coolingLeads.length} lead masih dalam cooldown {settings.cooldownHours} jam
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {coolingLeads.map((l) => (
-                    <span key={l.id} className="text-[10px] bg-orange-500/10 border border-orange-500/20 text-orange-300/70 px-2 py-0.5 rounded-full">
+                    <span key={l.id} className="text-[10px] bg-orange-100/70 border border-orange-200 text-orange-900 px-2 py-0.5 rounded-full font-mono">
                       {l.businessName} · {cooldownRemaining(l.lastContactedAt, settings.cooldownHours)}
                     </span>
                   ))}
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer mt-1">
                   <input type="checkbox" checked={skipCooldown} onChange={(e) => setSkipCooldown(e.target.checked)}
-                    className="w-3.5 h-3.5 accent-orange-500" />
-                  <span className="text-orange-300/70 text-[11px]">Kirim tetap ke semua (abaikan cooldown) — risiko lebih tinggi</span>
+                    className="w-3.5 h-3.5 accent-orange-600" />
+                  <span className="text-orange-800 text-[11px]">Kirim tetap ke semua (abaikan cooldown) — risiko lebih tinggi</span>
                 </label>
               </div>
             )}
 
-            <div className="bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 flex items-start gap-2">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
               <span className="text-lg leading-none">🔄</span>
               <div>
-                <p className="text-indigo-300 text-xs font-semibold">Rotator + Variasi + Greeting Aktif</p>
-                <p className="text-indigo-200/60 text-[11px] mt-0.5">
+                <p className="text-slate-900 text-xs font-semibold">Rotator + Variasi + Greeting Aktif</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">
                   Device digilir otomatis. Pesan divariasikan suffix, emoji, dan sapaan sesuai waktu (pagi/siang/sore).
                 </p>
               </div>
@@ -334,16 +334,16 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={8}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/30 outline-none focus:border-indigo-500/50 resize-none font-mono"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-none font-mono transition-all"
             />
             <div className="flex items-center gap-3 flex-wrap">
               <Button onClick={handleSend} disabled={status === "sending" || !message.trim() || eligibleCount === 0}
-                className="bg-green-600 hover:bg-green-500 text-white gap-2">
+                className="bg-[#1E242E] hover:bg-slate-800 text-white gap-2 rounded-xl shadow-xs text-xs font-semibold h-10 px-4">
                 {status === "sending"
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</>
                   : <><Send className="w-4 h-4" /> Kirim ke {eligibleCount} Lead</>}
               </Button>
-              <p className="text-blue-200/30 text-xs">Delay adaptif · variasi otomatis · dihandle Fonnte</p>
+              <p className="text-slate-400 text-xs font-mono">Delay adaptif · variasi otomatis · dihandle Fonnte</p>
             </div>
             </>
             )}
@@ -351,65 +351,65 @@ function BroadcastModal({ leads, settings, onClose, onDone }: { leads: Lead[]; s
         ) : (
           <div className="p-8 text-center space-y-4">
             <div className="text-5xl">✅</div>
-            <p className="text-white font-bold text-lg">Broadcast Dikirim ke Antrian</p>
+            <p className="text-slate-900 font-bold text-lg tracking-tight">Broadcast Dikirim ke Antrian</p>
 
             {/* Countdown */}
             {countdown !== null && countdown > 0 && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3">
-                <p className="text-blue-300 text-xs font-semibold mb-1">Estimasi selesai terkirim semua:</p>
-                <p className="text-white text-2xl font-bold font-mono">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                <p className="text-slate-600 text-xs font-semibold mb-1">Estimasi selesai terkirim semua:</p>
+                <p className="text-slate-900 text-2xl font-bold font-mono">
                   {countdown >= 60
                     ? `${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`
                     : `${countdown}s`}
                 </p>
-                <p className="text-blue-200/40 text-[10px] mt-1">Fonnte mengirim dengan jeda {result?.delayRange}s antar pesan</p>
+                <p className="text-slate-400 text-[10px] mt-1 font-mono">Fonnte mengirim dengan jeda {result?.delayRange}s antar pesan</p>
               </div>
             )}
 
             <div className="flex justify-center gap-6 flex-wrap">
               <div className="text-center">
-                <p className="text-green-400 text-2xl font-bold">{result?.sent}</p>
-                <p className="text-blue-200/50 text-xs">Diantrekan</p>
+                <p className="text-emerald-700 text-2xl font-bold font-mono">{result?.sent}</p>
+                <p className="text-slate-500 text-xs font-mono">Diantrekan</p>
               </div>
               <div className="text-center">
-                <p className="text-red-400 text-2xl font-bold">{result?.failed}</p>
-                <p className="text-blue-200/50 text-xs">Gagal</p>
+                <p className="text-rose-600 text-2xl font-bold font-mono">{result?.failed}</p>
+                <p className="text-slate-500 text-xs font-mono">Gagal</p>
               </div>
               {(result?.skipped ?? 0) > 0 && (
                 <div className="text-center">
-                  <p className="text-orange-400 text-2xl font-bold">{result?.skipped}</p>
-                  <p className="text-blue-200/50 text-xs">Dilewati</p>
+                  <p className="text-amber-700 text-2xl font-bold font-mono">{result?.skipped}</p>
+                  <p className="text-slate-500 text-xs font-mono">Dilewati</p>
                 </div>
               )}
               <div className="text-center">
-                <p className="text-indigo-400 text-2xl font-bold">{result?.devices ?? 1}</p>
-                <p className="text-blue-200/50 text-xs">Device</p>
+                <p className="text-slate-900 text-2xl font-bold font-mono">{result?.devices ?? 1}</p>
+                <p className="text-slate-500 text-xs font-mono">Device</p>
               </div>
             </div>
 
             {result?.cooldownLeads && result.cooldownLeads.length > 0 && (
-              <p className="text-orange-400/60 text-xs">
+              <p className="text-orange-700 text-xs font-mono">
                 Cooldown: {result.cooldownLeads.join(", ")}
               </p>
             )}
             {result?.consentSkippedLeads && result.consentSkippedLeads.length > 0 && (
-              <p className="text-red-300/70 text-xs">
+              <p className="text-rose-700 text-xs font-mono">
                 Opt-out/do-not-contact: {result.consentSkippedLeads.join(", ")}
               </p>
             )}
             {result?.invalidPhones && result.invalidPhones.length > 0 && (
-              <p className="text-red-400/60 text-xs">
+              <p className="text-rose-600 text-xs font-mono">
                 Nomor tidak valid: {result.invalidPhones.join(", ")}
               </p>
             )}
             {(result?.dailyLimitSkipped ?? 0) > 0 && (
-              <p className="text-amber-300/70 text-xs">
+              <p className="text-amber-700 text-xs font-mono">
                 Limit harian: {result?.dailyLimitSkipped} lead dilewati
               </p>
             )}
 
             <Button onClick={onDone} variant="outline"
-              className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
+              className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-xl shadow-2xs text-xs font-semibold">
               Tutup &amp; Refresh
             </Button>
           </div>
@@ -719,14 +719,14 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
       {/* Template WA Manual Editor */}
       {showTemplateEditor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowTemplateEditor(false)} />
-          <div className="relative glass rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={() => setShowTemplateEditor(false)} />
+          <div className="relative bg-white rounded-3xl w-full max-w-md border border-slate-200 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
               <div>
-                <h2 className="text-white font-bold text-sm">Template Pesan WA Manual</h2>
-                <p className="text-blue-200/50 text-xs mt-0.5">Gunakan {"{name}"} atau {"{businessName}"} sebagai variabel</p>
+                <h2 className="text-slate-900 font-bold text-sm tracking-tight">Template Pesan WA Manual</h2>
+                <p className="text-slate-500 text-xs mt-0.5 font-mono">Gunakan {"{name}"} atau {"{businessName}"} sebagai variabel</p>
               </div>
-              <button onClick={() => setShowTemplateEditor(false)} className="text-blue-200/40 hover:text-white transition-colors">
+              <button onClick={() => setShowTemplateEditor(false)} className="text-slate-400 hover:text-slate-700 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -735,19 +735,19 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                 value={draftTemplate}
                 onChange={(e) => setDraftTemplate(e.target.value)}
                 rows={8}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-green-500/50 resize-none font-mono"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 resize-none font-mono transition-all"
               />
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
                 <button onClick={() => setDraftTemplate(broadcastSettings.consentTemplate)}
-                  className="text-xs text-blue-200/40 hover:text-white transition-colors underline">
+                  className="text-xs text-slate-500 hover:text-slate-800 transition-colors underline font-mono">
                   Reset ke default
                 </button>
                 <div className="flex-1" />
                 <button onClick={() => setShowTemplateEditor(false)}
-                  className="px-4 py-2 rounded-xl text-xs border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 transition-all">
+                  className="px-3.5 py-2 rounded-xl text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all font-semibold">
                   Batal
                 </button>
-                <Button onClick={saveWaTemplate} className="bg-green-600 hover:bg-green-500 text-white gap-2 h-9 text-xs px-4">
+                <Button onClick={saveWaTemplate} className="bg-[#1E242E] hover:bg-slate-800 text-white rounded-xl gap-2 h-9 text-xs px-4 shadow-xs font-semibold">
                   Simpan Template
                 </Button>
               </div>
@@ -769,56 +769,54 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
         />
       )}
 
-      <FadeUp delay={0.2} className="glass rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative">
-        <div className="absolute inset-0 bg-linear-to-b from-indigo-500/5 to-transparent pointer-events-none" />
-
+      <FadeUp delay={0.2} className="rounded-3xl border border-slate-200 bg-white shadow-xs overflow-hidden relative">
         {/* Filter + Search */}
-        <div className="p-5 border-b border-white/10 relative z-10 space-y-3">
+        <div className="p-5 border-b border-slate-100 bg-slate-50/40 space-y-3">
           {/* Row 1: search + action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="relative flex-1">
-              <UserSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/30" />
+            <div className="relative flex-1 w-full">
+              <UserSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Cari nama, bisnis, nomor, domain..."
-                className="w-full h-10 pl-9 pr-4 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-blue-200/30 focus:border-indigo-500/50 focus:outline-none"
+                className="w-full h-10 pl-9 pr-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
               />
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 shrink-0 flex-wrap">
               <button
                 onClick={() => setShowAdvancedFilters((v) => !v)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                   showAdvancedFilters || consentFilter !== "ALL" || hasWebsiteFilter !== "ALL" || neverContacted || categoryFilter !== "ALL"
-                    ? "bg-indigo-600/20 border-indigo-500/40 text-indigo-300"
-                    : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                    ? "bg-[#1E242E] text-white border-slate-800 shadow-xs"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs"
                 }`}
               >
-                <Filter className="w-3 h-3" /> Filter
+                <Filter className="w-3.5 h-3.5" /> Filter
                 {(consentFilter !== "ALL" || hasWebsiteFilter !== "ALL" || neverContacted || categoryFilter !== "ALL") && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 )}
               </button>
               <button onClick={() => { setDraftTemplate(waTemplate); setShowTemplateEditor(true); }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-green-400 hover:border-green-500/30 transition-all bg-white/5">
-                <Pencil className="w-3 h-3" /> Template WA
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all bg-white shadow-2xs">
+                <Pencil className="w-3.5 h-3.5 text-slate-500" /> Template WA
               </button>
               <button onClick={() => setShowHistory(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-white/10 text-blue-200/50 hover:text-indigo-400 hover:border-indigo-500/30 transition-all bg-white/5">
-                <History className="w-3 h-3" /> Riwayat
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all bg-white shadow-2xs">
+                <History className="w-3.5 h-3.5 text-slate-500" /> Riwayat
               </button>
             </div>
           </div>
 
           {/* Row 2: status filter tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
             {(["ALL", "NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
               <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all border ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all border ${
                   statusFilter === s
-                    ? "bg-indigo-600 text-white border-indigo-500/50 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
-                    : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white hover:bg-white/10"
+                    ? "bg-[#1E242E] text-white border-slate-800 shadow-xs"
+                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 shadow-2xs"
                 }`}>
                 {s === "ALL" ? `Semua (${total})` : STATUS_LABELS[s]}
               </button>
@@ -827,54 +825,54 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
 
           {/* Row 3: advanced filters (collapsible) */}
           {showAdvancedFilters && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-200/60">
               <div className="space-y-1">
-                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Consent WA</p>
+                <p className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-semibold">Consent WA</p>
                 <select
                   value={consentFilter}
                   onChange={(e) => setConsentFilter(e.target.value)}
-                  className="w-full h-9 rounded-lg px-2 bg-white/5 border border-white/10 text-white text-xs"
+                  className="w-full h-9 rounded-xl px-2.5 bg-white border border-slate-200 text-slate-900 text-xs focus:ring-1 focus:ring-slate-900 font-mono"
                 >
-                  <option value="ALL" className="bg-[#030914]">Semua</option>
-                  <option value="UNKNOWN" className="bg-[#030914]">Belum opt-in</option>
-                  <option value="OPTED_IN" className="bg-[#030914]">Opt-in</option>
-                  <option value="OPTED_OUT" className="bg-[#030914]">Opt-out</option>
+                  <option value="ALL">Semua</option>
+                  <option value="UNKNOWN">Belum opt-in</option>
+                  <option value="OPTED_IN">Opt-in</option>
+                  <option value="OPTED_OUT">Opt-out</option>
                 </select>
               </div>
               <div className="space-y-1">
-                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Website</p>
+                <p className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-semibold">Website</p>
                 <select
                   value={hasWebsiteFilter}
                   onChange={(e) => setHasWebsiteFilter(e.target.value)}
-                  className="w-full h-9 rounded-lg px-2 bg-white/5 border border-white/10 text-white text-xs"
+                  className="w-full h-9 rounded-xl px-2.5 bg-white border border-slate-200 text-slate-900 text-xs focus:ring-1 focus:ring-slate-900 font-mono"
                 >
-                  <option value="ALL" className="bg-[#030914]">Semua</option>
-                  <option value="yes" className="bg-[#030914]">Punya website</option>
-                  <option value="no" className="bg-[#030914]">Belum punya website</option>
+                  <option value="ALL">Semua</option>
+                  <option value="yes">Punya website</option>
+                  <option value="no">Belum punya website</option>
                 </select>
               </div>
               <div className="space-y-1">
-                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Kategori Bisnis</p>
+                <p className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-semibold">Kategori Bisnis</p>
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full h-9 rounded-lg px-2 bg-white/5 border border-white/10 text-white text-xs"
+                  className="w-full h-9 rounded-xl px-2.5 bg-white border border-slate-200 text-slate-900 text-xs focus:ring-1 focus:ring-slate-900 font-mono"
                 >
                   {CATEGORY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value} className="bg-[#030914]">{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
               <div className="space-y-1">
-                <p className="text-blue-200/40 text-[10px] uppercase tracking-wider">Kontak</p>
+                <p className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-semibold">Kontak</p>
                 <label className="flex items-center gap-2 h-9 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={neverContacted}
                     onChange={(e) => setNeverContacted(e.target.checked)}
-                    className="w-4 h-4 accent-indigo-500"
+                    className="w-4 h-4 accent-slate-900 rounded"
                   />
-                  <span className="text-white text-xs">Belum pernah dihubungi</span>
+                  <span className="text-slate-700 text-xs font-medium">Belum pernah dihubungi</span>
                 </label>
               </div>
             </div>
@@ -883,8 +881,8 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
 
         {/* Bulk action bar */}
         {selected.size > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20 relative z-10">
-            <span className="text-indigo-300 text-sm font-medium">{selected.size} lead dipilih</span>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-slate-100 border-b border-slate-200">
+            <span className="text-slate-900 text-xs font-semibold font-mono">{selected.size} lead dipilih</span>
             <div className="flex items-center gap-2 flex-wrap">
               {/* Bulk status change */}
               <div className="relative">
@@ -898,10 +896,10 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                     setStatusMenuPos({ top: rect.bottom + 4, left: rect.left });
                     setShowStatusMenu((v) => !v);
                   }}
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-1.5 h-8 text-xs shadow-none">
+                  className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 gap-1.5 h-8 text-xs rounded-lg shadow-2xs font-semibold">
                   {bulkUpdating
-                    ? <Loader2 className="w-3 h-3 animate-spin" />
-                    : <ChevronDown className="w-3 h-3" />}
+                    ? <Loader2 className="w-3 h-3 animate-spin text-slate-600" />
+                    : <ChevronDown className="w-3 h-3 text-slate-600" />}
                   Ubah Status
                 </Button>
                 {showStatusMenu && typeof document !== "undefined" && createPortal(
@@ -912,22 +910,22 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                       left: statusMenuPos.left,
                       zIndex: 9999,
                     }}
-                    className="glass rounded-xl border border-white/10 shadow-2xl min-w-[140px] overflow-hidden"
+                    className="bg-white rounded-xl border border-slate-200 shadow-xl min-w-[140px] overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {(["NEW", "FOLLOWUP", "DEAL", "CLOSED"] as const).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleBulkStatus(s)}
-                        className="w-full text-left px-4 py-2.5 text-xs hover:bg-white/10 transition-colors flex items-center gap-2"
+                        className="w-full text-left px-4 py-2 text-xs hover:bg-slate-50 transition-colors flex items-center gap-2 text-slate-700 font-medium"
                       >
                         <span className={`w-2 h-2 rounded-full shrink-0 ${
-                          s === "NEW"      ? "bg-indigo-400" :
-                          s === "FOLLOWUP" ? "bg-amber-400"  :
-                          s === "DEAL"     ? "bg-green-400"  :
-                          "bg-white/30"
+                          s === "NEW"      ? "bg-emerald-500" :
+                          s === "FOLLOWUP" ? "bg-amber-500"  :
+                          s === "DEAL"     ? "bg-blue-500"   :
+                          "bg-slate-400"
                         }`} />
-                        <span className="text-white">{STATUS_LABELS[s]}</span>
+                        <span>{STATUS_LABELS[s]}</span>
                       </button>
                     ))}
                   </div>,
@@ -937,34 +935,34 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
 
               <Button size="sm" onClick={() => handleBulkConsent("OPTED_IN")} disabled={bulkUpdating}
                 title="Tandai lead terpilih sudah memberi izin WhatsApp"
-                className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 gap-1.5 h-8 text-xs shadow-none">
+                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 gap-1.5 h-8 text-xs rounded-lg shadow-2xs font-semibold">
                 Opt-in
               </Button>
               <Button size="sm" onClick={() => handleBulkConsent("OPTED_OUT")} disabled={bulkUpdating}
                 title="Jangan hubungi lead terpilih via WhatsApp"
-                className="bg-red-600/10 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/25 gap-1.5 h-8 text-xs shadow-none">
+                className="bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 gap-1.5 h-8 text-xs rounded-lg shadow-2xs font-semibold">
                 Opt-out
               </Button>
 
               <Button size="sm" onClick={() => setShowBroadcast(true)}
-                className="bg-green-600 hover:bg-green-500 text-white gap-1.5 h-8 text-xs">
+                className="bg-[#1E242E] hover:bg-slate-800 text-white gap-1.5 h-8 text-xs rounded-lg shadow-xs font-semibold">
                 <Send className="w-3 h-3" /> Broadcast WA
               </Button>
               <Button size="sm" onClick={handleExportWati}
                 title="Export format Wati untuk broadcast WhatsApp API"
-                className="bg-green-600/20 hover:bg-green-600 text-green-300 hover:text-white border border-green-500/30 gap-1.5 h-8 text-xs shadow-none">
-                <Download className="w-3 h-3" /> Export Wati
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 gap-1.5 h-8 text-xs rounded-lg shadow-2xs font-semibold">
+                <Download className="w-3 h-3 text-slate-500" /> Export Wati
               </Button>
               <Button size="sm" onClick={handleExportCSV}
-                className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 gap-1.5 h-8 text-xs shadow-none">
-                <Download className="w-3 h-3" /> Export CSV
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 gap-1.5 h-8 text-xs rounded-lg shadow-2xs font-semibold">
+                <Download className="w-3 h-3 text-slate-500" /> Export CSV
               </Button>
               <Button size="sm" onClick={handleDelete} disabled={deleting}
-                className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 gap-1.5 h-8 text-xs shadow-none">
+                className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 gap-1.5 h-8 text-xs rounded-lg shadow-2xs font-semibold">
                 {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                 Hapus
               </Button>
-              <button onClick={() => setSelected(new Map())} className="text-blue-200/40 hover:text-white transition-colors">
+              <button onClick={() => setSelected(new Map())} className="text-slate-400 hover:text-slate-700 transition-colors p-1">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -972,32 +970,32 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
         )}
 
         {/* Table */}
-        <div className="overflow-x-auto relative z-10">
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="px-4 py-4 w-10">
-                  <button onClick={toggleAll} className="text-blue-200/40 hover:text-white transition-colors">
+              <tr className="border-b border-slate-100 bg-slate-50/60">
+                <th className="px-4 py-3.5 w-10">
+                  <button onClick={toggleAll} className="text-slate-400 hover:text-slate-800 transition-colors">
                     {paginated.length > 0 && paginated.every((l) => selected.has(l.id))
-                      ? <CheckSquare className="w-4 h-4 text-indigo-400" />
+                      ? <CheckSquare className="w-4 h-4 text-slate-900" />
                       : <Square className="w-4 h-4" />}
                   </button>
                 </th>
-                <th className="text-left px-4 py-4 text-blue-200/40 font-bold text-[11px] uppercase tracking-wider">Nama / Bisnis</th>
-                <th className="text-left px-4 py-4 text-blue-200/40 font-bold text-[11px] uppercase tracking-wider">Kontak</th>
-                <th className="text-left px-4 py-4 text-blue-200/40 font-bold text-[11px] uppercase tracking-wider hidden md:table-cell">Domain</th>
-                <th className="text-left px-4 py-4 text-blue-200/40 font-bold text-[11px] uppercase tracking-wider hidden lg:table-cell">Tanggal</th>
-                <th className="text-left px-4 py-4 text-blue-200/40 font-bold text-[11px] uppercase tracking-wider">Status</th>
-                <th className="text-right px-4 py-4 text-blue-200/40 font-bold text-[11px] uppercase tracking-wider">Aksi</th>
+                <th className="text-left px-4 py-3.5 text-slate-500 font-mono font-medium text-[10px] uppercase tracking-wider">Nama / Bisnis</th>
+                <th className="text-left px-4 py-3.5 text-slate-500 font-mono font-medium text-[10px] uppercase tracking-wider">Kontak</th>
+                <th className="text-left px-4 py-3.5 text-slate-500 font-mono font-medium text-[10px] uppercase tracking-wider hidden md:table-cell">Domain</th>
+                <th className="text-left px-4 py-3.5 text-slate-500 font-mono font-medium text-[10px] uppercase tracking-wider hidden lg:table-cell">Tanggal</th>
+                <th className="text-left px-4 py-3.5 text-slate-500 font-mono font-medium text-[10px] uppercase tracking-wider">Status</th>
+                <th className="text-right px-4 py-3.5 text-slate-500 font-mono font-medium text-[10px] uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="text-center py-20">
                     <div className="flex flex-col items-center justify-center gap-3">
-                      <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
-                      <p className="text-blue-200/40 text-sm">Memuat data...</p>
+                      <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                      <p className="text-slate-400 text-xs font-mono">Memuat data prospek...</p>
                     </div>
                   </td>
                 </tr>
@@ -1005,51 +1003,52 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                 <tr>
                   <td colSpan={7} className="text-center py-20">
                     <div className="flex flex-col items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                        <UserSearch className="w-8 h-8 text-blue-200/20" />
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-3">
+                        <UserSearch className="w-6 h-6 text-slate-400" />
                       </div>
-                      <p className="text-blue-200/50 font-medium">Tidak ada prospek yang cocok.</p>
+                      <p className="text-slate-700 font-semibold text-sm">Tidak ada prospek yang cocok.</p>
+                      <p className="text-slate-400 text-xs font-mono mt-1">Coba sesuaikan kata kunci pencarian atau filter status.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 paginated.map((l) => (
-                  <tr key={l.id} className="hover:bg-white/5 transition-colors group">
+                  <tr key={l.id} className="hover:bg-slate-50/70 transition-colors group">
                     <td className="px-4 py-4">
-                      <button onClick={() => toggleSelect(l)} className="text-blue-200/40 hover:text-indigo-400 transition-colors">
+                      <button onClick={() => toggleSelect(l)} className="text-slate-400 hover:text-slate-800 transition-colors">
                         {selected.has(l.id)
-                          ? <CheckSquare className="w-4 h-4 text-indigo-400" />
+                          ? <CheckSquare className="w-4 h-4 text-slate-900" />
                           : <Square className="w-4 h-4" />}
                       </button>
                     </td>
-                    <td className="px-4 py-5">
-                      <p className="text-white font-bold group-hover:text-indigo-300 transition-colors">{l.name}</p>
-                      <p className="text-blue-200/50 text-xs mt-0.5">{l.businessName}</p>
+                    <td className="px-4 py-4">
+                      <p className="text-slate-900 font-bold group-hover:text-slate-950 transition-colors">{l.name}</p>
+                      <p className="text-slate-500 text-xs mt-0.5">{l.businessName}</p>
                     </td>
-                    <td className="px-4 py-5">
+                    <td className="px-4 py-4">
                       <a href={WA(l.whatsapp, l.name, l.businessName)} target="_blank" rel="noopener noreferrer"
-                        className="text-blue-200/70 hover:text-green-400 transition-colors font-mono text-xs flex items-center gap-1.5 w-fit">
+                        className="text-slate-700 hover:text-emerald-700 transition-colors font-mono text-xs flex items-center gap-1.5 w-fit font-medium">
                         {l.whatsapp}
                       </a>
                       <select
                         value={consentMap[l.id] ?? l.waOptInStatus}
                         onChange={(e) => updateConsent(l.id, e.target.value as Lead["waOptInStatus"])}
-                        className={`mt-2 appearance-none px-2 py-1 rounded-md text-[10px] font-bold border outline-none ${CONSENT_COLORS[consentMap[l.id] ?? l.waOptInStatus]}`}
+                        className={`mt-1.5 appearance-none px-2 py-0.5 rounded-md text-[10px] font-bold border outline-none font-mono ${CONSENT_COLORS[consentMap[l.id] ?? l.waOptInStatus]}`}
                         title="Status izin broadcast WhatsApp"
                       >
                         {(Object.keys(CONSENT_LABELS) as Lead["waOptInStatus"][]).map((s) => (
-                          <option key={s} value={s} className="bg-[#0d1b35] text-white">{CONSENT_LABELS[s]}</option>
+                          <option key={s} value={s}>{CONSENT_LABELS[s]}</option>
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-5 text-blue-200/50 text-xs font-mono hidden md:table-cell">
-                      {l.domain ? <span className="px-2.5 py-1 bg-white/5 rounded-md border border-white/5 text-blue-200/70">{l.domain}</span> : "—"}
+                    <td className="px-4 py-4 text-slate-500 text-xs font-mono hidden md:table-cell">
+                      {l.domain ? <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-slate-700">{l.domain}</span> : "—"}
                     </td>
-                    <td className="px-4 py-5 text-blue-200/50 text-xs font-medium hidden lg:table-cell">
-                      <div className="space-y-0.5">
+                    <td className="px-4 py-4 text-slate-500 text-xs font-medium hidden lg:table-cell">
+                      <div className="space-y-0.5 font-mono">
                         <p>{new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(l.createdAt))}</p>
                         {l.lastContactedAt && (
-                          <p className={`text-[10px] flex items-center gap-1 ${isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours) ? "text-orange-400/70" : "text-blue-200/30"}`}>
+                          <p className={`text-[10px] flex items-center gap-1 ${isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours) ? "text-orange-700" : "text-slate-400"}`}>
                             {isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours) ? "🕐" : "✉️"}
                             {isCoolingDown(l.lastContactedAt, broadcastSettings.cooldownHours)
                               ? `Cooldown ${cooldownRemaining(l.lastContactedAt, broadcastSettings.cooldownHours)}`
@@ -1058,27 +1057,27 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-5">
+                    <td className="px-4 py-4">
                       <div className="relative inline-block">
                         <select value={statusMap[l.id]} onChange={(e) => updateStatus(l.id, e.target.value as Lead["status"])}
-                          className={`appearance-none pr-7 pl-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold cursor-pointer border outline-none transition-all ${STATUS_COLORS[statusMap[l.id]]}`}>
+                          className={`appearance-none pr-6 pl-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider font-bold cursor-pointer border outline-none transition-all font-mono ${STATUS_COLORS[statusMap[l.id]]}`}>
                           {(Object.keys(STATUS_LABELS) as Lead["status"][]).map((s) => (
-                            <option key={s} value={s} className="bg-[#0d1b35] text-white">{STATUS_LABELS[s]}</option>
+                            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
                           ))}
                         </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none text-current opacity-60" />
+                        <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none text-current opacity-60" />
                       </div>
                     </td>
-                    <td className="px-4 py-5 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <td className="px-4 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
                         <a href={WA(l.whatsapp, l.name, l.businessName)} target="_blank" rel="noopener noreferrer">
-                          <Button size="sm" className="bg-green-600/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-500/30 shadow-none transition-all h-9 px-3 text-xs">
-                            <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> WA
+                          <Button size="sm" className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs transition-all h-8 px-2.5 text-xs font-semibold rounded-xl">
+                            <MessageCircle className="w-3.5 h-3.5 mr-1 text-emerald-600" /> WA
                           </Button>
                         </a>
                         <Link href={`/admin/proposals/new?leadId=${l.id}`}>
-                          <Button size="sm" variant="outline" className="bg-blue-600/10 border-blue-500/20 text-blue-300 hover:text-white hover:bg-blue-600 shadow-none transition-all h-9 px-3 text-xs">
-                            <ScrollText className="w-3.5 h-3.5 mr-1.5" /> Proposal
+                          <Button size="sm" variant="outline" className="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 shadow-2xs transition-all h-8 px-2.5 text-xs font-semibold rounded-xl">
+                            <ScrollText className="w-3.5 h-3.5 mr-1 text-slate-600" /> Proposal
                           </Button>
                         </Link>
                       </div>
@@ -1091,22 +1090,22 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
         </div>
 
         {total > 0 && (
-          <div className="p-5 border-t border-white/10 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
-            <p className="text-xs text-blue-200/40 font-medium">
-              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> prospek
+          <div className="p-4 border-t border-slate-100 bg-slate-50/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-slate-500 font-mono">
+              Menampilkan <span className="text-slate-900 font-semibold">{startIdx}-{endIdx}</span> dari <span className="text-slate-900 font-semibold">{total}</span> prospek
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-end">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-blue-200/40">Tampilkan</span>
+                <span className="text-xs text-slate-500 font-mono">Per halaman:</span>
                 <div className="flex gap-1">
                   {PER_PAGE_OPTIONS.map((n) => (
                     <button
                       key={n}
                       onClick={() => setPerPage(n)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border font-mono ${
                         perPage === n
-                          ? "bg-indigo-600 text-white border-indigo-500/50"
-                          : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white hover:bg-white/10"
+                          ? "bg-[#1E242E] text-white border-slate-800 shadow-xs"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100 shadow-2xs"
                       }`}
                     >
                       {n}
@@ -1115,19 +1114,19 @@ export default function LeadsTable({ broadcastSettings }: { broadcastSettings: B
                 </div>
               </div>
               {/* Server-side pagination controls */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="p-1.5 rounded-lg border border-white/10 text-blue-200/50 hover:text-white disabled:opacity-30 transition-colors"
+                  className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-30 transition-colors shadow-2xs"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-blue-200/60 text-xs px-2">{page} / {totalPages}</span>
+                <span className="text-slate-600 text-xs font-mono px-2">{page} / {totalPages}</span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="p-1.5 rounded-lg border border-white/10 text-blue-200/50 hover:text-white disabled:opacity-30 transition-colors"
+                  className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-30 transition-colors shadow-2xs"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

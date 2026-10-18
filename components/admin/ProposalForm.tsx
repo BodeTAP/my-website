@@ -160,94 +160,90 @@ export default function ProposalForm({
       <div className="xl:col-span-2 space-y-6">
         
         {/* Client info */}
-        <FadeUp delay={0.1} className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] pointer-events-none" />
-          <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2 relative z-10">
-            <span className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-xs ring-1 ring-blue-500/30">1</span>
+        <FadeUp delay={0.1} className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-xs">
+          <h3 className="text-slate-900 font-bold text-lg mb-5 flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">1</span>
             Informasi Klien
           </h3>
-          <div className="space-y-5 relative z-10">
+          <div className="space-y-4">
             <div>
-              <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider mb-2 block">Pilih Dari Leads (Opsional)</label>
+              <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider mb-1.5 block">Pilih Dari Leads (Opsional)</label>
               <div className="relative">
                 <select
                   value={leadId}
                   onChange={e => selectLead(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 appearance-none focus:ring-1 focus:ring-teal-500/50 transition-all cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm focus:bg-white focus:outline-none focus:border-slate-900 appearance-none focus:ring-1 focus:ring-slate-900 transition-all cursor-pointer"
                 >
-                  <option value="" className="bg-[#0a1628]">— Isi Manual —</option>
+                  <option value="" className="bg-white text-slate-500">— Isi Manual —</option>
                   {leads.map(l => (
-                    <option key={l.id} value={l.id} className="bg-[#0a1628]">
+                    <option key={l.id} value={l.id} className="bg-white text-slate-900">
                       {l.businessName} ({l.name})
                     </option>
                   ))}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <UserSearch className="w-4 h-4 text-blue-200/40" />
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <UserSearch className="w-4 h-4 text-slate-400" />
                 </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider block">Nama Kontak *</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider block">Nama Kontak *</label>
                 <input
                   value={clientName} onChange={e => setClientName(e.target.value)}
                   placeholder="Misal: Budi Santoso"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider block">Nama Bisnis *</label>
+              <div className="space-y-1.5">
+                <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider block">Nama Bisnis *</label>
                 <input
                   value={businessName} onChange={e => setBizName(e.target.value)}
                   placeholder="Misal: PT Karya Maju"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all"
                 />
               </div>
             </div>
             
-            <div className="space-y-2">
-              <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider block">WhatsApp</label>
+            <div className="space-y-1.5">
+              <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider block">WhatsApp</label>
               <input
                 value={whatsapp} onChange={e => setWhatsapp(e.target.value)}
                 placeholder="08xxxxxxxxxx"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/20 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all font-mono"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all font-mono"
               />
             </div>
           </div>
         </FadeUp>
 
         {/* Package selector */}
-        <FadeUp delay={0.2} className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] pointer-events-none" />
-          <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2 relative z-10">
-            <span className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs ring-1 ring-emerald-500/30">2</span>
+        <FadeUp delay={0.2} className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-xs">
+          <h3 className="text-slate-900 font-bold text-lg mb-5 flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">2</span>
             Paket Utama
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {Object.entries(PACKAGES).map(([key, pkg]) => {
               const selected = pkgType === key;
               return (
                 <button
                   key={key} onClick={() => selectPackage(key)}
-                  className={`relative text-left p-5 rounded-2xl border transition-all overflow-hidden ${
+                  className={`relative text-left p-4 sm:p-5 rounded-2xl border transition-all ${
                     selected
-                      ? "bg-emerald-600/10 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"
-                      : "bg-black/20 border-white/10 hover:border-white/20 hover:bg-white/5"
+                      ? "bg-[#1E242E] border-slate-900 text-white shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100 hover:border-slate-300"
                   }`}
                 >
                   {selected && (
-                    <div className="absolute top-0 right-0 p-3 bg-gradient-to-bl from-emerald-500/20 to-transparent rounded-bl-2xl">
-                      <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.5)]">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
+                    <div className="absolute top-3 right-3 w-5 h-5 bg-white text-slate-900 rounded-full flex items-center justify-center shadow-xs">
+                      <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   )}
-                  <p className={`font-bold text-[15px] mb-1 ${selected ? "text-emerald-300" : "text-white"}`}>{pkg.label}</p>
-                  <p className="text-blue-200/50 text-xs mb-3 pr-4 leading-relaxed h-8">{pkg.desc}</p>
+                  <p className={`font-bold text-sm mb-1 ${selected ? "text-white" : "text-slate-900"}`}>{pkg.label}</p>
+                  <p className={`text-xs mb-3 pr-4 leading-relaxed ${selected ? "text-slate-300" : "text-slate-500"}`}>{pkg.desc}</p>
                   <div className="mt-auto">
-                    <p className={`font-black text-lg ${selected ? "text-white" : "text-blue-400"}`}>
+                    <p className={`font-bold text-base ${selected ? "text-white" : "text-slate-900"}`}>
                       {key === "custom" ? "Fleksibel" : formatRp(pkg.price)}
                     </p>
                   </div>
@@ -258,30 +254,29 @@ export default function ProposalForm({
         </FadeUp>
 
         {/* Addons */}
-        <FadeUp delay={0.3} className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[80px] pointer-events-none" />
-          <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2 relative z-10">
-            <span className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-xs ring-1 ring-purple-500/30">3</span>
+        <FadeUp delay={0.3} className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-xs">
+          <h3 className="text-slate-900 font-bold text-lg mb-5 flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">3</span>
             Fitur Tambahan (Add-ons)
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {availableAddons.map(addon => {
               const on = addons.has(addon.id);
               return (
                 <button
                   key={addon.id} onClick={() => toggleAddon(addon.id)}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all group ${
-                    on ? "bg-purple-600/15 border-purple-500/40 ring-1 ring-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]" : "bg-black/20 border-white/10 hover:border-white/20 hover:bg-white/5"
+                  className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
+                    on ? "bg-slate-900 text-white border-slate-900 shadow-xs" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-900"
                   }`}
                 >
-                  <div className={`w-6 h-6 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
-                    on ? "bg-purple-500 border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.4)]" : "border-white/20 group-hover:border-white/40"
+                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
+                    on ? "bg-white text-slate-900 border-white" : "border-slate-300 bg-white"
                   }`}>
-                    {on && <Check className="w-4 h-4 text-white" />}
+                    {on && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${on ? "text-white" : "text-blue-200/80 group-hover:text-white transition-colors"}`}>{addon.label}</p>
-                    <p className={`text-xs font-medium mt-0.5 ${on ? "text-purple-300" : "text-blue-400/70"}`}>+{formatRp(addon.price)}</p>
+                    <p className={`text-xs font-semibold truncate ${on ? "text-white" : "text-slate-900"}`}>{addon.label}</p>
+                    <p className={`text-[11px] font-medium mt-0.5 ${on ? "text-slate-300" : "text-slate-500"}`}>+{formatRp(addon.price)}</p>
                   </div>
                 </button>
               );
@@ -289,44 +284,44 @@ export default function ProposalForm({
           </div>
 
           {/* Custom items */}
-          <div className="mt-8 pt-6 border-t border-white/10 relative z-10">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mt-6 pt-5 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-3.5">
               <div>
-                <p className="text-white font-semibold">Item Custom</p>
-                <p className="text-blue-200/40 text-xs mt-0.5">Layanan di luar paket standar.</p>
+                <p className="text-slate-900 font-bold text-sm">Item Custom</p>
+                <p className="text-slate-500 text-xs">Layanan di luar paket standar.</p>
               </div>
-              <Button onClick={addCustomItem} size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl h-9">
-                <Plus className="w-4 h-4 mr-1.5" /> Tambah Item
+              <Button onClick={addCustomItem} size="sm" className="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl h-8 text-xs font-semibold shadow-2xs">
+                <Plus className="w-3.5 h-3.5 mr-1" /> Tambah Item
               </Button>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {customItems.length === 0 && (
-                <div className="text-center py-6 border border-dashed border-white/10 rounded-2xl bg-black/20">
-                  <p className="text-blue-200/30 text-sm">Tidak ada item custom.</p>
+                <div className="text-center py-5 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                  <p className="text-slate-400 text-xs">Tidak ada item custom.</p>
                 </div>
               )}
               {customItems.map((item, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row gap-3 bg-black/20 p-2 sm:p-1.5 rounded-2xl border border-white/10">
+                <div key={idx} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
                   <input
                     value={item.label}
                     onChange={e => updateCustomItem(idx, "label", e.target.value)}
                     placeholder="Nama layanan (misal: Setup Server VPS)"
-                    className="flex-1 bg-transparent border-none px-3 py-2 text-white text-sm placeholder:text-blue-200/30 focus:outline-none focus:ring-1 focus:ring-white/10 rounded-xl"
+                    className="flex-1 bg-white border border-slate-200 px-3 py-2 text-slate-900 text-xs rounded-lg placeholder:text-slate-400 focus:outline-none focus:border-slate-900"
                   />
                   <div className="flex items-center gap-2">
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-200/40 text-sm font-medium">Rp</span>
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-medium">Rp</span>
                       <input
                         type="number"
                         value={item.price || ""}
                         onChange={e => updateCustomItem(idx, "price", parseInt(e.target.value) || 0)}
                         placeholder="Harga"
-                        className="w-full sm:w-36 bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white text-sm placeholder:text-blue-200/30 focus:outline-none focus:border-teal-500/50"
+                        className="w-full sm:w-32 bg-white border border-slate-200 rounded-lg pl-8 pr-2.5 py-2 text-slate-900 text-xs placeholder:text-slate-400 focus:outline-none focus:border-slate-900 font-semibold"
                       />
                     </div>
-                    <button onClick={() => removeCustomItem(idx)} className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors shrink-0">
-                      <Trash2 className="w-4 h-4" />
+                    <button onClick={() => removeCustomItem(idx)} className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shrink-0">
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -336,96 +331,93 @@ export default function ProposalForm({
         </FadeUp>
 
         {/* Details */}
-        <FadeUp delay={0.4} className="glass rounded-3xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] pointer-events-none" />
-          <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2 relative z-10">
-            <span className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 text-xs ring-1 ring-amber-500/30">4</span>
+        <FadeUp delay={0.4} className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-xs">
+          <h3 className="text-slate-900 font-bold text-lg mb-5 flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">4</span>
             Detail Eksekusi
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5 relative z-10">
-            <div className="space-y-2">
-              <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider block">Estimasi Timeline</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="space-y-1.5">
+              <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider block">Estimasi Timeline</label>
               <div className="relative">
                 <select
                   value={timeline} onChange={e => setTimeline(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 appearance-none focus:ring-1 focus:ring-teal-500/50 transition-all cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm focus:bg-white focus:outline-none focus:border-slate-900 appearance-none focus:ring-1 focus:ring-slate-900 transition-all cursor-pointer"
                 >
-                  {TIMELINES.map(t => <option key={t} value={t} className="bg-[#0a1628]">{t}</option>)}
+                  {TIMELINES.map(t => <option key={t} value={t} className="bg-white text-slate-900">{t}</option>)}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <Calendar className="w-4 h-4 text-blue-200/40" />
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <Calendar className="w-4 h-4 text-slate-400" />
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider block">Berlaku Hingga</label>
+            <div className="space-y-1.5">
+              <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider block">Berlaku Hingga</label>
               <input
                 type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all"
               />
             </div>
           </div>
-          <div className="space-y-2 relative z-10">
-            <label className="text-blue-200/60 text-xs font-semibold uppercase tracking-wider block">Syarat & Ketentuan / Catatan (Opsional)</label>
+          <div className="space-y-1.5">
+            <label className="text-slate-900 text-xs font-semibold uppercase tracking-wider block">Syarat & Ketentuan / Catatan (Opsional)</label>
             <textarea
               value={notes} onChange={e => setNotes(e.target.value)} rows={3}
               placeholder="Tambahkan catatan khusus untuk klien di sini..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/30 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 resize-none transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 resize-none transition-all"
             />
           </div>
         </FadeUp>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-red-400 font-bold text-xs">!</span>
+          <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-rose-700 font-bold text-xs">!</span>
             </div>
-            <p className="text-red-400 text-sm font-medium">{error}</p>
+            <p className="text-rose-700 text-xs sm:text-sm font-semibold">{error}</p>
           </div>
         )}
       </div>
 
       {/* ── Right: Summary Fixed Panel ────────────────────────────────────────── */}
       <div className="xl:col-span-1">
-        <div className="glass rounded-3xl p-6 border border-white/5 sticky top-24 shadow-2xl overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-b from-teal-500/10 to-transparent pointer-events-none opacity-50" />
-          
-          <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2 relative z-10">
-            <Receipt className="w-5 h-5 text-teal-400" />
+        <div className="bg-white rounded-2xl p-6 border border-slate-200/90 sticky top-24 shadow-xs">
+          <h3 className="text-slate-900 font-bold text-base mb-5 flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-slate-800" />
             Kalkulasi Biaya
           </h3>
 
-          <div className="space-y-4 mb-6 relative z-10">
-            <div className="flex justify-between items-start text-sm">
+          <div className="space-y-3.5 mb-5">
+            <div className="flex justify-between items-start text-xs sm:text-sm">
               <div className="flex items-start gap-2 max-w-[65%]">
-                <Package className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span className="text-white font-medium leading-snug">{basePkg?.label}</span>
+                <Package className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />
+                <span className="text-slate-900 font-medium leading-snug">{basePkg?.label}</span>
               </div>
-              <span className="text-white font-bold whitespace-nowrap">{formatRp(basePrice)}</span>
+              <span className="text-slate-900 font-bold whitespace-nowrap">{formatRp(basePrice)}</span>
             </div>
             
             {[...addons].map(id => {
               const a = ADDONS.find(x => x.id === id)!;
               return (
-                <div key={id} className="flex justify-between items-start text-sm pl-6">
-                  <span className="text-blue-200/60 leading-snug pr-4">+ {a.label}</span>
-                  <span className="text-purple-300 whitespace-nowrap">+{formatRp(a.price)}</span>
+                <div key={id} className="flex justify-between items-start text-xs pl-6">
+                  <span className="text-slate-500 leading-snug pr-4">+ {a.label}</span>
+                  <span className="text-slate-900 font-semibold whitespace-nowrap">+{formatRp(a.price)}</span>
                 </div>
               );
             })}
             
             {customItems.filter(c => c.label).map((c, i) => (
-              <div key={i} className="flex justify-between items-start text-sm pl-6">
-                <span className="text-blue-200/60 leading-snug pr-4">+ {c.label}</span>
-                <span className="text-purple-300 whitespace-nowrap">+{formatRp(c.price)}</span>
+              <div key={i} className="flex justify-between items-start text-xs pl-6">
+                <span className="text-slate-500 leading-snug pr-4">+ {c.label}</span>
+                <span className="text-slate-900 font-semibold whitespace-nowrap">+{formatRp(c.price)}</span>
               </div>
             ))}
           </div>
 
-          <div className="border-t border-white/10 pt-5 mb-6 relative z-10">
+          <div className="border-t border-slate-100 pt-4 mb-5">
             <div className="flex justify-between items-end">
-              <span className="text-blue-200/60 text-sm font-medium uppercase tracking-wider mb-1">Total Estimasi</span>
-              <span className="text-white font-black text-3xl bg-gradient-to-r from-teal-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-md">
+              <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Total Estimasi</span>
+              <span className="text-slate-900 font-bold text-2xl tracking-tight">
                 {formatRp(total)}
               </span>
             </div>
@@ -434,12 +426,12 @@ export default function ProposalForm({
           <Button
             onClick={handleSave}
             disabled={pending}
-            className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white h-12 rounded-xl font-bold shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_30px_rgba(20,184,166,0.5)] transition-all relative z-10"
+            className="w-full bg-[#1E242E] hover:bg-slate-800 text-white h-11 rounded-xl font-semibold shadow-xs transition-colors"
           >
-            {pending ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Sedang Menyimpan...</> : "Simpan Proposal"}
+            {pending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menyimpan...</> : "Simpan Proposal"}
           </Button>
-          <p className="text-blue-200/30 text-[11px] text-center mt-3 font-medium relative z-10">
-            Anda dapat mengunduh PDF atau membagikan link <br/>setelah proposal tersimpan.
+          <p className="text-slate-400 text-[11px] text-center mt-3 font-medium">
+            Anda dapat mengunduh PDF atau membagikan link setelah proposal tersimpan.
           </p>
         </div>
       </div>

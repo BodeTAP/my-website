@@ -41,7 +41,7 @@ export default function AdminDashboardLoading() {
           </div>
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex justify-between py-3 border-b border-white/5">
+              <div key={i} className="flex justify-between py-3 border-b border-slate-100">
                 <div className="space-y-2">
                   <SkeletonText className="w-32" />
                   <SkeletonText className="w-48" />

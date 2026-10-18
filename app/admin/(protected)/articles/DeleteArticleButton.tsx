@@ -26,7 +26,7 @@ export default function DeleteArticleButton({ id }: { id: string }) {
         size="sm"
         disabled={loading}
         onClick={handleDelete}
-        className="h-8 w-8 p-0 text-red-400/60 hover:text-red-400 hover:bg-red-500/5"
+        className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
       >
         <Trash2 className="w-4 h-4" />
       </Button>

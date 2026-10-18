@@ -12,7 +12,7 @@ export default function TicketsLoading() {
 
       <div className="space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="glass rounded-2xl p-5 border border-white/10 flex items-center justify-between">
+          <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex items-center justify-between">
             <div className="space-y-2 flex-1">
               <SkeletonTitle className="w-1/2" />
               <div className="flex gap-3">

@@ -63,21 +63,21 @@ export default function NewProjectModal({ clients }: { clients: Client[] }) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} className="bg-blue-600 hover:bg-blue-500 text-white">
-        <Plus className="w-4 h-4 mr-2" />
+      <Button onClick={() => setOpen(true)} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white shadow-xs font-semibold">
+        <Plus className="w-4 h-4 mr-1.5" />
         Proyek Baru
       </Button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs" onClick={() => setOpen(false)} />
 
           {/* Modal */}
-          <div className="relative glass rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-white/5">
-              <h2 className="text-white font-bold text-lg">Proyek Baru</h2>
-              <button onClick={() => setOpen(false)} className="text-blue-200/50 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors">
+          <div className="relative bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl border border-slate-200">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <h2 className="text-slate-900 font-bold text-lg tracking-tight">Proyek Baru</h2>
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -85,16 +85,16 @@ export default function NewProjectModal({ clients }: { clients: Client[] }) {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               {/* Klien */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200 text-sm">Klien *</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Klien *</Label>
                 <select
                   required
                   value={form.clientId}
                   onChange={set("clientId")}
-                  className="w-full h-10 rounded-lg px-3 text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-500/50"
+                  className="w-full h-11 rounded-xl px-3.5 text-sm bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all cursor-pointer"
                 >
-                  <option value="" className="bg-[#0d1b35]">— Pilih klien —</option>
+                  <option value="" className="bg-white text-slate-500">— Pilih klien —</option>
                   {clients.map((c) => (
-                    <option key={c.id} value={c.id} className="bg-[#0d1b35]">
+                    <option key={c.id} value={c.id} className="bg-white text-slate-900">
                       {c.businessName} ({c.user.email})
                     </option>
                   ))}
@@ -103,89 +103,89 @@ export default function NewProjectModal({ clients }: { clients: Client[] }) {
 
               {/* Nama proyek */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200 text-sm">Nama Proyek *</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Nama Proyek *</Label>
                 <Input
                   required
                   value={form.name}
                   onChange={set("name")}
                   placeholder="Website Toko Maju Jaya"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+                  className="h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all"
                 />
               </div>
 
               {/* Deskripsi */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200 text-sm">Deskripsi</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Deskripsi</Label>
                 <Textarea
                   value={form.description}
                   onChange={set("description")}
                   rows={2}
                   placeholder="Deskripsi singkat proyek..."
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 resize-none"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all resize-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Status */}
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200 text-sm">Status</Label>
+                  <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Status</Label>
                   <select
                     value={form.status}
                     onChange={set("status")}
-                    className="w-full h-10 rounded-lg px-3 text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-500/50"
+                    className="w-full h-11 rounded-xl px-3.5 text-sm bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all cursor-pointer"
                   >
                     {STATUS_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value} className="bg-[#0d1b35]">{s.label}</option>
+                      <option key={s.value} value={s.value} className="bg-white text-slate-900">{s.label}</option>
                     ))}
                   </select>
                 </div>
 
                 {/* Deadline */}
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200 text-sm">Deadline</Label>
+                  <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Deadline</Label>
                   <Input
                     type="date"
                     value={form.deadline}
                     onChange={set("deadline")}
-                    className="bg-white/5 border-white/10 text-white [color-scheme:dark]"
+                    className="h-11 bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all"
                   />
                 </div>
               </div>
 
               {/* Live URL */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200 text-sm">Live URL</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Live URL</Label>
                 <Input
                   value={form.liveUrl}
                   onChange={set("liveUrl")}
                   placeholder="https://tokobaru.com"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+                  className="h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all font-mono text-xs"
                 />
               </div>
 
               {/* Catatan internal */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200 text-sm">Catatan Internal</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Catatan Internal</Label>
                 <Textarea
                   value={form.notes}
                   onChange={set("notes")}
                   rows={2}
                   placeholder="Catatan untuk tim (tidak terlihat klien)..."
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 resize-none"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all resize-none"
                 />
               </div>
 
               {error && (
-                <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                <p className="text-rose-700 text-xs font-semibold bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2.5">
                   {error}
                 </p>
               )}
 
-              <div className="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-xs">
                   Batal
                 </Button>
-                <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-500 text-white">
+                <Button type="submit" disabled={loading} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white shadow-xs font-semibold">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Buat Proyek"}
                 </Button>
               </div>

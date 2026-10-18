@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 const STATUS_CONFIG = {
-  UNPAID:  { label: "Belum Bayar", cls: "text-amber-300 border-amber-500/20 bg-amber-500/10" },
-  PAID:    { label: "Lunas",       cls: "text-green-300 border-green-500/20 bg-green-500/10" },
-  EXPIRED: { label: "Kadaluarsa", cls: "text-gray-400  border-gray-500/20  bg-gray-500/10"  },
-  FAILED:  { label: "Gagal",       cls: "text-red-400   border-red-500/20   bg-red-500/10"   },
+  UNPAID:  { label: "Belum Bayar", cls: "text-amber-800 border-amber-200 bg-amber-50" },
+  PAID:    { label: "Lunas",       cls: "text-emerald-800 border-emerald-200 bg-emerald-50" },
+  EXPIRED: { label: "Kadaluarsa", cls: "text-slate-600  border-slate-200  bg-slate-100"  },
+  FAILED:  { label: "Gagal",       cls: "text-rose-800   border-rose-200   bg-rose-50"   },
 } as const;
 
 type InvoiceStatus = keyof typeof STATUS_CONFIG;
@@ -74,7 +74,7 @@ export default function InvoiceStatusToggle({
         ref={btnRef}
         onClick={handleOpen}
         disabled={saving}
-        className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all disabled:opacity-50 cursor-pointer ${cfg.cls}`}
+        className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-all disabled:opacity-50 cursor-pointer ${cfg.cls}`}
       >
         {saving && <Loader2 className="w-3 h-3 animate-spin" />}
         {cfg.label}
@@ -90,24 +90,21 @@ export default function InvoiceStatusToggle({
 
           {/* Dropdown — fixed so it escapes overflow:hidden */}
           <div
-            className="fixed z-9999 rounded-xl border border-white/10 shadow-2xl overflow-hidden"
+            className="fixed z-9999 rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden py-1"
             style={{
               top:      pos.top,
               left:     pos.left,
               minWidth: pos.minWidth,
-              background: "rgba(8,18,36,0.85)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
             }}
           >
             {(Object.entries(STATUS_CONFIG) as [InvoiceStatus, typeof STATUS_CONFIG[InvoiceStatus]][]).map(([key, val]) => (
               <button
                 key={key}
                 onClick={() => handleSelect(key)}
-                className={`w-full text-left px-3 py-2.5 text-xs font-medium transition-colors hover:bg-white/8 flex items-center gap-2 whitespace-nowrap ${val.cls.split(" ").find(c => c.startsWith("text-")) ?? ""}`}
+                className="w-full text-left px-3 py-2 text-xs font-medium transition-colors hover:bg-slate-50 flex items-center gap-2 whitespace-nowrap text-slate-700"
               >
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${key === status ? "bg-current" : "opacity-0"}`} />
-                {val.label}
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${key === status ? "bg-slate-900" : "opacity-0"}`} />
+                <span className={val.cls.split(" ").find(c => c.startsWith("text-")) ?? ""}>{val.label}</span>
               </button>
             ))}
           </div>

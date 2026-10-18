@@ -18,28 +18,33 @@ export default async function LeadsPage() {
   ]);
 
   return (
-    <div>
-      <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-indigo-600/20 rounded-full blur-[60px] pointer-events-none" />
-        <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center ring-1 ring-indigo-500/20">
-              <Magnet className="w-5 h-5 text-indigo-400" />
+    <div className="space-y-6">
+      <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+              Pipeline Prospek
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
+              <Magnet className="w-5 h-5 text-slate-700" />
             </div>
             Inbox Leads
           </h1>
-          <p className="text-blue-200/60 text-sm mt-2">
-            Mengelola <strong className="text-indigo-400">{totalLeads} prospek</strong>, dengan {newLeadsCount} prospek baru menunggu.
+          <p className="text-slate-500 text-sm mt-1.5 font-normal">
+            Mengelola <strong className="text-slate-900 font-semibold">{totalLeads} prospek</strong>, dengan <span className="text-emerald-700 font-medium">{newLeadsCount} prospek baru</span> menunggu tindak lanjut.
           </p>
         </div>
-        <Link href="/admin/leads/finder" className="relative z-10">
-          <Button className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+        <Link href="/admin/leads/finder">
+          <Button className="bg-[#1E242E] hover:bg-slate-800 text-white gap-2 shadow-xs rounded-xl h-10 px-4 text-xs font-semibold">
             <MapPin className="w-4 h-4" /> Cari Calon Klien
           </Button>
         </Link>
       </FadeUp>
 
-      <div className="relative z-10">
+      <div>
         <LeadsTable broadcastSettings={broadcastSettings} />
       </div>
     </div>

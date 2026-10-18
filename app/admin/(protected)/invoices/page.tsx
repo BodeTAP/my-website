@@ -73,15 +73,14 @@ export default async function InvoicesPage({
   return (
     <div>
       <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-teal-600/20 rounded-full blur-[60px] pointer-events-none" />
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-teal-500/10 flex items-center justify-center ring-1 ring-teal-500/20">
-              <Receipt className="w-5 h-5 text-teal-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+              <Receipt className="w-5 h-5 text-slate-700" />
             </div>
             Manajemen Invoice
           </h1>
-          <p className="text-blue-200/60 text-sm mt-2">{total} invoice tercatat di sistem.</p>
+          <p className="text-slate-500 text-sm mt-2">{total} invoice tercatat di sistem.</p>
         </div>
         <div className="relative z-10">
           <NewInvoiceModal clients={clients} />
@@ -89,37 +88,37 @@ export default async function InvoicesPage({
       </FadeUp>
 
       <FadeUp delay={0.1}>
-        <div className="glass rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between border border-white/5 relative z-10">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between shadow-xs relative z-10">
           <InvoiceSearch />
           <InvoiceFilter />
         </div>
       </FadeUp>
 
       <FadeUp delay={0.2} className="relative z-10">
-        <div className="glass rounded-3xl overflow-hidden mb-6 border border-white/5 shadow-2xl">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden mb-6">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">No. Invoice</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Klien</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase hidden sm:table-cell">Deskripsi</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Jumlah</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase hidden md:table-cell">Jatuh Tempo</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Status</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Tagih</th>
-                  <th className="text-right px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Aksi</th>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">No. Invoice</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Klien</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase hidden sm:table-cell">Deskripsi</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Jumlah</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase hidden md:table-cell">Jatuh Tempo</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Status</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Tagih</th>
+                  <th className="text-right px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 relative">
+              <tbody className="divide-y divide-slate-100 relative">
                 {invoices.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-16">
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                          <FileWarning className="w-8 h-8 text-blue-200/20" />
+                        <div className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-3 shadow-2xs text-slate-400">
+                          <FileWarning className="w-7 h-7" />
                         </div>
-                        <p className="text-blue-200/50 font-medium">Belum ada invoice. Klik &quot;Invoice Baru&quot; untuk membuat tagihan.</p>
+                        <p className="text-slate-500 font-medium text-sm">Belum ada invoice. Klik &quot;Invoice Baru&quot; untuk membuat tagihan.</p>
                       </div>
                     </td>
                   </tr>
@@ -132,34 +131,34 @@ export default async function InvoicesPage({
                     const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`;
 
                     return (
-                      <tr key={inv.id} className="hover:bg-white/5 transition-colors group">
-                        <td className="px-6 py-5">
-                          <p className="text-blue-200/70 font-mono text-xs group-hover:text-teal-300 transition-colors">{inv.invoiceNo}</p>
+                      <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="px-6 py-4">
+                          <p className="text-slate-700 font-mono text-xs font-semibold">{inv.invoiceNo}</p>
                         </td>
-                        <td className="px-6 py-5">
-                          <p className="text-white font-bold text-sm">{inv.client.businessName}</p>
-                          <p className="text-blue-200/40 text-xs mt-0.5">{inv.client.user.name}</p>
+                        <td className="px-6 py-4">
+                          <p className="text-slate-900 font-semibold text-sm">{inv.client.businessName}</p>
+                          <p className="text-slate-400 text-xs mt-0.5">{inv.client.user.name}</p>
                         </td>
-                        <td className="px-6 py-5 text-blue-200/60 text-xs hidden sm:table-cell max-w-48">
+                        <td className="px-6 py-4 text-slate-500 text-xs hidden sm:table-cell max-w-48">
                           <p className="line-clamp-2">{inv.description ?? "—"}</p>
                         </td>
-                        <td className="px-6 py-5">
-                          <p className="text-white font-semibold text-sm whitespace-nowrap tracking-wide">{formatRupiah(inv.amount)}</p>
+                        <td className="px-6 py-4">
+                          <p className="text-slate-900 font-bold text-sm whitespace-nowrap">{formatRupiah(inv.amount)}</p>
                         </td>
-                        <td className="px-6 py-5 text-blue-200/50 text-xs font-medium hidden md:table-cell whitespace-nowrap">
+                        <td className="px-6 py-4 text-slate-500 text-xs font-medium hidden md:table-cell whitespace-nowrap">
                           {inv.dueDate
                             ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(inv.dueDate))
                             : "—"}
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-4">
                           <InvoiceStatusToggle invoiceId={inv.id} currentStatus={inv.status} />
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-4">
                           {(inv.status === "UNPAID" || inv.status === "EXPIRED" || inv.status === "FAILED") && (
                             <div className="flex items-center gap-2">
                               <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                                <Button size="sm" className="bg-green-600/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-500/30 h-8 px-3 text-xs whitespace-nowrap transition-all shadow-none hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]">
-                                  <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                                <Button size="sm" className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 h-8 px-2.5 text-xs rounded-xl font-medium shadow-2xs whitespace-nowrap transition-colors">
+                                  <MessageCircle className="w-3.5 h-3.5 mr-1 text-emerald-600" />
                                   WA
                                 </Button>
                               </a>
@@ -167,7 +166,7 @@ export default async function InvoicesPage({
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-5 text-right">
+                        <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                             <DownloadInvoiceButton invoiceId={inv.id} invoiceNo={inv.invoiceNo} variant="outline" />
                             <DeleteInvoiceButton invoiceId={inv.id} invoiceNo={inv.invoiceNo} />
@@ -185,9 +184,9 @@ export default async function InvoicesPage({
 
       {total > 0 && (
         <FadeUp delay={0.3}>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10">
-            <p className="text-xs text-blue-200/40 font-medium">
-              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{total}</span> invoice
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:px-6 shadow-xs relative z-10">
+            <p className="text-xs text-slate-500 font-medium">
+              Menampilkan <span className="text-slate-900 font-semibold">{startIdx}-{endIdx}</span> dari <span className="text-slate-900 font-semibold">{total}</span> invoice
             </p>
             <InvoicePagination totalPages={totalPages} />
           </div>

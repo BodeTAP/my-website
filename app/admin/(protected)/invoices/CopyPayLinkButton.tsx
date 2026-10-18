@@ -19,11 +19,11 @@ export default function CopyPayLinkButton({ link }: { link: string }) {
       variant="outline"
       onClick={handleCopy}
       title="Salin link pembayaran"
-      className="h-8 px-2.5 border-white/10 text-blue-400/70 hover:text-blue-300 hover:bg-white/5"
+      className="h-8 px-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-2xs"
     >
       {copied
-        ? <Check className="w-3.5 h-3.5 text-green-400" />
-        : <Link2 className="w-3.5 h-3.5" />}
+        ? <Check className="w-3.5 h-3.5 text-emerald-600" />
+        : <Link2 className="w-3.5 h-3.5 text-slate-500" />}
     </Button>
   );
 }

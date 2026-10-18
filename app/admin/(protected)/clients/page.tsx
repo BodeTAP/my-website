@@ -64,23 +64,28 @@ export default async function AdminClientsPage() {
   }));
 
   return (
-    <div>
-      <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-sky-600/20 rounded-full blur-[60px] pointer-events-none" />
-        <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center ring-1 ring-sky-500/20">
-              <UsersRound className="w-5 h-5 text-sky-400" />
+    <div className="space-y-6">
+      <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+              Direktori Klien
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
+              <UsersRound className="w-5 h-5 text-slate-700" />
             </div>
             Daftar Klien
           </h1>
-          <p className="text-blue-200/60 text-sm mt-2">
-            Kelola direktori kontak klien. Pastikan <strong className="text-sky-400">nomor WhatsApp terisi</strong> agar notifikasi tagihan dapat terkirim otomatis.
+          <p className="text-slate-500 text-sm mt-1.5 font-normal">
+            Kelola direktori kontak klien. Pastikan <strong className="text-slate-900 font-semibold">nomor WhatsApp terisi</strong> agar notifikasi tagihan dapat terkirim otomatis.
           </p>
         </div>
       </FadeUp>
       
-      <div className="relative z-10">
+      <div>
         <ClientsClient clients={clients} />
       </div>
     </div>

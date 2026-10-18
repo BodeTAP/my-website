@@ -34,10 +34,10 @@ export default function ProposalStatusSelect({
     <select
       value={status}
       onChange={e => handleChange(e.target.value)}
-      className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50 cursor-pointer"
+      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 text-sm focus:outline-none focus:bg-white focus:ring-1 focus:ring-slate-900 cursor-pointer"
     >
       {OPTIONS.map(o => (
-        <option key={o.value} value={o.value} className="bg-[#0a1628]">{o.label}</option>
+        <option key={o.value} value={o.value}>{o.label}</option>
       ))}
     </select>
   );

@@ -41,18 +41,18 @@ export default function ProjectStatusSelect({
       value={status}
       onChange={handleChange}
       disabled={saving}
-      className={`text-xs font-medium rounded-lg px-2.5 py-1.5 border bg-transparent focus:outline-none focus:border-blue-500/50 cursor-pointer transition-opacity disabled:opacity-50 ${
+      className={`text-xs font-semibold rounded-lg px-2.5 py-1 border transition-opacity disabled:opacity-50 cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-900 ${
         status === "DRAFTING"
-          ? "border-blue-500/20 bg-blue-500/10 text-blue-300"
+          ? "border-slate-200 bg-slate-100 text-slate-700"
           : status === "DEVELOPMENT"
-          ? "border-amber-500/20 bg-amber-500/10 text-amber-300"
+          ? "border-amber-200 bg-amber-50 text-amber-700"
           : status === "TESTING"
-          ? "border-violet-500/20 bg-violet-500/10 text-violet-300"
-          : "border-green-500/20 bg-green-500/10 text-green-300"
+          ? "border-purple-200 bg-purple-50 text-purple-700"
+          : "border-emerald-200 bg-emerald-50 text-emerald-700"
       }`}
     >
       {STATUS_OPTIONS.map((s) => (
-        <option key={s.value} value={s.value} className="bg-[#0d1b35] text-white">
+        <option key={s.value} value={s.value}>
           {s.label}
         </option>
       ))}

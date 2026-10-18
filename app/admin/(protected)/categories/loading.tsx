@@ -8,7 +8,7 @@ export default function CategoriesLoading() {
         <SkeletonText className="w-48" />
       </div>
 
-      <div className="glass rounded-2xl p-6 border border-white/10 space-y-4 mb-8">
+      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4 mb-8">
         <SkeletonTitle className="w-40 h-6" />
         <div className="flex gap-2">
           <Skeleton className="h-10 flex-1 rounded-xl" />
@@ -18,7 +18,7 @@ export default function CategoriesLoading() {
 
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="glass rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+          <div key={i} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex items-center justify-between">
             <div className="space-y-2 flex-1">
               <SkeletonTitle className="w-1/3 h-5" />
               <SkeletonText className="w-24 h-3" />

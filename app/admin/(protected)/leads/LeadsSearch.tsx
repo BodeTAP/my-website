@@ -35,7 +35,7 @@ export default function LeadsSearch() {
 
   return (
     <div className="relative w-full sm:w-64">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/30" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
       <Input
         value={q}
         onChange={(e) => {
@@ -43,11 +43,11 @@ export default function LeadsSearch() {
           setIsTyping(true);
         }}
         placeholder="Cari nama / email klien..."
-        className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 h-10"
+        className="pl-10 pr-10 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 rounded-xl h-10 transition-all text-sm font-mono"
       />
       {(isTyping || isPending) && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+          <Loader2 className="w-4 h-4 text-slate-700 animate-spin" />
         </div>
       )}
     </div>

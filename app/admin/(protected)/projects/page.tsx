@@ -23,15 +23,14 @@ export default async function ProjectsPage() {
   return (
     <div>
       <FadeUp className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-600/20 rounded-full blur-[60px] pointer-events-none" />
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
-              <Briefcase className="w-5 h-5 text-amber-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+              <Briefcase className="w-5 h-5 text-slate-700" />
             </div>
             Manajemen Proyek
           </h1>
-          <p className="text-blue-200/60 text-sm mt-2">{projects.length} proyek terdaftar di sistem.</p>
+          <p className="text-slate-500 text-sm mt-2">{projects.length} proyek terdaftar di sistem.</p>
         </div>
         <div className="relative z-10">
           <NewProjectModal clients={clients} />
@@ -39,62 +38,62 @@ export default async function ProjectsPage() {
       </FadeUp>
 
       <FadeUp delay={0.2} className="relative z-10">
-        <div className="glass rounded-3xl overflow-hidden mb-6 border border-white/5 shadow-2xl">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden mb-6">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Nama Proyek</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Klien</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Status</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase hidden md:table-cell">Deadline</th>
-                  <th className="text-left px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase hidden lg:table-cell">Live URL</th>
-                  <th className="text-right px-6 py-4 text-blue-200/40 font-medium text-xs tracking-wider uppercase">Aksi</th>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Nama Proyek</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Klien</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Status</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase hidden md:table-cell">Deadline</th>
+                  <th className="text-left px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase hidden lg:table-cell">Live URL</th>
+                  <th className="text-right px-6 py-3.5 text-slate-400 font-semibold text-xs tracking-wider uppercase">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 relative">
+              <tbody className="divide-y divide-slate-100 relative">
                 {projects.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-16">
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                          <FolderKanban className="w-8 h-8 text-blue-200/20" />
+                        <div className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-3 shadow-2xs text-slate-400">
+                          <FolderKanban className="w-7 h-7" />
                         </div>
-                        <p className="text-blue-200/50 font-medium">Belum ada proyek. Klik &quot;Proyek Baru&quot; untuk menambahkan.</p>
+                        <p className="text-slate-500 font-medium text-sm">Belum ada proyek. Klik &quot;Proyek Baru&quot; untuk menambahkan.</p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   projects.map((p) => (
-                    <tr key={p.id} className="hover:bg-white/5 transition-colors group">
-                      <td className="px-6 py-5">
-                        <p className="text-white font-bold group-hover:text-amber-300 transition-colors">{p.name}</p>
+                    <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <p className="text-slate-900 font-semibold group-hover:text-slate-700 transition-colors">{p.name}</p>
                         {p.description && (
-                          <p className="text-blue-200/40 text-xs line-clamp-1 mt-1 max-w-xs">{p.description}</p>
+                          <p className="text-slate-400 text-xs line-clamp-1 mt-0.5 max-w-xs">{p.description}</p>
                         )}
                       </td>
-                      <td className="px-6 py-5">
-                        <p className="text-blue-200/80 text-sm font-semibold">{p.client.businessName}</p>
-                        <p className="text-blue-200/40 text-xs mt-0.5">{p.client.user.email}</p>
+                      <td className="px-6 py-4">
+                        <p className="text-slate-900 text-sm font-medium">{p.client.businessName}</p>
+                        <p className="text-slate-400 text-xs mt-0.5">{p.client.user.email}</p>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-6 py-4">
                         <ProjectStatusSelect projectId={p.id} currentStatus={p.status} />
                       </td>
-                      <td className="px-6 py-5 text-blue-200/50 text-xs font-medium hidden md:table-cell">
+                      <td className="px-6 py-4 text-slate-500 text-xs font-medium hidden md:table-cell">
                         {p.deadline
                           ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(p.deadline))
                           : "—"}
                       </td>
-                      <td className="px-6 py-5 hidden lg:table-cell">
+                      <td className="px-6 py-4 hidden lg:table-cell">
                         {p.liveUrl ? (
-                          <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 hover:underline text-xs truncate max-w-40 block transition-colors">
+                          <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:text-sky-700 hover:underline text-xs truncate max-w-40 block font-medium transition-colors">
                             {p.liveUrl}
                           </a>
                         ) : (
-                          <span className="text-blue-200/30 text-xs">—</span>
+                          <span className="text-slate-300 text-xs">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-5 text-right">
+                      <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                           <EditProjectModal project={p} />
                           <DeleteProjectButton projectId={p.id} projectName={p.name} />

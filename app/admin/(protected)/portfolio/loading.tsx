@@ -13,7 +13,7 @@ export default function PortfolioAdminLoading() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="glass rounded-2xl overflow-hidden border border-white/10 space-y-4 pb-4">
+          <div key={i} className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-xs space-y-4 pb-4">
             <Skeleton className="h-44 rounded-none" />
             <div className="px-5 space-y-3">
               <SkeletonTitle className="w-3/4" />

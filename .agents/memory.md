@@ -61,6 +61,10 @@ user confirms a lasting preference, project decision, or important current state
   - Palette: `#FFFFFF` & `#F8F9FA` canvas with `#1E242E` (Deep Slate) accents and 1px `slate-200` borders.
   - Eliminated all legacy dark cyberpunk blue backgrounds (`bg-[#071225]`, `bg-[#07111f]`, `text-blue-200`, cyan glows) across all portal components and tools.
   - Redesigned: `PortalShell`, `NotificationBell`, `AIHelpWidget`, `dashboard`, `projects`, `invoices`, `hosting`, `credits`, `tickets`, `profile`, `tools` hub, `tools/lead-finder`, `tools/proposal-generator`, `tools/invoice-generator`, `reset-password`, and all loading skeletons.
+- On 2026-10-19, complete redesign of admin panel (`/admin/*`) to "White & Soft Grey + Slate":
+  - Palette: Clean `#FFFFFF` & Soft Grey `#F8F9FA` canvas with Deep Slate `#1E242E` sidebar & accents, and crisp 1px `slate-200` borders.
+  - Eliminated all legacy dark cyberpunk blue/neon glow styling (`glass`, `bg-[#030914]`, `bg-[#071225]`, `border-white/10`, cyan/pink/amber glows) across the entire admin panel.
+  - Redesigned all 18 modules & components: `AdminShell` (with collapsible sidebar & custom user menu), dashboard KPIs, Leads (table, search, pagination, broadcast modals, Google Maps finder), Clients (list & profile editor), Credits (manager & adjust modal), Projects (status select, new/edit/delete modals), Invoices (filters, search, status toggles, new/delete modals, copy pay link), Tickets (thread viewer & reply), Proposals & Proposal Templates, Maintenance, Hosting, Articles (list, new, edit, delete, rich editor), Categories, Portfolio, Testimonials, Team, Tools, Settings (6 tabs, Device Manager, Team Roles & Permissions), Onboarding (generator, brief detail modal, copy link), and all loading skeletons.
 
 ## Current Focus
 

@@ -24,15 +24,15 @@ export default function InvoiceFilter() {
   };
 
   return (
-    <div className="flex flex-wrap gap-1 bg-white/5 p-1 rounded-xl border border-white/5 overflow-x-auto">
+    <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto">
       {FILTERS.map((f) => (
         <button
           key={f.label}
           onClick={() => setFilter(f.value)}
-          className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
             current === f.value
-              ? "bg-teal-600 text-white shadow-lg"
-              : "text-blue-200/40 hover:text-white"
+              ? "bg-white text-slate-900 shadow-xs"
+              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
           }`}
         >
           {f.label}

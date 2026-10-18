@@ -16,8 +16,8 @@ export default async function NewProposalPage({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Buat Proposal Baru</h1>
-        <p className="text-blue-200/50 text-sm mt-1">Pilih paket dan tambahkan add-on sesuai kebutuhan klien.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Buat Proposal Baru</h1>
+        <p className="text-slate-500 text-sm mt-1">Pilih paket dan tambahkan add-on sesuai kebutuhan klien.</p>
       </div>
       <ProposalForm leads={leads} defaultLeadId={leadId} />
     </div>

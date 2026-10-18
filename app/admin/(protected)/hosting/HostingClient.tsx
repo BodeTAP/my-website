@@ -32,17 +32,17 @@ function daysLeft(dateStr: string | null) {
 }
 
 function ExpiryBadge({ dateStr }: { dateStr: string | null }) {
-  if (!dateStr) return <span className="text-white/20 text-xs">—</span>;
+  if (!dateStr) return <span className="text-slate-300 text-xs">—</span>;
   const days = daysLeft(dateStr);
   const date = new Date(dateStr).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-  const color = days === null ? "white/30"
-    : days < 0 ? "red-500" : days <= 7 ? "red-400" : days <= 14 ? "orange-400" : days <= 30 ? "yellow-400" : "green-400";
+  const color = days === null ? "text-slate-400"
+    : days < 0 ? "text-rose-600" : days <= 7 ? "text-rose-600" : days <= 14 ? "text-amber-600" : days <= 30 ? "text-amber-500" : "text-emerald-600";
   return (
     <div className="flex flex-col gap-0.5">
-      <span className={`text-xs font-semibold text-${color}`}>
+      <span className={`text-xs font-semibold ${color}`}>
         {days === null ? "—" : days < 0 ? "Expired" : `${days}h lagi`}
       </span>
-      <span className="text-white/40 text-[10px]">{date}</span>
+      <span className="text-slate-500 text-[10px]">{date}</span>
     </div>
   );
 }
@@ -171,10 +171,10 @@ export default function HostingClient() {
     <div className="space-y-8">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-2xl backdrop-blur-md ${
-          toast.ok ? "bg-green-500/10 border-green-500/30 text-green-300" : "bg-red-500/10 border-red-500/30 text-red-300"
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-xl backdrop-blur-md ${
+          toast.ok ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-rose-50 border-rose-200 text-rose-800"
         }`}>
-          {toast.ok ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
+          {toast.ok ? <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" /> : <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />}
           <span className="text-sm font-medium">{toast.msg}</span>
         </div>
       )}
@@ -182,12 +182,12 @@ export default function HostingClient() {
       <FadeUp>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Manajemen Hosting</h1>
-            <p className="text-blue-200/50 text-sm mt-1">Pantau domain, hosting, dan SSL semua klien dari satu tempat.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Manajemen Hosting</h1>
+            <p className="text-slate-500 text-sm mt-1">Pantau domain, hosting, dan SSL semua klien dari satu tempat.</p>
           </div>
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all"
+            className="flex items-center gap-2 bg-[#1E242E] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-xs transition-colors"
           >
             <Plus className="w-4 h-4" /> Tambah Record
           </button>
@@ -197,18 +197,20 @@ export default function HostingClient() {
       {/* Stats */}
       <StaggerChildren className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Record",  value: stats.total,   icon: Globe,         color: "blue" },
-          { label: "Aktif",         value: stats.active,  icon: CheckCircle,   color: "green" },
-          { label: "Kritis (≤14h)", value: stats.kritis,  icon: AlertTriangle, color: "orange" },
-          { label: "Expired",       value: stats.expired, icon: Clock,         color: "red" },
-        ].map(({ label, value, icon: Icon, color }) => (
+          { label: "Total Record",  value: stats.total,   icon: Globe,         iconBg: "bg-slate-100 text-slate-700" },
+          { label: "Aktif",         value: stats.active,  icon: CheckCircle,   iconBg: "bg-emerald-50 text-emerald-700" },
+          { label: "Kritis (≤14h)", value: stats.kritis,  icon: AlertTriangle, iconBg: "bg-amber-50 text-amber-700" },
+          { label: "Expired",       value: stats.expired, icon: Clock,         iconBg: "bg-rose-50 text-rose-700" },
+        ].map(({ label, value, icon: Icon, iconBg }) => (
           <StaggerItem key={label}>
-            <div className={`glass rounded-2xl p-5 border border-${color}-500/20 bg-${color}-500/5`}>
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-white/50 text-xs font-bold uppercase tracking-wider">{label}</span>
-                <Icon className={`w-4 h-4 text-${color}-400`} />
+                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{label}</span>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}>
+                  <Icon className="w-4 h-4" />
+                </div>
               </div>
-              <p className="text-3xl font-black text-white">{value}</p>
+              <p className="text-3xl font-black text-slate-900 tracking-tight">{value}</p>
             </div>
           </StaggerItem>
         ))}
@@ -218,23 +220,23 @@ export default function HostingClient() {
       <FadeUp delay={0.1}>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Cari domain atau nama klien..."
-              className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-blue-500/50 transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs transition-all"
             />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1.5 p-1 bg-slate-100 border border-slate-200 rounded-xl flex-wrap">
             {["ALL", "ACTIVE", "KRITIS", "EXPIRED", "SUSPENDED"].map(s => (
               <button
                 key={s}
                 onClick={() => setFilterStatus(s)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   filterStatus === s
-                    ? "bg-blue-600/20 border-blue-500/50 text-blue-300"
-                    : "bg-black/30 border-white/10 text-white/50 hover:text-white hover:border-white/20"
+                    ? "bg-white text-slate-900 shadow-xs font-semibold"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
                 }`}
               >
                 {s === "ALL" ? "Semua" : s === "KRITIS" ? "⚠ Kritis" : s}
@@ -246,44 +248,44 @@ export default function HostingClient() {
 
       {/* Table */}
       <FadeUp delay={0.15}>
-        <div className="glass rounded-2xl border border-white/5 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+              <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-20 text-white/30">
-              <Globe className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="font-semibold">Tidak ada record ditemukan</p>
+            <div className="text-center py-20 text-slate-400">
+              <Globe className="w-10 h-10 mx-auto mb-3 opacity-30 text-slate-400" />
+              <p className="font-semibold text-slate-600">Tidak ada record ditemukan</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/5">
+                  <tr className="border-b border-slate-200 bg-slate-50/50">
                     {["Domain / Klien", "Domain Expired", "Hosting Expired", "SSL Expired", "Status", "Aksi"].map(h => (
-                      <th key={h} className="px-5 py-3.5 text-left text-[10px] font-black uppercase tracking-widest text-white/30">{h}</th>
+                      <th key={h} className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-slate-100">
                   {paginatedFiltered.map(r => {
                     const minDays = Math.min(
                       daysLeft(r.domainExpiry)  ?? 999,
                       daysLeft(r.hostingExpiry) ?? 999,
                       daysLeft(r.sslExpiry)     ?? 999
                     );
-                    const rowGlow = minDays <= 7 ? "bg-red-500/5" : minDays <= 14 ? "bg-orange-500/5" : "";
+                    const rowGlow = minDays <= 7 ? "bg-rose-50/40" : minDays <= 14 ? "bg-amber-50/40" : "";
                     return (
-                      <tr key={r.id} className={`hover:bg-white/5 transition-colors ${rowGlow}`}>
+                      <tr key={r.id} className={`hover:bg-slate-50/70 transition-colors ${rowGlow}`}>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                              <Globe className="w-4 h-4 text-blue-400" />
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                              <Globe className="w-4 h-4 text-slate-700" />
                             </div>
                             <div>
-                              <p className="text-white font-bold text-sm">{r.domainName}</p>
-                              <p className="text-white/40 text-xs">{r.client.user.name ?? r.client.user.email}</p>
+                              <p className="text-slate-900 font-semibold text-sm">{r.domainName}</p>
+                              <p className="text-slate-500 text-xs">{r.client.user.name ?? r.client.user.email}</p>
                             </div>
                           </div>
                         </td>
@@ -291,10 +293,10 @@ export default function HostingClient() {
                         <td className="px-5 py-4"><ExpiryBadge dateStr={r.hostingExpiry} /></td>
                         <td className="px-5 py-4"><ExpiryBadge dateStr={r.sslExpiry} /></td>
                         <td className="px-5 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                            r.status === "ACTIVE"    ? "bg-green-500/10 text-green-400 border border-green-500/20" :
-                            r.status === "EXPIRED"   ? "bg-red-500/10 text-red-400 border border-red-500/20" :
-                            "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                            r.status === "ACTIVE"    ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                            r.status === "EXPIRED"   ? "bg-rose-50 text-rose-700 border-rose-200" :
+                            "bg-amber-50 text-amber-700 border-amber-200"
                           }`}>
                             {r.status}
                           </span>
@@ -303,13 +305,13 @@ export default function HostingClient() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => openEdit(r)}
-                              className="p-2 rounded-lg text-blue-400/60 hover:text-blue-300 hover:bg-blue-500/10 transition-all"
+                              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(r.id, r.domainName)}
-                              className="p-2 rounded-lg text-red-400/60 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                              className="p-2 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -327,9 +329,9 @@ export default function HostingClient() {
 
       {totalItems > 0 && (
         <FadeUp delay={0.2}>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 sm:px-6 rounded-2xl border border-white/5 relative z-10 mt-6">
-            <p className="text-xs text-blue-200/40 font-medium">
-              Menampilkan <span className="text-blue-200">{startIdx}-{endIdx}</span> dari <span className="text-blue-200">{totalItems}</span> record
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 sm:px-6 rounded-2xl border border-slate-200 shadow-2xs relative z-10 mt-6">
+            <p className="text-xs text-slate-500 font-medium">
+              Menampilkan <span className="text-slate-900 font-semibold">{startIdx}-{endIdx}</span> dari <span className="text-slate-900 font-semibold">{totalItems}</span> record
             </p>
             <HostingPagination totalPages={totalPages} />
           </div>
@@ -338,25 +340,25 @@ export default function HostingClient() {
 
       {/* Modal Form */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-8 w-full max-w-2xl border border-white/10 bg-[#050b14]/95 shadow-[0_0_80px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-white font-black text-xl">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-2xl border border-slate-200 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-slate-900 font-bold text-xl">
                 {editRecord ? "Edit Record Hosting" : "Tambah Record Hosting"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition-all">
+              <button onClick={() => setShowModal(false)} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-5">
               {/* Klien */}
-              <div className="space-y-2">
-                <label className="text-white/60 text-[11px] font-bold uppercase tracking-widest">Klien *</label>
+              <div className="space-y-1.5">
+                <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Klien *</label>
                 <select
                   value={form.clientId}
                   onChange={e => setForm(f => ({ ...f, clientId: e.target.value }))}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-colors"
                 >
                   <option value="">— Pilih Klien —</option>
                   {clients.map(c => (
@@ -377,8 +379,8 @@ export default function HostingClient() {
               <FormField label="Expired Domain" type="date" value={form.domainExpiry}
                 onChange={v => setForm(f => ({ ...f, domainExpiry: v }))} />
 
-              <div className="border-t border-white/5 pt-5 space-y-4">
-                <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Informasi Hosting</p>
+              <div className="border-t border-slate-100 pt-5 space-y-4">
+                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Informasi Hosting</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField label="Provider Hosting" placeholder="Niagahoster, Vercel..." value={form.hostingProvider}
                     onChange={v => setForm(f => ({ ...f, hostingProvider: v }))} />
@@ -394,12 +396,12 @@ export default function HostingClient() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-white/60 text-[11px] font-bold uppercase tracking-widest">Status</label>
+                <div className="space-y-1.5">
+                  <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">Status</label>
                   <select
                     value={form.status}
                     onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-colors"
                   >
                     <option value="ACTIVE">ACTIVE</option>
                     <option value="EXPIRED">EXPIRED</option>
@@ -412,15 +414,17 @@ export default function HostingClient() {
 
               <div className="flex gap-3 pt-2">
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 font-bold text-sm transition-all"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-semibold text-sm shadow-2xs transition-colors"
                 >
                   Batal
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={pending || !form.clientId || !form.domainName}
-                  className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-2.5 rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-semibold text-sm shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {pending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : editRecord ? "Simpan Perubahan" : "Tambah Record"}
                 </button>
@@ -437,14 +441,14 @@ function FormField({ label, placeholder, value, onChange, type = "text" }: {
   label: string; placeholder?: string; value: string; onChange: (v: string) => void; type?: string;
 }) {
   return (
-    <div className="space-y-2">
-      <label className="text-white/60 text-[11px] font-bold uppercase tracking-widest">{label}</label>
+    <div className="space-y-1.5">
+      <label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all"
+        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-colors"
       />
     </div>
   );

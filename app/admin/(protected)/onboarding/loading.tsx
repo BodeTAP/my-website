@@ -20,7 +20,7 @@ export default function OnboardingLoading() {
 
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="glass rounded-2xl p-5 border border-white/10 flex items-center justify-between">
+          <div key={i} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
             <div className="space-y-2 flex-1">
               <SkeletonTitle className="w-1/3 h-5" />
               <div className="flex gap-3">

@@ -120,14 +120,14 @@ function subscribeSidebarCollapsed(onStoreChange: () => void) {
 const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
   <motion.div layout transition={SIDEBAR_SPRING}>
     <Link
-    href="/admin"
-    className={`flex items-center group ${collapsed ? "justify-center gap-0 px-0" : "gap-3 px-2"}`}
-    aria-label="MFWEB Admin Portal"
+      href="/admin"
+      className={`flex items-center group ${collapsed ? "justify-center gap-0 px-0" : "gap-3 px-2"}`}
+      aria-label="MFWEB Admin Portal"
     >
       <motion.div
         layout
-        className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden shadow-xs transition-shadow"
-        animate={{ rotate: collapsed ? -8 : 0, scale: collapsed ? 0.96 : 1 }}
+        className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xs transition-shadow"
+        animate={{ rotate: collapsed ? -6 : 0, scale: collapsed ? 0.96 : 1 }}
         transition={SIDEBAR_SPRING}
       >
         <BrandLogoIcon size={24} variant="dark" className="shrink-0 relative z-10" />
@@ -143,8 +143,8 @@ const Logo = ({ collapsed = false }: { collapsed?: boolean }) => (
         }}
         transition={SIDEBAR_FADE}
       >
-      <p className="text-white text-base font-black tracking-tight">MF<span className="text-zinc-400">WEB</span></p>
-      <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider mt-0.5">Admin Portal</p>
+        <p className="text-white text-base font-bold tracking-tight">MF<span className="text-slate-400">WEB</span></p>
+        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">Admin Portal</p>
       </motion.div>
     </Link>
   </motion.div>
@@ -174,33 +174,11 @@ function SidebarContent({
   showCollapseToggle = false,
 }: SidebarContentProps) {
   return (
-    <aside className="flex flex-col h-full bg-[#030914]/80 backdrop-blur-xl relative overflow-hidden">
-      {/* Glow Effects */}
-      <motion.div
-        className="absolute top-0 left-0 w-64 h-64 bg-blue-600/5 blur-[100px] pointer-events-none"
-        animate={{ x: collapsed ? -40 : 0, opacity: collapsed ? 0.35 : 1 }}
-        transition={SIDEBAR_SPRING}
-      />
-      <motion.div
-        className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-600/5 blur-[100px] pointer-events-none"
-        animate={{ x: collapsed ? 48 : 0, opacity: collapsed ? 0.35 : 1 }}
-        transition={SIDEBAR_SPRING}
-      />
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={collapsed ? "sidebar-contract" : "sidebar-expand"}
-          className="absolute inset-y-0 -left-16 w-28 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent pointer-events-none"
-          initial={{ x: collapsed ? 230 : 40, opacity: 0 }}
-          animate={{ x: collapsed ? -40 : 290, opacity: [0, 1, 0] }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </AnimatePresence>
-
-      {/* Logo */}
+    <aside className="flex flex-col h-full bg-[#1E242E] text-slate-100 relative overflow-hidden border-r border-slate-800/90">
+      {/* Logo Header */}
       <motion.div
         layout
-        className={`border-b border-white/5 relative z-10 ${collapsed ? "p-4" : "p-6"}`}
+        className={`border-b border-slate-800/90 relative z-10 ${collapsed ? "p-4" : "p-5"}`}
         transition={SIDEBAR_SPRING}
       >
         <motion.div
@@ -212,7 +190,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-9 h-9 items-center justify-center rounded-xl text-blue-200/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_18px_rgba(37,99,235,0.22)]`}
+            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-9 h-9 items-center justify-center rounded-xl text-slate-400 hover:text-white bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 transition-all shadow-xs`}
             aria-label={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
             title={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
           >
@@ -234,13 +212,13 @@ function SidebarContent({
       {/* Nav */}
       <motion.nav
         layout
-        className={`flex-1 py-6 overflow-y-auto custom-scrollbar relative z-10 ${collapsed ? "px-3 space-y-5" : "px-5 space-y-8"}`}
+        className={`flex-1 py-5 overflow-y-auto custom-scrollbar relative z-10 ${collapsed ? "px-2.5 space-y-4" : "px-4 space-y-6"}`}
         transition={SIDEBAR_SPRING}
       >
         {hasNoAccess ? (
           <motion.div
             layout
-            className={`rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300/80 text-xs leading-relaxed ${
+            className={`rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed ${
               collapsed ? "px-2 py-3 text-center" : "px-3 py-4"
             }`}
             title="Anda belum memiliki akses modul. Hubungi Super Admin."
@@ -250,55 +228,49 @@ function SidebarContent({
           </motion.div>
         ) : (
           menuGroups.map((group, i) => (
-            <motion.div key={i} layout className={collapsed ? "space-y-1.5" : "space-y-2"} transition={SIDEBAR_SPRING}>
+            <motion.div key={i} layout className={collapsed ? "space-y-1.5" : "space-y-1"} transition={SIDEBAR_SPRING}>
               <motion.h4
                 aria-hidden={collapsed}
-                className="px-3 text-[10px] font-black uppercase tracking-widest text-blue-200/40 overflow-hidden whitespace-nowrap"
+                className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400/80 overflow-hidden whitespace-nowrap"
                 animate={{
                   opacity: collapsed ? 0 : 1,
                   height: collapsed ? 0 : "auto",
-                  marginBottom: collapsed ? 0 : 12,
+                  marginBottom: collapsed ? 0 : 8,
                   x: collapsed ? -10 : 0,
                 }}
                 transition={SIDEBAR_FADE}
               >
                 {group.title}
               </motion.h4>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {group.items.map((item) => {
                   const active = isActive(item.href);
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`relative flex items-center rounded-xl transition-colors text-sm font-medium group overflow-hidden ${
-                        collapsed ? "justify-center w-12 h-12 mx-auto px-0 py-0" : "justify-between px-3 py-2.5"
+                      className={`relative flex items-center rounded-xl transition-all text-xs font-semibold group overflow-hidden ${
+                        collapsed ? "justify-center w-11 h-11 mx-auto px-0 py-0" : "justify-between px-3 py-2.5"
                       } ${
                         active
-                          ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/10 text-white border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
-                          : "text-blue-200/60 hover:text-white hover:bg-white/5 border border-transparent"
+                          ? "bg-slate-800 text-white border border-slate-700/80 shadow-xs"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/50 border border-transparent"
                       }`}
                       aria-label={collapsed ? item.label : undefined}
                       title={collapsed ? item.label : undefined}
                     >
                       {active && (
-                        <motion.div
-                          layoutId="admin-sidebar-active-orb"
-                          className={`absolute ${collapsed ? "inset-1.5 rounded-lg" : "inset-y-1 left-1 w-1 rounded-full"} bg-blue-400/25`}
-                          transition={SIDEBAR_SPRING}
+                        <div
+                          className={`absolute ${collapsed ? "inset-1 rounded-lg" : "inset-y-1.5 left-1 w-1 rounded-full"} bg-white`}
                         />
                       )}
                       <div className={`relative z-10 flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
-                        <motion.span
-                          layout
-                          animate={{ scale: active ? 1.08 : 1, y: active && collapsed ? -1 : 0 }}
-                          transition={SIDEBAR_SPRING}
-                        >
-                          <item.icon className={`w-4 h-4 shrink-0 transition-colors ${active ? "text-blue-400" : "text-blue-200/40 group-hover:text-blue-300"}`} />
-                        </motion.span>
+                        <span className={`shrink-0 transition-colors ${active ? "text-white" : "text-slate-400 group-hover:text-slate-200"}`}>
+                          <item.icon className="w-4 h-4" />
+                        </span>
                         <motion.span
                           aria-hidden={collapsed}
-                          className="overflow-hidden whitespace-nowrap"
+                          className="overflow-hidden whitespace-nowrap text-xs"
                           animate={{
                             opacity: collapsed ? 0 : 1,
                             width: collapsed ? 0 : "auto",
@@ -312,15 +284,9 @@ function SidebarContent({
                       </div>
                       <AnimatePresence initial={false}>
                         {active && !collapsed && (
-                          <motion.span
-                            className="relative z-10"
-                            initial={{ opacity: 0, x: -6 }}
-                            animate={{ opacity: 0.6, x: 0 }}
-                            exit={{ opacity: 0, x: -6 }}
-                            transition={SIDEBAR_FADE}
-                          >
-                            <ChevronRight className="w-3.5 h-3.5 text-blue-500" />
-                          </motion.span>
+                          <span className="relative z-10 opacity-70">
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                          </span>
                         )}
                       </AnimatePresence>
                     </Link>
@@ -335,15 +301,15 @@ function SidebarContent({
       {/* User / Logout */}
       <motion.div
         layout
-        className={`border-t border-white/5 relative z-10 bg-black/20 ${collapsed ? "p-3" : "p-5"}`}
+        className={`border-t border-slate-800/90 relative z-10 bg-slate-900/40 ${collapsed ? "p-3" : "p-4"}`}
         transition={SIDEBAR_SPRING}
       >
-        <motion.div layout className={`flex items-center py-1 mb-4 ${collapsed ? "justify-center px-0" : "justify-between px-1"}`} transition={SIDEBAR_SPRING}>
-          <div className={`flex items-center ${collapsed ? "w-12 justify-center" : "w-full gap-3"}`}>
+        <motion.div layout className={`flex items-center mb-3 ${collapsed ? "justify-center px-0" : "justify-between px-1"}`} transition={SIDEBAR_SPRING}>
+          <div className={`flex items-center ${collapsed ? "w-11 justify-center" : "w-full gap-3"}`}>
             <motion.div
               layout
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/10 shadow-lg shrink-0"
-              animate={{ scale: collapsed ? 0.95 : 1, boxShadow: collapsed ? "0 0 18px rgba(99,102,241,0.18)" : "0 10px 15px rgba(0,0,0,0.2)" }}
+              className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs"
+              animate={{ scale: collapsed ? 0.95 : 1 }}
               transition={SIDEBAR_SPRING}
             >
               A
@@ -360,15 +326,15 @@ function SidebarContent({
               transition={SIDEBAR_FADE}
             >
               <p className="text-white text-xs font-bold truncate">Admin Utama</p>
-              <p className="text-blue-200/40 text-[10px] truncate mt-0.5">Administrator</p>
+              <p className="text-slate-400 text-[10px] truncate mt-0.5">Administrator</p>
             </motion.div>
           </div>
         </motion.div>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className={`flex items-center justify-center rounded-xl text-red-400/80 hover:text-white bg-red-500/10 hover:bg-red-500/80 border border-red-500/20 transition-all text-sm font-bold group shadow-[0_0_10px_rgba(239,68,68,0)] hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] ${
-            collapsed ? "w-12 h-12 mx-auto px-0 py-0" : "w-full gap-2 px-3 py-3"
+          className={`flex items-center justify-center rounded-xl text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-600/80 border border-rose-500/20 transition-all text-xs font-semibold group shadow-xs ${
+            collapsed ? "w-11 h-11 mx-auto px-0 py-0" : "w-full gap-2 px-3 py-2.5"
           }`}
           aria-label={collapsed ? "Keluar sesi" : undefined}
           title={collapsed ? "Keluar sesi" : undefined}
@@ -420,10 +386,10 @@ export default function AdminShell({ children, allowedModules, isSuperAdmin }: A
   };
 
   return (
-    <div className="min-h-screen flex bg-[#030914]">
+    <div className="min-h-screen flex bg-[#F8F9FA]">
       {/* ── Desktop sidebar ─────────────────────────────── */}
       <div
-        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col z-20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`hidden lg:flex shrink-0 border-r border-slate-800/90 flex-col z-20 shadow-xs overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           sidebarCollapsed ? "w-20" : "w-72"
         }`}
       >
@@ -440,14 +406,14 @@ export default function AdminShell({ children, allowedModules, isSuperAdmin }: A
       {/* ── Mobile drawer backdrop ───────────────────────── */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* ── Mobile drawer ───────────────────────────────── */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 shadow-[10px_0_40px_rgba(0,0,0,0.8)] border-r border-white/10 lg:hidden transition-transform duration-300 ease-[0.22,1,0.36,1] ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 shadow-2xl border-r border-slate-800/90 lg:hidden transition-transform duration-300 ease-[0.22,1,0.36,1] ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -455,7 +421,7 @@ export default function AdminShell({ children, allowedModules, isSuperAdmin }: A
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="p-2.5 rounded-xl text-blue-200/50 hover:text-white bg-black/40 hover:bg-white/10 border border-white/5 transition-all backdrop-blur-md"
+            className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 transition-all shadow-xs"
             aria-label="Tutup menu"
           >
             <X className="w-5 h-5" />
@@ -472,11 +438,11 @@ export default function AdminShell({ children, allowedModules, isSuperAdmin }: A
       {/* ── Main content ────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Mobile top bar */}
-        <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#030914]/90 backdrop-blur-lg border-b border-white/5 sticky top-0 z-30 shadow-lg">
+        <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#1E242E] border-b border-slate-800 sticky top-0 z-30 shadow-xs">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="p-2.5 rounded-xl text-blue-200/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+            className="p-2 rounded-xl text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 transition-all shadow-xs"
             aria-label="Buka menu"
           >
             <Menu className="w-5 h-5" />
@@ -484,7 +450,7 @@ export default function AdminShell({ children, allowedModules, isSuperAdmin }: A
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/admin" className="flex items-center gap-2">
               <BrandLogoIcon size={24} variant="dark" />
-              <span className="text-white font-black tracking-tight">MF<span className="text-zinc-400">WEB</span></span>
+              <span className="text-white font-bold tracking-tight">MF<span className="text-slate-400">WEB</span></span>
             </Link>
           </div>
           <div className="w-10" /> {/* spacer */}

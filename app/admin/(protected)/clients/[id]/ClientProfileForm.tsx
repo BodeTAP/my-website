@@ -116,23 +116,23 @@ export default function ClientProfileForm({ client, adminUsers }: { client: Edit
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#071225] p-5">
-      <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+      <div className="flex flex-col gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-lg font-black text-white">Detail Akun Klien</h2>
-          <p className="mt-1 text-sm text-blue-200/50">Data master untuk kontak, billing, preferensi komunikasi, dan catatan internal.</p>
+          <h2 className="text-lg font-bold text-slate-900">Detail Akun Klien</h2>
+          <p className="mt-1 text-sm text-slate-500">Data master untuk kontak, billing, preferensi komunikasi, dan catatan internal.</p>
         </div>
         <button
           onClick={save}
           disabled={saving || !form.businessName.trim()}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1E242E] px-4 py-2 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Simpan
         </button>
       </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
         <Field label="Nama bisnis" value={form.businessName} onChange={(value) => setField("businessName", value)} required />
         <SelectField
           label="Status klien"
@@ -185,10 +185,10 @@ export default function ClientProfileForm({ client, adminUsers }: { client: Edit
             </div>
             <button
               onClick={markContactedNow}
-              className="mb-0.5 inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-bold text-blue-100 transition-colors hover:bg-white/10"
+              className="mb-0.5 inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50"
               title="Tandai sudah dihubungi sekarang"
             >
-              <Clock className="h-3.5 w-3.5" />
+              <Clock className="h-3.5 w-3.5 text-slate-500" />
               Hari ini
             </button>
           </div>
@@ -199,9 +199,9 @@ export default function ClientProfileForm({ client, adminUsers }: { client: Edit
         <div className="md:col-span-2">
           <Field label="Tags" value={form.tags} onChange={(value) => setField("tags", value)} placeholder="VIP, maintenance, upsell" />
           {tagPreview.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
               {tagPreview.map((tag) => (
-                <span key={tag} className="rounded-md border border-sky-500/20 bg-sky-500/10 px-2 py-1 text-[11px] font-semibold text-sky-200">
+                <span key={tag} className="rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
                   {tag}
                 </span>
               ))}
@@ -209,20 +209,20 @@ export default function ClientProfileForm({ client, adminUsers }: { client: Edit
           )}
         </div>
         <div className="md:col-span-2">
-          <label className="block text-xs font-bold uppercase tracking-wide text-blue-200/45">Catatan internal</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Catatan internal</label>
           <textarea
             value={form.internalNotes}
             onChange={(event) => setField("internalNotes", event.target.value)}
             rows={5}
             placeholder="Konteks penting, preferensi, risiko, atau catatan follow-up."
-            className="mt-2 w-full rounded-lg border border-white/10 bg-black/25 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-blue-200/25 focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/15"
+            className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
           />
         </div>
       </div>
 
       {(saved || error) && (
-        <div className={`mt-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${saved ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-red-500/25 bg-red-500/10 text-red-200"}`}>
-          {saved ? <Check className="h-4 w-4" /> : null}
+        <div className={`mt-5 flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-medium ${saved ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800"}`}>
+          {saved ? <Check className="h-4 w-4 text-emerald-600" /> : null}
           {saved ? "Detail klien tersimpan." : error}
         </div>
       )}
@@ -247,7 +247,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-bold uppercase tracking-wide text-blue-200/45">
+      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
         {label}{required ? " *" : ""}
       </span>
       <input
@@ -255,7 +255,7 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition-colors placeholder:text-blue-200/25 focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/15"
+        className="mt-2 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
       />
     </label>
   );
@@ -274,14 +274,14 @@ function SelectField({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-bold uppercase tracking-wide text-blue-200/45">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-sm text-white outline-none transition-colors focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/15"
+        className="mt-2 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
       >
         {options.map(([optionValue, labelText]) => (
-          <option key={optionValue || "empty"} value={optionValue} className="bg-[#071225]">
+          <option key={optionValue || "empty"} value={optionValue}>
             {labelText}
           </option>
         ))}

@@ -54,59 +54,67 @@ export default async function AdminToolsPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-3 text-2xl font-bold text-white sm:text-3xl">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20">
-              <Wrench className="h-5 w-5 text-blue-300" />
+          <h1 className="flex items-center gap-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-700">
+              <Wrench className="h-5 w-5 text-slate-700" />
             </div>
             Tools
           </h1>
-          <p className="mt-2 text-sm text-blue-200/55">
+          <p className="mt-1.5 text-sm text-slate-500">
             Pusat konfigurasi tool portal: prioritas kredit, status fitur, dan template proposal bawaan.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 px-4 py-3">
-            <Search className="mb-2 h-4 w-4 text-blue-300" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Tools Aktif</p>
-            <p className="font-black text-white">{activeTools}/3</p>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-2xs">
+            <Search className="mb-2 h-4 w-4 text-slate-700" />
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tools Aktif</p>
+            <p className="font-bold text-slate-900 text-sm mt-0.5">{activeTools}/3</p>
           </div>
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-            <Coins className="mb-2 h-4 w-4 text-amber-300" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-amber-200/45">Warning</p>
-            <p className="font-black text-white">{settings.tool_low_credit_warning_threshold}</p>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-2xs">
+            <Coins className="mb-2 h-4 w-4 text-amber-600" />
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Warning</p>
+            <p className="font-bold text-slate-900 text-sm mt-0.5">{settings.tool_low_credit_warning_threshold}</p>
           </div>
-          <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 px-4 py-3">
-            <FileText className="mb-2 h-4 w-4 text-blue-300" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Template</p>
-            <p className="font-black text-white">{templates.length}</p>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-2xs">
+            <FileText className="mb-2 h-4 w-4 text-slate-700" />
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Template</p>
+            <p className="font-bold text-slate-900 text-sm mt-0.5">{templates.length}</p>
           </div>
         </div>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-5">
-          <BarChart3 className="mb-4 h-5 w-5 text-blue-300" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Proposal Dibuat</p>
-          <p className="mt-1 text-2xl font-black text-white">{proposalCount}</p>
-          <p className="mt-1 text-xs font-bold text-blue-200/35">{proposalCreditsUsed} kredit terpakai - semua waktu</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-3 text-slate-700">
+            <BarChart3 className="h-4 w-4" />
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Proposal Dibuat</p>
+          <p className="mt-1 text-2xl font-black text-slate-900 tracking-tight">{proposalCount}</p>
+          <p className="mt-1 text-xs text-slate-400">{proposalCreditsUsed} kredit terpakai - semua waktu</p>
         </div>
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
-          <ReceiptText className="mb-4 h-5 w-5 text-emerald-300" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-200/45">Invoice Dibuat</p>
-          <p className="mt-1 text-2xl font-black text-white">{invoiceStats._count.id}</p>
-          <p className="mt-1 text-xs font-bold text-emerald-200/35">{invoiceCreditsUsed} kredit terpakai - semua waktu</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3 text-emerald-700">
+            <ReceiptText className="h-4 w-4" />
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Invoice Dibuat</p>
+          <p className="mt-1 text-2xl font-black text-slate-900 tracking-tight">{invoiceStats._count.id}</p>
+          <p className="mt-1 text-xs text-slate-400">{invoiceCreditsUsed} kredit terpakai - semua waktu</p>
         </div>
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
-          <Coins className="mb-4 h-5 w-5 text-amber-300" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-amber-200/45">Total Nilai Invoice</p>
-          <p className="mt-1 text-2xl font-black text-white">{formatRupiah(invoiceStats._sum.total ?? 0)}</p>
-          <p className="mt-1 text-xs font-bold text-amber-200/35">Dari Invoice Generator - semua waktu</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center mb-3 text-amber-700">
+            <Coins className="h-4 w-4" />
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total Nilai Invoice</p>
+          <p className="mt-1 text-2xl font-black text-slate-900 tracking-tight">{formatRupiah(invoiceStats._sum.total ?? 0)}</p>
+          <p className="mt-1 text-xs text-slate-400">Dari Invoice Generator - semua waktu</p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-          <FileText className="mb-4 h-5 w-5 text-blue-200/70" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-blue-200/45">Template Proposal</p>
-          <p className="mt-1 text-2xl font-black text-white">{templates.length}</p>
-          <p className="mt-1 text-xs font-bold text-blue-200/35">Template bawaan admin</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-3 text-slate-700">
+            <FileText className="h-4 w-4" />
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Template Proposal</p>
+          <p className="mt-1 text-2xl font-black text-slate-900 tracking-tight">{templates.length}</p>
+          <p className="mt-1 text-xs text-slate-400">Template bawaan admin</p>
         </div>
       </section>
 
@@ -114,8 +122,8 @@ export default async function AdminToolsPage() {
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-xl font-black text-white">Template Proposal</h2>
-          <p className="mt-1 text-sm text-blue-200/45">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">Template Proposal</h2>
+          <p className="mt-1 text-sm text-slate-500">
             Template bawaan yang muncul di Proposal Generator portal klien.
           </p>
         </div>

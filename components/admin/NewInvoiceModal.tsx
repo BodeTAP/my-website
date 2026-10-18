@@ -154,7 +154,7 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
-            className="absolute inset-0 bg-black/60 backdrop-blur-md" 
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs" 
             onClick={() => setOpen(false)} 
           />
           
@@ -163,121 +163,119 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative glass rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl shadow-black/80 border border-white/10"
-            style={{ background: "rgba(5, 11, 20, 0.95)" }}
+            className="relative bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10 relative z-10 bg-white/5">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-transparent" />
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-teal-500/10 ring-1 ring-teal-500/20 flex items-center justify-center">
-                  <Receipt className="w-6 h-6 text-teal-400" />
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 relative z-10 bg-white">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-slate-100 ring-1 ring-slate-200 flex items-center justify-center">
+                  <Receipt className="w-5 h-5 text-slate-800" />
                 </div>
                 <div>
-                  <h2 className="text-white font-bold text-xl leading-none mb-1.5 tracking-tight">Invoice Baru</h2>
-                  <p className="text-blue-200/50 text-sm">Buat tagihan resmi untuk klien.</p>
+                  <h2 className="text-slate-900 font-bold text-xl leading-none mb-1 tracking-tight">Invoice Baru</h2>
+                  <p className="text-slate-500 text-xs sm:text-sm">Buat tagihan resmi untuk klien.</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-blue-200/40 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors">
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Form Body */}
-            <form onSubmit={handleSubmit} className="overflow-y-auto p-6 sm:p-8 flex-1 space-y-6 relative z-10">
+            <form onSubmit={handleSubmit} className="overflow-y-auto p-6 sm:p-8 flex-1 space-y-5 relative z-10">
               
               {/* Klien */}
               <div>
-                <Label className="text-blue-200 font-medium text-sm mb-2 block">Kepada Klien <span className="text-teal-400">*</span></Label>
+                <Label className="text-slate-900 font-semibold text-xs uppercase tracking-wider mb-2 block">Kepada Klien <span className="text-slate-900">*</span></Label>
                 <select required value={clientId} onChange={e => handleClientChange(e.target.value)}
-                  className="w-full h-11 rounded-xl px-4 text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all cursor-pointer"
+                  className="w-full h-11 rounded-xl px-3.5 text-sm bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all cursor-pointer"
                 >
-                  <option value="" className="bg-[#0d1b35]">— Pilih entitas klien —</option>
+                  <option value="" className="bg-white text-slate-500">— Pilih entitas klien —</option>
                   {clients.map(c => (
-                    <option key={c.id} value={c.id} className="bg-[#0d1b35]">
+                    <option key={c.id} value={c.id} className="bg-white text-slate-900">
                       {c.businessName} ({c.user.email})
                     </option>
                   ))}
                 </select>
                 {/* Warning: no phone number */}
                 {selectedClient && !selectedClient.phone && (
-                  <p className="mt-2 text-xs text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <p className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2 flex items-center gap-2">
                     ⚠️ Klien ini belum memiliki nomor WhatsApp — notifikasi WA tidak akan terkirim. Tambahkan nomor di halaman profil klien.
                   </p>
                 )}
               </div>
 
               {/* No + Due */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-blue-200 font-medium text-sm mb-2 block">No. Referensi Invoice <span className="text-teal-400">*</span></Label>
+                  <Label className="text-slate-900 font-semibold text-xs uppercase tracking-wider mb-2 block">No. Referensi Invoice <span className="text-slate-900">*</span></Label>
                   <Input value={invoiceNo} onChange={e => setInvoiceNo(e.target.value)} required
-                    className="bg-white/5 border-white/10 text-white font-mono text-sm h-11 rounded-xl focus:border-teal-500/50 focus:ring-teal-500/50" />
+                    className="bg-slate-50 border-slate-200 text-slate-900 font-mono text-xs sm:text-sm h-11 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900" />
                 </div>
                 <div>
-                  <Label className="text-blue-200 font-medium text-sm mb-2 block">Batas Waktu Pembayaran (Jatuh Tempo)</Label>
+                  <Label className="text-slate-900 font-semibold text-xs uppercase tracking-wider mb-2 block">Jatuh Tempo</Label>
                   <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white [color-scheme:dark] h-11 rounded-xl focus:border-teal-500/50 focus:ring-teal-500/50" />
+                    className="bg-slate-50 border-slate-200 text-slate-900 h-11 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900" />
                 </div>
               </div>
 
               {/* Line items */}
-              <div className="bg-white/[0.02] border border-white/5 p-5 rounded-2xl">
+              <div className="bg-slate-50/70 border border-slate-200 p-5 rounded-2xl">
                 <div className="flex items-start sm:items-center justify-between mb-4 flex-col sm:flex-row gap-3">
-                  <Label className="text-white font-semibold text-base">Rincian Tagihan <span className="text-teal-400">*</span></Label>
+                  <Label className="text-slate-900 font-bold text-sm">Rincian Tagihan <span className="text-slate-900">*</span></Label>
                   <div className="flex items-center gap-2 flex-wrap">
                     <select onChange={e => { const p = PACKAGE_PRESETS[parseInt(e.target.value)]; if (p) applyPackagePreset(p); e.target.value = ""; }}
                       defaultValue=""
-                      className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-teal-300 font-medium focus:outline-none cursor-pointer transition-colors"
+                      className="text-xs bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-semibold focus:outline-none cursor-pointer shadow-2xs"
                     >
-                      <option value="" className="bg-[#0d1b35]">+ Preset Paket</option>
-                      {PACKAGE_PRESETS.map((p, i) => <option key={i} value={i} className="bg-[#0d1b35]">{p.label}</option>)}
+                      <option value="" className="bg-white text-slate-500">+ Preset Paket</option>
+                      {PACKAGE_PRESETS.map((p, i) => <option key={i} value={i} className="bg-white text-slate-900">{p.label}</option>)}
                     </select>
                     <select onChange={e => { const a = ADDON_PRESETS[parseInt(e.target.value)]; if (a) addAddonPreset(a); e.target.value = ""; }}
                       defaultValue=""
-                      className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-teal-300 font-medium focus:outline-none cursor-pointer transition-colors"
+                      className="text-xs bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-semibold focus:outline-none cursor-pointer shadow-2xs"
                     >
-                      <option value="" className="bg-[#0d1b35]">+ Preset Add-on</option>
-                      {ADDON_PRESETS.map((a, i) => <option key={i} value={i} className="bg-[#0d1b35]">{a.label}</option>)}
+                      <option value="" className="bg-white text-slate-500">+ Preset Add-on</option>
+                      {ADDON_PRESETS.map((a, i) => <option key={i} value={i} className="bg-white text-slate-900">{a.label}</option>)}
                     </select>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {lineItems.map((item, i) => (
                     <div key={i} className="flex gap-2 sm:gap-3 items-center group/item">
                       <input
                         value={item.label}
                         onChange={e => updateItem(i, "label", e.target.value)}
                         placeholder="Nama layanan / deskripsi item"
-                        className="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-blue-200/20 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 transition-all"
+                        className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all"
                       />
                       <div className="relative w-28 sm:w-40 shrink-0">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-200/40 text-xs font-medium pointer-events-none">Rp</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-medium pointer-events-none">Rp</span>
                         <input
                           value={displayRp(item.amount)}
                           onChange={e => updateItem(i, "amount", e.target.value)}
                           placeholder="0"
-                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm placeholder:text-blue-200/20 focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 text-right font-medium transition-all"
+                          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 text-right font-semibold transition-all"
                         />
                       </div>
                       <button type="button" onClick={() => removeItem(i)}
                         disabled={lineItems.length === 1}
-                        className="p-2 text-red-400/40 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all shrink-0 disabled:opacity-20 disabled:hover:bg-transparent"
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shrink-0 disabled:opacity-20 disabled:hover:bg-transparent"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
-                  <button type="button" onClick={addItem} className="text-xs text-teal-400 hover:text-teal-300 font-medium transition-colors flex items-center gap-1.5 pt-2 px-1">
+                  <button type="button" onClick={addItem} className="text-xs text-slate-700 hover:text-slate-900 font-semibold transition-colors flex items-center gap-1.5 pt-2 px-1">
                     <Plus className="w-4 h-4" /> Tambah baris item
                   </button>
                 </div>
 
                 {/* Total */}
-                <div className="flex justify-between items-end mt-6 pt-5 border-t border-white/10">
-                  <span className="text-blue-200/50 text-sm font-medium uppercase tracking-wider">Total Tagihan Keseluruhan</span>
-                  <span className="text-white font-black text-2xl tracking-tight">
+                <div className="flex justify-between items-end mt-5 pt-4 border-t border-slate-200">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Tagihan</span>
+                  <span className="text-slate-900 font-bold text-2xl tracking-tight">
                     Rp {total.toLocaleString("id-ID")}
                   </span>
                 </div>
@@ -285,18 +283,18 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
 
               {/* WA message */}
               <div>
-                <Label className="text-blue-200 font-medium text-sm mb-2 block flex items-center gap-2">
+                <Label className="text-slate-900 font-semibold text-xs uppercase tracking-wider mb-2 block flex items-center gap-2">
                   Template Pesan WhatsApp
-                  <span className="text-blue-200/30 text-xs font-normal border border-white/10 px-2 py-0.5 rounded-full bg-white/5">Otomatisasi</span>
+                  <span className="text-slate-500 text-[10px] font-semibold border border-slate-200 px-2 py-0.5 rounded-full bg-white">Otomatisasi</span>
                 </Label>
                 <Textarea value={whatsappMsg} onChange={e => setWhatsappMsg(e.target.value)}
-                  rows={4} placeholder="Pesan pengantar tagihan yang akan dikirim via WhatsApp... (Akan terisi otomatis saat memilih klien)"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/20 resize-none text-sm rounded-xl focus:border-teal-500/50 focus:ring-teal-500/50 leading-relaxed"
+                  rows={3} placeholder="Pesan pengantar tagihan yang akan dikirim via WhatsApp... (Akan terisi otomatis saat memilih klien)"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 resize-none text-sm rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 leading-relaxed"
                 />
               </div>
 
               {error && (
-                <motion.p initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="text-red-400 text-sm font-medium bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
+                <motion.p initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="text-rose-700 text-xs font-semibold bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2.5 flex items-center gap-2">
                   <X className="w-4 h-4 shrink-0" /> {error}
                 </motion.p>
               )}
@@ -304,12 +302,12 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
             </form>
 
             {/* Footer Actions */}
-            <div className="p-6 border-t border-white/10 bg-white/5 flex justify-end gap-3 shrink-0">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="text-blue-200/70 hover:text-white hover:bg-white/10 rounded-xl px-6 h-11">
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-100 px-5 h-10 shadow-xs">
                 Batal
               </Button>
-              <Button type="button" onClick={handleSubmit} disabled={loading} className="bg-teal-600 hover:bg-teal-500 text-white rounded-xl px-8 h-11 font-bold shadow-[0_0_20px_rgba(13,148,136,0.3)] transition-all">
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Terbitkan Invoice"}
+              <Button type="button" onClick={handleSubmit} disabled={loading} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white px-7 h-10 font-semibold shadow-xs transition-colors">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Terbitkan Invoice"}
               </Button>
             </div>
 
@@ -321,8 +319,8 @@ export default function NewInvoiceModal({ clients }: { clients: Client[] }) {
 
   return (
     <>
-      <Button onClick={handleOpen} className="bg-teal-600 hover:bg-teal-500 text-white h-11 px-6 rounded-xl font-semibold shadow-[0_0_20px_rgba(13,148,136,0.3)] hover:shadow-[0_0_30px_rgba(13,148,136,0.5)] transition-all hover:-translate-y-0.5">
-        <Plus className="w-5 h-5 mr-2" />
+      <Button onClick={handleOpen} className="bg-[#1E242E] hover:bg-slate-800 text-white h-11 px-5 rounded-xl font-semibold shadow-xs transition-colors">
+        <Plus className="w-4 h-4 mr-2" />
         Buat Tagihan Baru
       </Button>
 

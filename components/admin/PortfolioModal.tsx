@@ -79,43 +79,43 @@ export default function PortfolioModal({ mode, portfolio }: Props) {
   return (
     <>
       {mode === "create" ? (
-        <Button onClick={() => setOpen(true)} className="bg-blue-600 hover:bg-blue-500 text-white gap-2">
+        <Button onClick={() => setOpen(true)} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white gap-2 shadow-xs font-semibold">
           <Plus className="w-4 h-4" />
           Portofolio Baru
         </Button>
       ) : (
         <Button size="sm" variant="ghost" onClick={() => setOpen(true)}
-          className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-8 px-2">
+          className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 px-2 rounded-lg">
           <Pencil className="w-3.5 h-3.5" />
         </Button>
       )}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="relative glass rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs" onClick={() => setOpen(false)} />
+          <div className="relative bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200 shadow-xl">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/5">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
-                  <Globe className="w-4 h-4 text-teal-400" />
+                <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+                  <Globe className="w-4 h-4 text-slate-700" />
                 </div>
-                <h2 className="text-white font-semibold">
+                <h2 className="text-slate-900 font-bold text-lg tracking-tight">
                   {mode === "create" ? "Tambah Portofolio" : "Edit Portofolio"}
                 </h2>
               </div>
-              <button onClick={() => setOpen(false)} className="text-blue-200/40 hover:text-white transition-colors">
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
               {/* Title */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Judul Proyek *</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Judul Proyek *</Label>
                 <Input value={form.title} onChange={(e) => set("title", e.target.value)}
                   placeholder="Website Toko Online ABC" required
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 h-11" />
               </div>
 
               {/* Cover image */}
@@ -127,39 +127,39 @@ export default function PortfolioModal({ mode, portfolio }: Props) {
 
               {/* Client */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Nama Klien</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Nama Klien</Label>
                 <Input value={form.clientName} onChange={(e) => set("clientName", e.target.value)}
                   placeholder="Toko ABC"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 h-11" />
               </div>
 
               {/* Description */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Deskripsi</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Deskripsi</Label>
                 <Textarea value={form.description} onChange={(e) => set("description", e.target.value)}
                   rows={3} placeholder="Ceritakan tentang proyek ini..."
-                  className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50 resize-none" />
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 resize-none" />
               </div>
 
               {/* Tech stack */}
               <div className="space-y-1.5">
-                <Label className="text-blue-200/70 text-xs">Tech Stack</Label>
+                <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Tech Stack</Label>
                 <div className="flex gap-2">
                   <Input value={techInput} onChange={(e) => setTechInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTech(); } }}
                     placeholder="Next.js, Tailwind, dll."
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50 flex-1" />
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 flex-1 h-11" />
                   <Button type="button" onClick={addTech} variant="outline"
-                    className="border-white/10 text-white hover:bg-white/5 shrink-0">
+                    className="border-slate-200 text-slate-700 bg-white hover:bg-slate-50 rounded-xl shrink-0 h-11 px-4 shadow-xs">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
                 {form.techStack.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {form.techStack.map((t) => (
-                      <span key={t} className="flex items-center gap-1.5 text-xs bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-full px-3 py-1">
+                      <span key={t} className="flex items-center gap-1.5 text-xs bg-slate-100 border border-slate-200 text-slate-700 rounded-full px-3 py-1 font-medium">
                         {t}
-                        <button type="button" onClick={() => removeTech(t)} className="text-blue-400/60 hover:text-red-400 transition-colors">
+                        <button type="button" onClick={() => removeTech(t)} className="text-slate-400 hover:text-rose-600 transition-colors">
                           <X className="w-3 h-3" />
                         </button>
                       </span>
@@ -171,49 +171,49 @@ export default function PortfolioModal({ mode, portfolio }: Props) {
               {/* Live URL & Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">Live URL</Label>
+                  <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Live URL</Label>
                   <Input value={form.liveUrl} onChange={(e) => set("liveUrl", e.target.value)}
-                    placeholder="https://tokooabc.com"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
+                    placeholder="https://tokoabc.com"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 font-mono text-xs h-11" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">Metrics / Hasil</Label>
+                  <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Metrics / Hasil</Label>
                   <Input value={form.metrics} onChange={(e) => set("metrics", e.target.value)}
                     placeholder="Traffic naik 3x dalam 2 bulan"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 focus:border-blue-500/50" />
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 h-11" />
                 </div>
               </div>
 
               {/* Order & Featured */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">Urutan Tampil</Label>
+                  <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Urutan Tampil</Label>
                   <Input type="number" min={0} value={form.order} onChange={(e) => set("order", e.target.value)}
-                    className="bg-white/5 border-white/10 text-white focus:border-blue-500/50" />
+                    className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:border-slate-900 focus:ring-slate-900 h-11" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200/70 text-xs">Featured</Label>
-                  <label className="flex items-center gap-3 h-10 cursor-pointer">
+                  <Label className="text-slate-900 text-xs font-semibold uppercase tracking-wider">Featured</Label>
+                  <label className="flex items-center gap-3 h-11 cursor-pointer">
                     <div
                       onClick={() => set("featured", !form.featured)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${form.featured ? "bg-teal-500" : "bg-white/10"}`}
+                      className={`relative w-10 h-5 rounded-full transition-colors ${form.featured ? "bg-slate-900" : "bg-slate-200"}`}
                     >
                       <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${form.featured ? "translate-x-5" : "translate-x-0.5"}`} />
                     </div>
-                    <span className="text-blue-200/60 text-sm">{form.featured ? "Ya" : "Tidak"}</span>
+                    <span className="text-slate-700 font-medium text-sm">{form.featured ? "Ya" : "Tidak"}</span>
                   </label>
                 </div>
               </div>
 
-              {error && <p className="text-red-400 text-sm">{error}</p>}
+              {error && <p className="text-rose-700 text-xs bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2.5 font-medium">{error}</p>}
 
-              <div className="flex gap-3 pt-2">
-                <Button type="button" variant="ghost" onClick={() => setOpen(false)}
-                  className="flex-1 border border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5">
+              <div className="flex gap-3 pt-3 border-t border-slate-100">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}
+                  className="flex-1 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-xs">
                   Batal
                 </Button>
                 <Button type="submit" disabled={loading}
-                  className="flex-1 bg-teal-600 hover:bg-teal-500 text-white">
+                  className="flex-1 rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white shadow-xs font-semibold">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : mode === "create" ? "Tambahkan" : "Simpan"}
                 </Button>
               </div>

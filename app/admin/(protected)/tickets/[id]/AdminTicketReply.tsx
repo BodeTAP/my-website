@@ -90,15 +90,15 @@ export default function AdminTicketReply({
 
   if (closed) {
     return (
-      <div className="p-6 text-center shrink-0 border-t border-white/10 bg-black/40 backdrop-blur-md">
-        <p className="text-blue-200/40 text-sm mb-4">Percakapan telah diakhiri karena tiket ini ditutup.</p>
+      <div className="p-6 text-center shrink-0 border-t border-slate-100 bg-slate-50/50">
+        <p className="text-slate-500 text-sm mb-4">Percakapan telah diakhiri karena tiket ini ditutup.</p>
         <Button
           size="sm"
           onClick={() => changeStatus("OPEN")}
           disabled={loading}
-          className="bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-colors h-10 px-6 rounded-xl"
+          className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors h-10 px-5 rounded-xl shadow-2xs font-semibold"
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCcw className="w-4 h-4 mr-2 text-pink-400" />}
+          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCcw className="w-4 h-4 mr-2 text-slate-500" />}
           Buka Kembali Tiket
         </Button>
       </div>
@@ -106,19 +106,19 @@ export default function AdminTicketReply({
   }
 
   return (
-    <div className="p-4 sm:p-5 shrink-0 border-t border-white/10 bg-[#070e1a]/95 backdrop-blur-xl relative z-20">
+    <div className="p-4 sm:p-5 shrink-0 border-t border-slate-100 bg-white relative z-20">
       
       {/* Control Bar (Status & AI Draft) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2 bg-black/20 p-1 rounded-xl border border-white/5 w-fit">
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 w-fit">
           {["IN_PROGRESS", "CLOSED"].map((s) => (
             <button
               key={s}
               onClick={() => setStatus(s)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wider uppercase transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold tracking-wider uppercase transition-all ${
                 status === s
-                  ? "bg-pink-600/20 text-pink-400 ring-1 ring-pink-500/30"
-                  : "text-blue-200/40 hover:text-white hover:bg-white/5"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               {s === "IN_PROGRESS" ? "Proses Keluhan" : "Tutup Tiket"}
@@ -130,16 +130,16 @@ export default function AdminTicketReply({
           size="sm"
           onClick={getAiDraft}
           disabled={aiLoading}
-          className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 text-purple-300 border border-purple-500/30 h-8 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.15)] transition-all"
+          className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 h-8 px-3 rounded-xl shadow-2xs font-semibold text-xs transition-colors"
         >
-          {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+          {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5 text-slate-500" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />}
           AI Auto-Draft
         </Button>
       </div>
 
       {/* Message Input Container */}
       <div className="flex items-end gap-3">
-        <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl overflow-hidden focus-within:border-pink-500/50 focus-within:ring-1 focus-within:ring-pink-500/50 transition-all">
+        <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:bg-white focus-within:border-slate-900 focus-within:ring-1 focus-within:ring-slate-900 transition-all">
           <textarea
             ref={textareaRef}
             value={body}
@@ -147,7 +147,7 @@ export default function AdminTicketReply({
             onKeyDown={handleKeyDown}
             rows={1}
             placeholder="Tulis balasan untuk klien... (Tekan Enter untuk kirim)"
-            className="w-full bg-transparent text-white placeholder:text-blue-200/30 resize-none text-sm p-4 outline-none min-h-[52px] max-h-[120px] custom-scrollbar"
+            className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 resize-none text-sm p-3.5 outline-none min-h-[52px] max-h-[120px] custom-scrollbar"
             style={{ overflowY: body.split("\n").length > 3 ? "auto" : "hidden" }}
           />
         </div>
@@ -155,14 +155,14 @@ export default function AdminTicketReply({
         <Button
           disabled={loading || !body.trim()}
           onClick={sendReply}
-          className="bg-pink-600 hover:bg-pink-500 text-white rounded-2xl h-[52px] w-[52px] shrink-0 p-0 shadow-[0_0_20px_rgba(236,72,153,0.3)] hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:hover:bg-pink-600"
+          className="bg-[#1E242E] hover:bg-slate-800 text-white rounded-xl h-[52px] w-[52px] shrink-0 p-0 shadow-xs transition-all disabled:opacity-50"
         >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 ml-1" />}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 ml-0.5" />}
         </Button>
       </div>
 
-      <p className="text-[10px] text-blue-200/30 text-center mt-3">
-        Gunakan <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-blue-200/50">Shift</kbd> + <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-blue-200/50">Enter</kbd> untuk baris baru
+      <p className="text-[11px] text-slate-400 text-center mt-3">
+        Gunakan <kbd className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-mono text-[10px]">Shift</kbd> + <kbd className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-mono text-[10px]">Enter</kbd> untuk baris baru
       </p>
     </div>
   );

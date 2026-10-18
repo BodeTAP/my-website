@@ -20,21 +20,20 @@ export default async function EditArticlePage({ params }: Params) {
     <FadeUp>
       <div className="flex items-center gap-4 mb-8">
         <Link href="/admin/articles">
-          <Button variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-full bg-white/5 text-blue-400 hover:text-blue-300 hover:bg-white/10 transition-colors">
+          <Button variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-            <PenTool className="w-6 h-6 text-violet-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <PenTool className="w-6 h-6 text-slate-700" />
             Edit Artikel
           </h1>
-          <p className="text-blue-200/50 text-sm mt-1">Perbarui konten artikel Anda.</p>
+          <p className="text-slate-500 text-sm mt-1">Perbarui konten artikel Anda.</p>
         </div>
       </div>
       
       <div className="relative">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
         <ArticleEditor article={article} categories={categories} />
       </div>
     </FadeUp>

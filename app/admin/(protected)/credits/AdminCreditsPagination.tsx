@@ -55,10 +55,10 @@ export default function AdminCreditsPagination({
         size="icon"
         disabled={currentPage === 1 || isPending}
         onClick={() => setPage(currentPage - 1)}
-        className="h-8 w-8 border-white/10 text-white hover:bg-white/5 disabled:opacity-30"
+        className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40"
       >
         {isPending && pendingPage === currentPage - 1
-          ? <Loader2 className="w-4 h-4 animate-spin" />
+          ? <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
           : <ChevronLeft className="w-4 h-4" />}
       </Button>
 
@@ -69,16 +69,16 @@ export default function AdminCreditsPagination({
             variant={currentPage === page ? "default" : "outline"}
             disabled={isPending}
             onClick={() => setPage(page)}
-            className={`h-8 w-8 p-0 text-xs ${
+            className={`h-8 w-8 rounded-xl p-0 text-xs font-semibold ${
               currentPage === page
-                ? "bg-amber-500 text-black hover:bg-amber-400"
-                : "border-white/10 text-blue-200/50 hover:text-white hover:bg-white/5"
+                ? "bg-[#1E242E] text-white hover:bg-slate-800 shadow-xs"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs"
             } disabled:opacity-60`}
           >
             {isPending && pendingPage === page ? <Loader2 className="w-3 h-3 animate-spin" /> : page}
           </Button>
         ) : (
-          <span key={index} className="text-blue-200/30 text-xs px-1">...</span>
+          <span key={index} className="text-slate-400 text-xs px-1">...</span>
         ),
       )}
 
@@ -87,10 +87,10 @@ export default function AdminCreditsPagination({
         size="icon"
         disabled={currentPage === totalPages || isPending}
         onClick={() => setPage(currentPage + 1)}
-        className="h-8 w-8 border-white/10 text-white hover:bg-white/5 disabled:opacity-30"
+        className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40"
       >
         {isPending && pendingPage === currentPage + 1
-          ? <Loader2 className="w-4 h-4 animate-spin" />
+          ? <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
           : <ChevronRight className="w-4 h-4" />}
       </Button>
     </div>

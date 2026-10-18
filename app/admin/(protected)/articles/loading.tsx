@@ -13,7 +13,7 @@ export default function ArticlesLoading() {
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center justify-between">
         <Skeleton className="h-10 w-full sm:w-64 rounded-xl" />
-        <div className="flex gap-1 p-1 glass rounded-xl border border-white/5">
+        <div className="flex gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-20 rounded-lg" />
           ))}
@@ -22,7 +22,7 @@ export default function ArticlesLoading() {
 
       <SkeletonTable rows={10} cols={5} />
 
-      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 glass p-4 rounded-2xl border border-white/10">
+      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
         <SkeletonText className="w-48" />
         <div className="flex gap-1.5">
           {Array.from({ length: 5 }).map((_, i) => (

@@ -13,7 +13,7 @@ export default function TestimonialsLoading() {
 
       <div className="space-y-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="glass rounded-2xl p-6 border border-white/10 flex gap-6 items-start">
+          <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex gap-6 items-start">
             <SkeletonAvatar size="md" className="shrink-0" />
             <div className="space-y-3 flex-1">
               <div className="flex justify-between items-start">

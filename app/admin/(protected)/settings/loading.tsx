@@ -8,7 +8,7 @@ export default function SettingsLoading() {
         <SkeletonText className="w-64" />
       </div>
 
-      <div className="glass rounded-2xl p-8 border border-white/10 space-y-8">
+      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-xs space-y-8">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="space-y-3">
             <SkeletonText className="w-32 h-4" />
