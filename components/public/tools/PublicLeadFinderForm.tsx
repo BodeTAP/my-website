@@ -45,7 +45,6 @@ function isLocalLimitReached(limit: number): boolean {
   const usage = getLocalUsage();
   if (!usage) return false;
   if (Date.now() > usage.resetAt) {
-    // Window expired, clear it
     localStorage.removeItem(STORAGE_KEY);
     return false;
   }
@@ -75,7 +74,7 @@ export default function PublicLeadFinderForm({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (loading) return; // guard against double-submit double-charging quota
+      if (loading) return;
       setError(null);
       setResults([]);
       setSearched(false);
@@ -85,7 +84,6 @@ export default function PublicLeadFinderForm({
         return;
       }
 
-      // Client-side soft-limit check
       if (isLocalLimitReached(freemiumLimit)) {
         track("freemium_paywall_shown", { tool: "lead_finder", reason: "local_limit" });
         setShowPaywall(true);
@@ -98,45 +96,66 @@ export default function PublicLeadFinderForm({
         const res = await fetch("/api/tools/lead-finder", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: query.trim(), city: city.trim() }),
+          body: JSON.stringify({
+            query: query.trim(),
+            city: city.trim() || undefined,
+          }),
         });
 
-        if (res.status === 429) {
-          // Rate limited — get the reset window from the API and persist it.
-          const data = await res.json().catch(() => null);
-          const retryAfterMs: number = (data?.retryAfterMs as number) || 24 * 60 * 60 * 1000;
-          const resetAt = Date.now() + retryAfterMs;
-          setLocalUsage({ count: 1, resetAt });
-          track("freemium_paywall_shown", { tool: "lead_finder", reason: "server_limit" });
-          setShowPaywall(true);
-          setLoading(false);
-          return;
+        if (res.status === 403) {
+          const body = (await res.json().catch(() => ({}))) as {
+            code?: string;
+            message?: string;
+          };
+          if (body.code === "FREEMIUM_DISABLED") {
+            setFreemiumDisabled(true);
+            return;
+          }
         }
 
-        if (res.status === 403) {
-          setFreemiumDisabled(true);
-          setLoading(false);
+        if (res.status === 429) {
+          const body = (await res.json().catch(() => ({}))) as {
+            retryAfterMs?: number;
+          };
+          const resetAt =
+            typeof body.retryAfterMs === "number" && body.retryAfterMs > 0
+              ? Date.now() + body.retryAfterMs
+              : Date.now() + 24 * 60 * 60 * 1000;
+          setLocalUsage({ count: freemiumLimit, resetAt });
+          track("freemium_paywall_shown", { tool: "lead_finder", reason: "rate_limit" });
+          setShowPaywall(true);
           return;
         }
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({ error: "Terjadi kesalahan" }));
-          setError(data.error || "Terjadi kesalahan");
-          setLoading(false);
+          const errData = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          setError(errData.error || "Gagal mengambil data lead. Silakan coba lagi.");
           return;
         }
 
-        const data = await res.json();
-        setResults(data.places || []);
+        const data = (await res.json()) as {
+          places?: LeadResult[];
+          results?: LeadResult[];
+        };
+        const items = data.places || data.results || [];
+        setResults(items);
         setSearched(true);
-        track("freemium_lead_search", { results: data.places?.length ?? 0, has_city: !!city.trim() });
 
-        // Update localStorage usage
-        const usage = getLocalUsage();
-        const resetAt = Date.now() + 24 * 60 * 60 * 1000;
-        setLocalUsage({ count: (usage?.count ?? 0) + 1, resetAt: usage?.resetAt ?? resetAt });
+        const current = getLocalUsage();
+        const nextCount = (current?.count || 0) + 1;
+        const resetAt = current?.resetAt || Date.now() + 24 * 60 * 60 * 1000;
+        setLocalUsage({ count: nextCount, resetAt });
+
+        track("freemium_tool_used", {
+          tool: "lead_finder",
+          resultCount: items.length,
+          query: query.trim(),
+          city: city.trim() || undefined,
+        });
       } catch {
-        setError("Gagal menghubungi server. Coba lagi nanti.");
+        setError("Terjadi kesalahan koneksi. Periksa koneksi internet Anda.");
       } finally {
         setLoading(false);
       }
@@ -151,7 +170,7 @@ export default function PublicLeadFinderForm({
       stars.push(
         <Star
           key={i}
-          className={`h-3.5 w-3.5 ${i < full ? "fill-amber-400 text-amber-400" : "text-white/20"}`}
+          className={`h-3.5 w-3.5 ${i < full ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
         />,
       );
     }
@@ -160,16 +179,16 @@ export default function PublicLeadFinderForm({
 
   if (freemiumDisabled) {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-6 text-center">
-        <AlertCircle className="mx-auto mb-3 h-8 w-8 text-amber-400" />
-        <p className="text-sm font-semibold text-amber-200">
-          Free tier tidak tersedia untuk tool ini saat ini.
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-xs">
+        <AlertCircle className="mx-auto mb-3 h-8 w-8 text-slate-700" />
+        <p className="text-sm font-semibold text-slate-900">
+          Uji coba gratis sedang dinonaktifkan sementara.
         </p>
         <a
           href="/portal/register"
-          className="mt-3 inline-block text-sm font-bold text-blue-400 underline underline-offset-2 hover:text-blue-300"
+          className="mt-3 inline-block text-sm font-bold text-slate-900 underline underline-offset-2 hover:text-slate-700"
         >
-          Daftar akun untuk akses penuh →
+          Daftar akun portal untuk akses penuh →
         </a>
       </div>
     );
@@ -177,35 +196,34 @@ export default function PublicLeadFinderForm({
 
   return (
     <>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
-        {/* Free tier notice */}
-        <p className="mb-5 text-center text-xs font-semibold text-blue-200/50">
-          Gratis: 1 pencarian per hari, maks 5 hasil
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <p className="mb-5 text-center text-xs font-mono text-slate-500">
+          Uji Coba Publik: 1 pencarian per hari, maksimal 5 hasil preview
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-[1fr_200px]">
             {/* Keyword input */}
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-200/40" />
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Kata kunci, misal: salon kecantikan"
-                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 text-sm font-medium text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:outline-hidden focus:ring-1 focus:ring-slate-800"
               />
             </div>
 
             {/* City input */}
             <div className="relative">
-              <MapPin className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-200/40" />
+              <MapPin className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="Kota (opsional)"
-                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 text-sm font-medium text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:outline-hidden focus:ring-1 focus:ring-slate-800"
               />
             </div>
           </div>
@@ -214,17 +232,17 @@ export default function PublicLeadFinderForm({
           <button
             type="submit"
             disabled={loading}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 font-bold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-7"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-slate-900 font-medium text-sm text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-7 cursor-pointer"
           >
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Mencari...
+                Mencari prospek...
               </>
             ) : (
               <>
                 <Search className="h-4 w-4" />
-                Cari Leads
+                Cari Prospek Sekarang
               </>
             )}
           </button>
@@ -232,34 +250,34 @@ export default function PublicLeadFinderForm({
 
         {/* Error message */}
         {error && (
-          <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3">
-            <p className="text-sm text-red-300">{error}</p>
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+            <p className="text-xs sm:text-sm text-red-700">{error}</p>
           </div>
         )}
 
         {/* Results */}
         {searched && (
-          <div className="mt-6">
-            <p className="mb-4 text-sm font-semibold text-blue-200/60">
-              {results.length} hasil ditemukan
+          <div className="mt-6 pt-6 border-t border-slate-100">
+            <p className="mb-4 text-xs font-mono font-semibold text-slate-600">
+              {results.length} prospek ditemukan
             </p>
 
             {results.length === 0 ? (
-              <p className="text-sm text-blue-200/40">
-                Tidak ada hasil untuk pencarian ini. Coba kata kunci atau kota lain.
+              <p className="text-sm text-slate-500">
+                Tidak ada hasil untuk pencarian ini. Coba kata kunci yang lebih umum atau periksa penulisan kota.
               </p>
             ) : (
               <div className="grid gap-3">
                 {results.map((lead, idx) => (
                   <div
                     key={`${lead.name}-${idx}`}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] p-4"
+                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs"
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-white">{lead.name}</h4>
+                        <h4 className="font-bold text-slate-900 text-sm sm:text-base">{lead.name}</h4>
                         {lead.address && (
-                          <p className="mt-1 text-xs text-blue-200/45">{lead.address}</p>
+                          <p className="mt-1 text-xs text-slate-500">{lead.address}</p>
                         )}
                       </div>
 
@@ -267,7 +285,7 @@ export default function PublicLeadFinderForm({
                       {lead.rating != null && lead.rating > 0 && (
                         <div className="flex shrink-0 items-center gap-1">
                           {renderStars(lead.rating)}
-                          <span className="ml-1 text-xs font-semibold text-blue-200/50">
+                          <span className="ml-1 text-xs font-mono text-slate-600">
                             {lead.rating.toFixed(1)}
                           </span>
                         </div>
@@ -275,32 +293,29 @@ export default function PublicLeadFinderForm({
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      {/* Category badge */}
                       {lead.category && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
+                        <span className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-mono text-slate-700">
                           <Tag className="h-3 w-3" />
                           {lead.category}
                         </span>
                       )}
 
-                      {/* Phone link */}
                       {lead.phone && (
                         <a
                           href={`tel:${lead.phoneNorm || lead.phone}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-1 text-[10px] font-bold text-blue-300 transition-colors hover:bg-blue-500/20"
+                          className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-mono text-slate-700 transition-colors hover:bg-slate-100"
                         >
                           <Phone className="h-3 w-3" />
                           {lead.phone}
                         </a>
                       )}
 
-                      {/* Website link */}
                       {lead.website && (
                         <a
                           href={lead.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full border border-purple-500/20 bg-purple-500/10 px-2.5 py-1 text-[10px] font-bold text-purple-300 transition-colors hover:bg-purple-500/20"
+                          className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-mono text-slate-700 transition-colors hover:bg-slate-100"
                         >
                           <Globe className="h-3 w-3" />
                           Website

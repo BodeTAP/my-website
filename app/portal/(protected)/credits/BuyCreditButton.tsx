@@ -38,11 +38,11 @@ export default function BuyCreditButton({ packageId }: { packageId: string }) {
       <Button
         type="submit"
         disabled={loading}
-        className="h-10 w-full rounded-xl bg-amber-500 text-xs font-black text-black hover:bg-amber-400"
+        className="h-10 w-full rounded-xl bg-[#1E242E] text-xs font-bold text-white hover:bg-slate-800 shadow-xs transition-colors"
       >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Beli <ArrowRight className="w-4 h-4 ml-1" /></>}
+        {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <>Beli Paket <ArrowRight className="w-3.5 h-3.5 ml-1.5" /></>}
       </Button>
-      {error && <p className="text-red-300 text-xs leading-relaxed">{error}</p>}
+      {error && <p className="text-rose-600 text-xs leading-relaxed font-medium">{error}</p>}
     </form>
   );
 }

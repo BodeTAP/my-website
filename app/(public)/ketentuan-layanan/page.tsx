@@ -13,127 +13,94 @@ const UPDATED = "27 April 2026";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-10">
-          <p className="text-blue-400/60 text-sm mb-2">Terakhir diperbarui: {UPDATED}</p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ketentuan Layanan</h1>
-          <p className="text-blue-200/60 leading-relaxed">
-            Dengan menggunakan layanan MFWEB, Anda menyetujui ketentuan-ketentuan berikut.
-            Harap baca dengan seksama sebelum menggunakan layanan kami.
+    <div className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="w-full bg-[#1E242E] text-white pt-24 pb-16 sm:pt-28 sm:pb-20 border-b border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-px w-8 bg-slate-500" />
+            <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+              Perjanjian & Regulasi
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+            Ketentuan Layanan
+          </h1>
+          <p className="mt-3 text-slate-400 text-xs font-mono">
+            Terakhir diperbarui: {UPDATED}
+          </p>
+          <p className="mt-4 text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+            Perjanjian ini mengatur syarat dan tata cara penggunaan jasa pengembangan website, pemeliharaan sistem, dan portal klien MFWEB.
           </p>
         </div>
+      </section>
 
-        <div className="space-y-8">
+      {/* Content */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <div className="max-w-3xl mx-auto space-y-10 text-slate-600 text-sm sm:text-base leading-relaxed">
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">1. Definisi</h2>
-            <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li><strong className="text-blue-200">&quot;MFWEB&quot;</strong> merujuk pada penyedia layanan pembuatan website.</li>
-              <li><strong className="text-blue-200">&quot;Klien&quot;</strong> merujuk pada individu atau badan usaha yang menggunakan layanan MFWEB.</li>
-              <li><strong className="text-blue-200">&quot;Layanan&quot;</strong> merujuk pada jasa pembuatan website, portal klien, dan layanan terkait.</li>
-              <li><strong className="text-blue-200">&quot;Portal Klien&quot;</strong> merujuk pada platform digital untuk memantau proyek dan invoice.</li>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">1. Definisi Istilah</h2>
+            <ul className="space-y-2 list-disc pl-5 text-slate-600">
+              <li><strong className="text-slate-900">&quot;MFWEB&quot;</strong> merujuk pada entitas penyedia jasa perancangan dan rekayasa web.</li>
+              <li><strong className="text-slate-900">&quot;Klien&quot;</strong> merujuk pada perorangan atau badan usaha yang menjalin kontrak layanan.</li>
+              <li><strong className="text-slate-900">&quot;Layanan&quot;</strong> mencakup perancangan antarmuka, pemrograman, integrasi sistem, dan optimasi SEO.</li>
+              <li><strong className="text-slate-900">&quot;Portal Klien&quot;</strong> merujuk pada dashboard online tempat Klien memantau status proyek, tagihan, dan tools.</li>
             </ul>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">2. Layanan yang Disediakan</h2>
-            <p className="text-blue-200/60 mb-3">MFWEB menyediakan layanan meliputi:</p>
-            <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li>Pembuatan landing page, company profile, dan toko online</li>
-              <li>Optimasi SEO website</li>
-              <li>Hosting dan pengelolaan domain</li>
-              <li>Support teknis dan pemeliharaan website (paket maintenance)</li>
-              <li>Akses portal klien untuk memantau proyek dan invoice</li>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">2. Lingkup Pekerjaan & Batasan</h2>
+            <p className="mb-3">MFWEB melayani pengembangan website sesuai spesifikasi yang disepakati, meliputi:</p>
+            <ul className="space-y-2 list-disc pl-5 text-slate-600">
+              <li>Pembuatan Landing Page berorientasi konversi, Profil Perusahaan, dan Toko Online</li>
+              <li>Konfigurasi arsitektur SEO on-page dan performa kecepatan (Core Web Vitals)</li>
+              <li>Penyediaan domain dan hosting performa tinggi (pada paket yang mencakup)</li>
+              <li>Dukungan pemeliharaan berkala serta pendampingan teknis setelah go-live</li>
             </ul>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">3. Pemesanan dan Pembayaran</h2>
-            <div className="text-blue-200/60 space-y-3">
-              <p>3.1 Pemesanan dianggap sah setelah Klien melakukan pembayaran uang muka (DP) sesuai kesepakatan.</p>
-              <p>3.2 Pembayaran dapat dilakukan melalui transfer bank, QRIS, atau metode pembayaran lain yang tersedia melalui gateway pembayaran kami (Tripay).</p>
-              <p>3.3 Invoice akan dikirimkan melalui portal klien dan/atau email. Pembayaran harus diselesaikan sesuai jatuh tempo yang tercantum.</p>
-              <p>3.4 Keterlambatan pembayaran dapat menyebabkan penundaan pengerjaan proyek.</p>
-              <p>3.5 Biaya yang sudah dibayarkan tidak dapat dikembalikan kecuali jika MFWEB gagal memenuhi kewajibannya.</p>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">3. Mekanisme Pemesanan & Pembayaran</h2>
+            <div className="space-y-3">
+              <p>3.1 Pengerjaan proyek dimulai secara resmi setelah pembayaran uang muka (DP) diterima dan materi dasar divalidasi.</p>
+              <p>3.2 Pembayaran dapat dilakukan melalui saluran resmi gateway Tripay (QRIS, Virtual Account, Transfer Bank).</p>
+              <p>3.3 Invoice tagihan memiliki tanggal jatuh tempo yang tercatat resmi pada sistem portal klien.</p>
+              <p>3.4 Keterlambatan pembayaran termin dapat berdampak pada penyesuaian jadwal rilis atau penundaan sementara akses pengerjaan.</p>
             </div>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">4. Alur Transaksi Pembayaran</h2>
-            <div className="text-blue-200/60 space-y-2">
-              <p className="mb-3">Proses pembayaran layanan MFWEB melalui platform digital berjalan sebagai berikut:</p>
-              <ol className="space-y-2 list-decimal pl-5">
-                <li>Klien menerima invoice melalui portal klien (<code className="text-blue-300 bg-blue-900/30 px-1 rounded">/portal/invoices</code>).</li>
-                <li>Klien memilih metode pembayaran yang tersedia (transfer bank, QRIS, e-wallet, atau gerai retail).</li>
-                <li>Klien melakukan pembayaran sesuai instruksi yang diberikan.</li>
-                <li>Gateway pembayaran (Tripay) memverifikasi pembayaran secara otomatis.</li>
-                <li>Sistem kami menerima notifikasi dari Tripay dan memperbarui status invoice menjadi <strong className="text-green-400">LUNAS</strong>.</li>
-                <li>Klien dan admin menerima konfirmasi pembayaran otomatis.</li>
-              </ol>
-              <p className="mt-3">Konfirmasi pembayaran manual via WhatsApp tetap tersedia sebagai alternatif.</p>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">4. Hak Cipta & Kepemilikan Aset</h2>
+            <div className="space-y-3">
+              <p>4.1 Setelah seluruh kewajiban pembayaran dilunasi penuh, Klien memegang hak milik penuh atas domain, materi konten, dan source code website.</p>
+              <p>4.2 MFWEB berhak mencantumkan hasil karya pada portofolio dan dokumentasi studi kasus, kecuali ada perjanjian tertulis NDA sebelumnya.</p>
+              <p>4.3 Klien menjamin bahwa seluruh aset gambar, teks, dan video yang diserahkan tidak melanggar hak cipta pihak ketiga.</p>
             </div>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">5. Pengerjaan dan Revisi</h2>
-            <div className="text-blue-200/60 space-y-3">
-              <p>5.1 Estimasi waktu pengerjaan diberikan setelah konsultasi dan bergantung pada paket yang dipilih serta kelengkapan materi dari Klien.</p>
-              <p>5.2 Jumlah revisi yang termasuk dalam paket sesuai dengan ketentuan paket yang dipilih (1-3x revisi).</p>
-              <p>5.3 Revisi di luar paket dikenakan biaya tambahan sesuai kesepakatan.</p>
-              <p>5.4 MFWEB berhak menunda pengerjaan jika Klien tidak memberikan materi yang dibutuhkan dalam waktu yang wajar.</p>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">5. Ketentuan Revisi & Garansi</h2>
+            <div className="space-y-3">
+              <p>5.1 Setiap paket layanan mencakup kuota revisi minor (1 hingga 3 kali) yang berfokus pada penyelarasan konten, tata letak, dan visual.</p>
+              <p>5.2 Perubahan besar di luar cakupan brief awal (scope creep) akan dikalkulasikan sebagai add-on pekerjaan terpisah.</p>
+              <p>5.3 Garansi perbaikan bug teknis berlaku selama masa pemeliharaan aktif sejak tanggal serah terima.</p>
             </div>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">6. Kepemilikan dan Hak Cipta</h2>
-            <div className="text-blue-200/60 space-y-3">
-              <p>6.1 Setelah pelunasan pembayaran, Klien memiliki hak penuh atas website yang telah dibuat, termasuk kode dan desain.</p>
-              <p>6.2 MFWEB berhak menampilkan hasil pekerjaan sebagai portofolio, kecuali Klien secara eksplisit meminta sebaliknya.</p>
-              <p>6.3 Klien bertanggung jawab atas legalitas konten yang diunggah ke website.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">7. Tanggung Jawab Terbatas</h2>
-            <div className="text-blue-200/60 space-y-3">
-              <p>7.1 MFWEB tidak bertanggung jawab atas kerugian tidak langsung yang timbul dari penggunaan layanan.</p>
-              <p>7.2 MFWEB tidak menjamin peringkat tertentu di mesin pencari, kecuali dalam paket SEO dengan ketentuan khusus.</p>
-              <p>7.3 Gangguan layanan pihak ketiga (hosting, domain, payment gateway) di luar kendali MFWEB bukan merupakan tanggung jawab MFWEB.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">8. Pembatalan Layanan</h2>
-            <div className="text-blue-200/60 space-y-3">
-              <p>8.1 Klien dapat membatalkan pesanan sebelum pengerjaan dimulai dan mendapatkan pengembalian dana penuh.</p>
-              <p>8.2 Pembatalan setelah pengerjaan dimulai akan dikenakan biaya sesuai persentase pekerjaan yang telah diselesaikan.</p>
-              <p>8.3 MFWEB berhak membatalkan layanan jika Klien melanggar ketentuan ini.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">9. Dukungan dan Kontak</h2>
-            <p className="text-blue-200/60">
-              Untuk pertanyaan, keluhan, atau dukungan teknis, Klien dapat menghubungi kami melalui:{" "}
-              <Link href="/contact" className="text-blue-400 hover:underline">halaman kontak</Link>,
-              {" "}email, atau langsung via WhatsApp di nomor{" "}
-              <a href={`https://wa.me/${WA}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">6. Dukungan Teknis & Layanan Pelanggan</h2>
+            <p>
+              Bantuan teknis dan koordinasi pengerjaan dilayani melalui portal klien atau via WhatsApp di nomor{" "}
+              <a href={`https://wa.me/${WA}`} target="_blank" rel="noopener noreferrer" className="text-slate-900 underline font-semibold">
                 +{WA}
-              </a>.
-              Tim kami siap membantu pada hari kerja Senin–Sabtu, pukul 09.00–21.00 WIB.
+              </a>{" "}
+              pada jam operasional kerja Senin–Sabtu, pukul 09.00–21.00 WIB.
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">10. Hukum yang Berlaku</h2>
-            <p className="text-blue-200/60">
-              Ketentuan ini tunduk pada hukum yang berlaku di Indonesia. Setiap sengketa diselesaikan secara musyawarah. Jika tidak tercapai kesepakatan, penyelesaian dilakukan melalui mekanisme hukum yang berlaku.
-            </p>
-          </section>
+          </div>
 
         </div>
-      </div>
+      </section>
     </div>
   );
 }

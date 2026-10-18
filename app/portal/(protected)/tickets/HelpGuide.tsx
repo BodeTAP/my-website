@@ -108,18 +108,18 @@ export default function HelpGuide() {
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
-      <div className="px-5 py-4 border-b border-white/5 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-          <BookOpen className="w-4 h-4 text-blue-300" />
+    <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+      <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+          <BookOpen className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="text-white font-bold text-sm">Panduan Penggunaan</h3>
-          <p className="text-blue-200/40 text-xs">Klik topik untuk melihat langkah-langkah</p>
+          <h3 className="text-slate-900 font-bold text-sm">Panduan Penggunaan Tools</h3>
+          <p className="text-slate-500 text-xs">Pilih topik di bawah ini untuk melihat panduan langkah demi langkah</p>
         </div>
       </div>
 
-      <div className="divide-y divide-white/5">
+      <div className="divide-y divide-slate-100">
         {guides.map((guide) => {
           const isOpen = openSection === guide.id;
           const Icon = guide.icon;
@@ -129,42 +129,42 @@ export default function HelpGuide() {
               <button
                 type="button"
                 onClick={() => setOpenSection(isOpen ? null : guide.id)}
-                className="w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-white/[0.03] transition-colors"
+                className="w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-blue-300" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 text-slate-700">
+                  <Icon className="w-4 h-4" />
                 </div>
-                <span className="flex-1 text-sm font-medium text-white">{guide.title}</span>
+                <span className="flex-1 text-xs sm:text-sm font-semibold text-slate-800">{guide.title}</span>
                 {isOpen ? (
-                  <ChevronDown className="w-4 h-4 text-blue-200/40" />
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-blue-200/40" />
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 )}
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-1 space-y-4">
+                <div className="px-5 pb-5 pt-1 space-y-4 bg-slate-50/40">
                   {/* Steps */}
-                  <div className="space-y-2 pl-11">
+                  <div className="space-y-2.5 pl-2 sm:pl-11">
                     {guide.steps.map((step, idx) => (
                       <div key={idx} className="flex gap-3">
-                        <span className="shrink-0 w-5 h-5 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[10px] font-bold text-blue-300">
+                        <span className="shrink-0 w-5 h-5 rounded-full bg-[#1E242E] text-white flex items-center justify-center text-[10px] font-bold mt-0.5 shadow-2xs">
                           {idx + 1}
                         </span>
-                        <p className="text-sm text-blue-100/70 leading-relaxed pt-0.5">{step}</p>
+                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pt-0.5">{step}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Tips */}
                   {guide.tips && guide.tips.length > 0 && (
-                    <div className="ml-11 rounded-xl border border-amber-500/15 bg-amber-500/[0.04] px-4 py-3 space-y-1.5">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-amber-300 flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3" />
-                        Tips
+                    <div className="ml-0 sm:ml-11 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 space-y-1.5 shadow-2xs">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        Tips Praktis
                       </p>
                       {guide.tips.map((tip, idx) => (
-                        <p key={idx} className="text-xs text-amber-100/70 leading-relaxed">• {tip}</p>
+                        <p key={idx} className="text-xs text-amber-950 leading-relaxed font-medium">• {tip}</p>
                       ))}
                     </div>
                   )}

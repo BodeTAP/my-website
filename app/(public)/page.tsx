@@ -19,6 +19,7 @@ import PricingSection from "@/components/public/PricingSection";
 import TestimonialCarousel from "@/components/public/TestimonialCarousel";
 import HeroStats from "@/components/public/HeroStats";
 import FAQSection from "@/components/public/FAQSection";
+import PerspectiveLayerShowcase from "@/components/public/PerspectiveLayerShowcase";
 import { FadeUp, FadeIn, StaggerChildren, StaggerItem, ScaleIn, HoverCard } from "@/components/public/motion";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings, SITE_SETTING_DEFAULTS } from "@/lib/siteSettings";
@@ -383,140 +384,93 @@ export default async function HomePage() {
   };
 
   return (
-    <div className="relative overflow-x-clip bg-[#020611]">
-      {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section className="relative px-4 pb-16 pt-28 sm:px-6 lg:px-8 lg:pb-20">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1fr)]">
-          <div className="relative">
-          <FadeUp delay={0}>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-1.5 text-xs font-semibold text-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-              Untuk bisnis lokal yang ingin lebih mudah ditemukan dan dihubungi
-            </div>
-          </FadeUp>
+    <div className="relative overflow-x-clip bg-white text-slate-900 selection:bg-slate-200">
+      {/* ── Hero: Full Width Deep Slate Section ── */}
+      <section className="relative w-full bg-[#1E242E] text-white pt-28 pb-16 sm:pt-32 sm:pb-24 lg:pt-36 lg:pb-28 border-b border-slate-800 overflow-hidden">
+        {/* Subtle architectural ambient gradient */}
+        <div className="absolute inset-0 bg-radial-[at_top_right] from-slate-800/50 via-slate-900/20 to-transparent pointer-events-none" />
 
-          <h1 className="max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
-            {heroHeadline}
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-blue-100/68 sm:text-lg">
-            {heroSubheadline}
-          </p>
-
-          <FadeUp delay={0.2}>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href={settings.home_primary_cta_url || settings.brand_consultation_url || "/contact"}>
-                <Button size="lg" className="h-12 rounded-lg bg-blue-600 px-6 text-white shadow-none hover:bg-blue-500">
-                  {primaryCtaLabel}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href={secondaryCtaUrl || "/tools"}>
-                <Button size="lg" variant="outline" className="h-12 rounded-lg border-white/12 bg-white/[0.03] px-6 text-white hover:bg-white/[0.07]">
-                  {secondaryCtaLabel}
-                </Button>
-              </Link>
-            </div>
-          </FadeUp>
-
-          <div className="mt-10">
-            <HeroStats stats={heroStats} />
-          </div>
-          </div>
-
-          <FadeUp delay={0.25} className="relative">
-            <div className="rounded-2xl border border-white/10 bg-[#071225] p-4 shadow-2xl shadow-black/25">
-              <div className="mb-4 flex items-center justify-between border-b border-white/8 pb-4">
-                <div>
-                  <p className="text-sm font-bold text-white">Alur jualan MFWEB</p>
-                  <p className="text-xs text-blue-100/45">Dari ditemukan sampai tagihan siap kirim</p>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+            <div>
+              <FadeUp delay={0}>
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="h-px w-8 bg-slate-500" />
+                  <span className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-[0.22em] text-slate-300">
+                    Studio Desain Web & Sistem Penjualan
+                  </span>
                 </div>
-                <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-200">
-                  Workflow nyata
-                </span>
-              </div>
+              </FadeUp>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  {
-                    icon: Globe,
-                    label: "Website ditemukan",
-                    text: "Calon pelanggan melihat layanan, lokasi, portofolio, dan CTA WhatsApp.",
-                    meta: "Google + mobile",
-                  },
-                  {
-                    icon: Search,
-                    label: "Lead dicari",
-                    text: "Lead Finder membantu menemukan bisnis lokal yang bisa diprospek.",
-                    meta: "Data prospek",
-                  },
-                  {
-                    icon: FileText,
-                    label: "Proposal dikirim",
-                    text: "Penawaran dibuat sebagai PDF dengan brand kit yang konsisten.",
-                    meta: "PDF siap kirim",
-                  },
-                  {
-                    icon: ReceiptText,
-                    label: "Invoice selesai",
-                    text: "Tagihan dibuat rapi, termasuk item layanan dan PPN 11% opsional.",
-                    meta: "Dokumen final",
-                  },
-                ].map((item) => {
-                  const Icon = item.icon;
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight text-white">
+                {heroHeadline}
+              </h1>
 
-                  return (
-                    <div key={item.label} className="rounded-xl border border-white/8 bg-white/[0.035] p-4">
-                      <div className="mb-4 flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/12 text-blue-200">
-                          <Icon className="h-5 w-5" />
-                        </span>
-                        <div>
-                          <p className="font-bold text-white">{item.label}</p>
-                          <p className="text-xs text-blue-100/40">{item.meta}</p>
-                        </div>
-                      </div>
-                      <p className="text-sm leading-relaxed text-blue-100/58">{item.text}</p>
-                    </div>
-                  );
-                })}
+              <p className="mt-6 text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl font-normal">
+                {heroSubheadline}
+              </p>
+
+              <FadeUp delay={0.2}>
+                <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+                  <Link href={settings.home_primary_cta_url || settings.brand_consultation_url || "/contact"}>
+                    <Button size="lg" className="h-12 rounded-full bg-white px-7 text-slate-950 font-bold hover:bg-slate-100 shadow-sm text-sm">
+                      {primaryCtaLabel}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link href={secondaryCtaUrl || "/tools"}>
+                    <Button size="lg" variant="outline" className="h-12 rounded-full border-slate-600 bg-transparent px-6 text-white hover:bg-slate-800 font-semibold text-sm">
+                      {secondaryCtaLabel}
+                    </Button>
+                  </Link>
+                </div>
+              </FadeUp>
+
+              <div className="mt-12 pt-8 border-t border-slate-700/60 max-w-md">
+                <HeroStats stats={heroStats} />
               </div>
             </div>
-          </FadeUp>
+
+            {/* 3D Perspective Layer Showcase */}
+            <div className="relative flex items-center justify-center">
+              <PerspectiveLayerShowcase />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#06111f] px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+      {/* ── Tools Bisnis (Alur Jualan Digital) ───────────────────── */}
+      <section className="border-y border-slate-200/80 bg-[#F8F9FA] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.85fr_1.15fr] items-center">
           <FadeUp>
-            <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-emerald-200/75">
-              Tools bisnis
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+              Pipeline Bisnis
             </p>
-            <h2 className="max-w-xl text-3xl font-bold leading-tight text-white sm:text-4xl">
-              Bukan cuma punya website. Alur jualannya juga dibantu.
+            <h2 className="text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl tracking-tight">
+              Bukan cuma punya website. Alur closing juga dibantu.
             </h2>
-            <p className="mt-5 max-w-xl leading-relaxed text-blue-100/58">
+            <p className="mt-4 text-slate-600 leading-relaxed text-base">
               Banyak bisnis sudah punya nomor WhatsApp dan Instagram, tapi masih
-              bingung mencari prospek, menulis penawaran, dan membuat dokumen
-              tagihan yang rapi. Tiga tools ini dibuat untuk bagian itu.
+              bingung mencari prospek potensial, menyusun proposal penawaran, serta membuat dokumen
+              invoice yang terpercaya. Tiga tools ini dirancang khusus untuk memotong proses manual tersebut.
               {welcomeCredits > 0 ? ` Akun baru mendapat ${welcomeCredits} kredit gratis untuk mencoba alurnya.` : ""}
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
               <Link href="/tools">
-                <Button className="rounded-lg bg-blue-600 text-white hover:bg-blue-500">
+                <Button className="rounded-full bg-slate-900 text-white hover:bg-slate-800 px-6 font-semibold text-xs sm:text-sm h-11">
                   Buka Katalog Tools
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/portal/register">
-                <Button variant="outline" className="rounded-lg border-white/10 text-white hover:bg-white/[0.06]">
+                <Button variant="outline" className="rounded-full border-slate-300 bg-white text-slate-800 hover:bg-slate-100 px-6 font-semibold text-xs sm:text-sm h-11">
                   Masuk Portal Klien
                 </Button>
               </Link>
             </div>
           </FadeUp>
 
-          <div className="divide-y divide-white/8 rounded-2xl border border-white/10 bg-white/[0.025]">
+          <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
             {toolCards.map((tool, index) => {
               const Icon = tool.icon;
 
@@ -524,26 +478,26 @@ export default async function HomePage() {
                 <Link
                   key={tool.href}
                   href={tool.href}
-                  className="group grid gap-4 p-5 transition-colors hover:bg-white/[0.035] sm:grid-cols-[auto_1fr_auto]"
+                  className="group grid gap-4 p-6 transition-colors hover:bg-slate-50 sm:grid-cols-[auto_1fr_auto] items-center"
                 >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-500/12 text-blue-200">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-800 transition-colors group-hover:bg-slate-900 group-hover:text-white">
                     <Icon className="h-5 w-5" />
                   </span>
                   <span>
-                    <span className="mb-1 flex items-center gap-3">
-                      <span className="text-sm font-semibold text-blue-100/45">
+                    <span className="mb-1.5 flex items-center gap-2.5">
+                      <span className="text-xs font-mono font-bold text-slate-400">
                         0{index + 1}
                       </span>
-                      <span className="font-bold text-white">{tool.title}</span>
-                      <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-black uppercase text-amber-200">
+                      <span className="font-bold text-slate-900 text-base">{tool.title}</span>
+                      <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-700">
                         {tool.badge}
                       </span>
                     </span>
-                    <span className="block text-sm leading-relaxed text-blue-100/56">
+                    <span className="block text-xs sm:text-sm leading-relaxed text-slate-600">
                       {tool.desc}
                     </span>
                   </span>
-                  <span className="hidden items-center text-blue-200 transition-transform group-hover:translate-x-1 sm:flex">
+                  <span className="hidden items-center text-slate-400 transition-all group-hover:translate-x-1 group-hover:text-slate-900 sm:flex">
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </Link>
@@ -554,48 +508,48 @@ export default async function HomePage() {
       </section>
 
       {/* ── Domain Checker ───────────────────────────────────────── */}
-      <section className="border-b border-white/8 bg-[#020611] py-16 px-4 sm:px-6 lg:px-8">
+      <section className="border-b border-slate-200/80 bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <FadeUp className="text-center mb-10" delay={0.2}>
-            <h2 className="text-3xl font-bold text-white mb-3">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
               Domain Bisnis Anda Masih Tersedia?
             </h2>
-            <p className="text-blue-200/60 max-w-xl mx-auto">
-              Cek sekarang sebelum didaftar orang lain. Domain yang bagus adalah aset bisnis Anda.
+            <p className="text-slate-600 max-w-xl mx-auto text-base">
+              Cek sekarang sebelum didaftarkan pihak lain. Domain yang tepat adalah identitas paten aset digital bisnis Anda.
             </p>
           </FadeUp>
-          <FadeIn delay={0.4}>
+          <FadeIn delay={0.3}>
             <DomainChecker />
           </FadeIn>
         </div>
       </section>
 
-      {/* ── Benefits ─────────────────────────────────────────────── */}
-      <section className="border-y border-white/8 bg-[#071225] px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.7fr_1.3fr]">
+      {/* ── Benefits (Yang Sering Terjadi) ────────────────────────── */}
+      <section className="border-b border-slate-200/80 bg-[#F8F9FA] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.75fr_1.25fr] items-center">
           <FadeUp>
-            <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-blue-200/55">
-              Yang sering terjadi
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+              Evaluasi Masalah
             </p>
-            <h2 className="text-3xl font-bold leading-tight text-white sm:text-4xl">
+            <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight text-slate-900 tracking-tight">
               Calon pelanggan sudah mencari. Pertanyaannya: mereka menemukan siapa?
             </h2>
-            <p className="mt-5 leading-relaxed text-blue-100/58">
-              Website yang baik bukan pajangan. Ia menjawab pertanyaan dasar
-              calon pelanggan sebelum mereka menekan tombol WhatsApp.
+            <p className="mt-4 leading-relaxed text-slate-600 text-base">
+              Website yang baik bukan sekadar pajangan digital. Ia menjawab keraguan mendasar
+              calon pelanggan dan membangun rasa percaya sebelum mereka menekan tombol WhatsApp.
             </p>
           </FadeUp>
 
           <StaggerChildren className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {benefits.map((b) => (
               <StaggerItem key={b.title}>
-                <div className="flex h-full gap-4 rounded-xl border border-white/8 bg-white/[0.025] p-5">
-                  <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-blue-200">
-                    <b.icon className="h-4 w-4" />
+                <div className="flex h-full gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all">
+                  <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800">
+                    <b.icon className="h-5 w-5" />
                   </span>
                   <div>
-                    <h3 className="font-semibold text-white">{b.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-blue-100/55">{b.desc}</p>
+                    <h3 className="font-bold text-slate-900 text-base">{b.title}</h3>
+                    <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">{b.desc}</p>
                   </div>
                 </div>
               </StaggerItem>
@@ -609,16 +563,20 @@ export default async function HomePage() {
 
       {/* ── Portfolio Preview ─────────────────────────────────────── */}
       {portfolios.length > 0 && (
-        <section className="border-y border-white/8 bg-[#071225] py-20 px-4 sm:px-6 lg:px-8">
+        <section className="border-t border-slate-200/80 bg-[#F8F9FA] py-24 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <FadeUp className="flex items-end justify-between mb-12">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Hasil Kerja Terbaru</h2>
-                <p className="text-blue-200/60">Website yang telah kami bangun untuk klien</p>
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                  Studi Kasus Nyata
+                </p>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                  Hasil Kerja Terbaru
+                </h2>
               </div>
               <Link href="/portfolio">
-                <Button variant="ghost" className="text-blue-400 hover:text-blue-300 hover:bg-white/5">
-                  Lihat semua <ArrowRight className="ml-1 w-4 h-4" />
+                <Button variant="ghost" className="rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-200/70 font-bold text-xs sm:text-sm">
+                  Lihat Semua <ArrowRight className="ml-1.5 w-4 h-4" />
                 </Button>
               </Link>
             </FadeUp>
@@ -628,22 +586,22 @@ export default async function HomePage() {
                 <StaggerItem key={p.slug}>
                   <HoverCard className="h-full">
                     <Link href={`/portfolio/${p.slug}`}>
-                      <div className="h-full cursor-pointer overflow-hidden rounded-xl border border-white/8 bg-white/[0.025] transition-colors duration-300 group hover:border-blue-400/25">
-                        <div className="h-48 bg-linear-to-br from-blue-900/50 to-blue-800/20 overflow-hidden">
+                      <div className="h-full cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-all duration-300 group hover:border-slate-300 hover:shadow-md">
+                        <div className="h-48 bg-slate-100 overflow-hidden relative">
                           {p.coverImage ? (
                             <Image src={p.coverImage} alt={p.title} width={400} height={192} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Globe className="w-16 h-16 text-blue-500/30" />
+                              <Globe className="w-12 h-12 text-slate-300" />
                             </div>
                           )}
                         </div>
-                        <div className="p-5">
-                          <h3 className="text-white font-semibold mb-1 group-hover:text-blue-300 transition-colors">{p.title}</h3>
-                          {p.description && <p className="text-blue-200/50 text-sm line-clamp-2 mb-3">{p.description}</p>}
+                        <div className="p-6">
+                          <h3 className="text-slate-900 font-bold text-base mb-1.5 group-hover:text-slate-700 transition-colors">{p.title}</h3>
+                          {p.description && <p className="text-slate-500 text-xs sm:text-sm line-clamp-2 mb-3.5 leading-relaxed">{p.description}</p>}
                           {p.metrics && (
-                            <div className="flex items-center gap-1.5 text-green-400 text-xs font-medium">
-                              <TrendingUp className="w-3.5 h-3.5" />
+                            <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-semibold">
+                              <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
                               {p.metrics}
                             </div>
                           )}
@@ -660,16 +618,20 @@ export default async function HomePage() {
 
       {/* ── Blog Preview ──────────────────────────────────────────── */}
       {articles.length > 0 && (
-        <section className="bg-[#020611] py-20 px-4 sm:px-6 lg:px-8">
+        <section className="border-t border-slate-200/80 bg-white py-24 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <FadeUp className="flex items-end justify-between mb-12">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Tips & Artikel</h2>
-                <p className="text-blue-200/60">Panduan praktis untuk mengelola website dan pemasaran online</p>
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                  Wawasan Bisnis
+                </p>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                  Tips & Artikel Praktis
+                </h2>
               </div>
               <Link href="/blog">
-                <Button variant="ghost" className="text-blue-400 hover:text-blue-300 hover:bg-white/5">
-                  Baca semua <ArrowRight className="ml-1 w-4 h-4" />
+                <Button variant="ghost" className="rounded-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 font-bold text-xs sm:text-sm">
+                  Baca Semua <ArrowRight className="ml-1.5 w-4 h-4" />
                 </Button>
               </Link>
             </FadeUp>
@@ -679,24 +641,24 @@ export default async function HomePage() {
                 <StaggerItem key={a.slug}>
                   <HoverCard className="h-full">
                     <Link href={`/blog/${a.slug}`}>
-                      <article className="flex h-full flex-col overflow-hidden rounded-xl border border-white/8 bg-white/[0.025] transition-colors duration-300 group hover:border-blue-400/25">
-                        <div className="h-40 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
+                      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition-all duration-300 group hover:border-slate-300 hover:shadow-md">
+                        <div className="h-44 bg-slate-100 overflow-hidden relative">
                           {a.coverImage ? (
-                            <Image src={a.coverImage} alt={a.title} width={400} height={160} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <Image src={a.coverImage} alt={a.title} width={400} height={176} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-blue-300/25">
-                              <FileText className="h-12 w-12" />
+                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <FileText className="h-10 w-10" />
                             </div>
                           )}
                         </div>
-                        <div className="p-5 flex-1 flex flex-col">
+                        <div className="p-6 flex-1 flex flex-col">
                           {a.publishedAt && (
-                            <p className="text-blue-400/60 text-xs mb-2">
+                            <p className="text-slate-400 text-xs font-medium mb-2">
                               {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(a.publishedAt))}
                             </p>
                           )}
-                          <h3 className="text-white font-semibold mb-2 line-clamp-2 group-hover:text-blue-300 transition-colors flex-1">{a.title}</h3>
-                          {a.excerpt && <p className="text-blue-200/50 text-sm line-clamp-2">{a.excerpt}</p>}
+                          <h3 className="text-slate-900 font-bold text-base mb-2 line-clamp-2 group-hover:text-slate-700 transition-colors flex-1">{a.title}</h3>
+                          {a.excerpt && <p className="text-slate-500 text-xs sm:text-sm line-clamp-2 leading-relaxed">{a.excerpt}</p>}
                         </div>
                       </article>
                     </Link>
@@ -709,14 +671,17 @@ export default async function HomePage() {
       )}
 
       {/* ── Testimonials ──────────────────────────────────────────── */}
-      <section className="border-y border-white/8 bg-[#071225] py-20 px-4 sm:px-6 lg:px-8">
+      <section className="border-t border-slate-200/80 bg-[#F8F9FA] py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <FadeUp className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+          <FadeUp className="text-center mb-12">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+              Ulasan Klien
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
               Apa Kata Klien Kami
             </h2>
-            <p className="text-blue-200/60 max-w-md mx-auto">
-              Lebih dari 50 bisnis lokal telah mempercayakan kehadiran digital mereka kepada kami.
+            <p className="text-slate-600 max-w-md mx-auto text-base">
+              Puluhan bisnis lokal mempercayakan identitas digital dan alur penjualan mereka kepada kami.
             </p>
           </FadeUp>
           <FadeIn delay={0.1}>
@@ -728,60 +693,63 @@ export default async function HomePage() {
       {/* ── FAQ ──────────────────────────────────────────────────── */}
       <FAQSection />
 
-      {/* ── Final CTA ─────────────────────────────────────────────── */}
-      <section className="bg-[#020611] py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+      {/* ── Final CTA: Deep Slate Hero Block ──────────────────────── */}
+      <section className="bg-white py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-200/80">
+        <div className="max-w-5xl mx-auto">
           <ScaleIn>
-            <div className="rounded-2xl border border-white/10 bg-[#071225] p-8 sm:p-10">
-              <FadeUp>
-                <h2 className="max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl">
-                  Mau mulai dari website, lead, atau dokumen penawaran?
-                </h2>
-              </FadeUp>
+            <div className="relative rounded-3xl bg-[#1E242E] text-white p-8 sm:p-14 border border-slate-700/60 shadow-2xl overflow-hidden">
+              {/* Subtle ambient light */}
+              <div className="absolute inset-0 bg-radial-[at_top_right] from-slate-800/40 via-transparent to-transparent pointer-events-none" />
 
-              <FadeUp delay={0.1}>
-                <p className="mt-4 max-w-2xl text-blue-100/58 leading-relaxed">
-                  Ceritakan kondisi bisnis Anda sekarang. Kami bantu pilih langkah
-                  paling masuk akal: landing page, company profile, SEO, atau tools
-                  untuk mempercepat proses sales.
-                </p>
-              </FadeUp>
+              <div className="relative z-10">
+                <FadeUp>
+                  <h2 className="max-w-2xl text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-white">
+                    Mau mulai dari website, lead, atau dokumen penawaran?
+                  </h2>
+                </FadeUp>
 
-              <FadeUp delay={0.2}>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Link href="/contact">
-                    <Button size="lg" className="h-12 rounded-lg bg-blue-600 px-6 text-white shadow-none hover:bg-blue-500">
-                      Konsultasi Gratis
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </Link>
-                  <a
-                    href={
-                      whatsappNumber
-                        ? `https://wa.me/${whatsappNumber}?text=Halo%20${encodeURIComponent(settings.brand_name)}%2C%20saya%20ingin%20konsultasi%20website`
-                        : "/contact"
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button size="lg" variant="outline" className="h-12 rounded-lg border-green-500/25 px-6 text-green-300 hover:bg-green-500/10">
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      WhatsApp Langsung
-                    </Button>
-                  </a>
-                </div>
-              </FadeUp>
+                <FadeUp delay={0.1}>
+                  <p className="mt-5 max-w-2xl text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
+                    Ceritakan kondisi dan target bisnis Anda. Kami bantu pilih solusi yang paling masuk akal: landing page konversi cepat, company profile kredibel, atau tools pendukung sales.
+                  </p>
+                </FadeUp>
 
-              <FadeUp delay={0.3}>
-                <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
-                  {["Harga dibahas di awal", "Alur kerja jelas", "Dokumen siap dipakai"].map((f) => (
-                    <li key={f} className="flex items-center gap-1.5 text-blue-100/50 text-xs">
-                      <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </FadeUp>
+                <FadeUp delay={0.2}>
+                  <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+                    <Link href="/contact">
+                      <Button size="lg" className="h-12 rounded-full bg-white px-7 text-slate-950 font-bold hover:bg-slate-100 shadow-sm text-sm">
+                        Konsultasi Gratis
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <a
+                      href={
+                        whatsappNumber
+                          ? `https://wa.me/${whatsappNumber}?text=Halo%20${encodeURIComponent(settings.brand_name)}%2C%20saya%20ingin%20konsultasi%20website`
+                          : "/contact"
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button size="lg" variant="outline" className="h-12 rounded-full border-slate-600 bg-transparent px-6 text-slate-200 hover:bg-slate-800 font-semibold text-sm">
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        WhatsApp Langsung
+                      </Button>
+                    </a>
+                  </div>
+                </FadeUp>
+
+                <FadeUp delay={0.3}>
+                  <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-2.5 pt-8 border-t border-slate-700/60">
+                    {["Harga transparan dibahas di awal", "Alur kerja rapi & terjadwal", "Dokumen & hak akses penuh milik Anda"].map((f) => (
+                      <li key={f} className="flex items-center gap-2 text-slate-300 text-xs font-medium">
+                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </FadeUp>
+              </div>
             </div>
           </ScaleIn>
         </div>

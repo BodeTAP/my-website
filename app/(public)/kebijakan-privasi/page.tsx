@@ -12,111 +12,106 @@ const UPDATED = "27 April 2026";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-10">
-          <p className="text-blue-400/60 text-sm mb-2">Terakhir diperbarui: {UPDATED}</p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">Kebijakan Privasi</h1>
-          <p className="text-blue-200/60 leading-relaxed">
-            MFWEB (&quot;<strong className="text-blue-200">kami</strong>&quot;) berkomitmen untuk melindungi privasi Anda.
-            Kebijakan ini menjelaskan informasi apa yang kami kumpulkan, bagaimana kami menggunakannya,
-            dan hak-hak yang Anda miliki atas data Anda.
+    <div className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="w-full bg-[#1E242E] text-white pt-24 pb-16 sm:pt-28 sm:pb-20 border-b border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-px w-8 bg-slate-500" />
+            <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+              Legalitas & Privasi
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+            Kebijakan Privasi
+          </h1>
+          <p className="mt-3 text-slate-400 text-xs font-mono">
+            Terakhir diperbarui: {UPDATED}
+          </p>
+          <p className="mt-4 text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+            MFWEB (&quot;<strong className="text-white font-medium">kami</strong>&quot;) berkomitmen penuh menjaga kerahasiaan dan keamanan data pribadi Anda sesuai standar perlindungan data yang berlaku.
           </p>
         </div>
+      </section>
 
-        <div className="prose prose-invert prose-blue max-w-none space-y-8">
+      {/* Content */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <div className="max-w-3xl mx-auto space-y-10 text-slate-600 text-sm sm:text-base leading-relaxed">
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">1. Informasi yang Kami Kumpulkan</h2>
-            <p className="text-blue-200/60 mb-3">Kami mengumpulkan informasi yang Anda berikan secara langsung, antara lain:</p>
-            <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li>Nama lengkap dan informasi kontak (email, nomor WhatsApp)</li>
-              <li>Nama bisnis dan informasi usaha</li>
-              <li>Informasi pembayaran (diproses oleh pihak ketiga yang aman)</li>
-              <li>Konten yang Anda kirimkan melalui form konsultasi atau onboarding</li>
-              <li>Data akun portal klien (email, password terenkripsi)</li>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">1. Informasi yang Kami Kumpulkan</h2>
+            <p className="mb-3">Kami mengumpulkan informasi yang Anda berikan secara langsung saat menggunakan layanan kami, antara lain:</p>
+            <ul className="space-y-2 list-disc pl-5 text-slate-600">
+              <li>Nama lengkap dan kontak identitas (email, nomor WhatsApp aktif)</li>
+              <li>Profil entitas usaha atau merek dagang</li>
+              <li>Informasi transaksi pembayaran (diproses aman melalui gateway tersertifikasi)</li>
+              <li>Materi proyek yang dikirimkan melalui portal atau formulir brief</li>
+              <li>Data kredensial akun portal klien (email dan kata sandi terenkripsi)</li>
             </ul>
-            <p className="text-blue-200/60 mt-3">Kami juga mengumpulkan data secara otomatis melalui cookies dan teknologi serupa, seperti alamat IP, jenis browser, dan halaman yang dikunjungi.</p>
-          </section>
+            <p className="mt-4 text-xs text-slate-500 font-mono">
+              Kami juga mengumpulkan data analitik teknis seperti alamat IP, tipe browser, dan log aktivitas guna memastikan stabilitas infrastruktur kami.
+            </p>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">2. Cara Kami Menggunakan Informasi</h2>
-            <p className="text-blue-200/60 mb-3">Informasi yang kami kumpulkan digunakan untuk:</p>
-            <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li>Menyediakan dan mengelola layanan pembuatan website</li>
-              <li>Memproses pembayaran dan mengirimkan invoice</li>
-              <li>Berkomunikasi dengan Anda terkait proyek dan layanan</li>
-              <li>Mengelola akun portal klien Anda</li>
-              <li>Meningkatkan kualitas layanan dan website kami</li>
-              <li>Memenuhi kewajiban hukum yang berlaku</li>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">2. Tujuan Penggunaan Informasi</h2>
+            <p className="mb-3">Informasi yang dikumpulkan dimanfaatkan secara proporsional untuk keperluan:</p>
+            <ul className="space-y-2 list-disc pl-5 text-slate-600">
+              <li>Pengerjaan, konfigurasi teknis, dan serah terima proyek website</li>
+              <li>Penerbitan dokumen invoice resmi dan validasi pembayaran</li>
+              <li>Komunikasi koordinasi berkala selama masa pengerjaan</li>
+              <li>Otentikasi akses ke portal klien mandiri Anda</li>
+              <li>Peningkatan kualitas keamanan sistem dan pencegahan ancaman siber</li>
             </ul>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">3. Berbagi Informasi dengan Pihak Ketiga</h2>
-            <p className="text-blue-200/60 mb-3">Kami tidak menjual atau menyewakan data pribadi Anda. Kami hanya berbagi informasi dengan pihak ketiga terpercaya untuk keperluan operasional, termasuk:</p>
-            <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li><strong className="text-blue-200">Tripay</strong> — gateway pembayaran untuk memproses transaksi</li>
-              <li><strong className="text-blue-200">Vercel</strong> — hosting dan infrastruktur server</li>
-              <li><strong className="text-blue-200">Resend</strong> — layanan pengiriman email</li>
-              <li><strong className="text-blue-200">Neon PostgreSQL</strong> — penyimpanan database</li>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">3. Pihak Ketiga & Infrastruktur</h2>
+            <p className="mb-3">Kami tidak pernah menjual data pribadi Anda kepada pihak manapun. Kami hanya bermitra dengan penyedia infrastruktur tepercaya untuk kebutuhan operasional:</p>
+            <ul className="space-y-2 list-disc pl-5 text-slate-600">
+              <li><strong className="text-slate-900">Tripay</strong> — Gateway transaksi berizin resmi Bank Indonesia</li>
+              <li><strong className="text-slate-900">Vercel</strong> — Infrastruktur hosting dan Edge Network berstandar global</li>
+              <li><strong className="text-slate-900">Resend</strong> — Layanan pengiriman notifikasi transactional email</li>
+              <li><strong className="text-slate-900">Neon PostgreSQL</strong> — Penyimpanan basis data cloud dengan enkripsi at-rest</li>
             </ul>
-            <p className="text-blue-200/60 mt-3">Semua pihak ketiga tunduk pada kebijakan privasi mereka masing-masing dan kami memastikan mereka memiliki standar keamanan yang memadai.</p>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">4. Keamanan Data</h2>
-            <p className="text-blue-200/60">
-              Kami menerapkan langkah-langkah keamanan teknis dan organisasional untuk melindungi data Anda, termasuk enkripsi data, koneksi HTTPS, dan autentikasi yang aman. Namun, tidak ada metode transmisi internet yang 100% aman, dan kami tidak dapat menjamin keamanan mutlak.
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">4. Keamanan dan Enkripsi Data</h2>
+            <p>
+              Seluruh transmisi data dienkripsi menggunakan protokol SSL/TLS modern (HTTPS). Akses ke basis data internal dilindungi dengan autentikasi bertingkat dan prinsip least-privilege untuk meminimalkan risiko kebocoran data.
             </p>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">5. Cookies</h2>
-            <p className="text-blue-200/60">
-              Kami menggunakan cookies untuk menjaga sesi login Anda dan meningkatkan pengalaman pengguna. Anda dapat mengatur browser untuk menolak cookies, namun beberapa fitur mungkin tidak berfungsi dengan baik.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">6. Hak-Hak Anda</h2>
-            <p className="text-blue-200/60 mb-3">Anda memiliki hak untuk:</p>
-            <ul className="text-blue-200/60 space-y-1.5 list-disc pl-5">
-              <li>Mengakses data pribadi yang kami simpan tentang Anda</li>
-              <li>Meminta koreksi data yang tidak akurat</li>
-              <li>Meminta penghapusan data Anda (dengan ketentuan tertentu)</li>
-              <li>Menolak pemrosesan data untuk tujuan tertentu</li>
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">5. Hak Kepemilikan Data Anda</h2>
+            <p className="mb-3">Sebagai pemilik data, Anda berhak untuk:</p>
+            <ul className="space-y-2 list-disc pl-5 text-slate-600">
+              <li>Meminta salinan data riwayat akun yang kami catat</li>
+              <li>Melakukan pembaruan atau perbaikan informasi yang tidak akurat</li>
+              <li>Mengajukan penghapusan akun portal setelah seluruh kewajiban proyek terselesaikan</li>
             </ul>
-            <p className="text-blue-200/60 mt-3">
-              Untuk menggunakan hak-hak tersebut, hubungi kami di{" "}
-              <Link href="/contact" className="text-blue-400 hover:underline">halaman kontak</Link> atau via WhatsApp.
+            <p className="mt-4">
+              Untuk menyampaikan permohonan hak data, silakan hubungi kami via{" "}
+              <Link href="/contact" className="text-slate-900 underline font-semibold">
+                halaman kontak
+              </Link>.
             </p>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">7. Retensi Data</h2>
-            <p className="text-blue-200/60">
-              Kami menyimpan data Anda selama hubungan bisnis berlangsung dan sesuai kewajiban hukum yang berlaku. Data akun akan dihapus dalam waktu 30 hari setelah permintaan penghapusan akun, kecuali diperlukan untuk keperluan hukum atau akuntansi.
+          <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-6 sm:p-8">
+            <h2 className="text-slate-900 font-bold text-lg mb-3">6. Hubungi Tim Hukum & Kepatuhan</h2>
+            <p>
+              Jika Anda memiliki pertanyaan spesifik mengenai ketentuan privasi ini, silakan berkonsultasi melalui{" "}
+              <Link href="/contact" className="text-slate-900 underline font-semibold">
+                halaman kontak resmi MFWEB
+              </Link>{" "}
+              atau melalui nomor WhatsApp operasional kami.
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">8. Perubahan Kebijakan</h2>
-            <p className="text-blue-200/60">
-              Kami dapat memperbarui kebijakan privasi ini sewaktu-waktu. Perubahan akan diumumkan di halaman ini dengan memperbarui tanggal &quot;Terakhir diperbarui&quot;. Kami menyarankan Anda meninjau halaman ini secara berkala.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-white font-bold text-xl mb-3">9. Hubungi Kami</h2>
-            <p className="text-blue-200/60">
-              Jika Anda memiliki pertanyaan tentang kebijakan privasi ini, silakan hubungi kami melalui{" "}
-              <Link href="/contact" className="text-blue-400 hover:underline">halaman kontak</Link> atau langsung via WhatsApp.
-            </p>
-          </section>
+          </div>
 
         </div>
-      </div>
+      </section>
     </div>
   );
 }

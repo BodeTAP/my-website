@@ -31,7 +31,7 @@ const TIMELINE_OPTIONS = [
 function renderInline(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
     part.startsWith("**") && part.endsWith("**")
-      ? <strong key={j} className="text-white font-semibold">{part.slice(2, -2)}</strong>
+      ? <strong key={j} className="text-slate-900 font-bold">{part.slice(2, -2)}</strong>
       : part,
   );
 }
@@ -53,8 +53,8 @@ function renderLine(rawLine: string, i: number) {
   const heading = line.match(/^#{1,6}\s+(.+)$/);
   if (heading) {
     return (
-      <h3 key={i} className="text-white font-bold text-base sm:text-lg mt-6 mb-3 first:mt-0 flex items-start gap-2 break-words">
-        <span className="mt-1 size-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)] shrink-0" />
+      <h3 key={i} className="text-slate-900 font-bold text-base sm:text-lg mt-6 mb-3 first:mt-0 flex items-center gap-2 break-words">
+        <span className="size-2 rounded-full bg-slate-900 shrink-0" />
         <span>{heading[1].replace(/\*\*/g, "")}</span>
       </h3>
     );
@@ -65,9 +65,9 @@ function renderLine(rawLine: string, i: number) {
     : [];
   if (cells.length >= 2) {
     return (
-      <div key={i} className="grid gap-2 sm:grid-cols-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm">
+      <div key={i} className="grid gap-2 sm:grid-cols-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
         {cells.map((cell, j) => (
-          <span key={j} className={j === 0 ? "text-white font-semibold break-words" : "text-blue-100/75 break-words"}>
+          <span key={j} className={j === 0 ? "text-slate-900 font-bold break-words" : "text-slate-600 break-words"}>
             {renderInline(cell)}
           </span>
         ))}
@@ -76,13 +76,13 @@ function renderLine(rawLine: string, i: number) {
   }
 
   if (line.startsWith("**") && line.endsWith("**")) {
-    return <p key={i} className="text-blue-100 font-semibold break-words">{line.slice(2, -2)}</p>;
+    return <p key={i} className="text-slate-900 font-bold break-words">{line.slice(2, -2)}</p>;
   }
 
   if (line.startsWith("- ")) {
     return (
-      <div key={i} className="flex items-start gap-2 text-blue-100/75 leading-relaxed">
-        <CheckCircle2 className="mt-0.5 size-4 text-emerald-300 shrink-0" />
+      <div key={i} className="flex items-start gap-2.5 text-slate-700 leading-relaxed text-sm">
+        <CheckCircle2 className="mt-0.5 size-4 text-emerald-600 shrink-0" />
         <p className="min-w-0 break-words">{renderInline(line.slice(2))}</p>
       </div>
     );
@@ -90,7 +90,7 @@ function renderLine(rawLine: string, i: number) {
 
   if (line.match(/^\d+\./)) {
     return (
-      <div key={i} className="rounded-xl border border-blue-400/10 bg-blue-400/[0.04] px-4 py-3 text-blue-100/80 leading-relaxed break-words">
+      <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 text-sm leading-relaxed break-words">
         {renderInline(line.replace(/^\d+\.\s*/, ""))}
       </div>
     );
@@ -100,10 +100,10 @@ function renderLine(rawLine: string, i: number) {
   return (
     <p
       key={i}
-      className={`leading-relaxed break-words ${
+      className={`leading-relaxed break-words text-sm ${
         isPriceLine
-          ? "rounded-xl bg-orange-400/[0.07] border border-orange-300/10 px-4 py-3 text-orange-100"
-          : "text-blue-100/72"
+          ? "rounded-xl bg-[#1E242E] text-white px-4 py-3 font-mono font-medium"
+          : "text-slate-600"
       }`}
     >
       {renderInline(line)}
@@ -179,16 +179,24 @@ export default function PricingEstimator() {
       {!result && !loading && (
         <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
           {/* Jenis Bisnis */}
-          <div className="glass rounded-2xl p-5 border border-white/5 space-y-3">
-            <label className="text-white font-semibold text-sm">Jenis Bisnis Anda *</label>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-px w-6 bg-slate-400" />
+              <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Langkah 1</span>
+            </div>
+            <label className="text-slate-900 font-bold text-sm block">Jenis Usaha / Industri *</label>
             <div className="flex flex-wrap gap-2">
               {BISNIS_TYPES.map((b) => (
-                <button key={b} type="button" onClick={() => setForm((f) => ({ ...f, bisnisType: b }))}
-                  className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, bisnisType: b }))}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all ${
                     form.bisnisType === b
-                      ? "bg-orange-500/20 border-orange-500/50 text-orange-300"
-                      : "bg-white/5 border-white/10 text-blue-200/60 hover:border-white/20 hover:text-white"
-                  }`}>
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
+                  }`}
+                >
                   {b}
                 </button>
               ))}
@@ -196,16 +204,24 @@ export default function PricingEstimator() {
           </div>
 
           {/* Jenis Website */}
-          <div className="glass rounded-2xl p-5 border border-white/5 space-y-3">
-            <label className="text-white font-semibold text-sm">Jenis Website yang Dibutuhkan *</label>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-px w-6 bg-slate-400" />
+              <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Langkah 2</span>
+            </div>
+            <label className="text-slate-900 font-bold text-sm block">Model Website yang Dibutuhkan *</label>
             <div className="flex flex-wrap gap-2">
               {WEBSITE_TYPES.map((w) => (
-                <button key={w} type="button" onClick={() => setForm((f) => ({ ...f, websiteType: w }))}
-                  className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                <button
+                  key={w}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, websiteType: w }))}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all ${
                     form.websiteType === w
-                      ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                      : "bg-white/5 border-white/10 text-blue-200/60 hover:border-white/20 hover:text-white"
-                  }`}>
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
+                  }`}
+                >
                   {w}
                 </button>
               ))}
@@ -213,16 +229,26 @@ export default function PricingEstimator() {
           </div>
 
           {/* Fitur Tambahan */}
-          <div className="glass rounded-2xl p-5 border border-white/5 space-y-3">
-            <label className="text-white font-semibold text-sm">Fitur Tambahan <span className="text-blue-200/40 font-normal">(opsional)</span></label>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-px w-6 bg-slate-400" />
+              <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Langkah 3</span>
+            </div>
+            <label className="text-slate-900 font-bold text-sm block">
+              Fitur Tambahan <span className="text-slate-400 font-normal">(opsional)</span>
+            </label>
             <div className="flex flex-wrap gap-2">
               {FITUR_OPTIONS.map((f) => (
-                <button key={f} type="button" onClick={() => toggleFitur(f)}
-                  className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => toggleFitur(f)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all ${
                     form.fitur.includes(f)
-                      ? "bg-teal-500/20 border-teal-500/50 text-teal-300"
-                      : "bg-white/5 border-white/10 text-blue-200/60 hover:border-white/20 hover:text-white"
-                  }`}>
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
+                  }`}
+                >
                   {f}
                 </button>
               ))}
@@ -231,31 +257,39 @@ export default function PricingEstimator() {
 
           {/* Halaman & Timeline */}
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="glass rounded-2xl p-5 border border-white/5 space-y-3">
-              <label className="text-white font-semibold text-sm">Jumlah Halaman</label>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+              <label className="text-slate-900 font-bold text-sm block">Estimasi Halaman</label>
               <div className="flex flex-wrap gap-2">
                 {HALAMAN_OPTIONS.map((h) => (
-                  <button key={h} type="button" onClick={() => setForm((f) => ({ ...f, halaman: h }))}
-                    className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, halaman: h }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       form.halaman === h
-                        ? "bg-purple-500/20 border-purple-500/50 text-purple-300"
-                        : "bg-white/5 border-white/10 text-blue-200/60 hover:border-white/20 hover:text-white"
-                    }`}>
+                        ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
+                    }`}
+                  >
                     {h}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="glass rounded-2xl p-5 border border-white/5 space-y-3">
-              <label className="text-white font-semibold text-sm">Target Waktu</label>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+              <label className="text-slate-900 font-bold text-sm block">Target Pengerjaan</label>
               <div className="flex flex-wrap gap-2">
                 {TIMELINE_OPTIONS.map((t) => (
-                  <button key={t} type="button" onClick={() => setForm((f) => ({ ...f, timeline: t }))}
-                    className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, timeline: t }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       form.timeline === t
-                        ? "bg-green-500/20 border-green-500/50 text-green-300"
-                        : "bg-white/5 border-white/10 text-blue-200/60 hover:border-white/20 hover:text-white"
-                    }`}>
+                        ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
+                    }`}
+                  >
                     {t}
                   </button>
                 ))}
@@ -263,39 +297,46 @@ export default function PricingEstimator() {
             </div>
           </div>
 
-          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20">{error}</p>}
+          {error && <p className="text-rose-600 text-sm bg-rose-50 p-4 rounded-xl border border-rose-200">{error}</p>}
 
-          <Button type="submit" disabled={!form.bisnisType || !form.websiteType}
-            className="w-full bg-orange-600 hover:bg-orange-500 text-white h-12 rounded-xl font-semibold gap-2 shadow-[0_0_20px_rgba(234,88,12,0.3)] disabled:opacity-40">
+          <Button
+            type="submit"
+            disabled={!form.bisnisType || !form.websiteType}
+            className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white h-12 font-medium gap-2 disabled:opacity-40 transition-colors"
+          >
             <Sparkles className="w-4 h-4" />
-            Hitung Estimasi Sekarang
+            Hitung Estimasi Biaya
           </Button>
         </form>
       )}
 
       {/* Streaming result */}
       {(result || loading) && (
-        <div className="space-y-4">
-          <div className="glass rounded-2xl p-6 border border-white/5 min-h-48">
+        <div className="space-y-6 max-w-3xl mx-auto">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
             {loading && !result && (
-              <div className="flex items-center gap-3 text-blue-400">
+              <div className="flex items-center gap-3 text-slate-600">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm">AI sedang menghitung estimasi...</span>
+                <span className="text-sm font-medium">AI sedang menyusun rincian estimasi biaya...</span>
               </div>
             )}
-            <div className="rounded-2xl border border-white/10 bg-[#071327]/80 overflow-hidden shadow-[0_20px_80px_rgba(0,0,0,0.25)]">
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-white/[0.03] px-5 py-4">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Sparkles className="size-4 text-orange-300 shrink-0" />
-                  <p className="text-sm font-semibold text-white">Hasil estimasi website</p>
+                  <Sparkles className="size-4 text-slate-700 shrink-0" />
+                  <p className="text-sm font-bold text-slate-900">Rincian Estimasi Proyek</p>
                 </div>
-                {done && <span className="text-xs text-emerald-300">Selesai</span>}
+                {done && (
+                  <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+                    Selesai
+                  </span>
+                )}
               </div>
-              <div className="space-y-2 p-5 sm:p-6 text-sm">
+              <div className="space-y-3 p-6 sm:p-8 text-sm">
                 {result.split("\n").map((line, i) => renderLine(line, i))}
               </div>
               {loading && (
-                <span className="mx-6 mb-5 inline-block h-4 w-1.5 bg-blue-400 align-middle animate-pulse" />
+                <span className="mx-6 mb-5 inline-block h-4 w-1.5 bg-slate-900 align-middle animate-pulse" />
               )}
             </div>
           </div>
@@ -303,12 +344,15 @@ export default function PricingEstimator() {
           {done && (
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/contact" className="flex-1">
-                <Button className="w-full bg-orange-600 hover:bg-orange-500 text-white gap-2">
-                  Konsultasi Gratis Sekarang <ArrowRight className="w-4 h-4" />
+                <Button className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white h-12 font-medium gap-2 transition-colors">
+                  Konsultasi Spesifikasi Gratis <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Button variant="outline" onClick={handleReset}
-                className="border-white/10 text-blue-200/60 hover:text-white hover:bg-white/5 gap-2">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                className="rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 h-12 px-6 gap-2 transition-colors font-medium"
+              >
                 <RefreshCw className="w-4 h-4" /> Hitung Ulang
               </Button>
             </div>

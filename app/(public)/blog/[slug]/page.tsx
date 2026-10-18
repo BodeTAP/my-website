@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import ReadingProgress from "@/components/public/ReadingProgress";
 import Breadcrumb from "@/components/public/Breadcrumb";
-import { FadeUp, FadeIn, ScaleIn } from "@/components/public/motion";
+import { FadeUp } from "@/components/public/motion";
 import { JsonLd } from "@/components/public/JsonLd";
 
 function estimateReadTime(html: string): number {
@@ -64,9 +64,12 @@ export default async function ArticlePage({ params }: Params) {
   });
   if (!article) notFound();
 
-  // Run both related-article queries in parallel instead of sequentially
   const relatedSelect = {
-    id: true, title: true, slug: true, coverImage: true, publishedAt: true,
+    id: true,
+    title: true,
+    slug: true,
+    coverImage: true,
+    publishedAt: true,
     category: { select: { name: true, slug: true } },
   } as const;
 
@@ -91,7 +94,6 @@ export default async function ArticlePage({ params }: Params) {
     ...otherCat.filter((a) => !seen.has(a.id)),
   ].slice(0, 2);
 
-  // JSON-LD: BlogPosting + BreadcrumbList
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -147,134 +149,173 @@ export default async function ArticlePage({ params }: Params) {
   const readTime = estimateReadTime(article.content);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white">
       <ReadingProgress />
-      <div className="max-w-3xl mx-auto">
-        <Breadcrumb items={[
-          { label: "Blog", href: "/blog" },
-          { label: article.title },
-        ]} />
 
-        {/* Cover */}
-        {article.coverImage && (
-          <ScaleIn delay={0.1}>
-            <div className="rounded-2xl overflow-hidden mb-8 h-64 sm:h-80">
-              <Image src={article.coverImage} alt={article.title} width={768} height={320} className="w-full h-full object-cover" priority />
-            </div>
-          </ScaleIn>
-        )}
+      {/* ── Breadcrumb & Article Header ────────────────────── */}
+      <header className="pt-28 pb-12 px-4 sm:px-6 lg:px-8 border-b border-slate-200 bg-[#F8F9FA]">
+        <div className="max-w-3xl mx-auto">
+          <Breadcrumb
+            items={[
+              { label: "Blog", href: "/blog" },
+              { label: article.title },
+            ]}
+          />
 
-        {/* Header */}
-        <FadeUp>
-          <div className="mb-8">
+          <FadeUp className="mt-6">
             <div className="flex items-center gap-3 flex-wrap mb-4">
               {article.category && (
-                <Link href={`/blog?category=${article.category.slug}`}
-                  className="text-xs bg-blue-600/20 text-blue-300 border border-blue-500/20 px-3 py-1 rounded-full hover:bg-blue-600/30 transition-colors">
+                <Link
+                  href={`/blog?category=${article.category.slug}`}
+                  className="text-xs font-mono bg-slate-200/80 text-slate-800 border border-slate-300 px-3 py-1 rounded-full hover:bg-slate-300 transition-colors"
+                >
                   {article.category.name}
                 </Link>
               )}
               {article.publishedAt && (
-                <div className="flex items-center gap-2 text-blue-400/60 text-sm">
-                  <Calendar className="w-4 h-4" />
+                <div className="flex items-center gap-1.5 text-slate-500 text-xs font-mono">
+                  <Calendar className="w-3.5 h-3.5" />
                   <time>
-                    {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(article.publishedAt))}
+                    {new Intl.DateTimeFormat("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }).format(new Date(article.publishedAt))}
                   </time>
                 </div>
               )}
-              <div className="flex items-center gap-1.5 text-blue-400/50 text-sm">
-                <Clock className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 text-slate-500 text-xs font-mono">
+                <Clock className="w-3.5 h-3.5" />
                 <span>{readTime} menit baca</span>
               </div>
             </div>
-            {article.tags && article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {article.tags.map((tag) => (
-                  <span key={tag} className="text-xs text-blue-200/40">#{tag}</span>
-                ))}
-              </div>
-            )}
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight mb-6">
               {article.title}
             </h1>
 
             {article.excerpt && (
-              <p className="text-blue-200/60 text-lg leading-relaxed border-l-2 border-blue-500/50 pl-4">
+              <p className="text-slate-600 text-base sm:text-lg leading-relaxed border-l-2 border-slate-900 pl-4 py-1">
                 {article.excerpt}
               </p>
             )}
-          </div>
-        </FadeUp>
+          </FadeUp>
+        </div>
+      </header>
 
-        {/* Content */}
-        <FadeIn delay={0.3}>
+      {/* ── Article Content ────────────────────────────────── */}
+      <main className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          {/* Cover image if available */}
+          {article.coverImage && (
+            <div className="rounded-2xl overflow-hidden mb-12 border border-slate-200 bg-slate-100 shadow-xs h-64 sm:h-96">
+              <Image
+                src={article.coverImage}
+                alt={article.title}
+                width={800}
+                height={400}
+                className="w-full h-full object-cover"
+                priority
+              />
+            </div>
+          )}
+
+          {/* HTML body rendered with clean prose */}
           <div
-            className="prose prose-invert prose-blue max-w-none
-              prose-headings:text-white prose-headings:font-bold
-              prose-p:text-blue-100/70 prose-p:leading-relaxed
-              prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-white
-              prose-code:text-blue-300 prose-code:bg-blue-900/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-              prose-blockquote:border-blue-500/50 prose-blockquote:text-blue-200/60
-              prose-ul:text-blue-100/70 prose-ol:text-blue-100/70
-              prose-img:rounded-xl"
+            className="prose prose-slate max-w-none
+              prose-headings:font-bold prose-headings:text-slate-900
+              prose-p:text-slate-700 prose-p:leading-relaxed
+              prose-a:text-slate-900 prose-a:underline hover:prose-a:text-slate-600
+              prose-strong:text-slate-900
+              prose-code:text-slate-800 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono
+              prose-blockquote:border-slate-300 prose-blockquote:text-slate-600 prose-blockquote:font-normal
+              prose-ul:text-slate-700 prose-ol:text-slate-700
+              prose-img:rounded-2xl prose-img:border prose-img:border-slate-200"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
-        </FadeIn>
 
-        {/* Artikel Terkait */}
-        {relatedArticles.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-white/5">
-            <h3 className="text-2xl font-bold text-white mb-6">Artikel Terkait</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {relatedArticles.map((rel) => (
-                <Link key={rel.id} href={`/blog/${rel.slug}`} className="group block h-full">
-                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#071225] transition-colors duration-300 hover:border-blue-500/30">
-                    <div className="h-40 bg-linear-to-br from-blue-900/40 to-indigo-900/20 overflow-hidden">
-                      {rel.coverImage ? (
-                        <Image src={rel.coverImage} alt={rel.title} width={400} height={160} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-sm text-blue-200/30">Belum ada gambar</div>
-                      )}
-                    </div>
-                    <div className="p-5 flex-1 flex flex-col">
-                      <h4 className="text-white font-semibold text-lg leading-snug group-hover:text-blue-300 transition-colors line-clamp-2 mb-3">
-                        {rel.title}
-                      </h4>
-                      <div className="mt-auto flex items-center justify-between text-xs">
-                        <span className="text-blue-400">{rel.category?.name ?? "Umum"}</span>
-                        <span className="text-blue-200/40">
-                          {rel.publishedAt ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(rel.publishedAt)) : ""}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+          {/* Tags */}
+          {article.tags && article.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-12 pt-6 border-t border-slate-200">
+              {article.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-full"
+                >
+                  #{tag}
+                </span>
               ))}
             </div>
+          )}
+
+          {/* Related Articles */}
+          {relatedArticles.length > 0 && (
+            <div className="mt-16 pt-10 border-t border-slate-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-6">Artikel Terkait</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {relatedArticles.map((rel) => (
+                  <Link key={rel.id} href={`/blog/${rel.slug}`} className="group block h-full">
+                    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-md transition-all shadow-xs">
+                      <div className="h-40 bg-slate-100 overflow-hidden border-b border-slate-100">
+                        {rel.coverImage ? (
+                          <Image
+                            src={rel.coverImage}
+                            alt={rel.title}
+                            width={400}
+                            height={160}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs font-mono text-slate-400">
+                            MFWEB
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h4 className="text-slate-900 font-bold text-base leading-snug group-hover:text-slate-700 transition-colors line-clamp-2 mb-3">
+                          {rel.title}
+                        </h4>
+                        <div className="mt-auto flex items-center justify-between text-xs font-mono text-slate-500">
+                          <span>{rel.category?.name ?? "Umum"}</span>
+                          <span>
+                            {rel.publishedAt
+                              ? new Intl.DateTimeFormat("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                }).format(new Date(rel.publishedAt))
+                              : ""}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Bottom CTA Block */}
+          <div className="mt-16 rounded-3xl border border-slate-800 bg-[#1E242E] text-white p-8 sm:p-12 text-center">
+            <h3 className="text-2xl font-bold text-white mb-2">
+              Ingin website bisnis Anda dirancang secara profesional?
+            </h3>
+            <p className="text-slate-300 text-sm sm:text-base mb-6 max-w-md mx-auto leading-relaxed">
+              Konsultasi gratis dengan tim MFWEB. Kami bantu evaluasi kebutuhan dan menyusun roadmap teknis yang tepat.
+            </p>
+            <Link href="/contact">
+              <Button className="h-11 rounded-full bg-white text-slate-900 hover:bg-slate-100 font-medium px-8 transition-colors">
+                Mulai Konsultasi Gratis
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
-        )}
-
-        {/* CTA */}
-        <div className="mt-14 rounded-2xl border border-white/10 bg-[#071225] p-8 text-center">
-          <h3 className="text-white font-bold text-xl mb-2">
-            Butuh website yang lebih rapi?
-          </h3>
-          <p className="text-blue-200/60 mb-6">
-            Konsultasi gratis. Kami bantu cek kebutuhan dan estimasi pengerjaan.
-          </p>
-          <Link href="/contact">
-            <Button className="bg-blue-600 hover:bg-blue-500 text-white px-8">
-              Konsultasi Gratis Sekarang
-            </Button>
-          </Link>
         </div>
+      </main>
 
-        {/* JSON-LD Structured Data */}
-        <JsonLd id="json-ld-article" data={articleJsonLd} />
-        <JsonLd id="json-ld-breadcrumb" data={breadcrumbJsonLd} />
-      </div>
+      {/* JSON-LD Structured Data */}
+      <JsonLd id="json-ld-article" data={articleJsonLd} />
+      <JsonLd id="json-ld-breadcrumb" data={breadcrumbJsonLd} />
     </div>
   );
 }

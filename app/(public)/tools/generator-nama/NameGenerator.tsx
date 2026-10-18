@@ -70,22 +70,32 @@ export default function NameGenerator() {
 
   return (
     <div className="space-y-6">
-      <div className="glass rounded-2xl p-6">
-        <h2 className="text-white font-semibold mb-1">
-          <span className="text-purple-400 mr-2">01</span> Pilih Industri & Gaya
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="h-px w-6 bg-slate-400" />
+          <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+            Parameter Ide
+          </span>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-1">
+          Pilih Industri & Karakter Bisnis
         </h2>
-        <p className="text-blue-200/40 text-sm mb-5">Sesuaikan dengan karakter bisnis Anda.</p>
+        <p className="text-slate-600 text-sm mb-6">
+          Kombinasikan kategori bidang usaha dan nuansa brand yang ingin Anda bangun.
+        </p>
 
         <div className="space-y-5">
           <div>
-            <label className="text-blue-200/60 text-xs mb-2 block">Industri / Bidang Bisnis</label>
+            <label className="text-slate-900 font-bold text-xs mb-2 block uppercase tracking-wider font-mono">
+              Industri / Bidang Usaha
+            </label>
             <select
               value={industry}
               onChange={(e) => setIndustry(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors cursor-pointer"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all cursor-pointer font-medium"
             >
               {INDUSTRIES.map((i) => (
-                <option key={i.value} value={i.value} className="bg-[#0a1628] text-white">
+                <option key={i.value} value={i.value}>
                   {i.label}
                 </option>
               ))}
@@ -93,16 +103,19 @@ export default function NameGenerator() {
           </div>
 
           <div>
-            <label className="text-blue-200/60 text-xs mb-2 block">Gaya Nama</label>
+            <label className="text-slate-900 font-bold text-xs mb-2 block uppercase tracking-wider font-mono">
+              Gaya & Karakter Nama
+            </label>
             <div className="flex flex-wrap gap-2">
               {STYLES.map((s) => (
                 <button
                   key={s.value}
+                  type="button"
                   onClick={() => setStyle(s.value)}
-                  className={`px-4 py-2 rounded-xl border text-sm transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-medium border transition-all ${
                     style === s.value
-                      ? "bg-purple-600/20 border-purple-500/50 text-purple-300"
-                      : "glass border-white/10 text-blue-200/60 hover:border-white/20"
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
                   }`}
                 >
                   {s.label}
@@ -112,8 +125,8 @@ export default function NameGenerator() {
           </div>
 
           <div>
-            <label className="text-blue-200/60 text-xs mb-2 block">
-              Kata Kunci <span className="text-blue-200/30">(opsional)</span>
+            <label className="text-slate-900 font-bold text-xs mb-2 block uppercase tracking-wider font-mono">
+              Kata Kunci Relevan <span className="text-slate-400 font-normal font-sans">(opsional)</span>
             </label>
             <input
               type="text"
@@ -122,33 +135,33 @@ export default function NameGenerator() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !loading) void handleGenerate();
               }}
-              placeholder="Contoh: nama pemilik, kota, atau kata unik"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-blue-200/30 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+              placeholder="Contoh: kopi, kota Malang, premium, eco"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-400 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all font-mono"
             />
           </div>
         </div>
 
-        <div className="flex gap-3 mt-5">
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <Button
             onClick={() => void handleGenerate()}
             disabled={loading}
-            className="bg-purple-600 hover:bg-purple-500 text-white h-11 px-8"
+            className="rounded-full bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 px-8 disabled:opacity-50 transition-colors"
           >
             {loading ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Wand2 className="w-4 h-4 mr-2" />}
-            {loading ? "Memproses..." : "Generate Nama"}
+            {loading ? "Memproses Ide..." : "Generate Nama"}
           </Button>
           {results.length > 0 && (
             <Button
               onClick={() => void handleGenerate()}
               disabled={loading}
               variant="outline"
-              className="h-11 border-white/10 text-white hover:bg-white/5"
+              className="rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 h-11 px-6 font-medium transition-colors"
             >
-              <RefreshCw className="w-4 h-4 mr-2" /> Generate Ulang
+              <RefreshCw className="w-4 h-4 mr-2" /> Buat Ide Baru
             </Button>
           )}
         </div>
-        {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
+        {error && <p className="mt-4 text-sm text-rose-600 bg-rose-50 p-4 rounded-xl border border-rose-200">{error}</p>}
       </div>
 
       <AnimatePresence>
@@ -158,32 +171,40 @@ export default function NameGenerator() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="glass rounded-2xl p-6"
+            className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs"
           >
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <h3 className="text-white font-semibold text-sm">Hasil Generate ({results.length} nama)</h3>
-              <span className="text-blue-200/30 text-xs">Klik Salin untuk copy nama + slogan</span>
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-slate-500 block mb-1">
+                  Inspirasi Brand
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">Rekomendasi Nama ({results.length})</h3>
+              </div>
+              <span className="text-slate-400 text-xs font-mono">Klik salin untuk menyalin ke clipboard</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {results.map((r, i) => (
                 <motion.div
                   key={`${r.name}-${i}`}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.07 }}
-                  className="group bg-white/3 border border-white/8 hover:border-purple-500/30 rounded-xl p-4 transition-colors"
+                  transition={{ delay: i * 0.05 }}
+                  className="rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300 p-5 transition-all flex flex-col justify-between"
                 >
-                  <p className="text-white font-bold text-lg mb-1">{r.name}</p>
-                  <p className="text-blue-200/50 text-xs leading-relaxed mb-3">{r.slogan}</p>
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div>
+                    <p className="text-slate-900 font-bold text-lg mb-1 tracking-tight">{r.name}</p>
+                    <p className="text-slate-600 text-xs leading-relaxed mb-4">{r.slogan}</p>
+                  </div>
+                  <div className="flex items-center gap-3 pt-3 border-t border-slate-200/60 flex-wrap">
                     <button
                       onClick={() => handleCopy(i, r.name, r.slogan)}
-                      className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-700 hover:text-slate-900 font-medium transition-colors"
                     >
                       {copiedIdx === i ? (
-                        <><Check className="w-3.5 h-3.5" /> Disalin!</>
+                        <><Check className="w-3.5 h-3.5 text-emerald-600" /> Disalin!</>
                       ) : (
-                        <><Copy className="w-3.5 h-3.5" /> Salin</>
+                        <><Copy className="w-3.5 h-3.5 text-slate-500" /> Salin</>
                       )}
                     </button>
                     <a
@@ -192,35 +213,21 @@ export default function NameGenerator() {
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-900 hover:underline font-semibold ml-auto"
                     >
-                      <MessageCircle className="w-3.5 h-3.5" /> Buat Website
+                      <MessageCircle className="w-3.5 h-3.5 text-slate-800" /> Bikin Website
                     </a>
                   </div>
                 </motion.div>
               ))}
-            </div>
-
-            <div className="mt-5 pt-4 border-t border-white/5 text-center">
-              <p className="text-blue-200/40 text-xs">
-                Tidak menemukan yang cocok?{" "}
-                <button
-                  onClick={() => void handleGenerate()}
-                  disabled={loading}
-                  className="text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  Generate ulang
-                </button>{" "}
-                untuk hasil baru.
-              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {results.length === 0 && (
-        <div className="text-center py-8 text-blue-200/25 text-sm">
-          Pilih industri dan gaya, lalu klik Generate Nama
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-400 text-xs font-mono">
+          Pilih industri dan gaya di atas, lalu tekan tombol Generate Nama untuk memulai.
         </div>
       )}
     </div>

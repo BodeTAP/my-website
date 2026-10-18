@@ -49,19 +49,19 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.45, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
-      className="border-b border-white/10 last:border-0"
+      className="border-b border-slate-100 last:border-0"
     >
       <button
         onClick={() => setOpen(!open)}
-        className="group flex w-full items-start justify-between gap-6 py-6 text-left outline-none"
+        className="group flex w-full items-start justify-between gap-6 py-5 text-left outline-none"
       >
-        <span className={`pr-6 text-base font-medium transition-colors sm:text-lg ${open ? "text-white" : "text-blue-100/75 group-hover:text-blue-100"}`}>
+        <span className={`pr-6 text-base sm:text-lg transition-colors ${open ? "text-slate-950 font-bold" : "text-slate-800 font-medium group-hover:text-slate-950"}`}>
           {q}
         </span>
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
-          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${open ? "bg-blue-600/20 text-blue-300" : "bg-white/5 text-blue-100/50 group-hover:bg-white/10 group-hover:text-white"}`}
+          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors ${open ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-900"}`}
         >
           <ChevronDown className="h-4 w-4" />
         </motion.span>
@@ -75,8 +75,8 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="pb-6 pr-12">
-              <p className="text-sm leading-relaxed text-blue-200/60 sm:text-base">{a}</p>
+            <div className="pb-5 pr-8">
+              <p className="text-sm leading-relaxed text-slate-600 sm:text-[15px]">{a}</p>
             </div>
           </motion.div>
         )}
@@ -87,41 +87,41 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
 
 export default function FAQSection() {
   return (
-    <section className="relative px-4 py-24 sm:px-6 lg:px-8">
+    <section className="relative px-4 py-24 sm:px-6 lg:px-8 bg-white border-t border-slate-200/80">
       <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-8">
-          <div className="relative z-10 lg:sticky lg:top-32 lg:col-span-5">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-10">
+          <div className="relative z-10 lg:sticky lg:top-28 lg:col-span-5">
             <FadeUp>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-4 py-1.5 text-xs text-blue-200/70">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3.5 py-1 text-xs font-bold text-slate-700">
                 Pertanyaan Umum
               </div>
-              <h2 className="mb-6 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+              <h2 className="mb-4 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl lg:text-5xl tracking-tight">
                 Hal yang biasa ditanyakan sebelum mulai
               </h2>
-              <p className="mb-10 max-w-md text-lg text-blue-200/60">
-                Jawaban singkat soal proses, biaya, revisi, dan support setelah website selesai.
+              <p className="mb-8 max-w-md text-base text-slate-600 leading-relaxed">
+                Jawaban ringkas dan transparan tentang proses, alur revisi, hak milik domain, dan bantuan teknis pasca-launch.
               </p>
 
-              <div className="rounded-2xl border border-white/10 bg-[#071225] p-7">
-                <h4 className="mb-2 font-semibold text-white">Belum menemukan jawaban?</h4>
-                <p className="mb-6 text-sm text-blue-200/60">
-                  Kirim pertanyaan lewat WhatsApp. Kami bantu cek kebutuhan Anda dulu sebelum bicara paket.
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-7 shadow-xs">
+                <h4 className="mb-1.5 font-bold text-slate-900 text-base">Belum menemukan jawaban?</h4>
+                <p className="mb-5 text-xs sm:text-sm text-slate-500 leading-relaxed">
+                  Kirim pertanyaan lewat WhatsApp. Kami bantu analisis kebutuhan bisnis Anda terlebih dahulu tanpa tekanan.
                 </p>
                 <a
                   href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20ingin%20bertanya%20sebelum%20memesan`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-medium text-white transition-colors hover:bg-blue-500"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-3.5 font-bold text-xs sm:text-sm text-white transition-colors hover:bg-slate-800 shadow-xs"
                 >
-                  <MessageCircle className="h-5 w-5" />
+                  <MessageCircle className="h-4 w-4" />
                   Chat via WhatsApp
                 </a>
               </div>
             </FadeUp>
           </div>
 
-          <div className="relative z-10 lg:col-span-7 lg:pl-10">
-            <div className="rounded-2xl border border-white/10 bg-[#06111f] p-6 sm:p-10">
+          <div className="relative z-10 lg:col-span-7">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
               {faqs.map((faq, i) => (
                 <FAQItem key={faq.q} q={faq.q} a={faq.a} index={i} />
               ))}

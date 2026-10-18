@@ -76,177 +76,198 @@ export default async function PortalProjectsPage() {
   const projects = user.client.projects;
 
   return (
-    <div>
-      <FadeUp className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Proyek Saya</h1>
-        <p className="text-blue-200/50 text-sm mt-1">{projects.length} proyek</p>
+    <div className="space-y-6">
+      <FadeUp className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-slate-200/80">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Proyek Saya</h1>
+          <p className="text-slate-500 text-sm mt-1">Pantau milestone pengerjaan, target rilis, dan ruang kerja website Anda.</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs w-fit">
+          {projects.length} Proyek Terdaftar
+        </div>
       </FadeUp>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {projects.length === 0 ? (
-          <FadeUp delay={0.1} className="rounded-2xl border border-white/10 bg-[#071225] p-12 text-center">
-            <Rocket className="w-10 h-10 text-blue-200/20 mx-auto mb-3" />
-            <p className="text-blue-200/40">Belum ada proyek aktif.</p>
-            <p className="text-blue-200/25 text-sm mt-1">Hubungi tim kami untuk memulai proyek Anda.</p>
+          <FadeUp delay={0.1} className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-400 border border-slate-200">
+              <Rocket className="w-7 h-7" />
+            </div>
+            <h2 className="text-slate-900 font-bold text-base mb-1">Belum Ada Proyek Aktif</h2>
+            <p className="text-slate-500 text-xs sm:text-sm max-w-sm mx-auto mb-6 leading-relaxed">
+              Belum ada proyek website yang sedang dikerjakan saat ini. Hubungi tim kami untuk konsultasi dan memulai proyek Anda.
+            </p>
+            <Link href="/portal/tickets">
+              <button className="bg-[#1E242E] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-xs transition-colors">
+                Mulai Konsultasi Baru
+              </button>
+            </Link>
           </FadeUp>
         ) : (
-          <StaggerChildren className="space-y-8">
+          <StaggerChildren className="space-y-6">
             {projects.map((project) => {
               const currentIdx = STATUS_ORDER[project.status as ProjectStatus] ?? 0;
 
               return (
                 <StaggerItem key={project.id}>
-                  <FadeUp className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
-                {/* Header */}
-                <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-white/5">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div>
-                      <h2 className="text-white font-bold text-lg">{project.name}</h2>
-                      {project.description && (
-                        <p className="text-blue-200/50 text-sm mt-1">{project.description}</p>
-                      )}
-                    </div>
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-lg transition-colors shrink-0"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" /> Buka Website
-                      </a>
-                    )}
-                  </div>
-
-                  {/* Dates row */}
-                  {(project.startDate || project.deadline) && (
-                    <div className="flex flex-wrap gap-5 mt-3">
-                      {project.startDate && (
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-blue-200/30" />
-                          <span className="text-blue-200/40 text-xs">Mulai:</span>
-                          <span className="text-blue-200/70 text-xs font-medium">{fmtDate(project.startDate)}</span>
-                        </div>
-                      )}
-                      {project.deadline && (
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-blue-200/30" />
-                          <span className="text-blue-200/40 text-xs">Target selesai:</span>
-                          <span className="text-blue-200/70 text-xs font-medium">{fmtDate(project.deadline)}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Vertical timeline */}
-                <div className="px-5 sm:px-6 py-5">
-                  <div className="relative">
-                    {STAGES.map((stage, i) => {
-                      const isCompleted = currentIdx > i;
-                      const isCurrent   = currentIdx === i;
-                      const isLast      = i === STAGES.length - 1;
-
-                      return (
-                        <div key={stage.status} className="flex gap-4">
-                          {/* Connector column */}
-                          <div className="flex flex-col items-center w-9 shrink-0">
-                            {/* Node */}
-                            <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center z-10 transition-all duration-300 ${
-                              isCompleted
-                                ? "bg-green-500 border-green-500"
-                                : isCurrent
-                                ? "bg-blue-600 border-blue-400 ring-4 ring-blue-500/15"
-                                : "bg-[#0a1628] border-white/10"
-                            }`}>
-                              {isCompleted ? (
-                                <CheckCircle2 className="w-5 h-5 text-white" />
-                              ) : isCurrent ? (
-                                <Loader2 className="w-4 h-4 text-white animate-spin" />
-                              ) : (
-                                <span className="text-[11px] font-bold text-blue-200/20">{i + 1}</span>
-                              )}
-                            </div>
-                            {/* Vertical line */}
-                            {!isLast && (
-                              <div className={`w-0.5 flex-1 my-1 min-h-8 transition-colors ${
-                                isCompleted ? "bg-green-500/40" : "bg-white/5"
-                              }`} />
-                            )}
+                  <FadeUp className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+                    {/* Header */}
+                    <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                          <div className="flex items-center gap-2.5 mb-1">
+                            <h2 className="text-slate-900 font-black text-lg tracking-tight">{project.name}</h2>
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                              {project.status}
+                            </span>
                           </div>
+                          {project.description && (
+                            <p className="text-slate-500 text-xs sm:text-sm max-w-2xl">{project.description}</p>
+                          )}
+                        </div>
+                        {project.liveUrl && (
+                          <a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-1.5 rounded-xl transition-colors shrink-0 shadow-2xs"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" /> Buka Website
+                          </a>
+                        )}
+                      </div>
 
-                          {/* Content card */}
-                          <div className={`flex-1 mb-4 ${isLast ? "mb-0" : ""}`}>
-                            <div className={`rounded-xl border p-4 transition-all duration-300 ${
-                              isCurrent
-                                ? `${stage.activeColor} ${stage.activeBorder}`
-                                : isCompleted
-                                ? "bg-green-500/5 border-green-500/15"
-                                : "bg-white/2 border-white/5"
-                            }`}>
-                              {/* Stage meta */}
-                              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
-                                  isCurrent
-                                    ? `${stage.activeColor} ${stage.activeText} border ${stage.activeBorder}`
-                                    : isCompleted
-                                    ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                                    : "bg-white/5 text-blue-200/25"
+                      {/* Dates row */}
+                      {(project.startDate || project.deadline) && (
+                        <div className="flex flex-wrap gap-4 mt-3 pt-3 border-t border-slate-200/60 text-xs">
+                          {project.startDate && (
+                            <div className="flex items-center gap-1.5 text-slate-500">
+                              <Clock className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Mulai:</span>
+                              <span className="text-slate-800 font-semibold">{fmtDate(project.startDate)}</span>
+                            </div>
+                          )}
+                          {project.deadline && (
+                            <div className="flex items-center gap-1.5 text-slate-500">
+                              <Clock className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Target rilis:</span>
+                              <span className="text-slate-800 font-semibold">{fmtDate(project.deadline)}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Vertical timeline */}
+                    <div className="px-6 py-6">
+                      <div className="relative">
+                        {STAGES.map((stage, i) => {
+                          const isCompleted = currentIdx > i;
+                          const isCurrent   = currentIdx === i;
+                          const isLast      = i === STAGES.length - 1;
+
+                          return (
+                            <div key={stage.status} className="flex gap-4">
+                              {/* Connector column */}
+                              <div className="flex flex-col items-center w-9 shrink-0">
+                                {/* Node */}
+                                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center z-10 transition-all duration-300 ${
+                                  isCompleted
+                                    ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                                    : isCurrent
+                                    ? "bg-[#1E242E] border-slate-800 text-white ring-4 ring-slate-200 scale-105"
+                                    : "bg-slate-100 border-slate-200 text-slate-400"
                                 }`}>
-                                  {stage.sublabel}
-                                </span>
-                                {isCurrent && (
-                                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-white">
-                                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                                    Sedang berjalan
-                                  </span>
-                                )}
-                                {isCompleted && (
-                                  <span className="text-[11px] font-semibold text-green-400">Selesai</span>
+                                  {isCompleted ? (
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  ) : isCurrent ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                  ) : (
+                                    <span className="text-[11px] font-bold">{i + 1}</span>
+                                  )}
+                                </div>
+                                {/* Vertical line */}
+                                {!isLast && (
+                                  <div className={`w-0.5 flex-1 my-1.5 min-h-8 transition-colors ${
+                                    isCompleted ? "bg-emerald-400/60" : "bg-slate-200"
+                                  }`} />
                                 )}
                               </div>
 
-                              {/* Stage name */}
-                              <h3 className={`font-semibold text-sm mb-1.5 ${
-                                isCurrent ? "text-white" : isCompleted ? "text-white/70" : "text-blue-200/30"
-                              }`}>
-                                {stage.label}
-                              </h3>
+                              {/* Content card */}
+                              <div className={`flex-1 mb-4 ${isLast ? "mb-0" : ""}`}>
+                                <div className={`rounded-xl border p-4 transition-all duration-200 ${
+                                  isCurrent
+                                    ? "bg-slate-50 border-slate-300 shadow-2xs"
+                                    : isCompleted
+                                    ? "bg-emerald-50/40 border-emerald-200/80"
+                                    : "bg-white border-slate-100 text-slate-400"
+                                }`}>
+                                  {/* Stage meta */}
+                                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                                      isCurrent
+                                        ? "bg-[#1E242E] text-white"
+                                        : isCompleted
+                                        ? "bg-emerald-100 text-emerald-800"
+                                        : "bg-slate-100 text-slate-500"
+                                    }`}>
+                                      {stage.sublabel}
+                                    </span>
+                                    {isCurrent && (
+                                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-800 animate-pulse" />
+                                        Sedang berjalan
+                                      </span>
+                                    )}
+                                    {isCompleted && (
+                                      <span className="text-[11px] font-bold text-emerald-700">Selesai</span>
+                                    )}
+                                  </div>
 
-                              {/* Stage description */}
-                              <p className={`text-xs leading-relaxed ${
-                                isCurrent ? "text-blue-200/65" : isCompleted ? "text-blue-200/35" : "text-blue-200/20"
-                              }`}>
-                                {stage.desc}
-                              </p>
+                                  {/* Stage name */}
+                                  <h3 className={`font-bold text-sm mb-1 ${
+                                    isCurrent ? "text-slate-900" : isCompleted ? "text-slate-800" : "text-slate-400"
+                                  }`}>
+                                    {stage.label}
+                                  </h3>
+
+                                  {/* Stage description */}
+                                  <p className={`text-xs leading-relaxed ${
+                                    isCurrent ? "text-slate-600" : isCompleted ? "text-slate-500" : "text-slate-400/80"
+                                  }`}>
+                                    {stage.desc}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                          );
+                        })}
+                      </div>
 
-                  {/* Notes from team */}
-                  {project.notes && (
-                    <div className="mt-3 mb-4 p-3.5 bg-amber-500/5 border border-amber-500/15 rounded-xl">
-                      <p className="text-amber-400/70 text-[10px] font-bold uppercase tracking-widest mb-1.5">
-                        Catatan dari Tim
-                      </p>
-                      <p className="text-blue-200/60 text-xs leading-relaxed">{project.notes}</p>
+                      {/* Notes from team */}
+                      {project.notes && (
+                        <div className="mt-4 p-4 bg-amber-50 border border-amber-200/90 rounded-xl">
+                          <p className="text-amber-900 text-[10px] font-black uppercase tracking-wider mb-1">
+                            Catatan dari Tim Pengembang
+                          </p>
+                          <p className="text-amber-950 text-xs leading-relaxed font-medium">{project.notes}</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  
-                  {/* Actions: Asset Upload & Feedback */}
-                  <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap items-center gap-3">
-                    <Link href="/portal/tickets">
-                      <button className="flex items-center gap-2 bg-blue-600/20 hover:bg-blue-600 border border-blue-500/30 text-blue-300 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                        <MessageSquare className="w-4 h-4" />
-                        Diskusi / Unggah Aset
-                      </button>
-                    </Link>
-                    <p className="text-xs text-blue-200/40">Gunakan menu tiket untuk mengirim logo, foto, atau daftar revisi.</p>
-                  </div>
-                </div>
+
+                    {/* Actions: Asset Upload & Feedback */}
+                    <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-xs text-slate-500">
+                        Punya pertanyaan, feedback revisi, atau ingin mengirim logo dan konten?
+                      </p>
+                      <Link href="/portal/tickets">
+                        <button className="flex items-center gap-2 bg-[#1E242E] hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all">
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          Diskusi / Kirim Tiket
+                        </button>
+                      </Link>
+                    </div>
                   </FadeUp>
                 </StaggerItem>
               );

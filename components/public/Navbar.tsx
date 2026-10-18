@@ -220,33 +220,33 @@ export default function Navbar() {
 
   const renderMegaPanel = (menu: MegaMenu) => (
     <div className="grid grid-cols-[minmax(220px,0.75fr)_minmax(0,1.5fr)] gap-6">
-      <div className="rounded-lg border border-blue-400/20 bg-blue-600/10 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-300">
+      <div className="rounded-xl border border-slate-200/90 bg-slate-50 p-5">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
           {menu.eyebrow}
         </p>
-        <p className="mt-3 text-xl font-black leading-tight text-white">
+        <p className="mt-3 text-lg font-black leading-tight text-slate-900">
           {menu.title}
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-blue-100/70">
+        <p className="mt-3 text-xs leading-relaxed text-slate-600">
           {menu.description}
         </p>
         <Link
           href={menu.href}
-          className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-blue-200 transition-colors hover:text-white"
+          className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-slate-900 transition-colors hover:text-slate-700"
           onClick={() => setActiveMega(null)}
         >
           {menu.cta}
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {menu.columns.map((column) => (
           <div key={column.title}>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100/45">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
               {column.title}
             </p>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {column.items.map((item) => {
                 const Icon = item.icon;
 
@@ -255,23 +255,23 @@ export default function Navbar() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setActiveMega(null)}
-                    className="group flex gap-3 rounded-lg border border-white/0 p-3 transition-colors hover:border-white/10 hover:bg-white/[0.04]"
+                    className="group flex gap-3 rounded-xl border border-transparent p-2.5 transition-colors hover:border-slate-200/80 hover:bg-slate-50"
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-400/20 bg-blue-500/10 text-blue-300 transition-colors group-hover:border-blue-300/35 group-hover:bg-blue-500/20 group-hover:text-white">
-                      <Icon className="h-5 w-5" />
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-2xs transition-colors group-hover:border-slate-300 group-hover:bg-slate-100 group-hover:text-slate-950">
+                      <Icon className="h-4 w-4" />
                     </span>
                     <span className="min-w-0">
                       <span className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white">
+                        <span className="text-xs font-bold text-slate-900">
                           {item.label}
                         </span>
                         {item.badge ? (
-                          <span className="rounded-full border border-amber-300/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-black uppercase text-amber-200">
+                          <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-700">
                             {item.badge}
                           </span>
                         ) : null}
                       </span>
-                      <span className="mt-1 block text-xs leading-relaxed text-blue-100/55">
+                      <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
                         {item.description}
                       </span>
                     </span>
@@ -285,6 +285,8 @@ export default function Navbar() {
     </div>
   );
 
+  const isDark = !scrolled && !open;
+
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
@@ -292,10 +294,10 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         open
-          ? "bg-[#071225]/98 border-b border-white/10 shadow-xl shadow-black/30 backdrop-blur-xl"
+          ? "bg-white/98 border-b border-slate-200 shadow-md backdrop-blur-xl"
           : scrolled
-            ? "glass border-b border-white/5 shadow-lg shadow-black/20"
-            : "bg-transparent"
+            ? "bg-white/95 border-b border-slate-200/80 shadow-xs backdrop-blur-md"
+            : "bg-[#1E242E]/80 border-b border-slate-800 backdrop-blur-md"
       }`}
     >
       <nav
@@ -304,23 +306,27 @@ export default function Navbar() {
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <BrandLogoIcon size={34} variant="dark" />
-          <span className="font-black text-white text-lg tracking-tight">
-            MF<span className="text-zinc-400">WEB</span>
+          <BrandLogoIcon size={32} variant={isDark ? "dark" : "light"} />
+          <span className={`font-black text-lg tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
+            MF<span className={isDark ? "text-slate-400" : "text-slate-500"}>WEB</span>
           </span>
         </Link>
 
         {/* Desktop links */}
-        <ul className="hidden md:flex items-center gap-2">
+        <ul className="hidden md:flex items-center gap-1.5">
           {navLinks.map((l) => (
             <li key={l.label}>
               {l.type === "mega" ? (
                 <button
                   type="button"
-                  className={`group inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm transition-colors duration-200 ${
+                  className={`group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-200 ${
                     activeMega === l.key
-                      ? "bg-white/10 text-white"
-                      : "text-blue-100/80 hover:bg-white/5 hover:text-white"
+                      ? isDark
+                        ? "bg-slate-800 text-white font-semibold"
+                        : "bg-slate-100 text-slate-950 font-semibold"
+                      : isDark
+                        ? "text-slate-300 hover:bg-slate-800/70 hover:text-white"
+                        : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-950"
                   }`}
                   aria-expanded={activeMega === l.key}
                   onMouseEnter={() => setActiveMega(l.key)}
@@ -329,15 +335,21 @@ export default function Navbar() {
                 >
                   {l.label}
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      activeMega === l.key ? "rotate-180" : ""
+                    className={`h-3.5 w-3.5 transition-transform ${
+                      isDark ? "text-slate-400" : "text-slate-400"
+                    } ${
+                      activeMega === l.key ? "rotate-180 text-white" : ""
                     }`}
                   />
                 </button>
               ) : (
                 <Link
                   href={l.href}
-                  className="relative rounded-full px-3 py-2 text-sm text-blue-100/80 transition-colors duration-200 hover:bg-white/5 hover:text-white"
+                  className={`relative rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-200 ${
+                    isDark
+                      ? "text-slate-300 hover:bg-slate-800/70 hover:text-white"
+                      : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-950"
+                  }`}
                   onFocus={() => setActiveMega(null)}
                 >
                   {l.label}
@@ -355,7 +367,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="absolute left-4 right-4 top-[calc(100%+0.75rem)] hidden rounded-xl border border-white/10 bg-[#071225]/95 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl md:block lg:left-8 lg:right-8"
+              className="absolute left-4 right-4 top-[calc(100%+0.75rem)] hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 backdrop-blur-xl md:block lg:left-8 lg:right-8"
               onMouseEnter={() => setActiveMega(activeMega)}
             >
               {renderMegaPanel(megaMenus[activeMega])}
@@ -366,12 +378,27 @@ export default function Navbar() {
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link href="/portal/login">
-            <Button variant="ghost" size="sm" className="text-blue-200 hover:text-white hover:bg-white/5">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`rounded-full font-medium text-sm ${
+                isDark
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
+              }`}
+            >
               Login Klien
             </Button>
           </Link>
           <Link href="/contact">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20">
+            <Button
+              size="sm"
+              className={`rounded-full font-semibold text-sm px-5 shadow-xs ${
+                isDark
+                  ? "bg-white hover:bg-slate-100 text-slate-950 font-bold"
+                  : "bg-slate-900 hover:bg-slate-800 text-white font-medium"
+              }`}
+            >
               Konsultasi Gratis
             </Button>
           </Link>
@@ -379,7 +406,9 @@ export default function Navbar() {
 
         {/* Mobile burger */}
         <button
-          className="md:hidden text-white p-1"
+          className={`md:hidden p-1 rounded-lg transition-colors ${
+            isDark ? "text-white hover:bg-slate-800" : "text-slate-900 hover:bg-slate-100"
+          }`}
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -405,7 +434,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="md:hidden overflow-hidden border-t border-white/10 bg-[#071225]/98 shadow-2xl shadow-black/40 backdrop-blur-xl"
+            className="md:hidden overflow-hidden border-t border-slate-200 bg-white/98 shadow-xl backdrop-blur-xl"
           >
             <ul className="flex flex-col px-6 py-4 gap-4">
               {navLinks.map((l, i) => (
@@ -419,7 +448,7 @@ export default function Navbar() {
                     <div>
                       <button
                         type="button"
-                        className="flex w-full items-center justify-between text-sm font-semibold text-blue-100/90"
+                        className="flex w-full items-center justify-between text-sm font-semibold text-slate-800"
                         aria-expanded={mobileSection === l.key}
                         onClick={() =>
                           setMobileSection(mobileSection === l.key ? null : l.key)
@@ -427,8 +456,8 @@ export default function Navbar() {
                       >
                         {l.label}
                         <ChevronDown
-                          className={`h-4 w-4 transition-transform ${
-                            mobileSection === l.key ? "rotate-180" : ""
+                          className={`h-4 w-4 text-slate-400 transition-transform ${
+                            mobileSection === l.key ? "rotate-180 text-slate-800" : ""
                           }`}
                         />
                       </button>
@@ -441,10 +470,10 @@ export default function Navbar() {
                             transition={{ duration: 0.2 }}
                             className="overflow-hidden"
                           >
-                            <div className="mt-3 space-y-4 rounded-lg border border-white/10 bg-[#0a1830]/95 p-3 shadow-inner shadow-black/20">
+                            <div className="mt-3 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-inner">
                               {megaMenus[l.key].columns.map((column) => (
                                 <div key={column.title}>
-                                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-100/40">
+                                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
                                     {column.title}
                                   </p>
                                   <div className="space-y-1">
@@ -455,13 +484,13 @@ export default function Navbar() {
                                         <Link
                                           key={item.href}
                                           href={item.href}
-                                          className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-blue-100/80 hover:bg-white/5 hover:text-white"
+                                          className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-slate-700 hover:bg-slate-200/60 hover:text-slate-950 transition-colors"
                                           onClick={closeMobileMenu}
                                         >
-                                          <Icon className="h-4 w-4 text-blue-300" />
-                                          <span>{item.label}</span>
+                                          <Icon className="h-4 w-4 text-slate-600" />
+                                          <span className="font-medium">{item.label}</span>
                                           {item.badge ? (
-                                            <span className="ml-auto rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-black uppercase text-amber-200">
+                                            <span className="ml-auto rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">
                                               {item.badge}
                                             </span>
                                           ) : null}
@@ -473,7 +502,7 @@ export default function Navbar() {
                               ))}
                               <Link
                                 href={megaMenus[l.key].href}
-                                className="inline-flex items-center gap-2 px-2 pt-1 text-sm font-bold text-blue-200 hover:text-white"
+                                className="inline-flex items-center gap-2 px-2 pt-1 text-sm font-bold text-slate-900 hover:text-slate-700"
                                 onClick={closeMobileMenu}
                               >
                                 {megaMenus[l.key].cta}
@@ -487,7 +516,7 @@ export default function Navbar() {
                   ) : (
                     <Link
                       href={l.href}
-                      className="text-blue-100/80 hover:text-white text-sm"
+                      className="text-slate-700 hover:text-slate-950 text-sm font-medium"
                       onClick={closeMobileMenu}
                     >
                       {l.label}
@@ -495,14 +524,14 @@ export default function Navbar() {
                   )}
                 </motion.li>
               ))}
-              <li className="pt-2 border-t border-white/5 flex flex-col gap-2">
+              <li className="pt-2 border-t border-slate-100 flex flex-col gap-2">
                 <Link href="/portal/login" onClick={closeMobileMenu}>
-                  <Button variant="ghost" size="sm" className="w-full text-blue-200 hover:text-white hover:bg-white/5">
+                  <Button variant="ghost" size="sm" className="w-full text-slate-700 hover:text-slate-950 hover:bg-slate-100 rounded-full">
                     Login Klien
                   </Button>
                 </Link>
                 <Link href="/contact" onClick={closeMobileMenu}>
-                  <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-500 text-white">
+                  <Button size="sm" className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-full">
                     Konsultasi Gratis
                   </Button>
                 </Link>

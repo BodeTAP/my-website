@@ -13,7 +13,7 @@ export default function PayInvoiceButton({
 }) {
   return (
     <Link href={`/bayar/${encodeURIComponent(invoiceNo)}`} target="_blank" rel="noopener noreferrer">
-      <Button className="bg-blue-600 hover:bg-blue-500 text-white h-8 px-4 text-xs whitespace-nowrap font-semibold">
+      <Button className="bg-[#1E242E] hover:bg-slate-800 text-white h-9 px-4 text-xs whitespace-nowrap font-bold rounded-xl shadow-xs transition-colors">
         <CreditCard className="w-3.5 h-3.5 mr-1.5" /> Bayar Sekarang
       </Button>
     </Link>

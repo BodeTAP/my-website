@@ -6,7 +6,7 @@ export default function PortalProfileLoading() {
       <SkeletonTitle className="w-32 mb-8" />
 
       <SkeletonCard className="p-8 space-y-8">
-        <div className="flex flex-col items-center gap-4 border-b border-white/5 pb-8">
+        <div className="flex flex-col items-center gap-4 border-b border-slate-100 pb-8">
           <SkeletonAvatar size="lg" />
           <Skeleton className="h-10 w-32 rounded-xl" />
         </div>

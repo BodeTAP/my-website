@@ -106,10 +106,10 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_STYLE: Record<string, string> = {
-  DRAFT: "bg-white/10 border-white/10 text-blue-100/70",
-  SENT: "bg-blue-500/10 border-blue-500/25 text-blue-200",
-  ACCEPTED: "bg-emerald-500/10 border-emerald-500/25 text-emerald-200",
-  DECLINED: "bg-red-500/10 border-red-500/25 text-red-200",
+  DRAFT: "bg-slate-100 border-slate-200 text-slate-700",
+  SENT: "bg-blue-50 border-blue-200 text-blue-800",
+  ACCEPTED: "bg-emerald-50 border-emerald-200 text-emerald-800",
+  DECLINED: "bg-rose-50 border-rose-200 text-rose-800",
 };
 
 const LAYOUT_OPTIONS: Array<{ value: ProposalDesign["layout"]; label: string; hint: string }> = [
@@ -614,27 +614,27 @@ export default function ProposalGeneratorClient({
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div className="space-y-3">
-          <Link href="/portal/tools" className="inline-flex items-center gap-2 text-sm text-blue-200/55 hover:text-blue-200 transition-colors">
+          <Link href="/portal/tools" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Tools
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-blue-300" />
+            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-800">
+              <FileText className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-white">Proposal Generator</h1>
-              <p className="text-blue-200/50 text-sm">Buat proposal PDF dari template, lalu edit detailnya sebelum dikirim.</p>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Proposal Generator</h1>
+              <p className="text-slate-500 text-sm mt-1">Buat proposal PDF dari template, lalu edit detailnya sebelum dikirim.</p>
             </div>
           </div>
         </div>
 
         <Link href="/portal/credits" className="w-fit">
-          <div className="flex items-center gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 px-4 py-3 hover:bg-amber-500/15 transition-colors">
-            <Coins className="w-5 h-5 text-amber-300" />
+          <div className="flex items-center gap-3 rounded-2xl bg-white border border-slate-200/90 shadow-xs px-4 py-3 hover:border-slate-300 transition-colors">
+            <Coins className="w-5 h-5 text-amber-500" />
             <div>
-              <p className="text-amber-200/55 text-[10px] uppercase tracking-widest font-black">Saldo</p>
-              <p className="text-white font-black">{balance} kredit</p>
+              <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Saldo</p>
+              <p className="text-slate-900 font-black">{balance} kredit</p>
             </div>
           </div>
         </Link>
@@ -642,14 +642,14 @@ export default function ProposalGeneratorClient({
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total Proposal", value: stats.total, tone: "text-blue-300 bg-blue-500/10 border-blue-500/20" },
-          { label: "Draft", value: stats.draft, tone: "text-blue-100/70 bg-white/5 border-white/10" },
-          { label: "Terkirim", value: stats.sent, tone: "text-cyan-300 bg-cyan-500/10 border-cyan-500/20" },
-          { label: "Diterima", value: stats.accepted, tone: "text-emerald-300 bg-emerald-500/10 border-emerald-500/20" },
+          { label: "Total Proposal", value: stats.total, tone: "text-slate-900" },
+          { label: "Draft", value: stats.draft, tone: "text-slate-700" },
+          { label: "Terkirim", value: stats.sent, tone: "text-blue-700" },
+          { label: "Diterima", value: stats.accepted, tone: "text-emerald-700" },
         ].map((item) => (
-          <div key={item.label} className={`rounded-2xl border p-4 ${item.tone}`}>
-            <p className="text-2xl font-black">{item.value}</p>
-            <p className="text-[10px] uppercase tracking-widest font-black opacity-70 mt-1">{item.label}</p>
+          <div key={item.label} className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
+            <p className={`text-2xl font-black ${item.tone}`}>{item.value}</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">{item.label}</p>
           </div>
         ))}
       </div>
@@ -668,10 +668,10 @@ export default function ProposalGeneratorClient({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`h-10 px-4 rounded-xl border inline-flex items-center gap-2 text-sm font-bold transition-colors ${
+              className={`h-10 px-4 rounded-xl border inline-flex items-center gap-2 text-sm font-semibold transition-colors ${
                 active
-                  ? "bg-blue-600 border-blue-500 text-white"
-                  : "bg-white/5 border-white/10 text-blue-200/60 hover:text-white hover:bg-white/10"
+                  ? "bg-[#1E242E] border-slate-800 text-white shadow-xs"
+                  : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-2xs"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -682,8 +682,8 @@ export default function ProposalGeneratorClient({
       </div>
 
       {(message || error) && (
-        <div className={`rounded-2xl border px-4 py-3 text-sm font-bold ${
-          error ? "bg-red-500/10 border-red-500/25 text-red-200" : "bg-emerald-500/10 border-emerald-500/25 text-emerald-200"
+        <div className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+          error ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800"
         }`}
         >
           {error || message}
@@ -692,72 +692,72 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "generate" && (
         <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
-          <section className="rounded-2xl border border-blue-500/20 bg-[#071225] p-5 space-y-5 xl:sticky xl:top-5">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 space-y-5 xl:sticky xl:top-5 shadow-xs">
             <div>
-              <h2 className="text-white font-black text-lg">Brief Proposal</h2>
-              <p className="text-blue-200/45 text-sm mt-1">{proposalCost} kredit per generate.</p>
+              <h2 className="text-slate-900 font-bold text-lg tracking-tight">Brief Proposal</h2>
+              <p className="text-slate-500 text-sm mt-1">{proposalCost} kredit per generate.</p>
             </div>
 
-            <div className="space-y-3">
-              <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Template</label>
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Template</label>
               <select
                 value={selectedTemplate?.id ?? ""}
                 onChange={(event) => setSelectedTemplateId(event.target.value)}
-                className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 outline-none focus:border-slate-900 focus:bg-white"
               >
                 {templates.map((template) => (
-                  <option key={template.id} value={template.id} className="bg-[#07111f] text-white">
+                  <option key={template.id} value={template.id} className="bg-white text-slate-900">
                     {template.name}
                   </option>
                 ))}
               </select>
               {selectedTemplate && (
-                <p className="text-blue-200/45 text-sm leading-relaxed">{selectedTemplate.description}</p>
+                <p className="text-slate-500 text-xs leading-relaxed mt-1">{selectedTemplate.description}</p>
               )}
             </div>
 
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Nama calon klien</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Nama calon klien</label>
                 <input
                   value={formValues.prospectName ?? ""}
                   onChange={(event) => setFormValues((current) => ({ ...current, prospectName: event.target.value }))}
                   placeholder="Budi Santoso"
-                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Nama bisnis/organisasi</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Nama bisnis/organisasi</label>
                 <input
                   value={formValues.businessName ?? ""}
                   onChange={(event) => setFormValues((current) => ({ ...current, businessName: event.target.value }))}
                   placeholder="PT Sukses Bersama"
-                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">WhatsApp</label>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">WhatsApp</label>
                   <input
                     value={formValues.whatsapp ?? ""}
                     onChange={(event) => setFormValues((current) => ({ ...current, whatsapp: event.target.value }))}
                     placeholder="08xxxxxxxxxx"
-                    className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                    className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Berlaku hingga</label>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Berlaku hingga</label>
                   <input
                     type="date"
                     value={formValues.validUntil ?? ""}
                     onChange={(event) => setFormValues((current) => ({ ...current, validUntil: event.target.value }))}
-                    className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                    className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 outline-none focus:border-slate-900 focus:bg-white text-sm"
                   />
                 </div>
               </div>
               {templateVariables.map((variable) => (
-                <div key={variable.key} className="space-y-2">
-                  <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">
+                <div key={variable.key} className="space-y-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
                     {variable.label}
                   </label>
                   {variable.type === "textarea" ? (
@@ -766,14 +766,14 @@ export default function ProposalGeneratorClient({
                       onChange={(event) => setFormValues((current) => ({ ...current, [variable.key]: event.target.value }))}
                       placeholder={variable.placeholder}
                       rows={3}
-                      className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+                      className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white resize-none text-sm"
                     />
                   ) : (
                     <input
                       value={formValues[variable.key] ?? ""}
                       onChange={(event) => setFormValues((current) => ({ ...current, [variable.key]: event.target.value }))}
                       placeholder={variable.placeholder}
-                      className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                      className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                     />
                   )}
                   {variable.type === "textarea" && (formValues[variable.key] ?? "").trim().length > 10 && (
@@ -781,34 +781,34 @@ export default function ProposalGeneratorClient({
                       type="button"
                       onClick={() => enhanceWithAi(variable.key, variable.label)}
                       disabled={enhancingKey === variable.key}
-                      className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-blue-300 hover:text-blue-200 disabled:opacity-50"
+                      className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 disabled:opacity-50"
                     >
-                      {enhancingKey === variable.key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      {enhancingKey === variable.key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-amber-500" />}
                       {enhancingKey === variable.key ? "Memperkaya..." : "Perkaya dengan AI"}
                     </button>
                   )}
                 </div>
               ))}
-              <div className="space-y-2">
-                <label className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Catatan / Terms</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Catatan / Terms</label>
                 <textarea
                   value={formValues.notes ?? ""}
                   onChange={(event) => setFormValues((current) => ({ ...current, notes: event.target.value }))}
                   placeholder="Tambahkan syarat pembayaran, masa berlaku, atau catatan khusus."
                   rows={3}
-                  className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white resize-none text-sm"
                 />
               </div>
             </div>
 
             {!enabled ? (
-              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-blue-100/70">
+              <div className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">
                 Proposal Generator sedang nonaktif sementara.
               </div>
             ) : !canGenerate && (
               <Link
                 href="/portal/credits"
-                className="block rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-100 hover:bg-amber-500/15 transition-colors"
+                className="block rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 hover:bg-amber-100/60 transition-colors"
               >
                 Kredit tidak cukup. Butuh {proposalCost} kredit untuk membuat proposal.
               </Link>
@@ -819,7 +819,7 @@ export default function ProposalGeneratorClient({
                 type="button"
                 disabled={!selectedTemplate || !canGenerate || loading}
                 onClick={generateProposal}
-                className="h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold disabled:opacity-50"
+                className="h-12 w-full rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-medium shadow-xs disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -836,41 +836,41 @@ export default function ProposalGeneratorClient({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
             {result ? (
               <div className="space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-white/10 pb-5">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-5">
                   <div className="flex-1 space-y-3">
-                    <p className="text-blue-200/45 text-xs font-black uppercase tracking-widest">Preview</p>
+                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Preview</p>
                     <input
                       value={resultTitle}
                       onChange={(event) => setResultTitle(event.target.value)}
-                      className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white font-black text-lg outline-none focus:border-blue-500"
+                      className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 font-bold text-lg outline-none focus:border-slate-900 focus:bg-white"
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         value={resultMeta.prospectName}
                         onChange={(event) => setResultMeta((current) => ({ ...current, prospectName: event.target.value }))}
                         placeholder="Nama calon klien"
-                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                        className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                       />
                       <input
                         value={resultMeta.businessName}
                         onChange={(event) => setResultMeta((current) => ({ ...current, businessName: event.target.value }))}
                         placeholder="Nama bisnis/organisasi"
-                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                        className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                       />
                       <input
                         value={resultMeta.whatsapp}
                         onChange={(event) => setResultMeta((current) => ({ ...current, whatsapp: event.target.value }))}
                         placeholder="WhatsApp"
-                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                        className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                       />
                       <input
                         type="date"
                         value={resultMeta.validUntil}
                         onChange={(event) => setResultMeta((current) => ({ ...current, validUntil: event.target.value }))}
-                        className="h-10 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white outline-none focus:border-blue-500"
+                        className="h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 outline-none focus:border-slate-900 focus:bg-white text-sm"
                       />
                     </div>
                     <textarea
@@ -878,17 +878,17 @@ export default function ProposalGeneratorClient({
                       onChange={(event) => setResultMeta((current) => ({ ...current, notes: event.target.value }))}
                       placeholder="Catatan / terms proposal"
                       rows={2}
-                      className="w-full rounded-xl bg-[#07111f] border border-white/10 px-3 py-2 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+                      className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white resize-none text-sm"
                     />
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-blue-200/40 text-sm">{result.proposalNo ?? "Belum bernomor"} - {result.templateName ?? "Template custom"} - {formatDate(result.createdAt)}</p>
+                      <p className="text-slate-500 text-xs font-medium">{result.proposalNo ?? "Belum bernomor"} - {result.templateName ?? "Template custom"} - {formatDate(result.createdAt)}</p>
                       <select
                         value={resultStatus}
                         onChange={(event) => setResultStatus(event.target.value)}
-                        className={`h-9 rounded-xl border px-3 text-xs font-black outline-none ${STATUS_STYLE[resultStatus] ?? STATUS_STYLE.DRAFT}`}
+                        className={`h-9 rounded-xl border px-3 text-xs font-bold outline-none ${STATUS_STYLE[resultStatus] ?? STATUS_STYLE.DRAFT}`}
                       >
                         {STATUS_OPTIONS.map((status) => (
-                          <option key={status.value} value={status.value} className="bg-[#07111f] text-white">
+                          <option key={status.value} value={status.value} className="bg-white text-slate-900">
                             {status.label}
                           </option>
                         ))}
@@ -897,7 +897,7 @@ export default function ProposalGeneratorClient({
                         type="button"
                         disabled={savingMeta}
                         onClick={saveResultMeta}
-                        className="h-9 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                        className="h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs font-semibold text-xs"
                       >
                         {savingMeta ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                         Simpan
@@ -905,18 +905,18 @@ export default function ProposalGeneratorClient({
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Link href={`/portal/tools/proposal-generator/${result.id}`} className="inline-flex h-10 items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-sm font-bold">
+                    <Link href={`/portal/tools/proposal-generator/${result.id}`} className="inline-flex h-10 items-center justify-center rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 text-sm font-semibold shadow-2xs transition-colors">
                       <Eye className="w-4 h-4 mr-2" />
                       Detail
                     </Link>
-                    <Button type="button" onClick={copyResult} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
+                    <Button type="button" onClick={copyResult} className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs font-semibold text-sm">
                       <Copy className="w-4 h-4 mr-2" />
                       Salin
                     </Button>
                     <a
                       href={`/api/portal/tools/proposal-generator/${result.id}/pdf`}
                       target="_blank"
-                      className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white px-3 text-sm font-bold transition-colors"
+                      className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-3 text-sm font-semibold transition-colors shadow-xs"
                     >
                       <Download className="w-4 h-4 mr-2" />
                       PDF
@@ -925,18 +925,18 @@ export default function ProposalGeneratorClient({
                       href={buildWhatsAppUrl({ ...result, ...resultMeta })}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-sm font-bold transition-colors"
+                      className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 text-sm font-semibold transition-colors shadow-2xs"
                     >
                       <Send className="w-4 h-4 mr-2" />
                       WhatsApp
                     </a>
-                    <Button type="button" onClick={downloadResult} className="rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white">
+                    <Button type="button" onClick={downloadResult} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-medium text-sm shadow-xs">
                       Unduh TXT
                     </Button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl overflow-hidden bg-white shadow-2xl ring-1 ring-white/10">
+                <div className="rounded-2xl overflow-hidden bg-white shadow-xl ring-1 ring-slate-200">
                   <iframe
                     key={`${result.id}-${pdfPreviewVersion}`}
                     src={`/api/portal/tools/proposal-generator/${result.id}/pdf?preview=1&v=${pdfPreviewVersion}`}
@@ -948,11 +948,11 @@ export default function ProposalGeneratorClient({
             ) : (
               <div className="h-full min-h-[420px] flex items-center justify-center text-center">
                 <div>
-                  <div className="mx-auto w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                    <FileText className="w-7 h-7 text-blue-200/45" />
+                  <div className="mx-auto w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-4 text-slate-500">
+                    <FileText className="w-7 h-7" />
                   </div>
-                  <p className="text-white font-black">Belum ada preview</p>
-                  <p className="text-blue-200/45 text-sm mt-1">Isi brief dan generate proposal pertama Anda.</p>
+                  <p className="text-slate-900 font-bold">Belum ada preview</p>
+                  <p className="text-slate-500 text-sm mt-1">Isi brief dan generate proposal pertama Anda.</p>
                 </div>
               </div>
             )}
@@ -962,24 +962,24 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "design" && (
         <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
-          <section className="rounded-2xl border border-blue-500/20 bg-[#071225] p-5 space-y-5">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 space-y-5 shadow-xs">
             <div>
-              <h2 className="text-white font-black text-lg">Brand Kit Proposal</h2>
-              <p className="text-blue-200/45 text-sm mt-1">Atur tampilan PDF tanpa mengubah isi template.</p>
+              <h2 className="text-slate-900 font-bold text-lg tracking-tight">Brand Kit Proposal</h2>
+              <p className="text-slate-500 text-sm mt-1">Atur tampilan PDF tanpa mengubah isi template.</p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-4 space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 rounded-2xl border border-slate-200 bg-white flex items-center justify-center overflow-hidden shadow-2xs">
                   {design.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={design.logoUrl} alt="Logo proposal" className="w-full h-full object-contain p-2" />
                   ) : (
-                    <ImageIcon className="w-8 h-8 text-blue-200/35" />
+                    <ImageIcon className="w-8 h-8 text-slate-300" />
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-sm font-bold transition-colors">
+                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 text-sm font-semibold shadow-2xs transition-colors">
                     {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                     Upload Logo
                     <input
@@ -997,7 +997,7 @@ export default function ProposalGeneratorClient({
                     <button
                       type="button"
                       onClick={() => setDesign((current) => ({ ...current, logoUrl: null }))}
-                      className="block text-sm font-bold text-red-200/80 hover:text-red-100"
+                      className="block text-xs font-semibold text-rose-600 hover:text-rose-700"
                     >
                       Hapus logo
                     </button>
@@ -1007,84 +1007,84 @@ export default function ProposalGeneratorClient({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="space-y-2">
-                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Warna utama</span>
-                <div className="flex h-12 rounded-xl bg-[#07111f] border border-white/10 overflow-hidden">
+              <label className="space-y-1.5">
+                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Warna utama</span>
+                <div className="flex h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden focus-within:border-slate-900 focus-within:bg-white">
                   <input
                     type="color"
                     value={design.primaryColor}
                     onChange={(event) => setDesign((current) => ({ ...current, primaryColor: event.target.value }))}
-                    className="w-14 h-full bg-transparent"
+                    className="w-14 h-full bg-transparent cursor-pointer border-0"
                   />
                   <input
                     value={design.primaryColor}
                     onChange={(event) => setDesign((current) => ({ ...current, primaryColor: event.target.value }))}
-                    className="flex-1 bg-transparent px-3 text-white outline-none"
+                    className="flex-1 bg-transparent px-3 text-slate-900 outline-none text-sm font-mono"
                   />
                 </div>
               </label>
-              <label className="space-y-2">
-                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Warna aksen</span>
-                <div className="flex h-12 rounded-xl bg-[#07111f] border border-white/10 overflow-hidden">
+              <label className="space-y-1.5">
+                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Warna aksen</span>
+                <div className="flex h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden focus-within:border-slate-900 focus-within:bg-white">
                   <input
                     type="color"
                     value={design.accentColor}
                     onChange={(event) => setDesign((current) => ({ ...current, accentColor: event.target.value }))}
-                    className="w-14 h-full bg-transparent"
+                    className="w-14 h-full bg-transparent cursor-pointer border-0"
                   />
                   <input
                     value={design.accentColor}
                     onChange={(event) => setDesign((current) => ({ ...current, accentColor: event.target.value }))}
-                    className="flex-1 bg-transparent px-3 text-white outline-none"
+                    className="flex-1 bg-transparent px-3 text-slate-900 outline-none text-sm font-mono"
                   />
                 </div>
               </label>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-xs font-black uppercase tracking-widest text-blue-200/45">Layout PDF</p>
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Layout PDF</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {LAYOUT_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => setDesign((current) => ({ ...current, layout: option.value }))}
-                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                    className={`rounded-2xl border p-4 text-left transition-all ${
                       design.layout === option.value
-                        ? "bg-blue-600/20 border-blue-500/50"
-                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                        ? "bg-slate-50 border-slate-900 shadow-xs"
+                        : "bg-white border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <p className="text-white font-black">{option.label}</p>
-                    <p className="text-blue-200/45 text-sm mt-1">{option.hint}</p>
+                    <p className="text-slate-900 font-bold text-sm">{option.label}</p>
+                    <p className="text-slate-500 text-xs mt-1 leading-relaxed">{option.hint}</p>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="space-y-2">
-                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Font</span>
+              <label className="space-y-1.5">
+                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Font</span>
                 <select
                   value={design.fontStyle}
                   onChange={(event) => setDesign((current) => ({ ...current, fontStyle: event.target.value as ProposalDesign["fontStyle"] }))}
-                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 outline-none focus:border-slate-900 focus:bg-white text-sm"
                 >
                   {FONT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-[#07111f] text-white">{option.label}</option>
+                    <option key={option.value} value={option.value} className="bg-white text-slate-900">{option.label}</option>
                   ))}
                 </select>
               </label>
-              <label className="space-y-2">
-                <span className="block text-xs font-black uppercase tracking-widest text-blue-200/45">Posisi logo</span>
+              <label className="space-y-1.5">
+                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Posisi logo</span>
                 <select
                   value={design.logoPosition}
                   onChange={(event) => setDesign((current) => ({ ...current, logoPosition: event.target.value as ProposalDesign["logoPosition"] }))}
-                  className="w-full h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white outline-none focus:border-blue-500"
+                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 outline-none focus:border-slate-900 focus:bg-white text-sm"
                 >
-                  <option value="left" className="bg-[#07111f] text-white">Kiri</option>
-                  <option value="center" className="bg-[#07111f] text-white">Tengah</option>
-                  <option value="right" className="bg-[#07111f] text-white">Kanan</option>
+                  <option value="left" className="bg-white text-slate-900">Kiri</option>
+                  <option value="center" className="bg-white text-slate-900">Tengah</option>
+                  <option value="right" className="bg-white text-slate-900">Kanan</option>
                 </select>
               </label>
             </div>
@@ -1097,24 +1097,24 @@ export default function ProposalGeneratorClient({
                 ["showRecipient", "Tampilkan data penerima"],
                 ["showFooter", "Tampilkan footer"],
               ].map(([key, label]) => (
-                <label key={key} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm font-bold text-blue-100/75">
+                <label key={key} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm font-semibold text-slate-700 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={Boolean(design[key as keyof ProposalDesign])}
                     onChange={(event) => setDesign((current) => ({ ...current, [key]: event.target.checked }))}
-                    className="accent-blue-500"
+                    className="accent-slate-900 w-4 h-4 rounded"
                   />
                   {label}
                 </label>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <Button
                 type="button"
                 disabled={savingDesign}
                 onClick={saveDesignDefaults}
-                className="h-12 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 font-bold"
+                className="h-12 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold shadow-2xs"
               >
                 {savingDesign ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Simpan Brand Kit
@@ -1123,7 +1123,7 @@ export default function ProposalGeneratorClient({
                 type="button"
                 disabled={savingMeta}
                 onClick={applyDesignToProposal}
-                className="h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold"
+                className="h-12 rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-medium shadow-xs"
               >
                 {savingMeta ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Palette className="w-4 h-4 mr-2" />}
                 Terapkan ke Preview
@@ -1131,24 +1131,24 @@ export default function ProposalGeneratorClient({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 min-h-[620px]">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 min-h-[620px] shadow-xs">
             {result ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-blue-200/45 text-xs font-black uppercase tracking-widest">Preview Desain</p>
-                    <h2 className="text-white font-black mt-1">{result.title}</h2>
+                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Preview Desain</p>
+                    <h2 className="text-slate-900 font-bold mt-1 text-base">{result.title}</h2>
                   </div>
                   <a
                     href={`/api/portal/tools/proposal-generator/${result.id}/pdf`}
                     target="_blank"
-                    className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white px-3 text-sm font-bold transition-colors"
+                    className="inline-flex h-10 items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-3 text-sm font-semibold transition-colors shadow-xs"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     PDF
                   </a>
                 </div>
-                <div className="rounded-2xl overflow-hidden bg-white shadow-2xl ring-1 ring-white/10">
+                <div className="rounded-2xl overflow-hidden bg-white shadow-xl ring-1 ring-slate-200">
                   <iframe
                     key={`design-${result.id}-${pdfPreviewVersion}`}
                     src={`/api/portal/tools/proposal-generator/${result.id}/pdf?preview=1&v=${pdfPreviewVersion}`}
@@ -1160,11 +1160,11 @@ export default function ProposalGeneratorClient({
             ) : (
               <div className="min-h-[540px] flex items-center justify-center text-center">
                 <div>
-                  <div className="mx-auto w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                    <Palette className="w-7 h-7 text-blue-200/45" />
+                  <div className="mx-auto w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-4 text-slate-500">
+                    <Palette className="w-7 h-7" />
                   </div>
-                  <p className="text-white font-black">Belum ada proposal untuk preview</p>
-                  <p className="text-blue-200/45 text-sm mt-1">Simpan brand kit, lalu generate proposal untuk melihat hasil desainnya.</p>
+                  <p className="text-slate-900 font-bold">Belum ada proposal untuk preview</p>
+                  <p className="text-slate-500 text-sm mt-1">Simpan brand kit, lalu generate proposal untuk melihat hasil desainnya.</p>
                 </div>
               </div>
             )}
@@ -1174,13 +1174,13 @@ export default function ProposalGeneratorClient({
 
       {activeTab === "templates" && (
         <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
-          <section className="rounded-2xl border border-white/10 bg-[#071225] p-5 space-y-3">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 space-y-3 shadow-xs">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-white font-black text-lg">Daftar Template</h2>
-                <p className="text-blue-200/45 text-sm mt-1">{templates.length} template tersedia</p>
+                <h2 className="text-slate-900 font-bold text-lg tracking-tight">Daftar Template</h2>
+                <p className="text-slate-500 text-sm mt-1">{templates.length} template tersedia</p>
               </div>
-              <Button type="button" onClick={() => startEdit()} className="rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold">
+              <Button type="button" onClick={() => startEdit()} className="rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-medium shadow-xs">
                 <Plus className="w-4 h-4 mr-2" />
                 Baru
               </Button>
@@ -1188,47 +1188,47 @@ export default function ProposalGeneratorClient({
 
             <div className="space-y-3 pt-2">
               {templates.map((template) => (
-                <div key={template.id} className="rounded-2xl bg-[#07111f]/70 border border-white/10 p-4">
+                <div key={template.id} className="rounded-2xl bg-slate-50/70 border border-slate-200 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-white font-black">{template.name}</h3>
-                        <span className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-wider border ${
+                        <h3 className="text-slate-900 font-bold text-sm">{template.name}</h3>
+                        <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
                           template.isDefault
-                            ? "bg-blue-500/10 border-blue-500/20 text-blue-200"
-                            : "bg-emerald-500/10 border-emerald-500/20 text-emerald-200"
+                            ? "bg-slate-200/80 border-slate-300 text-slate-700"
+                            : "bg-emerald-50 border-emerald-200 text-emerald-800"
                         }`}
                         >
                           {template.isDefault ? "Bawaan" : "Custom"}
                         </span>
                       </div>
-                      <p className="text-blue-200/40 text-sm mt-1">{template.category}</p>
+                      <p className="text-slate-500 text-xs mt-1">{template.category}</p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="flex flex-wrap gap-2 mt-3.5">
                     {template.isDefault ? (
                       <Button
                         type="button"
                         disabled={saving}
                         onClick={() => duplicateTemplate(template.id)}
-                        className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                        className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold shadow-2xs text-xs h-9"
                       >
-                        <Copy className="w-4 h-4 mr-2" />
+                        <Copy className="w-3.5 h-3.5 mr-1.5" />
                         Duplikat
                       </Button>
                     ) : (
                       <>
-                        <Button type="button" onClick={() => startEdit(template)} className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10">
-                          <Pencil className="w-4 h-4 mr-2" />
+                        <Button type="button" onClick={() => startEdit(template)} className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold shadow-2xs text-xs h-9">
+                          <Pencil className="w-3.5 h-3.5 mr-1.5" />
                           Edit
                         </Button>
                         <Button
                           type="button"
                           disabled={saving}
                           onClick={() => deleteTemplate(template.id)}
-                          className="rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-200 border border-red-500/20"
+                          className="rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold text-xs h-9"
                         >
-                          <Trash2 className="w-4 h-4 mr-2" />
+                          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                           Hapus
                         </Button>
                       </>
@@ -1239,10 +1239,10 @@ export default function ProposalGeneratorClient({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-blue-500/20 bg-[#071225] p-5 space-y-5">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 space-y-5 shadow-xs">
             <div>
-              <h2 className="text-white font-black text-lg">{draft.id ? "Edit Template" : "Template Baru"}</h2>
-              <p className="text-blue-200/45 text-sm mt-1">Template custom tersimpan khusus untuk akun Anda.</p>
+              <h2 className="text-slate-900 font-bold text-lg tracking-tight">{draft.id ? "Edit Template" : "Template Baru"}</h2>
+              <p className="text-slate-500 text-sm mt-1">Template custom tersimpan khusus untuk akun Anda.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1250,13 +1250,13 @@ export default function ProposalGeneratorClient({
                 value={draft.name}
                 onChange={(event) => updateDraft({ name: event.target.value })}
                 placeholder="Nama template"
-                className="h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                className="h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
               />
               <input
                 value={draft.category}
                 onChange={(event) => updateDraft({ category: event.target.value })}
                 placeholder="Kategori"
-                className="h-12 rounded-xl bg-[#07111f] border border-white/10 px-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                className="h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
               />
             </div>
 
@@ -1265,20 +1265,20 @@ export default function ProposalGeneratorClient({
               onChange={(event) => updateDraft({ description: event.target.value })}
               placeholder="Deskripsi singkat"
               rows={2}
-              className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+              className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white resize-none text-sm"
             />
 
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-white font-black">Field Brief</h3>
+                <h3 className="text-slate-900 font-bold text-sm">Field Brief</h3>
                 <Button
                   type="button"
                   onClick={() => updateDraft({
                     variables: [...draft.variables, { key: "", label: "", placeholder: "" }],
                   })}
-                  className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                  className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold shadow-2xs text-xs h-9"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-3.5 h-3.5 mr-1.5" />
                   Field
                 </Button>
               </div>
@@ -1290,7 +1290,7 @@ export default function ProposalGeneratorClient({
                       variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, key: event.target.value } : item),
                     })}
                     placeholder="key"
-                    className="h-11 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                    className="h-11 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                   />
                   <input
                     value={variable.label}
@@ -1298,7 +1298,7 @@ export default function ProposalGeneratorClient({
                       variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item),
                     })}
                     placeholder="Label"
-                    className="h-11 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                    className="h-11 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                   />
                   <input
                     value={variable.placeholder ?? ""}
@@ -1306,12 +1306,12 @@ export default function ProposalGeneratorClient({
                       variables: draft.variables.map((item, itemIndex) => itemIndex === index ? { ...item, placeholder: event.target.value } : item),
                     })}
                     placeholder="Placeholder"
-                    className="h-11 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                    className="h-11 rounded-xl bg-slate-50 border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm"
                   />
                   <button
                     type="button"
                     onClick={() => updateDraft({ variables: draft.variables.filter((_item, itemIndex) => itemIndex !== index) })}
-                    className="h-11 w-11 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/15 flex items-center justify-center"
+                    className="h-11 w-11 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 flex items-center justify-center transition-colors"
                     aria-label="Hapus field"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1322,20 +1322,20 @@ export default function ProposalGeneratorClient({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-white font-black">Section Proposal</h3>
+                <h3 className="text-slate-900 font-bold text-sm">Section Proposal</h3>
                 <Button
                   type="button"
                   onClick={() => updateDraft({
                     sections: [...draft.sections, { title: "", body: "" }],
                   })}
-                  className="rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                  className="rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold shadow-2xs text-xs h-9"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-3.5 h-3.5 mr-1.5" />
                   Section
                 </Button>
               </div>
               {draft.sections.map((section, index) => (
-                <div key={index} className="rounded-2xl bg-[#07111f]/70 border border-white/10 p-4 space-y-3">
+                <div key={index} className="rounded-2xl bg-slate-50/70 border border-slate-200 p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <input
                       value={section.title}
@@ -1343,12 +1343,12 @@ export default function ProposalGeneratorClient({
                         sections: draft.sections.map((item, itemIndex) => itemIndex === index ? { ...item, title: event.target.value } : item),
                       })}
                       placeholder="Judul section"
-                      className="h-11 flex-1 rounded-xl bg-[#07111f] border border-white/10 px-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                      className="h-11 flex-1 rounded-xl bg-white border border-slate-200 px-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => updateDraft({ sections: draft.sections.filter((_item, itemIndex) => itemIndex !== index) })}
-                      className="h-11 w-11 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/15 flex items-center justify-center"
+                      className="h-11 w-11 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 flex items-center justify-center transition-colors"
                       aria-label="Hapus section"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1361,7 +1361,7 @@ export default function ProposalGeneratorClient({
                     })}
                     placeholder="Isi section"
                     rows={5}
-                    className="w-full rounded-xl bg-[#07111f] border border-white/10 px-4 py-3 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500 resize-none"
+                    className="w-full rounded-xl bg-white border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 resize-none text-sm"
                   />
                 </div>
               ))}
@@ -1371,7 +1371,7 @@ export default function ProposalGeneratorClient({
               type="button"
               disabled={saving}
               onClick={saveTemplate}
-              className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold"
+              className="w-full h-12 rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-medium shadow-xs"
             >
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               Simpan Template
@@ -1381,14 +1381,14 @@ export default function ProposalGeneratorClient({
       )}
 
       {activeTab === "history" && (
-        <section className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <section className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+          <div className="px-5 py-4 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50">
             <div>
-              <h2 className="text-white font-black text-lg">Riwayat Proposal</h2>
-              <p className="text-blue-200/45 text-sm mt-1">{filteredProposals.length} dari {proposals.length} proposal</p>
+              <h2 className="text-slate-900 font-bold text-lg tracking-tight">Riwayat Proposal</h2>
+              <p className="text-slate-500 text-xs mt-0.5">{filteredProposals.length} dari {proposals.length} proposal</p>
             </div>
             <div className="relative w-full lg:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/35" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 value={historyQuery}
                 onChange={(event) => {
@@ -1396,17 +1396,17 @@ export default function ProposalGeneratorClient({
                   setHistoryPage(1);
                 }}
                 placeholder="Cari judul, template, status..."
-                className="w-full h-11 rounded-xl bg-[#07111f] border border-white/10 pl-11 pr-4 text-white placeholder:text-blue-200/25 outline-none focus:border-blue-500"
+                className="w-full h-10 rounded-xl bg-white border border-slate-200 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 text-sm shadow-2xs"
               />
             </div>
           </div>
-          <div className="divide-y divide-white/10">
+          <div className="divide-y divide-slate-100">
             {proposals.length === 0 ? (
-              <div className="p-8 text-center text-blue-200/45">Belum ada proposal.</div>
+              <div className="p-8 text-center text-slate-400 text-sm">Belum ada proposal.</div>
             ) : filteredProposals.length === 0 ? (
-              <div className="p-8 text-center text-blue-200/45">Tidak ada proposal yang cocok.</div>
+              <div className="p-8 text-center text-slate-400 text-sm">Tidak ada proposal yang cocok.</div>
             ) : pagedProposals.map((proposal) => (
-              <div key={proposal.id} className="px-5 py-4 hover:bg-white/5 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div key={proposal.id} className="px-5 py-4 hover:bg-slate-50/80 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -1416,29 +1416,29 @@ export default function ProposalGeneratorClient({
                   className="text-left flex-1"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-white font-bold">{proposal.title}</p>
+                    <p className="text-slate-900 font-bold text-sm">{proposal.title}</p>
                     {proposal.proposalNo && (
-                      <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-blue-200/70">
+                      <span className="rounded-lg border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
                         {proposal.proposalNo}
                       </span>
                     )}
-                    <span className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${STATUS_STYLE[proposal.status] ?? STATUS_STYLE.DRAFT}`}>
+                    <span className={`rounded-lg border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${STATUS_STYLE[proposal.status] ?? STATUS_STYLE.DRAFT}`}>
                       {STATUS_OPTIONS.find((status) => status.value === proposal.status)?.label ?? proposal.status}
                     </span>
                   </div>
-                  <p className="text-blue-200/40 text-sm mt-1">{proposal.businessName ?? proposal.prospectName ?? proposal.templateName ?? "Template custom"} - {formatDate(proposal.createdAt)}</p>
+                  <p className="text-slate-500 text-xs mt-1">{proposal.businessName ?? proposal.prospectName ?? proposal.templateName ?? "Template custom"} • {formatDate(proposal.createdAt)}</p>
                 </button>
                 <div className="flex flex-wrap gap-2">
-                  <Link href={`/portal/tools/proposal-generator/${proposal.id}`} className="inline-flex h-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3 text-xs font-bold">
-                    <Eye className="w-4 h-4 mr-2" />
+                  <Link href={`/portal/tools/proposal-generator/${proposal.id}`} className="inline-flex h-9 items-center justify-center rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 text-xs font-semibold shadow-2xs transition-colors">
+                    <Eye className="w-3.5 h-3.5 mr-1.5" />
                     Detail
                   </Link>
-                  <a href={`/api/portal/tools/proposal-generator/${proposal.id}/pdf`} target="_blank" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-xs font-bold">
-                    <Download className="w-4 h-4 mr-2" />
+                  <a href={`/api/portal/tools/proposal-generator/${proposal.id}/pdf`} target="_blank" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 text-xs font-semibold shadow-2xs transition-colors">
+                    <Download className="w-3.5 h-3.5 mr-1.5" />
                     PDF
                   </a>
-                  <a href={buildWhatsAppUrl(proposal)} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 px-3 text-xs font-bold">
-                    <Send className="w-4 h-4 mr-2" />
+                  <a href={buildWhatsAppUrl(proposal)} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 text-xs font-semibold shadow-2xs transition-colors">
+                    <Send className="w-3.5 h-3.5 mr-1.5" />
                     WA
                   </a>
                   <button
@@ -1447,7 +1447,7 @@ export default function ProposalGeneratorClient({
                       selectProposal(proposal);
                       setActiveTab("generate");
                     }}
-                    className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-200 hover:bg-blue-500/15 flex items-center justify-center"
+                    className="h-9 w-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 flex items-center justify-center transition-colors"
                     aria-label="Pilih proposal"
                   >
                     <Check className="w-4 h-4" />
@@ -1457,14 +1457,14 @@ export default function ProposalGeneratorClient({
             ))}
           </div>
           {filteredProposals.length > HISTORY_PAGE_SIZE && (
-            <div className="px-5 py-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <p className="text-blue-200/45 text-sm">Halaman {historyPage} dari {historyPageCount}</p>
-              <div className="flex items-center gap-2">
+            <div className="px-5 py-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+              <p className="text-slate-500 text-xs font-medium">Halaman {historyPage} dari {historyPageCount}</p>
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   disabled={historyPage <= 1}
                   onClick={() => setHistoryPage((page) => Math.max(1, page - 1))}
-                  className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 text-blue-200/70 disabled:opacity-40 hover:bg-white/10 flex items-center justify-center"
+                  className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-40 hover:bg-slate-50 flex items-center justify-center shadow-2xs"
                   aria-label="Halaman sebelumnya"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -1474,7 +1474,7 @@ export default function ProposalGeneratorClient({
                     key={page}
                     type="button"
                     onClick={() => setHistoryPage(page)}
-                    className={`h-9 min-w-9 rounded-xl border px-3 text-sm font-bold ${page === historyPage ? "bg-blue-600 border-blue-500 text-white" : "bg-white/5 border-white/10 text-blue-200/70 hover:bg-white/10"}`}
+                    className={`h-9 min-w-9 rounded-xl border px-3 text-xs font-bold transition-colors ${page === historyPage ? "bg-[#1E242E] border-slate-800 text-white shadow-xs" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs"}`}
                   >
                     {page}
                   </button>
@@ -1483,7 +1483,7 @@ export default function ProposalGeneratorClient({
                   type="button"
                   disabled={historyPage >= historyPageCount}
                   onClick={() => setHistoryPage((page) => Math.min(historyPageCount, page + 1))}
-                  className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 text-blue-200/70 disabled:opacity-40 hover:bg-white/10 flex items-center justify-center"
+                  className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-40 hover:bg-slate-50 flex items-center justify-center shadow-2xs"
                   aria-label="Halaman berikutnya"
                 >
                   <ChevronRight className="w-4 h-4" />

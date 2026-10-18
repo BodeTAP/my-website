@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import PriceCalculator from "./PriceCalculator";
 import { FadeUp } from "@/components/public/motion";
-import { Calculator } from "lucide-react";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { JsonLd, buildBreadcrumbJsonLd } from "@/components/public/JsonLd";
 
@@ -20,31 +19,40 @@ export default function KalkulasiPage() {
   ]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#030914]">
+    <div className="min-h-screen bg-white">
       <JsonLd id="json-ld-breadcrumb-kalkulasi-harga" data={breadcrumbJsonLd} />
-      {/* Background Orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-600/20 to-indigo-600/10 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" />
-      
-      <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <Breadcrumb items={[{ label: "Kalkulasi Harga" }]} />
-          
-          <FadeUp delay={0} className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 glass px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-blue-300 mb-8 border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)] bg-blue-500/5">
-              <Calculator className="w-4 h-4 text-blue-400" />
-              Kalkulator Harga
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-6 tracking-tight">
-              Hitung <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Investasi</span> <br className="hidden sm:block" />Digital Anda
-            </h1>
-            <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-              Pilih tipe platform dan fitur tambahan yang bisnis Anda butuhkan. Dapatkan estimasi anggaran awal secara transparan dan instan.
-            </p>
-          </FadeUp>
 
+      {/* ── Full-Width Deep Slate Hero ────────────────────── */}
+      <section className="w-full bg-[#1E242E] text-white pt-28 pb-16 sm:pt-32 sm:pb-24 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb items={[{ label: "Kalkulasi Harga" }]} />
+
+          <div className="max-w-3xl mx-auto text-center mt-6">
+            <FadeUp>
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <span className="h-px w-8 bg-slate-500" />
+                <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+                  Estimasi Investasi Digital
+                </span>
+                <span className="h-px w-8 bg-slate-500" />
+              </div>
+              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.15] mb-4">
+                Hitung estimasi biaya website Anda
+              </h1>
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
+                Pilih model website dan fitur fungsional yang bisnis Anda perlukan. Dapatkan perkiraan anggaran awal secara transparan dan terukur.
+              </p>
+            </FadeUp>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Calculator Main Section ───────────────────────── */}
+      <section className="py-16 sm:py-20 bg-[#F8F9FA] border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <PriceCalculator />
         </div>
-      </div>
+      </section>
     </div>
   );
 }

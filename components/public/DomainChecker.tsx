@@ -85,12 +85,12 @@ export default function DomainChecker() {
   };
 
   return (
-    <div id="domain-checker" className="mx-auto max-w-2xl rounded-2xl border border-white/10 bg-[#071225] p-6 sm:p-8">
-      <h3 className="text-white font-bold text-xl mb-2 text-center">
+    <div id="domain-checker" className="mx-auto max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+      <h3 className="text-slate-900 font-extrabold text-xl mb-2 text-center">
         Cek Ketersediaan Domain Bisnis Anda
       </h3>
-      <p className="text-blue-200/60 text-sm text-center mb-6">
-        Ketik nama bisnis Anda untuk melihat apakah domainnya masih tersedia.
+      <p className="text-slate-500 text-xs sm:text-sm text-center mb-6">
+        Ketik nama bisnis Anda untuk melihat apakah domain .com atau .id masih tersedia.
       </p>
 
       <form onSubmit={handleCheck} className="flex gap-2">
@@ -99,13 +99,13 @@ export default function DomainChecker() {
             value={query}
             onChange={(e) => { setQuery(e.target.value); setResult(null); setSuggestions([]); }}
             placeholder="namabisnisanda.com"
-            className="bg-white/5 border-white/10 text-white placeholder:text-blue-200/30 pr-4 h-12"
+            className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 h-12 rounded-full px-5 text-sm"
           />
         </div>
         <Button
           type="submit"
           disabled={loading || !query.trim()}
-          className="h-12 px-6 bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 shrink-0"
+          className="h-12 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full shadow-xs shrink-0"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
           <span className="ml-2 hidden sm:inline">Cek Domain</span>
@@ -113,7 +113,7 @@ export default function DomainChecker() {
       </form>
 
       {error && (
-        <p className="mt-4 text-red-400 text-sm text-center">{error}</p>
+        <p className="mt-4 text-red-500 text-xs text-center">{error}</p>
       )}
 
       {result && (
@@ -121,17 +121,17 @@ export default function DomainChecker() {
           {/* Main result */}
           <div className={`rounded-xl p-4 flex items-center justify-between gap-4 ${
             result.available
-              ? "bg-green-500/10 border border-green-500/20"
-              : "bg-red-500/10 border border-red-500/20"
+              ? "bg-emerald-50/80 border border-emerald-200"
+              : "bg-slate-50 border border-slate-200"
           }`}>
             <div className="flex items-center gap-3">
               {result.available
-                ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
-                : <XCircle    className="w-5 h-5 text-red-400 shrink-0" />}
+                ? <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                : <XCircle className="w-5 h-5 text-slate-400 shrink-0" />}
               <div>
-                <p className="text-white font-semibold text-sm">{result.domain}</p>
-                <p className={`text-xs ${result.available ? "text-green-300" : "text-red-300"}`}>
-                  {result.available ? "Domain tersedia!" : "Domain sudah dipakai"}
+                <p className="text-slate-900 font-bold text-sm">{result.domain}</p>
+                <p className={`text-xs ${result.available ? "text-emerald-700 font-medium" : "text-slate-500"}`}>
+                  {result.available ? "Domain tersedia untuk didaftarkan!" : "Domain sudah dipakai pihak lain"}
                 </p>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function DomainChecker() {
               <Button
                 onClick={() => handleClaim()}
                 size="sm"
-                className="bg-green-600 hover:bg-green-500 text-white shrink-0"
+                className="bg-slate-900 hover:bg-slate-800 text-white rounded-full font-bold text-xs h-9 px-4 shadow-xs shrink-0"
               >
                 Klaim & Buat Website
               </Button>
@@ -149,14 +149,14 @@ export default function DomainChecker() {
           {/* Suggestions when unavailable */}
           {!result.available && (
             <div>
-              <p className="text-blue-200/50 text-xs mb-2 px-1">
+              <p className="text-slate-500 text-xs mb-2 px-1 font-medium">
                 {loadingSugg ? "Mencari alternatif yang tersedia..." : suggestions.length > 0 ? "Domain alternatif yang tersedia:" : ""}
               </p>
 
               {loadingSugg && (
-                <div className="flex items-center justify-center gap-2 py-3 text-blue-200/40 text-sm">
+                <div className="flex items-center justify-center gap-2 py-3 text-slate-400 text-xs">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Mengecek alternatif...
+                  Mengecek alternatif domain...
                 </div>
               )}
 
@@ -165,17 +165,17 @@ export default function DomainChecker() {
                   {suggestions.map((s) => (
                     <div
                       key={s.domain}
-                      className="bg-green-500/5 border border-green-500/15 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-2.5">
-                        <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-                        <span className="text-white text-sm font-medium">{s.domain}</span>
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-slate-900 text-sm font-semibold">{s.domain}</span>
                       </div>
                       <Button
                         onClick={() => handleClaim(s.domain)}
                         size="sm"
                         variant="outline"
-                        className="border-green-500/30 text-green-300 hover:bg-green-500/10 hover:text-green-200 text-xs h-8 shrink-0"
+                        className="border-slate-300 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 rounded-full text-xs h-8 px-3 shrink-0 transition-colors"
                       >
                         Pilih ini
                       </Button>
@@ -185,8 +185,8 @@ export default function DomainChecker() {
               )}
 
               {!loadingSugg && suggestions.length === 0 && (
-                <p className="text-blue-200/40 text-xs text-center py-2">
-                  Semua alternatif juga sudah dipakai. Coba nama yang berbeda.
+                <p className="text-slate-400 text-xs text-center py-2">
+                  Semua alternatif populer juga sudah dipakai. Silakan coba nama brand yang sedikit berbeda.
                 </p>
               )}
             </div>

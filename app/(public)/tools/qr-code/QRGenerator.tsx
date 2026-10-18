@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Download, QrCode, Link2, MessageCircle, Type, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Tab = "url" | "whatsapp" | "text";
 
 const TABS: { id: Tab; label: string; icon: React.ElementType; placeholder: string }[] = [
-  { id: "url",       label: "URL / Link",  icon: Link2,          placeholder: "https://namabisnis.com" },
-  { id: "whatsapp",  label: "WhatsApp",    icon: MessageCircle,  placeholder: "08xxxxxxxxxx" },
-  { id: "text",      label: "Teks Bebas",  icon: Type,           placeholder: "Nama bisnis, alamat, atau teks apapun" },
+  { id: "url",       label: "URL / Tautan Website", icon: Link2,          placeholder: "https://namabisnis.com" },
+  { id: "whatsapp",  label: "Kontak WhatsApp",     icon: MessageCircle,  placeholder: "08xxxxxxxxxx atau 628xxxxxxxxxx" },
+  { id: "text",      label: "Teks Bebas / Catatan", icon: Type,           placeholder: "Tuliskan nama usaha, deskripsi, atau pesan" },
 ];
 
 const SIZES = [200, 300, 400, 500];
@@ -34,7 +35,7 @@ export default function QRGenerator() {
   const [tab,   setTab]   = useState<Tab>("url");
   const [value, setValue] = useState("");
   const [size,  setSize]  = useState(300);
-  const [key,   setKey]   = useState(0); // force re-render image
+  const [key,   setKey]   = useState(0);
 
   const qrData    = buildQRData(tab, value);
   const imageUrl  = qrData ? qrUrl(qrData, size) : null;
@@ -63,37 +64,42 @@ export default function QRGenerator() {
   const activeTab = TABS.find(t => t.id === tab)!;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      {/* Left: Input */}
+    <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6">
+      {/* Left: Input Options */}
       <div className="space-y-5">
         {/* Tab selector */}
-        <div className="glass rounded-2xl p-5">
-          <h3 className="text-white font-semibold mb-3 text-sm">
-            <span className="text-blue-400 mr-2">01</span> Jenis QR Code
-          </h3>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Langkah 1</span>
+          </div>
+          <h3 className="text-slate-900 font-bold text-sm mb-3">Tipe Data QR</h3>
           <div className="flex flex-col gap-2">
             {TABS.map(t => (
               <button
                 key={t.id}
+                type="button"
                 onClick={() => handleTabChange(t.id)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                   tab === t.id
-                    ? "bg-blue-600/15 border-blue-500/40 text-white"
-                    : "glass border-white/8 text-blue-200/60 hover:border-white/20"
+                    ? "bg-slate-900 border-slate-900 text-white shadow-xs font-medium"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
                 }`}
               >
                 <t.icon className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">{t.label}</span>
+                <span className="text-sm">{t.label}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Input */}
-        <div className="glass rounded-2xl p-5">
-          <h3 className="text-white font-semibold mb-3 text-sm">
-            <span className="text-blue-400 mr-2">02</span> {activeTab.label}
-          </h3>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Langkah 2</span>
+          </div>
+          <h3 className="text-slate-900 font-bold text-sm mb-3">{activeTab.label}</h3>
           {tab === "whatsapp" ? (
             <div className="space-y-2">
               <input
@@ -101,9 +107,9 @@ export default function QRGenerator() {
                 value={value}
                 onChange={e => setValue(e.target.value)}
                 placeholder="08xxxxxxxxxx atau 628xxxxxxxxxx"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/25 focus:outline-none focus:border-blue-500/50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 font-mono transition-all"
               />
-              <p className="text-blue-200/35 text-xs">QR akan membuka chat WhatsApp ke nomor ini</p>
+              <p className="text-slate-500 text-xs font-mono">Kode QR akan membuka tautan pesan langsung ke nomor ini.</p>
             </div>
           ) : tab === "text" ? (
             <textarea
@@ -111,7 +117,7 @@ export default function QRGenerator() {
               onChange={e => setValue(e.target.value)}
               placeholder={activeTab.placeholder}
               rows={4}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/25 focus:outline-none focus:border-blue-500/50 resize-none"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 resize-none font-mono transition-all"
             />
           ) : (
             <input
@@ -119,71 +125,76 @@ export default function QRGenerator() {
               value={value}
               onChange={e => setValue(e.target.value)}
               placeholder={activeTab.placeholder}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-blue-200/25 focus:outline-none focus:border-blue-500/50"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 font-mono transition-all"
             />
           )}
         </div>
 
         {/* Size selector */}
-        <div className="glass rounded-2xl p-5">
-          <h3 className="text-white font-semibold mb-3 text-sm">
-            <span className="text-blue-400 mr-2">03</span> Ukuran ({size}×{size}px)
-          </h3>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Langkah 3</span>
+          </div>
+          <h3 className="text-slate-900 font-bold text-sm mb-3">Resolusi Gambar ({size}×{size}px)</h3>
           <div className="flex gap-2">
             {SIZES.map(s => (
               <button
                 key={s}
+                type="button"
                 onClick={() => setSize(s)}
-                className={`flex-1 py-2 rounded-xl border text-sm transition-all ${
+                className={`flex-1 py-2 rounded-xl border text-xs font-mono transition-all ${
                   size === s
-                    ? "bg-blue-600/20 border-blue-500/50 text-blue-300"
-                    : "glass border-white/10 text-blue-200/50 hover:border-white/20"
+                    ? "bg-slate-900 border-slate-900 text-white font-bold"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
                 }`}
               >
-                {s}
+                {s}px
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Right: Preview */}
-      <div className="glass rounded-2xl p-5 flex flex-col items-center justify-center gap-4 min-h-64">
+      {/* Right: Output Preview */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 flex flex-col items-center justify-center gap-5 shadow-xs min-h-[360px]">
         {imageUrl ? (
           <>
-            <div className="bg-white p-3 rounded-2xl shadow-lg">
+            <div className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm">
               <Image
                 key={`${imageUrl}-${key}`}
                 src={imageUrl}
                 alt="QR Code"
                 width={size}
                 height={size}
-                className="block"
+                className="block max-w-[240px] max-h-[240px] w-auto h-auto"
                 unoptimized
               />
             </div>
-            <div className="flex gap-2 w-full">
-              <button
+            <div className="flex gap-2 w-full max-w-xs">
+              <Button
                 onClick={handleDownload}
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
+                className="flex-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 transition-colors"
               >
-                <Download className="w-4 h-4" /> Unduh PNG
-              </button>
+                <Download className="w-4 h-4 mr-2" /> Unduh PNG
+              </Button>
               <button
                 onClick={() => setKey(k => k + 1)}
-                className="p-2.5 glass border border-white/10 rounded-xl text-blue-200/50 hover:text-white transition-colors"
-                title="Refresh"
+                className="p-3 border border-slate-200 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                title="Refresh gambar"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-blue-200/30 text-xs text-center break-all line-clamp-2">{qrData}</p>
+            <p className="text-slate-400 text-xs font-mono text-center break-all line-clamp-2 max-w-xs">{qrData}</p>
           </>
         ) : (
-          <div className="text-center">
-            <QrCode className="w-16 h-16 text-blue-200/10 mx-auto mb-3" />
-            <p className="text-blue-200/30 text-sm">QR Code akan muncul di sini</p>
-            <p className="text-blue-200/20 text-xs mt-1">Isi input di sebelah kiri</p>
+          <div className="text-center py-10">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4 border border-slate-200">
+              <QrCode className="w-8 h-8 text-slate-400" />
+            </div>
+            <p className="text-slate-900 font-bold text-sm">Pratinjau QR Code</p>
+            <p className="text-slate-500 text-xs mt-1">Isi formulir di sebelah kiri untuk membuat kode QR instan</p>
           </div>
         )}
       </div>

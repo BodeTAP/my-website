@@ -5,13 +5,26 @@ import { BrandLogoIcon } from "@/components/brand/BrandLogo";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, Lock, Loader2, CheckCircle, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Mail,
+  Lock,
+  Loader2,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  FileCheck2,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FadeUp, ScaleIn } from "@/components/public/motion";
 
-type Mode = "magic" | "password";
+type Mode = "password" | "magic";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function PortalLoginPage() {
   const router = useRouter();
@@ -35,7 +48,7 @@ export default function PortalLoginPage() {
     });
 
     if (res?.error) {
-      setError("Email atau kata sandi tidak sesuai.");
+      setError("Email atau kata sandi yang Anda masukkan tidak sesuai.");
       setLoading(false);
     } else {
       router.push("/portal/dashboard");
@@ -47,10 +60,14 @@ export default function PortalLoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("resend", { email, redirect: false, callbackUrl: "/portal/dashboard" });
+    const res = await signIn("resend", {
+      email,
+      redirect: false,
+      callbackUrl: "/portal/dashboard",
+    });
 
     if (res?.error) {
-      setError("Gagal mengirim magic link. Mohon hubungi tim support.");
+      setError("Gagal mengirim tautan masuk. Silakan gunakan opsi kata sandi atau hubungi tim support.");
       setLoading(false);
     } else {
       setSent(true);
@@ -59,207 +76,482 @@ export default function PortalLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-[#030914]">
-      <div className="w-full max-w-md relative z-10 py-12">
-        
-        {/* Logo */}
-        <FadeUp delay={0}>
-          <div className="text-center mb-10 group">
-            <div className="inline-flex relative items-center justify-center w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 mb-5 shadow-xs">
-              <BrandLogoIcon size={34} variant="dark" />
+    <div className="min-h-screen grid lg:grid-cols-[1.1fr_1fr] bg-white overflow-hidden">
+      {/* ── Left Side: Deep Slate Showcase & Brand Experience ───────── */}
+      <div className="hidden lg:flex flex-col justify-between bg-[#1E242E] text-white p-12 lg:p-16 border-r border-slate-800 relative overflow-hidden">
+        {/* Ambient architectural lighting */}
+        <motion.div
+          initial={{ opacity: 0.2, scale: 0.8 }}
+          animate={{ opacity: [0.2, 0.35, 0.2], scale: [0.8, 1.05, 0.8] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-slate-600/20 blur-3xl pointer-events-none"
+        />
+        <motion.div
+          initial={{ opacity: 0.1, scale: 0.9 }}
+          animate={{ opacity: [0.1, 0.25, 0.1], scale: [0.9, 1.1, 0.9] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-slate-500/15 blur-3xl pointer-events-none"
+        />
+
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#33415510_1px,transparent_1px),linear-gradient(to_bottom,#33415510_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
+
+        {/* Top: Brand mark */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease }}
+          className="relative z-10"
+        >
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center transition-transform group-hover:scale-105">
+              <BrandLogoIcon size={26} variant="dark" />
             </div>
-            <h1 className="text-white font-black text-3xl tracking-tight">MF<span className="text-zinc-400">WEB</span></h1>
-            <p className="text-zinc-400 text-[11px] font-bold uppercase tracking-[0.2em] mt-1.5">Portal Klien</p>
+            <div>
+              <span className="font-bold text-white text-lg tracking-tight block">MFWEB</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 block">Client Portal</span>
+            </div>
+          </Link>
+        </motion.div>
+
+        {/* Middle: Editorial Value Proposition */}
+        <div className="relative z-10 my-auto py-12 max-w-lg">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1, ease }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <span className="h-px w-8 bg-slate-500" />
+              <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+                Workspace Klien
+              </span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
+              Satu kendali untuk seluruh proyek & berkas digital Anda.
+            </h1>
+
+            <p className="mt-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+              Pantau linimasa pengerjaan website, riwayat pembayaran invoice resmi, serta akses instan ke seluruh tool automasi bisnis kami.
+            </p>
+          </motion.div>
+
+          {/* Value feature list with stagger */}
+          <div className="mt-8 space-y-3">
+            {[
+              {
+                icon: CheckCircle2,
+                title: "Monitoring Progres Real-Time",
+                desc: "Pantau milestone pengerjaan mulai dari tahap desain, rekayasa kode, hingga peluncuran.",
+                delay: 0.2,
+              },
+              {
+                icon: FileCheck2,
+                title: "Generator Proposal & Invoice PDF",
+                desc: "Buat dokumen komersial resmi dengan brand kit bisnis Anda dalam hitungan detik.",
+                delay: 0.3,
+              },
+              {
+                icon: Sparkles,
+                title: "Lead Finder & Automasi B2B",
+                desc: "Temukan prospek usaha baru secara otomatis langsung dari dasbor portal klien Anda.",
+                delay: 0.4,
+              },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: item.delay, ease }}
+                whileHover={{ x: 4, transition: { duration: 0.2 } }}
+                className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-[#161B22]/70 p-4 transition-colors hover:border-slate-700"
+              >
+                <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <item.icon className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">{item.title}</p>
+                  <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </FadeUp>
+        </div>
 
-        <ScaleIn delay={0.1}>
-          <div className="rounded-2xl border border-white/10 bg-[#071225] p-8 sm:p-10">
-            {sent ? (
-              <div className="text-center py-6">
-                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
-                  <CheckCircle className="w-10 h-10 text-green-400" />
-                </div>
-                <h2 className="text-white font-black text-2xl mb-3">Cek email Anda</h2>
-                <p className="text-blue-200/60 text-sm leading-relaxed mb-8 px-2">
-                  Tautan masuk sudah dikirim ke{" "}
-                  <strong className="text-white font-bold">{email}</strong>.
-                  Klik tautan tersebut untuk masuk tanpa kata sandi.
-                </p>
-                <button
-                  onClick={() => setSent(false)}
-                  className="text-blue-400 hover:text-blue-300 hover:underline text-xs font-semibold uppercase tracking-wider block mx-auto transition-colors"
+        {/* Bottom: Security & Copyright */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="relative z-10 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400"
+        >
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-slate-300" />
+            <span>Enkripsi SSL 256-bit</span>
+          </div>
+          <span>© 2026 MFWEB Studio</span>
+        </motion.div>
+      </div>
+
+      {/* ── Right Side: Form Panel with Immersive In-Out ────────────── */}
+      <div className="flex flex-col justify-between bg-[#F8F9FA] p-6 sm:p-10 lg:p-16 min-h-screen">
+        {/* Top back navigation */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease }}
+          className="flex items-center justify-between"
+        >
+          <Link
+            href="/"
+            className="inline-flex items-center text-xs font-mono text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+            Kembali ke Beranda
+          </Link>
+
+          {/* Mobile logo icon */}
+          <div className="lg:hidden flex items-center gap-2">
+            <BrandLogoIcon size={24} variant="dark" />
+            <span className="font-bold text-slate-900 text-sm tracking-tight">MFWEB</span>
+          </div>
+        </motion.div>
+
+        {/* Centered Form Card */}
+        <div className="my-auto py-8 w-full max-w-md mx-auto">
+          {/* Master Auth Switcher (Login vs Register) with animated sliding indicator */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease }}
+            className="flex p-1 bg-slate-200/80 rounded-full border border-slate-300/80 mb-6 relative"
+          >
+            <Link
+              href="/portal/login"
+              className="relative flex-1 py-2 text-xs font-mono uppercase tracking-wider text-center font-bold"
+            >
+              <motion.div
+                layoutId="auth-main-tab-pill"
+                className="absolute inset-0 bg-white rounded-full shadow-xs border border-slate-200"
+                transition={{ type: "spring", stiffness: 450, damping: 35 }}
+              />
+              <span className="relative z-10 text-slate-900">
+                Masuk Akun
+              </span>
+            </Link>
+
+            <Link
+              href="/portal/register"
+              className="relative flex-1 py-2 text-xs font-mono uppercase tracking-wider text-center font-bold text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              <span className="relative z-10">
+                Daftar Baru
+              </span>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.98 }}
+            transition={{ duration: 0.45, ease }}
+            className="rounded-3xl border border-slate-200 bg-white p-7 sm:p-9 shadow-xs"
+          >
+            <AnimatePresence mode="wait">
+              {sent ? (
+                <motion.div
+                  key="sent-state"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.35, ease }}
+                  className="text-center py-6"
                 >
-                  Gunakan cara lain
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-blue-400" />
-                    <h2 className="text-white font-black text-xl">Masuk ke portal</h2>
+                  <div className="w-16 h-16 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-center mx-auto mb-5">
+                    <CheckCircle className="w-8 h-8 text-emerald-600" />
                   </div>
-                </div>
-                <p className="text-blue-200/50 text-xs font-medium mb-8">
-                  Belum memiliki akun klien?{" "}
-                  <Link href="/portal/register" className="text-blue-400 hover:text-blue-300 hover:underline transition-colors">
-                    Daftar sekarang
-                  </Link>
-                </p>
-
-                {/* Google */}
-                <button
-                  type="button"
-                  onClick={() => signIn("google", { callbackUrl: "/portal/dashboard" })}
-                  className="w-full flex items-center justify-center gap-3 h-12 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-semibold hover:bg-white/10 transition-all mb-6 group"
+                  <h2 className="text-slate-900 font-bold text-xl mb-2">Periksa Email Anda</h2>
+                  <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                    Tautan akses masuk telah dikirimkan ke{" "}
+                    <strong className="text-slate-900 font-mono font-medium">{email}</strong>.
+                    Buka pesan tersebut lalu klik tautan untuk masuk langsung.
+                  </p>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSent(false)}
+                    className="inline-flex items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-mono font-medium px-6 h-10 transition-colors"
+                  >
+                    Gunakan Metode Lain
+                  </motion.button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="form-state"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Lanjutkan dengan Google
-                </button>
-
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/5" />
-                  </div>
-                  <div className="relative flex justify-center text-xs">
-                    <span className="px-4 bg-[#071225] text-white/30 font-bold uppercase tracking-widest text-[10px]">Atau gunakan email</span>
-                  </div>
-                </div>
-
-                {/* Mode tabs */}
-                <div className="flex p-1 bg-black/40 rounded-xl mb-6 border border-white/5">
-                  <button
-                    onClick={() => { setMode("password"); setError(""); }}
-                    className={`flex-1 py-2 text-xs rounded-lg font-bold transition-all ${
-                      mode === "password"
-                        ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
-                        : "text-white/40 hover:text-white"
-                    }`}
-                  >
-                    Kata Sandi
-                  </button>
-                  <button
-                    onClick={() => { setMode("magic"); setError(""); }}
-                    className={`flex-1 py-2 text-xs rounded-lg font-bold transition-all ${
-                      mode === "magic"
-                        ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
-                        : "text-white/40 hover:text-white"
-                    }`}
-                  >
-                    Magic Link
-                  </button>
-                </div>
-
-                {/* Password login */}
-                {mode === "password" && (
-                  <form onSubmit={handlePassword} className="space-y-5">
-                    <div className="space-y-2">
-                      <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Alamat Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
-                        <Input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-11 h-12 bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                          placeholder="email@domain.com"
-                        />
-                      </div>
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="h-px w-6 bg-slate-400" />
+                      <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+                        Autentikasi
+                      </span>
                     </div>
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                      Masuk ke Portal Klien
+                    </h2>
+                    <p className="text-slate-500 text-xs sm:text-sm mt-1">
+                      Silakan pilih metode masuk yang Anda kehendaki.
+                    </p>
+                  </div>
 
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Kata Sandi</Label>
-                        <Link href="/portal/reset-password" className="text-blue-400/80 hover:text-blue-300 text-[10px] font-semibold transition-colors">
-                          Lupa Sandi?
-                        </Link>
-                      </div>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
-                        <Input
-                          type={showPw ? "text" : "password"}
-                          required
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="pl-11 pr-11 h-12 bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                          placeholder="Kata sandi"
+                  {/* Google Sign In */}
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => signIn("google", { callbackUrl: "/portal/dashboard" })}
+                    className="w-full flex items-center justify-center gap-3 h-12 bg-white border border-slate-200 rounded-full text-slate-700 text-sm font-medium hover:bg-slate-50 hover:border-slate-300 transition-all shadow-xs group"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 group-hover:scale-105 transition-transform" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Lanjutkan dengan Google
+                  </motion.button>
+
+                  {/* Separator */}
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="px-3 bg-white text-slate-400 font-mono text-[10px] uppercase tracking-widest">
+                        atau gunakan email
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Mode Selector Tabs with animated pill */}
+                  <div className="flex p-1 bg-slate-100 rounded-full border border-slate-200 mb-6 relative">
+                    <button
+                      type="button"
+                      onClick={() => { setMode("password"); setError(""); }}
+                      className="relative flex-1 py-1.5 text-xs text-center font-medium transition-colors"
+                    >
+                      {mode === "password" && (
+                        <motion.div
+                          layoutId="login-mode-pill"
+                          className="absolute inset-0 bg-white rounded-full shadow-xs border border-slate-200"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPw(!showPw)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400/50 hover:text-blue-400 transition-colors"
+                      )}
+                      <span className={`relative z-10 transition-colors ${mode === "password" ? "text-slate-900 font-semibold" : "text-slate-500 hover:text-slate-800"}`}>
+                        Kata Sandi
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setMode("magic"); setError(""); }}
+                      className="relative flex-1 py-1.5 text-xs text-center font-medium transition-colors"
+                    >
+                      {mode === "magic" && (
+                        <motion.div
+                          layoutId="login-mode-pill"
+                          className="absolute inset-0 bg-white rounded-full shadow-xs border border-slate-200"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <span className={`relative z-10 transition-colors ${mode === "magic" ? "text-slate-900 font-semibold" : "text-slate-500 hover:text-slate-800"}`}>
+                        Magic Link
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Form inputs with AnimatePresence */}
+                  <AnimatePresence mode="wait">
+                    {mode === "password" ? (
+                      <motion.form
+                        key="password-form"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.25, ease }}
+                        onSubmit={handlePassword}
+                        className="space-y-4"
+                      >
+                        <div className="space-y-1.5">
+                          <Label className="text-slate-900 text-xs font-mono uppercase tracking-wider block">
+                            Alamat Email
+                          </Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input
+                              type="email"
+                              required
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all font-mono text-sm"
+                              placeholder="nama@perusahaan.com"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <Label className="text-slate-900 text-xs font-mono uppercase tracking-wider">
+                              Kata Sandi
+                            </Label>
+                            <Link
+                              href="/portal/reset-password"
+                              className="text-slate-500 hover:text-slate-900 text-xs font-mono underline transition-colors"
+                            >
+                              Lupa sandi?
+                            </Link>
+                          </div>
+                          <div className="relative">
+                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input
+                              type={showPw ? "text" : "password"}
+                              required
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="pl-10 pr-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all text-sm font-mono"
+                              placeholder="Masukkan kata sandi"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPw(!showPw)}
+                              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <AnimatePresence>
+                          {error && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -6 }}
+                              className="p-3 bg-rose-50 border border-rose-200 rounded-xl"
+                            >
+                              <p className="text-rose-700 text-xs font-medium text-center">{error}</p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="submit"
+                          disabled={loading}
+                          className="w-full flex items-center justify-center rounded-full bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white h-11 font-medium text-sm transition-colors mt-2 shadow-xs cursor-pointer"
                         >
-                          {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
+                          {loading ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Memverifikasi...
+                            </span>
+                          ) : (
+                            "Masuk ke Portal"
+                          )}
+                        </motion.button>
+                      </motion.form>
+                    ) : (
+                      <motion.form
+                        key="magic-form"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.25, ease }}
+                        onSubmit={handleMagicLink}
+                        className="space-y-4"
+                      >
+                        <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+                          <p className="text-slate-600 text-xs leading-relaxed text-center">
+                            Masukkan email Anda. Kami akan mengirimkan tautan sekali klik untuk masuk langsung tanpa kata sandi.
+                          </p>
+                        </div>
 
-                    {error && (
-                      <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
-                        <p className="text-red-400 text-xs font-semibold text-center">{error}</p>
-                      </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-slate-900 text-xs font-mono uppercase tracking-wider block">
+                            Alamat Email
+                          </Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input
+                              type="email"
+                              required
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all font-mono text-sm"
+                              placeholder="nama@perusahaan.com"
+                            />
+                          </div>
+                        </div>
+
+                        <AnimatePresence>
+                          {error && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -6 }}
+                              className="p-3 bg-rose-50 border border-rose-200 rounded-xl"
+                            >
+                              <p className="text-rose-700 text-xs font-medium text-center">{error}</p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="submit"
+                          disabled={loading}
+                          className="w-full flex items-center justify-center rounded-full bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white h-11 font-medium text-sm transition-colors mt-2 shadow-xs cursor-pointer"
+                        >
+                          {loading ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Mengirim Tautan...
+                            </span>
+                          ) : (
+                            "Kirim Tautan Akses"
+                          )}
+                        </motion.button>
+                      </motion.form>
                     )}
+                  </AnimatePresence>
 
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm transition-colors mt-2"
-                    >
-                      {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Masuk"}
-                    </Button>
-                  </form>
-                )}
+                  {/* Footer link to Register */}
+                  <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+                    <p className="text-slate-600 text-xs">
+                      Belum memiliki akun klien?{" "}
+                      <Link
+                        href="/portal/register"
+                        className="font-bold text-slate-900 underline underline-offset-2 hover:text-black transition-colors"
+                      >
+                        Daftar akun baru gratis →
+                      </Link>
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
 
-                {/* Magic link */}
-                {mode === "magic" && (
-                  <form onSubmit={handleMagicLink} className="space-y-5">
-                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl mb-2">
-                      <p className="text-blue-200/80 text-xs leading-relaxed text-center">
-                        Masukkan email. Kami akan mengirim tautan masuk yang bisa diklik tanpa kata sandi.
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Alamat Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
-                        <Input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-11 h-12 bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                          placeholder="email@domain.com"
-                        />
-                      </div>
-                    </div>
-
-                    {error && (
-                      <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
-                        <p className="text-red-400 text-xs font-semibold text-center">{error}</p>
-                      </div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white h-12 rounded-xl font-bold text-sm transition-colors mt-2"
-                    >
-                      {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Kirim Tautan Akses"}
-                    </Button>
-                  </form>
-                )}
-              </>
-            )}
-          </div>
-        </ScaleIn>
+        {/* Bottom subtle copyright */}
+        <div className="text-center text-xs font-mono text-slate-400">
+          MFWEB Client Access · Secure Authentication
+        </div>
       </div>
     </div>
   );

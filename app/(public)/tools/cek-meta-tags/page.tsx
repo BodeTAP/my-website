@@ -17,26 +17,36 @@ export default function CekMetaTagsPage() {
   ]);
 
   return (
-    <>
+    <div className="min-h-screen bg-white">
       <JsonLd id="json-ld-breadcrumb-cek-meta-tags" data={breadcrumbJsonLd} />
-      <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Cek Meta Tags" }]} />
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs text-purple-300 mb-6 border border-purple-500/20">
-            🔍 Gratis Selamanya
+
+      {/* Hero */}
+      <section className="w-full bg-[#1E242E] text-white pt-24 pb-16 sm:pt-28 sm:pb-20 border-b border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb items={[{ label: "Tools", href: "/tools" }, { label: "Cek Meta Tags" }]} />
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-px w-8 bg-slate-500" />
+              <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+                Free Utility
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+              Cek Meta Tags & Social Preview
+            </h1>
+            <p className="mt-4 text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+              Pratinjau tampilan tautan website Anda saat muncul di Google Search, Facebook, LinkedIn, dan WhatsApp. Periksa Open Graph, Twitter Card, dan tag canonical secara lengkap.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Cek <span className="text-gradient">Meta Tags</span> Website
-          </h1>
-          <p className="text-blue-200/60 max-w-xl mx-auto">
-            Lihat bagaimana website Anda tampil di Google Search, Facebook, dan WhatsApp.
-            Cek title, description, og:image, dan semua meta tags sekaligus.
-          </p>
         </div>
-        <MetaChecker />
-      </div>
-      </div>
-    </>
+      </section>
+
+      {/* Main Form & Results */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-[#F8F9FA] border-b border-slate-200">
+        <div className="max-w-4xl mx-auto">
+          <MetaChecker />
+        </div>
+      </section>
+    </div>
   );
 }

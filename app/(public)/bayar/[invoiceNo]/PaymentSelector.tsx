@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Loader2, ShieldCheck, ChevronDown } from "lucide-react";
 import type { PaymentChannel } from "@/lib/tripay";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   invoiceNo:  string;
@@ -24,14 +25,13 @@ function groupChannels(channels: PaymentChannel[]) {
 }
 
 function formatFee(ch: PaymentChannel): string | null {
-  // Hanya tampilkan biaya jika dibebankan ke customer
   const flat    = ch.fee_customer?.flat ?? 0;
   const percent = ch.fee_customer?.percent ? parseFloat(ch.fee_customer.percent) : 0;
   
   if (flat > 0 && percent > 0) return `+Rp ${flat.toLocaleString("id-ID")} + ${percent}%`;
   if (flat > 0)    return `+Rp ${flat.toLocaleString("id-ID")}`;
   if (percent > 0) return `+${percent}%`;
-  return null; // Tidak ada biaya untuk customer (dibebankan ke merchant)
+  return null;
 }
 
 function calculateAdminFee(ch: PaymentChannel | null, baseAmount: number, feeHandling: Props["feeHandling"]): number {
@@ -61,24 +61,24 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHa
   const grandTotal = baseAmount + adminFee;
 
   async function handlePay() {
-    if (!selected) { setError("Pilih metode pembayaran terlebih dahulu."); return; }
+    if (!selected) { setError("Silakan pilih metode pembayaran terlebih dahulu."); return; }
     setLoading(true);
     setError("");
     try {
-      const selectedChannel = channels.find(ch => ch.code === selected);
+      const ch = channels.find(c => c.code === selected);
       const res  = await fetch(`/api/pay/${encodeURIComponent(invoiceNo)}`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ method: selected, methodName: selectedChannel?.name }),
+        body:    JSON.stringify({ method: selected, methodName: ch?.name }),
       });
       const data = await res.json() as { paymentUrl?: string; error?: string };
       if (!res.ok || !data.paymentUrl) {
-        setError(data.error ?? "Gagal membuat transaksi. Coba lagi.");
+        setError(data.error ?? "Gagal memproses transaksi. Silakan coba lagi.");
         return;
       }
       window.location.href = data.paymentUrl;
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError("Terjadi kendala koneksi ke server gateway. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -86,8 +86,8 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHa
 
   if (channels.length === 0) {
     return (
-      <p className="text-center text-blue-200/40 text-sm py-4">
-        Metode pembayaran tidak tersedia. Hubungi admin.
+      <p className="text-center text-slate-500 text-xs font-mono py-4">
+        Metode pembayaran online sedang tidak tersedia. Silakan hubungi admin.
       </p>
     );
   }
@@ -95,35 +95,35 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHa
   return (
     <div className="space-y-4">
       {/* Dynamic Total */}
-      <div className="border-t border-white/10 pt-4 mb-6">
+      <div className="border-t border-slate-200 pt-4 mb-4">
         <div className="flex justify-between items-end">
           <div className="space-y-1">
-            <span className="text-blue-200/60 text-sm">Total Tagihan</span>
+            <span className="text-slate-500 font-mono text-xs uppercase tracking-wider">Total Pembayaran</span>
             {adminFee > 0 && (
-              <p className="text-[11px] text-amber-300/80 bg-amber-500/10 px-2 py-0.5 rounded-full inline-block mt-1">
+              <p className="text-[11px] font-mono text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md block mt-1">
                 Termasuk admin +{formatRp(adminFee)}
               </p>
             )}
             {feeHandling === "merchant" && selectedChannel && (
-              <p className="text-[11px] text-emerald-300/80 bg-emerald-500/10 px-2 py-0.5 rounded-full inline-block mt-1">
-                Biaya admin ditanggung merchant
+              <p className="text-[11px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md block mt-1">
+                Biaya admin ditanggung pihak MFWEB
               </p>
             )}
             {feeHandling === "split" && selectedChannel && (
-              <p className="text-[11px] text-blue-200/70 bg-white/5 px-2 py-0.5 rounded-full inline-block mt-1">
+              <p className="text-[11px] font-mono text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md block mt-1">
                 Biaya admin mengikuti pembagian internal
               </p>
             )}
           </div>
           <div className="text-right">
-            <span className="text-white font-black text-3xl transition-all duration-300">
+            <span className="text-slate-900 font-bold font-mono text-2xl transition-all">
               {formatRp(grandTotal)}
             </span>
           </div>
         </div>
       </div>
 
-      <p className="text-blue-200/70 text-sm font-medium">Pilih Metode Pembayaran</p>
+      <p className="text-slate-900 text-xs font-mono uppercase tracking-wider font-bold">Pilih Kanal Pembayaran</p>
 
       {/* Grouped channels */}
       <div className="space-y-2">
@@ -131,32 +131,34 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHa
           const isOpen = (openGroup ?? groupKeys[0]) === group;
           const items  = grouped.get(group)!;
           return (
-            <div key={group} className="border border-white/10 rounded-xl overflow-hidden">
+            <div key={group} className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
               {/* Group header */}
               <button
+                type="button"
                 onClick={() => setOpenGroup(isOpen ? "__none__" : group)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white/3 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100/70 transition-colors text-left"
               >
-                <span className="text-white text-sm font-medium">{group}</span>
-                <ChevronDown className={`w-4 h-4 text-blue-200/40 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                <span className="text-slate-900 text-xs font-mono uppercase tracking-wider font-bold">{group}</span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
               </button>
 
               {/* Channel list */}
               {isOpen && (
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-slate-100">
                   {items.map(ch => {
                     const isSelected = selected === ch.code;
                     return (
                       <button
                         key={ch.code}
+                        type="button"
                         onClick={() => { setSelected(ch.code); setError(""); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                          isSelected ? "bg-blue-600/15" : "hover:bg-white/3"
+                          isSelected ? "bg-slate-100/80" : "hover:bg-slate-50"
                         }`}
                       >
                         {/* Radio */}
-                        <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                          isSelected ? "border-blue-500 bg-blue-600" : "border-white/20"
+                        <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
+                          isSelected ? "border-slate-900 bg-slate-900" : "border-slate-300"
                         }`}>
                           {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
@@ -172,17 +174,17 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHa
                             unoptimized
                           />
                         ) : (
-                          <div className="w-10 h-6 bg-white/10 rounded shrink-0" />
+                          <div className="w-10 h-6 bg-slate-100 border border-slate-200 rounded shrink-0" />
                         )}
 
                         {/* Name & Fee */}
                         <div className="flex-1 min-w-0 flex flex-col items-start text-left">
-                          <p className={`text-sm font-medium ${isSelected ? "text-white" : "text-blue-200/80"}`}>
+                          <p className={`text-sm font-medium ${isSelected ? "text-slate-900 font-bold" : "text-slate-700"}`}>
                             {ch.name}
                           </p>
                           {feeHandling === "customer" && formatFee(ch) && (
-                            <p className={`text-[10px] mt-0.5 ${isSelected ? "text-blue-200/60" : "text-blue-200/40"}`}>
-                              Biaya Admin: {formatFee(ch)}
+                            <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                              Admin: {formatFee(ch)}
                             </p>
                           )}
                         </div>
@@ -197,25 +199,25 @@ export default function PaymentSelector({ invoiceNo, baseAmount, channels, feeHa
       </div>
 
       {/* Pay button */}
-      <button
+      <Button
         onClick={handlePay}
         disabled={loading || !selected}
-        className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold py-4 rounded-2xl text-lg transition-colors"
+        className="w-full h-12 rounded-full bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-medium text-base transition-colors mt-2"
       >
         {loading
-          ? <><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>
-          : "Bayar Sekarang"}
-      </button>
+          ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Mengalihkan ke Gerbang Pembayaran...</>
+          : "Lanjutkan Pembayaran"}
+      </Button>
 
       {error && (
-        <p className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2">
+        <p className="text-rose-700 text-xs text-center bg-rose-50 border border-rose-200 rounded-xl px-4 py-2.5">
           {error}
         </p>
       )}
 
-      <div className="flex items-center justify-center gap-2 text-blue-200/40 text-xs">
+      <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-mono pt-1">
         <ShieldCheck className="w-3.5 h-3.5" />
-        Pembayaran aman diproses oleh Tripay Payment Gateway
+        Enkripsi SSL 256-bit terverifikasi Tripay Payment Gateway
       </div>
     </div>
   );

@@ -2,12 +2,12 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Send, MessageCircle, CheckCircle, Mail, MapPin, PhoneCall } from "lucide-react";
+import { Send, MessageCircle, CheckCircle, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { StaggerChildren, StaggerItem, FadeUp, ScaleIn, SlideIn } from "@/components/public/motion";
+import { StaggerChildren, StaggerItem, FadeUp, ScaleIn } from "@/components/public/motion";
 import Breadcrumb from "@/components/public/Breadcrumb";
 
 function ContactForm() {
@@ -54,23 +54,23 @@ function ContactForm() {
 
   if (success) {
     return (
-      <div className="flex h-full min-h-[500px] flex-col items-center justify-center rounded-2xl border border-green-500/20 bg-green-500/5 p-10 text-center">
+      <div className="flex h-full min-h-[460px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 text-center shadow-xs">
         <ScaleIn>
-          <div className="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center mb-8 mx-auto border border-green-500/30">
-            <CheckCircle className="w-12 h-12 text-green-400" />
+          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-6 mx-auto border border-slate-200">
+            <CheckCircle className="w-8 h-8 text-slate-900" />
           </div>
-          <h3 className="text-white text-3xl font-black mb-4 tracking-tight">Pesan terkirim</h3>
-          <p className="text-green-100/70 text-lg mb-10 max-w-sm mx-auto leading-relaxed">
-            Terima kasih. Kami akan cek detailnya dan menghubungi Anda lewat WhatsApp.
+          <h3 className="text-slate-900 text-2xl font-bold mb-3 tracking-tight">Pesan Berhasil Terkirim</h3>
+          <p className="text-slate-600 text-sm mb-8 max-w-sm mx-auto leading-relaxed">
+            Terima kasih atas pesan Anda. Tim kami akan meninjau rincian kebutuhan dan segera menghubungi Anda via WhatsApp.
           </p>
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%20Tech%2C%20saya%20baru%20mengisi%20formulir%20kontak`}
+            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343"}?text=Halo%20MFWEB%2C%20saya%20sudah%20mengisi%20formulir%20kontak`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button className="bg-green-600 hover:bg-green-500 text-white h-14 px-10 font-bold text-base transition-colors rounded-xl">
-              <MessageCircle className="w-5 h-5 mr-3" />
-              Buka Chat WhatsApp
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white h-12 px-8 font-medium text-sm rounded-full transition-colors">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Buka Chat WhatsApp Sekarang
             </Button>
           </a>
         </ScaleIn>
@@ -81,102 +81,122 @@ function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-white/10 bg-[#071225] p-8 sm:p-12"
+      className="rounded-2xl border border-slate-200 bg-white p-7 sm:p-10 shadow-xs"
     >
-      <StaggerChildren stagger={0.05} className="space-y-7 relative z-10">
+      <StaggerChildren stagger={0.04} className="space-y-6">
         <StaggerItem>
-          <div className="mb-6 border-b border-white/5 pb-5">
-            <h2 className="text-3xl font-black text-white mb-2">Form Konsultasi</h2>
-            <p className="text-blue-200/50 text-sm">Ceritakan kebutuhan singkatnya. Kami bantu arahkan langkah berikutnya.</p>
+          <div className="border-b border-slate-100 pb-5">
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Formulir Konsultasi</h2>
+            <p className="text-slate-500 text-xs sm:text-sm">
+              Sampaikan kebutuhan website Anda. Kami akan mempelajari dan memberikan rekomendasi teknis & estimasi.
+            </p>
           </div>
         </StaggerItem>
 
-        <StaggerItem className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-2.5">
-            <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Nama Lengkap *</Label>
+        <StaggerItem className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">
+              Nama Lengkap <span className="text-red-500">*</span>
+            </Label>
             <Input
               required
               value={form.name}
               onChange={set("name")}
               placeholder="Cth: Budi Santoso"
-              className="bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 h-14 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all px-4"
+              className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 h-11 rounded-xl focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm"
             />
           </div>
-          <div className="space-y-2.5">
-            <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Nama Bisnis *</Label>
+          <div className="space-y-2">
+            <Label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">
+              Nama Bisnis / Brand <span className="text-red-500">*</span>
+            </Label>
             <Input
               required
               value={form.businessName}
               onChange={set("businessName")}
-              placeholder="Cth: Toko Maju Jaya"
-              className="bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 h-14 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all px-4"
+              placeholder="Cth: Kopi Maju Bersama"
+              className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 h-11 rounded-xl focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm"
             />
           </div>
         </StaggerItem>
 
-        <StaggerItem className="space-y-2.5">
-          <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Nomor WhatsApp *</Label>
+        <StaggerItem className="space-y-2">
+          <Label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">
+            Nomor WhatsApp Aktif <span className="text-red-500">*</span>
+          </Label>
           <Input
             required
             type="tel"
             value={form.whatsapp}
             onChange={set("whatsapp")}
             placeholder="Cth: 081234567890"
-            className="bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 h-14 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all px-4"
+            className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 h-11 rounded-xl focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm"
           />
         </StaggerItem>
 
-        <StaggerItem className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-2.5">
-            <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest flex items-center">
+        <StaggerItem className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label className="text-slate-700 text-xs font-semibold uppercase tracking-wider flex items-center">
               Domain Incaran
               {domainParam && (
-                <span className="ml-2 text-green-400/90 text-[9px] bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">Otomatis Terisi</span>
+                <span className="ml-2 text-slate-600 text-[10px] bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 font-mono">
+                  Auto-fill
+                </span>
               )}
             </Label>
             <Input
               value={form.domain}
               onChange={set("domain")}
-              placeholder="Cth: namabisnis.com"
-              className="bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 h-14 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all px-4"
+              placeholder="Cth: kopimaju.com"
+              className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 h-11 rounded-xl focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm font-mono"
             />
           </div>
-          <div className="space-y-2.5">
-            <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Web / Socmed Saat Ini</Label>
+          <div className="space-y-2">
+            <Label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">
+              Website / Sosmed Saat Ini
+            </Label>
             <Input
               value={form.currentWebsite}
               onChange={set("currentWebsite")}
-              placeholder="Cth: instagram.com/bisnisku"
-              className="bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 h-14 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all px-4"
+              placeholder="Cth: instagram.com/kopimaju"
+              className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 h-11 rounded-xl focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm"
             />
           </div>
         </StaggerItem>
 
-        <StaggerItem className="space-y-2.5">
-          <Label className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Deskripsi Kebutuhan (Opsional)</Label>
+        <StaggerItem className="space-y-2">
+          <Label className="text-slate-700 text-xs font-semibold uppercase tracking-wider">
+            Rincian Kebutuhan (Opsional)
+          </Label>
           <Textarea
             value={form.message}
             onChange={set("message")}
             rows={4}
-            placeholder="Contoh: butuh company profile 5 halaman, ada katalog produk, CTA WhatsApp, dan bisa update konten sendiri."
-            className="bg-black/50 border-white/10 text-white placeholder:text-blue-200/20 rounded-xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none p-4"
+            placeholder="Ceritakan gambaran halaman, fitur yang diinginkan, atau referensi desain yang Anda sukai."
+            className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800 resize-none p-3.5 text-sm"
           />
         </StaggerItem>
 
-        {error && <StaggerItem><p className="text-red-400/90 text-sm font-medium bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-xl">{error}</p></StaggerItem>}
+        {error && (
+          <StaggerItem>
+            <p className="text-red-700 text-xs font-medium bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+              {error}
+            </p>
+          </StaggerItem>
+        )}
 
         <StaggerItem className="pt-2">
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white h-16 font-black text-lg transition-colors rounded-xl"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white h-12 font-medium text-sm rounded-full transition-colors cursor-pointer"
           >
             {loading ? (
-              "Memproses Permintaan..."
+              "Mengirim pesan..."
             ) : (
               <>
                 Kirim Permintaan Konsultasi
-                <Send className="w-5 h-5 ml-2" />
+                <Send className="w-4 h-4 ml-2" />
               </>
             )}
           </Button>
@@ -190,132 +210,125 @@ export default function ContactPage() {
   const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
 
   return (
-    <div className="min-h-screen">
-      {/* ── Header ──────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto relative z-10 mb-10">
+    <div className="min-h-screen bg-white">
+      {/* ── Full-Width Deep Slate Hero ────────────────────── */}
+      <section className="w-full bg-[#1E242E] text-white pt-28 pb-16 sm:pt-32 sm:pb-24 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Breadcrumb items={[{ label: "Kontak" }]} />
-        </div>
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <FadeUp delay={0}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">
-              <PhoneCall className="w-4 h-4 text-blue-400" />
-              Hubungi Kami
-            </div>
-          </FadeUp>
 
-          <FadeUp delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-6 tracking-tight">
-              Ceritakan kebutuhan website Anda
-            </h1>
-          </FadeUp>
-
-          <FadeUp delay={0.2}>
-            <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-              Isi form singkat atau langsung chat WhatsApp. Kami bantu cek kebutuhan,
-              estimasi scope, dan langkah paling praktis untuk mulai.
-            </p>
-          </FadeUp>
+          <div className="max-w-3xl mt-6">
+            <FadeUp>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-px w-8 bg-slate-500" />
+                <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+                  Konsultasi & Diskusi Proyek
+                </span>
+              </div>
+              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.15]">
+                Ceritakan kebutuhan website Anda
+              </h1>
+              <p className="mt-6 text-lg text-slate-300 leading-relaxed">
+                Isi formulir singkat di bawah atau hubungi langsung via WhatsApp. Kami bantu menganalisis kebutuhan, estimasi pengerjaan, dan langkah paling praktis untuk memulai.
+              </p>
+            </FadeUp>
+          </div>
         </div>
       </section>
 
-      {/* ── Main Content ────────────────────────────────────── */}
-      <section className="pb-32 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+      {/* ── Main Content Section ──────────────────────────── */}
+      <section className="py-16 sm:py-20 bg-[#F8F9FA] border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
             
-            {/* Form */}
-            <SlideIn delay={0.1} className="lg:col-span-3">
+            {/* Form Column */}
+            <div className="lg:col-span-3">
               <Suspense
                 fallback={
-                  <div className="glass rounded-[32px] p-8 border border-white/5 bg-[#050b14]/80 animate-pulse h-[700px]" />
+                  <div className="rounded-2xl border border-slate-200 bg-white p-8 animate-pulse h-[540px]" />
                 }
               >
                 <ContactForm />
               </Suspense>
-            </SlideIn>
+            </div>
 
-            {/* Info sidebar */}
+            {/* Info Sidebar Column */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* Direct Contact Card */}
-              <ScaleIn delay={0.15}>
-                <div className="rounded-2xl border border-emerald-500/20 bg-[#071225] p-8">
-                  <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-6">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Fast Response
+              {/* WhatsApp Quick Channel */}
+              <FadeUp delay={0.1}>
+                <div className="rounded-2xl border border-slate-800 bg-[#1E242E] text-white p-7">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-xs font-mono tracking-widest text-emerald-400 uppercase">
+                      Respon Cepat
+                    </span>
                   </div>
-                  
-                  <h3 className="text-white text-2xl font-black mb-3">Jalur Cepat WhatsApp</h3>
-                  <p className="text-emerald-100/60 text-sm mb-8 leading-relaxed">
-                    Lebih nyaman ngobrol via chat? Klik tombol di bawah untuk langsung terhubung dengan tim MFWEB.
+                  <h3 className="text-xl font-bold text-white mb-2">Jalur Cepat WhatsApp</h3>
+                  <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                    Lebih nyaman berdiskusi langsung? Hubungi kami langsung melalui WhatsApp untuk respon instan.
                   </p>
-                  
                   <a
-                    href={`https://wa.me/${WA_NUMBER}?text=Halo%20MFWEB%20Tech%2C%20saya%20ingin%20konsultasi%20pembuatan%20website`}
+                    href={`https://wa.me/${WA_NUMBER}?text=Halo%20MFWEB%2C%20saya%20ingin%20konsultasi%20pembuatan%20website`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-14 font-black text-base transition-colors rounded-xl">
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      Chat WhatsApp
+                    <Button className="w-full bg-white text-slate-900 hover:bg-slate-100 h-11 font-medium text-sm rounded-full transition-colors">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Chat Tim Kami
                     </Button>
                   </a>
                 </div>
-              </ScaleIn>
+              </FadeUp>
 
-              {/* Perks Card */}
-              <ScaleIn delay={0.2}>
-                <div className="rounded-2xl border border-white/10 bg-[#071225] p-8">
-                  <h3 className="text-white font-bold text-lg mb-6">Yang Anda Dapatkan</h3>
-                  <div className="space-y-4">
+              {/* What You Get Card */}
+              <FadeUp delay={0.15}>
+                <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-xs">
+                  <h3 className="text-slate-900 font-bold text-base mb-4">Yang Anda Dapatkan</h3>
+                  <div className="space-y-3.5">
                     {[
-                      "Sesi bedah kebutuhan bisnis (Gratis)",
-                      "Saran struktur halaman dan CTA",
-                      "Rekomendasi fitur yang benar-benar dibutuhkan",
-                      "Estimasi timeline pengerjaan",
-                      "Garansi perbaikan bug",
+                      "Sesi telaah kebutuhan bisnis gratis",
+                      "Rekomendasi struktur halaman & tombol CTA",
+                      "Saran fitur yang relevan & tidak berlebihan",
+                      "Estimasi timeline pengerjaan yang realistis",
+                      "Garansi perbaikan bug setelah peluncuran",
                     ].map((item) => (
-                      <div key={item} className="flex items-start gap-4">
-                        <div className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                          <CheckCircle className="w-3.5 h-3.5 text-blue-400" />
-                        </div>
-                        <span className="text-blue-100/70 text-sm font-medium leading-relaxed">{item}</span>
+                      <div key={item} className="flex items-start gap-3">
+                        <CheckCircle className="w-4 h-4 text-slate-800 shrink-0 mt-0.5" />
+                        <span className="text-slate-600 text-xs sm:text-sm leading-relaxed">{item}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              </ScaleIn>
+              </FadeUp>
 
-              {/* Contact Details */}
-              <ScaleIn delay={0.25}>
-                <div className="rounded-2xl border border-white/10 bg-[#071225] p-8 space-y-5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
-                      <Mail className="w-5 h-5 text-blue-400" />
+              {/* Direct Details Card */}
+              <FadeUp delay={0.2}>
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+                      <Mail className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-0.5">Email Official</p>
-                      <p className="text-white font-semibold text-sm">hello@mfweb.id</p>
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Email Resmi</p>
+                      <p className="text-slate-900 font-medium text-sm">hello@mfweb.id</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
-                      <MapPin className="w-5 h-5 text-blue-400" />
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+                      <MapPin className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-0.5">Basecamp</p>
-                      <p className="text-white font-semibold text-sm">Kediri, Jawa Timur</p>
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Studio Basecamp</p>
+                      <p className="text-slate-900 font-medium text-sm">Kediri, Jawa Timur, Indonesia</p>
                     </div>
                   </div>
                 </div>
-              </ScaleIn>
+              </FadeUp>
 
-              {/* Privacy note */}
-              <ScaleIn delay={0.3}>
-                <p className="text-blue-200/30 text-[11px] leading-relaxed text-center px-4 pt-2">
-                  Komunikasi Anda dilindungi enkripsi. Kami tidak akan pernah membagikan detail kontak Anda ke pihak ketiga.
-                </p>
-              </ScaleIn>
+              {/* Privacy Assurance */}
+              <p className="text-slate-400 text-xs leading-relaxed text-center px-2">
+                Privasi dan data bisnis Anda terjamin aman. Kami tidak akan pernah membagikan kontak Anda kepada pihak ketiga.
+              </p>
 
             </div>
           </div>

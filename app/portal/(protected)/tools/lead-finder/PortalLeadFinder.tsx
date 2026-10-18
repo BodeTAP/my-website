@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -388,10 +388,10 @@ function downloadCsv(places: PlaceLead[]) {
 function StarRating({ rating, count }: { rating: number | null; count: number | null }) {
   if (!rating) return null;
   return (
-    <span className="flex items-center gap-1 text-[11px] text-yellow-400/80">
-      <Star className="w-3 h-3 fill-yellow-400/80 text-yellow-400/80" />
-      <span className="font-medium">{rating.toFixed(1)}</span>
-      {count != null && <span className="text-blue-200/40">({count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count})</span>}
+    <span className="flex items-center gap-1 text-[11px] text-amber-500">
+      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+      <span className="font-semibold text-slate-700">{rating.toFixed(1)}</span>
+      {count != null && <span className="text-slate-400 font-normal">({count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count})</span>}
     </span>
   );
 }
@@ -400,14 +400,14 @@ function BusinessStatusBadge({ status }: { status: PlaceLead["businessStatus"] }
   if (!status || status === "OPERATIONAL") return null;
   if (status === "CLOSED_PERMANENTLY") {
     return (
-      <span className="flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-        <XCircle className="w-2.5 h-2.5" /> Tutup Permanen
+      <span className="flex items-center gap-1 text-[10px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+        <XCircle className="w-2.5 h-2.5 text-rose-500" /> Tutup Permanen
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[10px] text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
-      <Clock className="w-2.5 h-2.5" /> Tutup Sementara
+    <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+      <Clock className="w-2.5 h-2.5 text-amber-500" /> Tutup Sementara
     </span>
   );
 }
@@ -463,14 +463,14 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className={`w-full flex items-center justify-between gap-2 bg-white/5 border rounded-xl px-4 py-2.5 text-sm transition-all outline-none ${
-          open ? "border-blue-500/50 bg-white/8" : "border-white/10 hover:border-white/20"
+        className={`w-full flex items-center justify-between gap-2 bg-slate-50 border rounded-xl px-4 py-2.5 text-sm transition-all outline-none ${
+          open ? "border-slate-900 bg-white ring-1 ring-slate-900/10" : "border-slate-200 hover:border-slate-300"
         }`}
       >
-        <span className={`flex items-center gap-2 truncate ${value ? "text-white" : "text-blue-200/30"}`}>
+        <span className={`flex items-center gap-2 truncate ${value ? "text-slate-900 font-medium" : "text-slate-400"}`}>
           {value ? (
             <>
-              <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
               {value}
             </>
           ) : (
@@ -479,19 +479,19 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
         </span>
         <span className="flex items-center gap-1 shrink-0">
           {value && (
-            <span onClick={clear} className="p-0.5 rounded hover:bg-white/10 text-blue-200/40 hover:text-white transition-colors">
+            <span onClick={clear} className="p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors">
               <X className="w-3 h-3" />
             </span>
           )}
-          <ChevronDown className={`w-4 h-4 text-blue-200/40 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-2 w-full min-w-[320px] rounded-2xl border border-white/10 bg-[#07111f]/98 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden">
-          <div className="p-2.5 border-b border-white/5">
-            <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
-              <Search className="w-3.5 h-3.5 text-blue-200/40 shrink-0" />
+        <div className="absolute z-50 top-full mt-2 w-full min-w-[320px] rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+          <div className="p-2.5 border-b border-slate-100">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2">
+              <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <input
                 ref={searchRef}
                 value={search}
@@ -503,11 +503,11 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
                   if (event.key === "Enter" && search.trim()) select(search.trim());
                 }}
                 placeholder="Cari kota/kabupaten..."
-                className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-blue-200/30"
+                className="flex-1 bg-transparent outline-none text-sm text-slate-900 placeholder:text-slate-400"
               />
               {search && (
                 <button type="button" onClick={() => setSearch("")}>
-                  <X className="w-3 h-3 text-blue-200/40 hover:text-white" />
+                  <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
                 </button>
               )}
             </div>
@@ -515,17 +515,17 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
 
           <div className="flex h-80">
             {!search.trim() && (
-              <div className="w-36 shrink-0 border-r border-white/5 overflow-y-auto py-1">
+              <div className="w-36 shrink-0 border-r border-slate-100 overflow-y-auto py-1 bg-slate-50/60">
                 <button
                   type="button"
                   onClick={() => setActiveProvince(null)}
                   className={`w-full text-left px-3 py-2 text-xs transition-colors ${
-                    !activeProvince ? "bg-blue-500/20 text-blue-300 font-medium" : "text-blue-200/50 hover:bg-white/5 hover:text-white"
+                    !activeProvince ? "bg-white text-slate-900 font-bold border-r-2 border-slate-900 shadow-xs" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   Populer
                 </button>
-                <div className="h-px bg-white/5 my-1" />
+                <div className="h-px bg-slate-200/70 my-1" />
                 {CITY_GROUPS.map((group) => (
                   <button
                     key={group.label}
@@ -533,8 +533,8 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
                     onClick={() => setActiveProvince(group.label)}
                     className={`w-full text-left px-3 py-2 text-xs transition-colors leading-tight ${
                       activeProvince === group.label
-                        ? "bg-blue-500/20 text-blue-300 font-medium"
-                        : "text-blue-200/50 hover:bg-white/5 hover:text-white"
+                        ? "bg-white text-slate-900 font-bold border-r-2 border-slate-900 shadow-xs"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
                     {group.label}
@@ -547,24 +547,24 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
               {search.trim() ? (
                 searchResults!.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center gap-2">
-                    <p className="text-blue-200/30 text-xs">Tidak ditemukan</p>
-                    <button type="button" onClick={() => select(search.trim())} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                    <p className="text-slate-400 text-xs">Tidak ditemukan</p>
+                    <button type="button" onClick={() => select(search.trim())} className="text-xs text-slate-800 font-semibold hover:underline transition-colors">
                       Gunakan &quot;{search.trim()}&quot; langsung
                     </button>
                   </div>
                 ) : (
                   <>
-                    <p className="px-3 pt-1 pb-1.5 text-[10px] text-blue-200/30">{searchResults!.length} hasil</p>
+                    <p className="px-3 pt-1 pb-1.5 text-[10px] text-slate-400">{searchResults!.length} hasil</p>
                     {searchResults!.map((city) => (
                       <button
                         key={city}
                         type="button"
                         onClick={() => select(city)}
                         className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors ${
-                          value === city ? "bg-blue-500/20 text-blue-300" : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                          value === city ? "bg-slate-100 text-slate-900 font-semibold" : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                         }`}
                       >
-                        <MapPin className="w-3 h-3 text-blue-400/50 shrink-0" />
+                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                         {city}
                       </button>
                     ))}
@@ -572,7 +572,7 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
                 )
               ) : activeProvince ? (
                 <>
-                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-blue-200/30">
+                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     {activeProvince}
                   </p>
                   {provinceCities!.map((city) => (
@@ -581,17 +581,17 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
                       type="button"
                       onClick={() => select(city)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors ${
-                        value === city ? "bg-blue-500/20 text-blue-300" : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                        value === city ? "bg-slate-100 text-slate-900 font-semibold" : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                     >
-                      <MapPin className="w-3 h-3 text-blue-400/50 shrink-0" />
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                       {city}
                     </button>
                   ))}
                 </>
               ) : (
                 <>
-                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-blue-200/30">
+                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     Kota populer
                   </p>
                   {popularCities.map((city) => (
@@ -600,10 +600,10 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
                       type="button"
                       onClick={() => select(city)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors ${
-                        value === city ? "bg-blue-500/20 text-blue-300" : "text-blue-100/70 hover:bg-white/5 hover:text-white"
+                        value === city ? "bg-slate-100 text-slate-900 font-semibold" : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                     >
-                      <MapPin className="w-3 h-3 text-blue-400/50 shrink-0" />
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                       {city}
                     </button>
                   ))}
@@ -612,9 +612,9 @@ function CityDropdown({ value, onChange }: { value: string; onChange: (value: st
             </div>
           </div>
 
-          <div className="p-3 border-t border-white/5 flex items-center justify-between">
-            <span className="text-[10px] text-blue-200/30">{ALL_CITIES.length} kota/kabupaten tersedia</span>
-            <button type="button" onClick={() => clear()} className="text-xs text-blue-200/40 hover:text-white">
+          <div className="p-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <span className="text-[10px] text-slate-400">{ALL_CITIES.length} kota/kabupaten tersedia</span>
+            <button type="button" onClick={() => clear()} className="text-xs text-slate-500 hover:text-slate-900 font-medium">
               Kosongkan
             </button>
           </div>
@@ -866,51 +866,55 @@ export default function PortalLeadFinder({
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
-          <Link href="/portal/tools" className="inline-flex items-center gap-2 text-blue-200/50 hover:text-white text-sm mb-4 transition-colors">
+          <Link href="/portal/tools" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Kembali ke Tools
           </Link>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Search className="w-7 h-7 text-blue-400" />
-            Lead Finder
-          </h1>
-          <p className="text-blue-200/50 text-sm mt-2">Cari prospek bisnis lokal dari Google Maps, lalu simpan atau export list yang relevan.</p>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-800">
+              <Search className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Lead Finder</h1>
+              <p className="text-slate-500 text-sm mt-1">Cari prospek bisnis lokal dari Google Maps, lalu simpan atau export list yang relevan.</p>
+            </div>
+          </div>
         </div>
         <Link href="/portal/credits" className="w-fit">
-          <div className="flex items-center gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 px-4 py-3 hover:bg-amber-500/15 transition-colors">
-            <Coins className="w-5 h-5 text-amber-300" />
+          <div className="flex items-center gap-3 rounded-2xl bg-white border border-slate-200/90 shadow-xs px-4 py-3 hover:border-slate-300 transition-colors">
+            <Coins className="w-5 h-5 text-amber-500" />
             <div>
-              <p className="text-amber-200/55 text-[10px] uppercase tracking-widest font-black">Saldo</p>
-              <p className="text-white font-black">{balance} kredit</p>
+              <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Saldo</p>
+              <p className="text-slate-900 font-black">{balance} kredit</p>
             </div>
           </div>
         </Link>
       </div>
 
       {!enabled && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-blue-100">
-          <span className="flex items-center gap-3 text-sm font-bold">
-            <AlertTriangle className="w-5 h-5 text-blue-300" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-slate-100 border border-slate-200 px-5 py-4 text-slate-800">
+          <span className="flex items-center gap-3 text-sm font-semibold">
+            <AlertTriangle className="w-5 h-5 text-slate-600" />
             Lead Finder sedang nonaktif sementara.
           </span>
-          <span className="text-xs text-blue-200/45">Silakan coba lagi nanti.</span>
+          <span className="text-xs text-slate-500">Silakan coba lagi nanti.</span>
         </div>
       )}
 
       {enabled && insufficient && (
         <Link
           href="/portal/credits"
-          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 px-5 py-4 text-amber-100 hover:bg-amber-500/15 transition-colors"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-50 border border-amber-200 px-5 py-4 text-amber-900 hover:bg-amber-100/60 transition-colors"
         >
-          <span className="flex items-center gap-3 text-sm font-bold">
-            <AlertTriangle className="w-5 h-5 text-amber-300" />
+          <span className="flex items-center gap-3 text-sm font-semibold">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             Kredit tidak cukup. Beli sekarang
           </span>
-          <span className="text-xs text-amber-200/70">Butuh {creditCost} kredit untuk mode ini</span>
+          <span className="text-xs text-amber-700">Butuh {creditCost} kredit untuk mode ini</span>
         </Link>
       )}
 
-      <div className="rounded-2xl border border-white/10 bg-[#071225] p-6">
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -920,20 +924,20 @@ export default function PortalLeadFinder({
         >
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label htmlFor="lead-query" className="text-blue-200/60 text-xs font-medium">Kategori Bisnis *</label>
+              <label htmlFor="lead-query" className="text-slate-700 text-xs font-semibold">Kategori Bisnis *</label>
               <input
                 id="lead-query"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="contoh: restoran, salon, klinik..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-blue-200/30 outline-none focus:border-blue-500/50 text-sm"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:bg-white text-sm transition-all"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-blue-200/60 text-xs font-medium flex items-center gap-1.5">
+              <label className="text-slate-700 text-xs font-semibold flex items-center gap-1.5">
                 Kota / Area
-                <span className="text-blue-400/60 text-[10px] flex items-center gap-0.5">
-                  <Crosshair className="w-2.5 h-2.5" /> Presisi lebih akurat
+                <span className="text-slate-500 text-[10px] flex items-center gap-0.5">
+                  <Crosshair className="w-2.5 h-2.5 text-slate-600" /> Presisi lebih akurat
                 </span>
               </label>
               <CityDropdown value={city} onChange={setCity} />
@@ -948,8 +952,8 @@ export default function PortalLeadFinder({
                 onClick={() => setQuery(preset)}
                 className={`px-2.5 py-1 rounded-lg text-xs border transition-all ${
                   query === preset
-                    ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
-                    : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white hover:border-white/20"
+                    ? "bg-[#1E242E] border-slate-800 text-white font-medium shadow-xs"
+                    : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300"
                 }`}
               >
                 {preset}
@@ -978,19 +982,19 @@ export default function PortalLeadFinder({
                 onClick={() => setMode(option.value)}
                 className={`rounded-2xl border p-4 text-left transition-all ${
                   mode === option.value
-                    ? "border-blue-500/45 bg-blue-500/10"
-                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    ? "border-slate-900 bg-slate-50/80 shadow-xs"
+                    : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-black text-white">{option.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-blue-200/45">{option.description}</p>
+                    <p className="text-sm font-bold text-slate-900">{option.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">{option.description}</p>
                   </div>
-                  <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+                  <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-bold ${
                     mode === option.value
-                      ? "border-amber-400/30 bg-amber-400/10 text-amber-300"
-                      : "border-white/10 bg-white/5 text-blue-200/45"
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200 bg-slate-100 text-slate-600"
                   }`}>
                     {option.badge}
                   </span>
@@ -1005,21 +1009,21 @@ export default function PortalLeadFinder({
               onClick={() => setSocialScanEnabled((current) => !current)}
               className={`w-full rounded-2xl border p-4 text-left transition-all ${
                 socialScanEnabled
-                  ? "border-emerald-500/40 bg-emerald-500/10"
-                  : "border-white/10 bg-white/5 hover:border-white/20"
+                  ? "border-emerald-600/40 bg-emerald-50/60 shadow-xs"
+                  : "border-slate-200 bg-white hover:border-slate-300"
               }`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-black text-white">Social Scan</p>
-                  <p className="mt-1 text-xs leading-relaxed text-blue-200/45">
+                  <p className="text-sm font-bold text-slate-900">Social Scan</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
                     Cek link Instagram, Facebook, TikTok, LinkedIn, YouTube, dan X dari website bisnis. Hasil memakai cache dan dibatasi agar pencarian tetap stabil.
                   </p>
                 </div>
-                <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-black ${
+                <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-[10px] font-bold ${
                   socialScanEnabled
-                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                    : "border-white/10 bg-white/5 text-blue-200/45"
+                    ? "border-emerald-300 bg-emerald-100 text-emerald-800"
+                    : "border-slate-200 bg-slate-100 text-slate-600"
                 }`}>
                   +{socialScanCost} kredit
                 </span>
@@ -1027,19 +1031,19 @@ export default function PortalLeadFinder({
             </button>
           )}
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-6">
+          <div className="flex items-center gap-3 flex-wrap pt-1">
+            <Button type="submit" disabled={!query.trim() || loading || insufficient} className="bg-[#1E242E] hover:bg-slate-800 text-white gap-2 px-6 rounded-xl font-medium shadow-xs">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               {loading ? (mode === "deep" ? "Mencari lebih luas..." : "Mencari lead...") : "Cari Lead"}
             </Button>
 
-            <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-medium text-blue-300">
+            <div className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
               {mode === "deep" ? "Multi-search aktif" : "Fix 60 leads"}
               {activeSocialScan ? " + Social Scan" : ""}
             </div>
 
             {history.length > 0 && (
-              <button type="button" onClick={() => setShowHistory((value) => !value)} className="flex items-center gap-1.5 text-blue-200/40 hover:text-white text-xs transition-colors">
+              <button type="button" onClick={() => setShowHistory((value) => !value)} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 text-xs transition-colors ml-auto">
                 <History className="w-3.5 h-3.5" />
                 Riwayat ({history.length})
               </button>
@@ -1048,8 +1052,8 @@ export default function PortalLeadFinder({
         </form>
 
         {showHistory && history.length > 0 && (
-          <div className="mt-4 border-t border-white/5 pt-4 space-y-1.5">
-            <p className="text-blue-200/40 text-xs mb-2">Pencarian terakhir:</p>
+          <div className="mt-4 border-t border-slate-100 pt-4 space-y-1.5">
+            <p className="text-slate-400 text-xs mb-2 font-medium">Pencarian terakhir:</p>
             {history.map((item) => (
               <button
                 key={`${item.query}-${item.city}-${item.timestamp}`}
@@ -1059,13 +1063,13 @@ export default function PortalLeadFinder({
                   setCity(item.city);
                   setConfirmOpen(true);
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all text-left"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all text-left"
               >
-                <span className="flex items-center gap-2 text-sm text-white/70">
-                  <MapPin className="w-3.5 h-3.5 text-blue-400/60 shrink-0" />
+                <span className="flex items-center gap-2 text-sm text-slate-800">
+                  <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span>{item.query}{item.city ? ` - ${item.city}` : ""}</span>
                 </span>
-                <span className="text-blue-200/30 text-xs shrink-0">{item.total} hasil</span>
+                <span className="text-slate-500 text-xs shrink-0 font-medium">{item.total} hasil</span>
               </button>
             ))}
           </div>
@@ -1073,29 +1077,29 @@ export default function PortalLeadFinder({
       </div>
 
       {error && (
-        <div className="rounded-2xl bg-red-500/10 border border-red-500/25 px-5 py-4 text-red-200 text-sm">
+        <div className="rounded-2xl bg-rose-50 border border-rose-200 px-5 py-4 text-rose-800 text-sm">
           {error}
         </div>
       )}
 
       {listMessage && !error && (
-        <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/25 px-5 py-4 text-emerald-100 text-sm">
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-emerald-800 text-sm">
           {listMessage}
         </div>
       )}
 
       {savedLists.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-[#071225] p-5">
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="flex items-center gap-2 text-white font-black">
-                <Bookmark className="h-4 w-4 text-blue-300" />
+              <h2 className="flex items-center gap-2 text-slate-900 font-bold">
+                <Bookmark className="h-4 w-4 text-slate-700" />
                 Saved Lists
               </h2>
-              <p className="mt-1 text-xs text-blue-200/45">Buka ulang hasil pencarian tanpa memotong kredit lagi.</p>
+              <p className="mt-1 text-xs text-slate-500">Buka ulang hasil pencarian tanpa memotong kredit lagi.</p>
             </div>
             {places.length > 0 && (
-              <Button type="button" size="sm" onClick={saveCurrentList} disabled={savingList} className="gap-2 bg-blue-600 text-white hover:bg-blue-500">
+              <Button type="button" size="sm" onClick={saveCurrentList} disabled={savingList} className="gap-2 bg-[#1E242E] text-white hover:bg-slate-800 rounded-xl shadow-xs">
                 {savingList ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                 Simpan Hasil Ini
               </Button>
@@ -1103,17 +1107,17 @@ export default function PortalLeadFinder({
           </div>
           <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {savedLists.slice(0, 6).map((list) => (
-              <div key={list.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+              <div key={list.id} className="rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-black text-white">{list.name}</p>
-                    <p className="mt-1 truncate text-xs text-blue-200/45">{list.total} lead - {list.city ? `${list.query} di ${list.city}` : list.query}</p>
+                    <p className="truncate text-sm font-bold text-slate-900">{list.name}</p>
+                    <p className="mt-1 truncate text-xs text-slate-500">{list.total} lead - {list.city ? `${list.query} di ${list.city}` : list.query}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => void deleteSavedList(list.id)}
                     disabled={loadingListId === list.id}
-                    className="shrink-0 rounded-lg border border-red-500/15 bg-red-500/10 p-2 text-red-200/70 hover:text-red-100 disabled:opacity-50"
+                    className="shrink-0 rounded-lg border border-rose-200 bg-rose-50 p-2 text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition-colors"
                     aria-label="Hapus saved list"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -1123,7 +1127,7 @@ export default function PortalLeadFinder({
                   type="button"
                   onClick={() => void loadSavedList(list.id)}
                   disabled={loadingListId === list.id}
-                  className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 text-xs font-black text-blue-200 hover:bg-blue-500/15 disabled:opacity-50"
+                  className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-2xs disabled:opacity-50"
                 >
                   {loadingListId === list.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FolderOpen className="h-3.5 w-3.5" />}
                   Buka List
@@ -1135,7 +1139,7 @@ export default function PortalLeadFinder({
       )}
 
       {fullQuery && !error && !loading && !loadedFromSavedList && (
-        <div className="rounded-2xl bg-green-500/10 border border-green-500/25 px-5 py-4 text-green-100 text-sm">
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-emerald-900 text-sm">
           {lastMode === "deep" ? "Deep Search selesai" : "Pencarian selesai"}. {lastCreditCost} kredit telah digunakan, saldo terbaru {balance} kredit.
         </div>
       )}
@@ -1144,32 +1148,32 @@ export default function PortalLeadFinder({
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <p className="text-white font-semibold flex items-center gap-2 flex-wrap">
+              <p className="text-slate-900 font-bold flex items-center gap-2 flex-wrap">
                 {places.length} bisnis ditemukan
                 {usedBias && (
-                  <span className="text-[10px] text-blue-400/70 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Crosshair className="w-2.5 h-2.5" /> Lokasi presisi aktif
+                  <span className="text-[10px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full flex items-center gap-1 font-semibold">
+                    <Crosshair className="w-2.5 h-2.5 text-slate-600" /> Lokasi presisi aktif
                   </span>
                 )}
               </p>
-              <p className="text-xs text-blue-200/40 flex flex-wrap gap-3">
-                {noWebsiteCount > 0 && <span className="text-blue-300/70"><strong>{noWebsiteCount}</strong> tanpa website</span>}
-                {noPhoneCount > 0 && <span className="text-amber-300/80"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
-                {activeSocialScan && <span className="text-emerald-300/80"><strong>{socialFoundCount}</strong> punya social link</span>}
-                {closedCount > 0 && <span className="text-orange-400/70"><strong>{closedCount}</strong> tutup permanen</span>}
+              <p className="text-xs text-slate-500 flex flex-wrap gap-3">
+                {noWebsiteCount > 0 && <span className="text-amber-700"><strong>{noWebsiteCount}</strong> tanpa website</span>}
+                {noPhoneCount > 0 && <span className="text-slate-600"><strong>{noPhoneCount}</strong> tanpa nomor</span>}
+                {activeSocialScan && <span className="text-emerald-700"><strong>{socialFoundCount}</strong> punya social link</span>}
+                {closedCount > 0 && <span className="text-rose-600"><strong>{closedCount}</strong> tutup permanen</span>}
               </p>
-              {fullQuery && <p className="text-blue-200/40 text-xs">{fullQuery}</p>}
+              {fullQuery && <p className="text-slate-400 text-xs">{fullQuery}</p>}
             </div>
 
             {filteredPlaces.length > 0 && (
               <div className="flex flex-wrap gap-2 sm:justify-end">
                 <Button variant="outline" size="sm" onClick={saveCurrentList} disabled={savingList}
-                  className="gap-2 text-xs border-blue-500/25 bg-blue-500/10 text-blue-200 hover:bg-blue-500/15 shrink-0">
+                  className="gap-2 text-xs border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shrink-0 rounded-xl shadow-2xs">
                   {savingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                   Simpan List
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => downloadCsv(filteredPlaces)}
-                  className="gap-2 text-xs border-green-500/25 bg-green-500/10 text-green-200 hover:bg-green-500/15 shrink-0">
+                <Button size="sm" onClick={() => downloadCsv(filteredPlaces)}
+                  className="gap-2 text-xs bg-[#1E242E] text-white hover:bg-slate-800 shrink-0 rounded-xl shadow-xs">
                   <Download className="w-3.5 h-3.5" />
                   Download CSV ({filteredPlaces.length})
                 </Button>
@@ -1178,16 +1182,16 @@ export default function PortalLeadFinder({
           </div>
 
           <div className="grid lg:grid-cols-[1fr_220px] gap-3">
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-              <Search className="w-4 h-4 text-blue-200/35 shrink-0" />
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-2xs">
+              <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 value={resultSearch}
                 onChange={(event) => setResultSearch(event.target.value)}
                 placeholder="Cari di hasil: nama, alamat, kategori..."
-                className="w-full bg-transparent text-sm text-white placeholder:text-blue-200/30 outline-none"
+                className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 outline-none"
               />
               {resultSearch && (
-                <button type="button" onClick={() => setResultSearch("")} className="text-blue-200/35 hover:text-white">
+                <button type="button" onClick={() => setResultSearch("")} className="text-slate-400 hover:text-slate-700">
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -1196,14 +1200,14 @@ export default function PortalLeadFinder({
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as SortBy)}
-              className="h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-blue-500/45"
+              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-900 shadow-2xs"
             >
-              <option className="bg-[#07111f] text-white" value="PHONE">Ada nomor dulu</option>
-              <option className="bg-[#07111f] text-white" value="REVIEWS">Review terbanyak</option>
-              <option className="bg-[#07111f] text-white" value="RATING">Rating tertinggi</option>
-              <option className="bg-[#07111f] text-white" value="NO_WEBSITE">Belum ada website dulu</option>
-              <option className="bg-[#07111f] text-white" value="SOCIAL">Ada sosial media dulu</option>
-              <option className="bg-[#07111f] text-white" value="NAME">Nama A-Z</option>
+              <option className="bg-white text-slate-900" value="PHONE">Ada nomor dulu</option>
+              <option className="bg-white text-slate-900" value="REVIEWS">Review terbanyak</option>
+              <option className="bg-white text-slate-900" value="RATING">Rating tertinggi</option>
+              <option className="bg-white text-slate-900" value="NO_WEBSITE">Belum ada website dulu</option>
+              <option className="bg-white text-slate-900" value="SOCIAL">Ada sosial media dulu</option>
+              <option className="bg-white text-slate-900" value="NAME">Nama A-Z</option>
             </select>
           </div>
 
@@ -1213,44 +1217,44 @@ export default function PortalLeadFinder({
                 key={value}
                 type="button"
                 onClick={() => setFilter(value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                   filter === value
                     ? value === "NO_WEBSITE"
-                      ? "bg-red-500/20 border-red-500/40 text-red-300"
+                      ? "bg-amber-100 border-amber-300 text-amber-900 shadow-2xs"
                       : value === "HAS_WEBSITE"
-                      ? "bg-green-500/20 border-green-500/40 text-green-300"
-                      : "bg-white/15 border-white/20 text-white"
-                    : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                      ? "bg-emerald-100 border-emerald-300 text-emerald-900 shadow-2xs"
+                      : "bg-[#1E242E] border-slate-800 text-white shadow-2xs"
+                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
                 {value === "NO_WEBSITE" ? "Belum ada website" : value === "HAS_WEBSITE" ? "Ada website" : "Semua"}
               </button>
             ))}
 
-            <div className="w-px bg-white/10 mx-1" />
+            <div className="w-px bg-slate-200 mx-1" />
             <select
               value={socialFilter}
               onChange={(event) => setSocialFilter(event.target.value as SocialFilter)}
               disabled={!activeSocialScan}
-              className="h-8 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-white outline-none disabled:opacity-45"
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none disabled:opacity-45"
             >
-              <option className="bg-[#07111f] text-white" value="ALL">Semua sosial</option>
-              <option className="bg-[#07111f] text-white" value="ANY">Ada sosial media</option>
-              <option className="bg-[#07111f] text-white" value="NONE">Tidak ditemukan</option>
+              <option className="bg-white text-slate-900" value="ALL">Semua sosial</option>
+              <option className="bg-white text-slate-900" value="ANY">Ada sosial media</option>
+              <option className="bg-white text-slate-900" value="NONE">Tidak ditemukan</option>
               {SOCIAL_PLATFORMS.map((platform) => (
-                <option key={platform.value} className="bg-[#07111f] text-white" value={platform.value}>
+                <option key={platform.value} className="bg-white text-slate-900" value={platform.value}>
                   {platform.label}
                 </option>
               ))}
             </select>
-            <div className="w-px bg-white/10 mx-1" />
+            <div className="w-px bg-slate-200 mx-1" />
             <button
               type="button"
               onClick={() => setHasPhoneOnly((current) => !current)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                 hasPhoneOnly
-                  ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
-                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                  ? "bg-[#1E242E] border-slate-800 text-white shadow-2xs"
+                  : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
               Ada nomor
@@ -1258,38 +1262,38 @@ export default function PortalLeadFinder({
             <button
               type="button"
               onClick={() => setStatusFilter(statusFilter === "OPERATIONAL" ? "ALL" : "OPERATIONAL")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                 statusFilter === "OPERATIONAL"
-                  ? "bg-green-500/20 border-green-500/40 text-green-300"
-                  : "bg-white/5 border-white/10 text-blue-200/50 hover:text-white"
+                  ? "bg-emerald-100 border-emerald-300 text-emerald-900 shadow-2xs"
+                  : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
               Aktif saja
             </button>
 
-            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
-              <Star className="w-3 h-3 text-yellow-400/60" />
-              <span className="text-blue-200/40 text-xs">Min:</span>
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 py-1.5 shadow-2xs">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="text-slate-400 text-xs font-medium">Min:</span>
               {[0, 3, 3.5, 4, 4.5].map((rating) => (
                 <button
                   key={rating}
                   type="button"
                   onClick={() => setMinRating(rating)}
-                  className={`px-1.5 py-0.5 rounded text-xs transition-all ${minRating === rating ? "text-yellow-300 font-semibold" : "text-blue-200/40 hover:text-white"}`}
+                  className={`px-1.5 py-0.5 rounded text-xs transition-all ${minRating === rating ? "text-amber-800 font-bold bg-amber-50" : "text-slate-500 hover:text-slate-900"}`}
                 >
                   {rating === 0 ? "Semua" : rating}
                 </button>
               ))}
             </div>
 
-            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
-              <span className="text-blue-200/40 text-xs">Ulasan:</span>
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 py-1.5 shadow-2xs">
+              <span className="text-slate-400 text-xs font-medium">Ulasan:</span>
               {[0, 10, 50, 100, 500].map((reviews) => (
                 <button
                   key={reviews}
                   type="button"
                   onClick={() => setMinReviews(reviews)}
-                  className={`px-1.5 py-0.5 rounded text-xs transition-all ${minReviews === reviews ? "text-blue-300 font-semibold" : "text-blue-200/40 hover:text-white"}`}
+                  className={`px-1.5 py-0.5 rounded text-xs transition-all ${minReviews === reviews ? "text-slate-900 font-bold bg-slate-100" : "text-slate-500 hover:text-slate-900"}`}
                 >
                   {reviews === 0 ? "Semua" : `${reviews}+`}
                 </button>
@@ -1298,8 +1302,8 @@ export default function PortalLeadFinder({
           </div>
 
           {filteredPlaces.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-[#071225] p-12 text-center">
-              <p className="text-blue-200/40">Tidak ada hasil untuk filter ini.</p>
+            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+              <p className="text-slate-400">Tidak ada hasil untuk filter ini.</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 gap-3">
@@ -1307,56 +1311,56 @@ export default function PortalLeadFinder({
                 const isClosed = place.businessStatus === "CLOSED_PERMANENTLY";
                 const socialPlatforms = getSocialPlatforms(place);
                 return (
-                  <div key={place.placeId || `${place.name}-${place.phone}`} className={`rounded-2xl bg-[#071225] p-4 border transition-colors ${isClosed ? "opacity-55 border-white/10" : "border-white/10 hover:border-white/20"}`}>
+                  <div key={place.placeId || `${place.name}-${place.phone}`} className={`rounded-2xl bg-white p-4 border transition-all shadow-xs ${isClosed ? "opacity-55 border-slate-200" : "border-slate-200/90 hover:border-slate-300 hover:shadow-md"}`}>
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0">
                         {place.hasWebsite
-                          ? <Globe className="w-4 h-4 text-green-400/60" />
-                          : <GlobeOff className="w-4 h-4 text-red-400/70" />}
+                          ? <Globe className="w-4 h-4 text-emerald-600" />
+                          : <GlobeOff className="w-4 h-4 text-amber-600" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 flex-wrap">
-                          <p className="text-white font-semibold text-sm leading-snug line-clamp-1">{place.name || "Tanpa nama"}</p>
+                          <p className="text-slate-900 font-bold text-sm leading-snug line-clamp-1">{place.name || "Tanpa nama"}</p>
                           <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                             <BusinessStatusBadge status={place.businessStatus} />
                             {place.hasWebsite ? (
-                              <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                              <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                                 <Globe className="w-2.5 h-2.5" /> Ada website
                               </span>
                             ) : (
-                              <span className="flex items-center gap-1 text-[10px] text-blue-300 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                              <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
                                 <GlobeOff className="w-2.5 h-2.5" /> Tanpa website
                               </span>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                          {place.category && <p className="text-blue-200/40 text-[11px]">{place.category}</p>}
+                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                          {place.category && <p className="text-slate-500 text-[11px] font-medium">{place.category}</p>}
                           <StarRating rating={place.rating} count={place.ratingCount} />
-                          {place.isOpen === true && <span className="text-[10px] text-green-400/70">Buka</span>}
-                          {place.isOpen === false && <span className="text-[10px] text-red-400/70">Tutup</span>}
+                          {place.isOpen === true && <span className="text-[10px] text-emerald-700 font-semibold">Buka</span>}
+                          {place.isOpen === false && <span className="text-[10px] text-rose-600 font-semibold">Tutup</span>}
                         </div>
 
-                        <p className="text-blue-200/50 text-xs mt-1.5 line-clamp-2">{place.address || "Alamat tidak tersedia"}</p>
+                        <p className="text-slate-500 text-xs mt-1.5 line-clamp-2 leading-relaxed">{place.address || "Alamat tidak tersedia"}</p>
 
                         {place.phone ? (
-                          <p className="text-blue-300 text-xs mt-1.5 font-mono flex items-center gap-1.5">
-                            <Phone className="w-3 h-3" /> {place.phone}
+                          <p className="text-slate-800 text-xs mt-1.5 font-mono font-medium flex items-center gap-1.5">
+                            <Phone className="w-3 h-3 text-slate-500" /> {place.phone}
                           </p>
                         ) : (
-                          <p className="text-white/20 text-xs mt-1.5 italic">Tidak ada nomor telepon</p>
+                          <p className="text-slate-300 text-xs mt-1.5 italic">Tidak ada nomor telepon</p>
                         )}
 
                         {place.website && (
-                          <a href={place.website} target="_blank" rel="noopener noreferrer" className="text-blue-400 text-[11px] mt-1 flex items-center gap-1 hover:underline w-fit">
-                            <ChevronRight className="w-3 h-3" />
+                          <a href={place.website} target="_blank" rel="noopener noreferrer" className="text-slate-700 font-medium text-[11px] mt-1 flex items-center gap-1 hover:text-slate-900 hover:underline w-fit">
+                            <ChevronRight className="w-3 h-3 text-slate-400" />
                             <span className="truncate max-w-[220px]">{place.website.replace(/^https?:\/\//, "")}</span>
                           </a>
                         )}
 
                         {activeSocialScan && (
-                          <div className="mt-2 flex flex-wrap gap-1.5">
+                          <div className="mt-2.5 flex flex-wrap gap-1.5">
                             {socialPlatforms.length > 0 ? (
                               socialPlatforms.map((platform) => (
                                 <a
@@ -1364,13 +1368,13 @@ export default function PortalLeadFinder({
                                   href={place.socialScan.links[platform.value]}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/15"
+                                  className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors"
                                 >
                                   {platform.label}
                                 </a>
                               ))
                             ) : (
-                              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-bold text-blue-200/35">
+                              <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
                                 Sosial: {socialStatusText(place)}
                               </span>
                             )}
@@ -1387,36 +1391,36 @@ export default function PortalLeadFinder({
       )}
 
       {!loading && !searched && places.length === 0 && (
-        <div className="rounded-2xl border border-white/10 bg-[#071225] p-10 text-center text-blue-200/35 text-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-400 text-sm shadow-xs">
           Masukkan jenis bisnis dan kota untuk mulai mencari.
         </div>
       )}
 
       {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-[#071225] border border-white/10 p-6">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-5">
-              <Coins className="w-6 h-6 text-amber-300" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 p-6 shadow-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mb-5 text-amber-600">
+              <Coins className="w-6 h-6" />
             </div>
-            <h2 className="text-white font-black text-xl">Gunakan {creditCost} kredit?</h2>
-            <p className="text-blue-200/55 text-sm mt-2 leading-relaxed">
-              Mode <span className="text-white font-bold">{mode === "deep" ? "Deep Search" : "Standard"}</span>
-              {activeSocialScan ? <span> dengan <span className="text-white font-bold">Social Scan</span></span> : null}
-              {" "}akan memotong {creditCost} kredit dari saldo Anda. Query: <span className="text-white font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
+            <h2 className="text-slate-900 font-bold text-xl tracking-tight">Gunakan {creditCost} kredit?</h2>
+            <p className="text-slate-600 text-sm mt-2 leading-relaxed">
+              Mode <span className="text-slate-900 font-bold">{mode === "deep" ? "Deep Search" : "Standard"}</span>
+              {activeSocialScan ? <span> dengan <span className="text-slate-900 font-bold">Social Scan</span></span> : null}
+              {" "}akan memotong {creditCost} kredit dari saldo Anda. Query: <span className="text-slate-900 font-bold">{city.trim() ? `${query.trim()} di ${city.trim()}` : query.trim()}</span>.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setConfirmOpen(false)}
-                className="h-11 rounded-xl border-white/10 bg-white/5 text-blue-100 hover:bg-white/10"
+                className="h-11 rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               >
                 Batal
               </Button>
               <Button
                 type="button"
                 onClick={runSearch}
-                className="h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black flex-1"
+                className="h-11 rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white font-medium flex-1 shadow-xs"
               >
                 {mode === "deep" ? "Ya, Deep Search" : "Ya, Cari Lead"}
               </Button>

@@ -38,11 +38,11 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div>
-      <FadeUp className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Profil Saya</h1>
-        <p className="text-blue-200/50 text-sm mt-1">
-          Kelola informasi akun, data bisnis, dan brand kit dokumen.
+    <div className="space-y-6">
+      <FadeUp className="pb-2 border-b border-slate-200/80">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Profil Saya</h1>
+        <p className="text-slate-500 text-sm mt-1">
+          Kelola informasi akun, kontak bisnis, dan brand kit dokumen untuk proposal & invoice.
         </p>
       </FadeUp>
       <FadeUp delay={0.15}>

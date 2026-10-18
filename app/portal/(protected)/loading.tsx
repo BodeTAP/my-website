@@ -25,7 +25,7 @@ export default function PortalDashboardLoading() {
       <div className="space-y-4">
         <SkeletonTitle className="w-32" />
         <SkeletonCard className="p-0 overflow-hidden">
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-slate-100">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="p-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">

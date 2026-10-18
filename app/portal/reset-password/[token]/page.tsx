@@ -44,71 +44,97 @@ export default function ResetPasswordTokenPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 mb-4 shadow-xs">
-            <BrandLogoIcon size={34} variant="dark" />
+    <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-[#F8F9FA]">
+      <div className="w-full max-w-md">
+        {/* Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#1E242E] border border-slate-800 shadow-xs">
+            <BrandLogoIcon size={28} variant="dark" />
           </div>
-          <h1 className="text-white font-black text-2xl tracking-tight">MF<span className="text-zinc-400">WEB</span></h1>
-          <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mt-1">Portal Klien</p>
+          <h1 className="text-slate-900 font-bold text-xl tracking-tight mt-3">MFWEB</h1>
+          <p className="text-slate-500 text-xs font-mono uppercase tracking-widest mt-0.5">Atur Ulang Kata Sandi</p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#071225] p-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-7 sm:p-9 shadow-xs">
           {done ? (
-            <div className="text-center">
-              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <h2 className="text-white font-bold text-lg mb-2">Kata sandi berhasil diubah</h2>
-              <p className="text-blue-200/60 text-sm">Anda akan diarahkan ke halaman login dalam beberapa detik.</p>
+            <div className="text-center py-4">
+              <div className="w-16 h-16 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-center mx-auto mb-5">
+                <CheckCircle className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h2 className="text-slate-900 font-bold text-xl mb-2">Kata Sandi Berhasil Diubah</h2>
+              <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                Kata sandi baru Anda telah tersimpan dengan aman. Anda akan diarahkan ke halaman login secara otomatis.
+              </p>
+              <Button
+                onClick={() => router.push("/portal/login")}
+                className="w-full rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white h-11 font-medium text-sm transition-colors shadow-xs"
+              >
+                Masuk Sekarang
+              </Button>
             </div>
           ) : (
             <>
-              <h2 className="text-white font-bold text-lg mb-1">Buat kata sandi baru</h2>
-              <p className="text-blue-200/50 text-sm mb-6">Masukkan kata sandi baru untuk akun portal Anda.</p>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-2">
+                Buat Kata Sandi Baru
+              </h2>
+              <p className="text-slate-500 text-xs sm:text-sm leading-relaxed mb-6">
+                Masukkan kata sandi baru untuk akun klien Anda. Minimal terdiri dari 8 karakter.
+              </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200 text-sm">Kata sandi baru</Label>
+                  <Label className="text-slate-900 text-xs font-mono uppercase tracking-wider block">
+                    Kata Sandi Baru
+                  </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
                       type={showPw ? "text" : "password"}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+                      className="pl-10 pr-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 font-mono text-sm transition-all"
                       placeholder="Minimal 8 karakter"
                     />
-                    <button type="button" onClick={() => setShowPw(!showPw)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400/50 hover:text-blue-300">
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(!showPw)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    >
                       {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-blue-200 text-sm">Konfirmasi kata sandi</Label>
+                  <Label className="text-slate-900 text-xs font-mono uppercase tracking-wider block">
+                    Konfirmasi Kata Sandi
+                  </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/50" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
                       type="password"
                       required
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
-                      className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-blue-200/30"
+                      className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 font-mono text-sm transition-all"
                       placeholder="Ulangi kata sandi"
                     />
                   </div>
                 </div>
 
-                {error && <p className="text-red-400 text-sm">{error}</p>}
+                {error && (
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-medium text-rose-700">
+                    {error}
+                  </div>
+                )}
 
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white h-11"
+                  className="w-full rounded-xl bg-[#1E242E] hover:bg-slate-800 text-white h-11 font-medium text-sm transition-colors shadow-xs"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simpan kata sandi"}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simpan Kata Sandi"}
                 </Button>
               </form>
             </>

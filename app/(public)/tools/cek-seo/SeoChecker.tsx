@@ -18,21 +18,22 @@ type Check = {
 type Result = { score: number; url: string; checks: Check[] };
 
 const STATUS = {
-  pass: { icon: CheckCircle2, text: "text-green-400", bg: "border-green-500/10 bg-green-500/3" },
-  warn: { icon: AlertTriangle, text: "text-orange-400", bg: "border-orange-500/10 bg-orange-500/3" },
-  fail: { icon: XCircle, text: "text-red-400", bg: "border-red-500/10 bg-red-500/3" },
+  pass: { icon: CheckCircle2, text: "text-emerald-700", bg: "border-slate-200 bg-white" },
+  warn: { icon: AlertTriangle, text: "text-amber-700", bg: "border-amber-200 bg-amber-50/40" },
+  fail: { icon: XCircle, text: "text-rose-700", bg: "border-rose-200 bg-rose-50/40" },
 };
 
 function ScoreGauge({ score }: { score: number }) {
-  const color = score >= 75 ? "#34d399" : score >= 50 ? "#fb923c" : "#f87171";
-  const label = score >= 75 ? "Baik" : score >= 50 ? "Perlu Perbaikan" : "Kritis";
+  const color = score >= 75 ? "#10b981" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const label = score >= 75 ? "Kondisi Baik" : score >= 50 ? "Perlu Perbaikan" : "Kritis";
+  const textColor = score >= 75 ? "text-emerald-600" : score >= 50 ? "text-amber-600" : "text-rose-600";
   const r = 52;
   const circ = 2 * Math.PI * r;
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="relative w-36 h-36">
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-32 h-32">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
+          <circle cx="60" cy="60" r={r} fill="none" stroke="#F1F5F9" strokeWidth="10" />
           <motion.circle
             cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"
             strokeDasharray={circ}
@@ -42,13 +43,13 @@ function ScoreGauge({ score }: { score: number }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <motion.span className="text-4xl font-black text-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <motion.span className="text-3xl font-bold font-mono text-slate-900" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
             {score}
           </motion.span>
-          <span className="text-xs text-blue-200/40">/100</span>
+          <span className="text-[11px] font-mono text-slate-400">/ 100</span>
         </div>
       </div>
-      <span className="text-sm font-semibold" style={{ color }}>SEO Score {label}</span>
+      <span className={`text-xs font-mono uppercase tracking-wider font-semibold ${textColor}`}>{label}</span>
     </div>
   );
 }
@@ -74,7 +75,7 @@ export default function SeoChecker() {
       if (!res.ok) setError(data.error ?? "Terjadi kesalahan");
       else setResult(data as Result);
     } catch {
-      setError("Tidak dapat terhubung ke server. Coba lagi.");
+      setError("Tidak dapat terhubung ke server. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -86,12 +87,21 @@ export default function SeoChecker() {
 
   return (
     <div className="space-y-6">
-      {/* Input */}
-      <div className="glass rounded-2xl p-6">
-        <h2 className="text-white font-semibold mb-1">
-          <span className="text-teal-400 mr-2">01</span> Masukkan URL Website
+      {/* Input Card */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="h-px w-6 bg-slate-400" />
+          <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+            Analisis On-Page
+          </span>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-1">
+          Masukkan URL Website
         </h2>
-        <p className="text-blue-200/40 text-sm mb-5">Analisis akan dilakukan pada halaman yang Anda masukkan.</p>
+        <p className="text-slate-600 text-sm mb-6">
+          Analisis akan memeriksa metadata, struktur heading, dan faktor teknis pada URL yang diberikan.
+        </p>
+
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="url"
@@ -99,12 +109,12 @@ export default function SeoChecker() {
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCheck()}
             placeholder="https://namabisnis.com"
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-blue-200/30 text-sm focus:outline-none focus:border-teal-500/50 transition-colors"
+            className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-400 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all font-mono"
           />
           <Button
             onClick={handleCheck}
             disabled={loading || !url.trim()}
-            className="bg-teal-600 hover:bg-teal-500 text-white h-11 px-8 disabled:opacity-50 whitespace-nowrap"
+            className="rounded-full bg-slate-900 hover:bg-slate-800 text-white font-medium h-11 px-8 disabled:opacity-50 whitespace-nowrap transition-colors"
           >
             {loading ? (
               <span className="flex items-center gap-2">
@@ -116,7 +126,7 @@ export default function SeoChecker() {
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <SearchCheck className="w-4 h-4" /> Cek SEO
+                <SearchCheck className="w-4 h-4" /> Cek Skor SEO
               </span>
             )}
           </Button>
@@ -128,10 +138,10 @@ export default function SeoChecker() {
         {error && (
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="glass rounded-xl p-4 border border-red-500/20 flex items-start gap-3"
+            className="rounded-2xl p-5 border border-rose-200 bg-rose-50 text-rose-900 flex items-start gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-            <p className="text-red-300 text-sm">{error}</p>
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <p className="text-sm leading-relaxed">{error}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -143,30 +153,32 @@ export default function SeoChecker() {
             key="result"
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-5"
+            className="space-y-6"
           >
             {/* Score overview */}
-            <div className="glass rounded-2xl p-6 border border-teal-500/10">
-              <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+              <div className="flex flex-col sm:flex-row items-center gap-8">
                 <ScoreGauge score={result.score} />
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="text-blue-200/40 text-xs mb-1">SEO On-Page Analysis</p>
-                  <h3 className="text-white font-bold text-base mb-3 break-all">{result.url}</h3>
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-500 mb-1 block">
+                    SEO On-Page Audit
+                  </span>
+                  <h3 className="text-slate-900 font-mono font-bold text-lg mb-4 break-all">{result.url}</h3>
                   <div className="flex flex-wrap justify-center sm:justify-start gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-green-400" />
-                      <span className="text-green-400 font-bold text-lg">{passCount}</span>
-                      <span className="text-blue-200/50 text-sm">Lulus</span>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span className="text-slate-900 font-mono font-bold text-sm">{passCount}</span>
+                      <span className="text-slate-600 text-xs">Lolos</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-orange-400" />
-                      <span className="text-orange-400 font-bold text-lg">{warnCount}</span>
-                      <span className="text-blue-200/50 text-sm">Peringatan</span>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                      <span className="text-slate-900 font-mono font-bold text-sm">{warnCount}</span>
+                      <span className="text-slate-600 text-xs">Perhatian</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <XCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-red-400 font-bold text-lg">{failCount}</span>
-                      <span className="text-blue-200/50 text-sm">Gagal</span>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2">
+                      <XCircle className="w-4 h-4 text-rose-600" />
+                      <span className="text-slate-900 font-mono font-bold text-sm">{failCount}</span>
+                      <span className="text-slate-600 text-xs">Gagal</span>
                     </div>
                   </div>
                 </div>
@@ -174,11 +186,17 @@ export default function SeoChecker() {
             </div>
 
             {/* Checklist */}
-            <div className="glass rounded-2xl p-6">
-              <h3 className="text-white font-semibold mb-4 text-sm">
-                Detail Pemeriksaan ({result.checks.length} faktor)
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="h-px w-6 bg-slate-400" />
+                <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+                  Rincian Parameter
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">
+                Pemeriksaan Detail ({result.checks.length} faktor)
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {result.checks.map((check, i) => {
                   const { icon: Icon, text, bg } = STATUS[check.status];
                   return (
@@ -186,18 +204,18 @@ export default function SeoChecker() {
                       key={check.id}
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className={`flex items-start gap-3 p-3 rounded-xl border ${bg}`}
+                      transition={{ delay: i * 0.03 }}
+                      className={`flex items-start gap-3 p-4 rounded-xl border ${bg}`}
                     >
                       <Icon className={`w-4 h-4 ${text} shrink-0 mt-0.5`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-white text-sm font-medium">{check.label}</span>
-                          <span className={`text-xs font-bold ${text} shrink-0`}>
+                          <span className="text-slate-900 text-sm font-bold">{check.label}</span>
+                          <span className={`text-xs font-mono font-semibold ${text} shrink-0`}>
                             {check.points}/{check.maxPoints} poin
                           </span>
                         </div>
-                        <p className="text-blue-200/50 text-xs mt-0.5">{check.detail}</p>
+                        <p className="text-slate-600 text-xs mt-1 leading-relaxed">{check.detail}</p>
                       </div>
                     </motion.div>
                   );
@@ -205,14 +223,15 @@ export default function SeoChecker() {
               </div>
             </div>
 
+            {/* CTA */}
             {(failCount > 0 || warnCount > 0) && (
-              <div className="glass rounded-2xl p-6 border border-teal-500/10 text-center">
-                <p className="text-white font-semibold mb-2">Perlu Perbaikan SEO?</p>
-                <p className="text-blue-200/50 text-sm mb-4">
-                  Tim MFWEB siap membantu memperbaiki semua faktor SEO yang bermasalah di website Anda.
+              <div className="rounded-3xl border border-slate-800 bg-[#1E242E] text-white p-8 text-center">
+                <h4 className="text-xl font-bold text-white mb-2">Perlu Optimasi SEO Menyeluruh?</h4>
+                <p className="text-slate-300 text-sm max-w-lg mx-auto mb-6 leading-relaxed">
+                  Konsultasikan arsitektur website dan strategi SEO teknis bersama kami untuk mendongkrak peringkat Google bisnis Anda.
                 </p>
                 <Link href="/contact">
-                  <Button className="bg-teal-600 hover:bg-teal-500 text-white">
+                  <Button className="rounded-full bg-white text-slate-900 hover:bg-slate-100 font-medium px-8 h-11 transition-colors">
                     Konsultasi SEO Gratis <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
@@ -223,8 +242,8 @@ export default function SeoChecker() {
       </AnimatePresence>
 
       {!result && !loading && !error && (
-        <div className="text-center py-8 text-blue-200/25 text-sm">
-          ← Masukkan URL website untuk analisis SEO
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-400 text-xs font-mono">
+          Masukkan URL website di atas untuk memulai audit on-page SEO.
         </div>
       )}
     </div>

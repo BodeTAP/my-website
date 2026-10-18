@@ -59,10 +59,10 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_STYLE: Record<string, string> = {
-  DRAFT: "border-white/10 bg-white/5 text-blue-100/70",
-  SENT: "border-blue-500/25 bg-blue-500/10 text-blue-200",
-  PAID: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200",
-  VOID: "border-red-500/25 bg-red-500/10 text-red-200",
+  DRAFT: "border-slate-200 bg-slate-100 text-slate-700",
+  SENT: "border-blue-200 bg-blue-50 text-blue-700",
+  PAID: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  VOID: "border-rose-200 bg-rose-50 text-rose-700",
 };
 
 function formatRupiah(amount: number) {
@@ -157,12 +157,12 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <Link href="/portal/tools/invoice-generator" className="inline-flex items-center gap-2 text-sm text-blue-200/55 hover:text-blue-200 mb-3">
+          <Link href="/portal/tools/invoice-generator" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-2 font-medium transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Invoice Generator
           </Link>
-          <h1 className="text-2xl font-black text-white">{invoice.invoiceNo}</h1>
-          <p className="mt-1 text-sm text-blue-200/45">{invoice.title} — {fmtDate(invoice.issueDate)}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{invoice.invoiceNo}</h1>
+          <p className="mt-1 text-sm text-slate-500">{invoice.title} — {fmtDate(invoice.issueDate)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Status */}
@@ -170,41 +170,41 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
             value={status}
             onChange={(e) => updateStatus(e.target.value)}
             disabled={savingStatus}
-            className={`h-10 rounded-xl border px-3 text-sm font-black outline-none ${STATUS_STYLE[status] ?? STATUS_STYLE.DRAFT}`}
+            className={`h-10 rounded-xl border px-3 text-xs font-semibold outline-none cursor-pointer transition-colors ${STATUS_STYLE[status] ?? STATUS_STYLE.DRAFT}`}
           >
             {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value} className="bg-[#07111f] text-white">{opt.label}</option>
+              <option key={opt.value} value={opt.value} className="bg-white text-slate-900">{opt.label}</option>
             ))}
           </select>
           {/* Download */}
           <a
             href={`/api/portal/tools/invoice-generator/${invoice.id}/pdf`}
             target="_blank"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 text-sm font-black text-white transition-colors"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 text-sm font-medium text-white shadow-xs transition-colors"
           >
             <Download className="h-4 w-4" />
             Download PDF
           </a>
           {/* Duplicate */}
-          <Button type="button" onClick={duplicateInvoice} disabled={duplicating} className="h-10 rounded-xl border border-white/10 bg-white/10 text-white hover:bg-white/15">
+          <Button type="button" onClick={duplicateInvoice} disabled={duplicating} className="h-10 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs font-medium">
             {duplicating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Copy className="mr-2 h-4 w-4" />}
             Duplikasi
           </Button>
           {/* Delete */}
-          <button type="button" onClick={deleteInvoice} disabled={deleting} className="inline-flex h-10 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 px-3 text-sm font-black text-red-200 hover:bg-red-500/15 disabled:opacity-50">
+          <button type="button" onClick={deleteInvoice} disabled={deleting} className="inline-flex h-10 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition-colors">
             {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
       {(message || error) && (
-        <div className={`rounded-2xl border px-4 py-3 text-sm font-bold ${error ? "border-red-500/25 bg-red-500/10 text-red-200" : "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"}`}>
+        <div className={`rounded-xl border px-4 py-3 text-sm font-medium ${error ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
           {error || message}
         </div>
       )}
 
       {/* Invoice Preview (read-only, full width) */}
-      <div className="rounded-2xl border border-white/10 bg-[#071225] p-5">
+      <div className="rounded-2xl border border-slate-200 bg-slate-100/70 p-6 shadow-xs">
         <InvoiceReadOnlyPreview
           design={design}
           fromName={invoice.fromName}
@@ -285,7 +285,7 @@ function InvoiceReadOnlyPreview({
   const fontFamily = design.fontStyle === "serif" ? "Georgia, serif" : design.fontStyle === "mono" ? "'Courier New', monospace" : "system-ui, -apple-system, sans-serif";
 
   return (
-    <div className="mx-auto max-w-2xl rounded-xl overflow-hidden border border-white/10 shadow-xl" style={{ fontFamily }}>
+    <div className="mx-auto max-w-2xl rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm" style={{ fontFamily }}>
       <div className="bg-white text-slate-900 relative">
         {/* Modern side accent */}
         {isModern && <div className="absolute left-0 top-0 bottom-0 w-3" style={{ backgroundColor: design.accentColor }} />}

@@ -129,12 +129,12 @@ function SidebarContent({
   creditBalance,
 }: SidebarContentProps) {
   return (
-    <aside className="flex flex-col h-full bg-[#030914]/95 backdrop-blur-xl relative overflow-hidden">
+    <aside className="flex flex-col h-full bg-[#1E242E] text-slate-200 relative overflow-hidden select-none">
 
       {/* Logo */}
       <motion.div
         layout
-        className={`border-b border-white/5 relative z-10 ${collapsed ? "p-4" : "p-6"}`}
+        className={`border-b border-slate-800/80 relative z-10 ${collapsed ? "p-4" : "px-5 py-5"}`}
         transition={SIDEBAR_SPRING}
       >
         <motion.div
@@ -146,7 +146,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-9 h-9 items-center justify-center rounded-xl text-blue-200/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-colors`}
+            className={`${showCollapseToggle ? "hidden lg:flex" : "hidden"} w-8 h-8 items-center justify-center rounded-lg text-slate-400 hover:text-white bg-slate-850 hover:bg-slate-800 border border-slate-700/60 transition-colors`}
             aria-label={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
             title={collapsed ? "Tampilkan sidebar" : "Sembunyikan sidebar"}
           >
@@ -168,7 +168,7 @@ function SidebarContent({
       {/* User info + Bell */}
       <motion.div
         layout
-        className={`border-b border-white/5 relative z-10 bg-black/20 ${collapsed ? "px-3 py-5" : "px-5 py-5"}`}
+        className={`border-b border-slate-800/80 relative z-10 bg-[#171C24]/60 ${collapsed ? "px-3 py-4" : "px-5 py-4"}`}
         transition={SIDEBAR_SPRING}
       >
         <motion.div
@@ -176,19 +176,19 @@ function SidebarContent({
           className={`flex items-center ${collapsed ? "flex-col gap-3" : "justify-between mb-3"}`}
           transition={SIDEBAR_SPRING}
         >
-          <Link href="/portal/profile" className={`relative ${collapsed ? "w-12 flex justify-center" : ""}`} aria-label="Profil klien">
+          <Link href="/portal/profile" className={`relative ${collapsed ? "w-10 flex justify-center" : ""}`} aria-label="Profil klien">
             <UserAvatar 
               src={userImage} 
               name={userName} 
-              sizeClasses="w-10 h-10" 
-              imageClasses="ring-2 ring-blue-500/30 hover:ring-blue-400/60 transition-all shadow-lg"
-              fallbackClasses="text-sm ring-2 ring-white/10 shadow-lg"
+              sizeClasses="w-9 h-9" 
+              imageClasses="ring-2 ring-slate-700 hover:ring-slate-500 transition-all shadow-sm"
+              fallbackClasses="text-xs ring-2 ring-slate-700 shadow-sm"
             />
             {!collapsed && (
-              <div className="absolute bottom-0 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#030914]" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#1E242E]" />
             )}
           </Link>
-          <div className={collapsed ? "w-12 flex justify-center" : ""}>
+          <div className={collapsed ? "w-10 flex justify-center" : ""}>
             <NotificationBell />
           </div>
         </motion.div>
@@ -203,22 +203,22 @@ function SidebarContent({
           }}
           transition={SIDEBAR_FADE}
         >
-          <p className="text-white text-sm font-bold line-clamp-1">{userName}</p>
-          <p className="text-blue-200/40 text-[10px] line-clamp-1 mt-0.5">{userEmail}</p>
+          <p className="text-white text-sm font-semibold tracking-tight line-clamp-1">{userName}</p>
+          <p className="text-slate-400 text-[11px] line-clamp-1 mt-0.5">{userEmail}</p>
         </motion.div>
         <Link
           href="/portal/credits"
-          className={`mt-4 flex items-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15 hover:border-amber-400/35 transition-colors ${
-            collapsed ? "w-12 h-12 justify-center mx-auto" : "justify-between gap-3 px-3 py-2.5"
+          className={`mt-3 flex items-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-200 hover:bg-amber-500/15 hover:border-amber-400/40 transition-colors ${
+            collapsed ? "w-10 h-10 justify-center mx-auto" : "justify-between gap-3 px-3 py-2"
           }`}
           aria-label={`Saldo kredit ${creditBalance} kredit`}
           title={`Saldo kredit: ${creditBalance} kredit`}
         >
           <span className={`flex items-center min-w-0 ${collapsed ? "justify-center" : "gap-2"}`}>
-            <Coins className="w-4 h-4 text-amber-300 shrink-0" />
+            <Coins className="w-4 h-4 text-amber-400 shrink-0" />
             <motion.span
               aria-hidden={collapsed}
-              className="overflow-hidden whitespace-nowrap text-[11px] font-black uppercase tracking-widest text-amber-200/65"
+              className="overflow-hidden whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-amber-300/80"
               animate={{
                 opacity: collapsed ? 0 : 1,
                 width: collapsed ? 0 : "auto",
@@ -232,7 +232,7 @@ function SidebarContent({
           </span>
           <motion.span
             aria-hidden={collapsed}
-            className="overflow-hidden whitespace-nowrap text-sm font-black text-amber-300 tabular-nums"
+            className="overflow-hidden whitespace-nowrap text-xs font-black text-amber-300 tabular-nums bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-md"
             animate={{
               opacity: collapsed ? 0 : 1,
               width: collapsed ? 0 : "auto",
@@ -249,16 +249,16 @@ function SidebarContent({
       {/* Nav */}
       <motion.nav
         layout
-        className={`flex-1 py-6 overflow-y-auto custom-scrollbar relative z-10 ${collapsed ? "px-3 space-y-1.5" : "px-5 space-y-1.5"}`}
+        className={`flex-1 py-5 overflow-y-auto custom-scrollbar relative z-10 ${collapsed ? "px-2.5 space-y-1" : "px-3.5 space-y-1"}`}
         transition={SIDEBAR_SPRING}
       >
         <motion.h4
           aria-hidden={collapsed}
-          className="px-3 text-[10px] font-black uppercase tracking-widest text-blue-200/40 overflow-hidden whitespace-nowrap"
+          className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400/80 overflow-hidden whitespace-nowrap"
           animate={{
             opacity: collapsed ? 0 : 1,
             height: collapsed ? 0 : "auto",
-            marginBottom: collapsed ? 0 : 12,
+            marginBottom: collapsed ? 0 : 10,
             x: collapsed ? -10 : 0,
           }}
           transition={SIDEBAR_FADE}
@@ -271,30 +271,23 @@ function SidebarContent({
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex items-center rounded-xl transition-colors text-sm font-medium group overflow-hidden ${
-                collapsed ? "justify-center w-12 h-12 mx-auto px-0 py-0" : "justify-between px-3 py-3"
+              className={`relative flex items-center rounded-xl transition-all text-sm font-medium group overflow-hidden ${
+                collapsed ? "justify-center w-10 h-10 mx-auto px-0 py-0" : "justify-between px-3 py-2.5"
               } ${
                 active
-                  ? "bg-blue-600/15 text-white border border-blue-500/25"
-                  : "text-blue-200/60 hover:text-white hover:bg-white/5 border border-transparent"
+                  ? "bg-slate-800 text-white border border-slate-700/80 shadow-xs"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent"
               }`}
               aria-label={collapsed ? item.label : undefined}
               title={collapsed ? item.label : undefined}
             >
-              {active && (
-                <motion.div
-                  layoutId="portal-sidebar-active-orb"
-                  className={`absolute ${collapsed ? "inset-1.5 rounded-lg" : "inset-y-1 left-1 w-1 rounded-full"} bg-blue-400/25`}
-                  transition={SIDEBAR_SPRING}
-                />
-              )}
               <div className={`relative z-10 flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
                 <motion.span
                   layout
-                  animate={{ scale: active ? 1.08 : 1, y: active && collapsed ? -1 : 0 }}
+                  animate={{ scale: active ? 1.05 : 1 }}
                   transition={SIDEBAR_SPRING}
                 >
-                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${active ? "text-blue-400" : "text-blue-200/40 group-hover:text-blue-300"}`} />
+                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${active ? "text-white" : "text-slate-400 group-hover:text-slate-200"}`} />
                 </motion.span>
                 <motion.span
                   aria-hidden={collapsed}
@@ -314,12 +307,12 @@ function SidebarContent({
                 {active && !collapsed && (
                   <motion.span
                     className="relative z-10"
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 0.6, x: 0 }}
-                    exit={{ opacity: 0, x: -6 }}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 0.8, x: 0 }}
+                    exit={{ opacity: 0, x: -4 }}
                     transition={SIDEBAR_FADE}
                   >
-                    <ChevronRight className="w-3.5 h-3.5 text-blue-500" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -331,19 +324,19 @@ function SidebarContent({
       {/* Logout */}
       <motion.div
         layout
-        className={`border-t border-white/5 relative z-10 bg-black/20 ${collapsed ? "p-3" : "p-5"}`}
+        className={`border-t border-slate-800/80 relative z-10 bg-[#171C24]/60 ${collapsed ? "p-2.5" : "p-4"}`}
         transition={SIDEBAR_SPRING}
       >
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className={`flex items-center justify-center rounded-xl text-red-400/80 hover:text-white bg-red-500/10 hover:bg-red-500/80 border border-red-500/20 transition-colors text-sm font-bold group ${
-            collapsed ? "w-12 h-12 mx-auto px-0 py-0" : "w-full gap-2 px-3 py-3"
+          className={`flex items-center justify-center rounded-xl text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 transition-all text-xs font-semibold group ${
+            collapsed ? "w-10 h-10 mx-auto px-0 py-0" : "w-full gap-2 px-3 py-2.5"
           }`}
           aria-label={collapsed ? "Keluar sesi" : undefined}
           title={collapsed ? "Keluar sesi" : undefined}
         >
-          <LogOut className={`w-4 h-4 shrink-0 transition-transform ${collapsed ? "" : "group-hover:-translate-x-1"}`} />
+          <LogOut className={`w-4 h-4 shrink-0 transition-transform ${collapsed ? "" : "group-hover:-translate-x-0.5"}`} />
           <motion.span
             aria-hidden={collapsed}
             className="overflow-hidden whitespace-nowrap"
@@ -441,11 +434,11 @@ export default function PortalShell({
   };
 
   return (
-    <div className="h-screen overflow-hidden flex bg-[#030914]">
+    <div className="h-screen overflow-hidden flex bg-[#F8F9FA]">
       {/* ── Desktop sidebar ─────────────────────────────── */}
       <div
-        className={`hidden lg:flex shrink-0 border-r border-white/5 flex-col relative z-30 overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          sidebarCollapsed ? "w-20" : "w-72"
+        className={`hidden lg:flex shrink-0 border-r border-slate-800 flex-col relative z-30 overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          sidebarCollapsed ? "w-20" : "w-64"
         }`}
       >
         <SidebarContent
@@ -464,25 +457,25 @@ export default function PortalShell({
       {mobileDrawerOpen && (
         <div
           data-portal-mobile-backdrop
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-10 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* ── Mobile drawer ───────────────────────────────── */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 shadow-[10px_0_40px_rgba(0,0,0,0.8)] border-r border-white/10 lg:hidden transition-transform duration-300 ease-[0.22,1,0.36,1] ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 shadow-2xl border-r border-slate-800 lg:hidden transition-transform duration-300 ease-[0.22,1,0.36,1] ${
           mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="absolute top-5 right-5 z-50">
+        <div className="absolute top-4 right-4 z-50">
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="p-2.5 rounded-xl text-blue-200/50 hover:text-white bg-black/40 hover:bg-white/10 border border-white/5 transition-all backdrop-blur-md"
+            className="p-2 rounded-lg text-slate-400 hover:text-white bg-slate-800/80 border border-slate-700 transition-all"
             aria-label="Tutup menu"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
         <SidebarContent
@@ -496,21 +489,21 @@ export default function PortalShell({
       </div>
 
       {/* ── Main content ────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-20">
+      <div className="flex-1 flex flex-col min-w-0 relative z-20 bg-[#F8F9FA]">
         {/* Mobile top bar */}
-        <header className="lg:hidden flex items-center justify-between px-5 py-4 bg-[#030914]/90 backdrop-blur-lg border-b border-white/5 sticky top-0 z-30 shadow-lg">
+        <header className="lg:hidden flex items-center justify-between px-5 py-3.5 bg-[#1E242E] border-b border-slate-800 sticky top-0 z-30 shadow-xs">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="p-2.5 rounded-xl text-blue-200/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+            className="p-2 rounded-lg text-slate-400 hover:text-white bg-slate-800/80 border border-slate-700 transition-all"
             aria-label="Buka menu"
           >
             <Menu className="w-5 h-5" />
           </button>
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/portal/dashboard" className="flex items-center gap-2">
-              <BrandLogoIcon size={24} variant="dark" />
-              <span className="text-white font-black tracking-tight">MF<span className="text-zinc-400">WEB</span></span>
+              <BrandLogoIcon size={22} variant="dark" />
+              <span className="text-white font-black tracking-tight text-sm">MF<span className="text-slate-400">WEB</span></span>
             </Link>
           </div>
           <div className="flex items-center gap-2">
@@ -519,38 +512,38 @@ export default function PortalShell({
               <UserAvatar 
                 src={userImage} 
                 name={userName} 
-                sizeClasses="w-8 h-8" 
-                imageClasses="ring-2 ring-blue-500/20"
-                fallbackClasses="text-xs ring-1 ring-white/10"
+                sizeClasses="w-7 h-7" 
+                imageClasses="ring-1 ring-slate-700"
+                fallbackClasses="text-[10px] ring-1 ring-slate-700"
               />
             </Link>
           </div>
         </header>
 
         {/* Mobile bottom tab bar */}
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#030914]/90 backdrop-blur-xl border-t border-white/10 flex pb-safe">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#1E242E] border-t border-slate-800 flex pb-safe">
           {navItems.filter((item) => mobileNavLabels.has(item.label)).map((item) => {
             const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-[10px] transition-all relative ${
-                  active ? "text-blue-400 font-bold" : "text-blue-200/50 font-medium hover:text-blue-200/80"
+                className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] transition-all relative ${
+                  active ? "text-white font-bold" : "text-slate-400 font-medium hover:text-slate-200"
                 }`}
               >
                 {active && (
-                  <div className="absolute top-0 inset-x-0 h-px bg-blue-500/40" />
+                  <div className="absolute top-0 inset-x-4 h-0.5 bg-white rounded-full" />
                 )}
-                <item.icon className={`w-5 h-5 ${active ? "animate-pulse-slow" : ""}`} />
+                <item.icon className="w-4 h-4" />
                 <span className="leading-none">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <main className="flex-1 overflow-y-auto pb-24 lg:pb-0 relative">
-          <div className="p-5 sm:p-8 lg:p-10">{children}</div>
+        <main className="flex-1 overflow-y-auto pb-24 lg:pb-8 relative">
+          <div className="p-5 sm:p-7 lg:p-9 max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>

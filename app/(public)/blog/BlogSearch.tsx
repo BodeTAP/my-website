@@ -31,9 +31,9 @@ export default function BlogSearch({ initialQuery }: { initialQuery: string }) {
   }, [q, router, searchParams]);
 
   return (
-    <div className="relative max-w-md mx-auto mb-8">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-200/25">
-        <Search className="w-5 h-5" />
+    <div className="relative max-w-lg mx-auto">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+        <Search className="w-4 h-4" />
       </div>
       <input
         type="text"
@@ -42,19 +42,20 @@ export default function BlogSearch({ initialQuery }: { initialQuery: string }) {
           setQ(e.target.value);
           setIsTyping(true);
         }}
-        placeholder="Cari artikel..."
-        className="w-full rounded-2xl border border-white/10 bg-[#071225] py-3 pl-12 pr-12 text-white placeholder:text-blue-200/25 outline-none transition-colors focus:border-blue-500/40"
+        placeholder="Cari artikel, panduan, atau tips..."
+        className="w-full rounded-full border border-slate-700 bg-slate-900/90 py-3 pl-11 pr-11 text-sm text-white placeholder:text-slate-400 outline-hidden transition-colors focus:border-slate-400"
       />
       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
         {(isTyping || isPending) && (
-          <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+          <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
         )}
         {q && !isTyping && !isPending && (
           <button
             onClick={() => setQ("")}
-            className="text-blue-200/40 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Hapus pencarian"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>

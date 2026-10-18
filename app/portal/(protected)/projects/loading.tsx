@@ -25,7 +25,7 @@ export default function PortalProjectsLoading() {
                 <Skeleton className="h-2 w-full rounded-full" />
               </div>
               
-              <div className="flex justify-between border-t border-white/5 pt-4">
+              <div className="flex justify-between border-t border-slate-100 pt-4">
                 <div className="space-y-1">
                   <SkeletonText className="w-16" />
                   <SkeletonText className="w-24" />

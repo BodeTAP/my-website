@@ -286,39 +286,39 @@ export default function PublicProposalForm({
 
   return (
     <>
-      <section className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-10">
+      <div className="w-full max-w-3xl mx-auto rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
         {/* Free tier notice */}
-        <div className="mb-6 rounded-xl border border-teal-400/20 bg-teal-400/[0.06] px-4 py-3 flex items-center gap-2.5">
-          <FileText className="w-5 h-5 text-teal-400 shrink-0" />
-          <p className="text-sm text-teal-100 font-medium">
-            Gratis: 1 proposal per bulan (PDF dengan watermark)
+        <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-center gap-2.5">
+          <FileText className="w-4 h-4 text-slate-700 shrink-0" />
+          <p className="text-xs sm:text-sm text-slate-700 font-mono">
+            Uji Coba Gratis: 1 proposal per bulan (PDF dengan watermark)
           </p>
         </div>
 
         {/* Quota used banner — surfaced before the user starts typing */}
         {quotaUsed && (
-          <div className="mb-6 rounded-xl border border-amber-400/25 bg-amber-400/[0.08] px-4 py-3">
-            <p className="text-sm text-amber-100">
-              <strong className="font-bold text-amber-300">Kuota gratis bulan ini sudah dipakai.</strong>{" "}
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-xs sm:text-sm text-amber-800">
+              <strong className="font-bold text-amber-900">Kuota gratis bulan ini sudah digunakan.</strong>{" "}
               {resetCountdown ? `Reset ${resetCountdown}, atau ` : ""}
               <a
                 href="/portal/register"
-                className="text-amber-300 underline underline-offset-2 hover:text-amber-200"
+                className="font-bold text-amber-900 underline underline-offset-2 hover:text-amber-800"
               >
-                daftar gratis
+                daftar akun portal
               </a>{" "}
-              untuk lanjut sekarang.
+              untuk akses penuh tanpa batas.
             </p>
           </div>
         )}
 
         {disabledNotice && (
-          <div className="mb-6 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3 flex items-center gap-2.5">
-            <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-            <p className="text-sm text-amber-100">
-              Free tier tidak tersedia saat ini.{" "}
-              <a href="/portal/register" className="text-amber-400 underline underline-offset-2 hover:text-amber-300">
-                Daftar akun
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+            <p className="text-xs sm:text-sm text-amber-800">
+              Uji coba gratis sedang dinonaktifkan sementara.{" "}
+              <a href="/portal/register" className="font-bold text-amber-900 underline underline-offset-2 hover:text-amber-800">
+                Daftar akun portal
               </a>{" "}
               untuk menggunakan tool ini.
             </p>
@@ -326,25 +326,25 @@ export default function PublicProposalForm({
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="pf-prospect" className="block text-sm font-medium text-blue-100/80 mb-1.5">
-                Nama Prospek
+              <label htmlFor="pf-prospect" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Nama Calon Klien / Prospek
               </label>
               <input
                 id="pf-prospect"
                 type="text"
                 value={prospectName}
                 onChange={(e) => setProspectName(e.target.value)}
-                placeholder="PT Contoh Jaya"
+                placeholder="Cth: PT Contoh Jaya"
                 disabled={!!quotaUsed}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:outline-hidden focus:ring-1 focus:ring-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label htmlFor="pf-business" className="block text-sm font-medium text-blue-100/80 mb-1.5">
+              <label htmlFor="pf-business" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                 Nama Bisnis Anda
               </label>
               <input
@@ -352,34 +352,34 @@ export default function PublicProposalForm({
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Studio Kreatif ABC"
+                placeholder="Cth: Studio Desain ABC"
                 disabled={!!quotaUsed}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:outline-hidden focus:ring-1 focus:ring-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="pf-service" className="block text-sm font-medium text-blue-100/80 mb-1.5">
-              Deskripsi Layanan
+            <label htmlFor="pf-service" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Rincian Layanan & Deliverables
             </label>
             <textarea
               id="pf-service"
               value={serviceDescription}
               onChange={(e) => setServiceDescription(e.target.value)}
-              placeholder="Jelaskan layanan yang ditawarkan, scope pekerjaan, dan deliverables..."
+              placeholder="Jelaskan ruang lingkup pekerjaan, fitur yang dibangun, dan deliverables..."
               rows={4}
               disabled={!!quotaUsed}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:outline-hidden focus:ring-1 focus:ring-slate-800 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label htmlFor="pf-price" className="block text-sm font-medium text-blue-100/80 mb-1.5">
-              Harga (Rupiah)
+            <label htmlFor="pf-price" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Nilai Investasi (Rupiah)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-blue-200/40">Rp</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-mono text-slate-400">Rp</span>
               <input
                 id="pf-price"
                 type="number"
@@ -389,25 +389,25 @@ export default function PublicProposalForm({
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="5000000"
                 disabled={!!quotaUsed}
-                className="w-full rounded-lg border border-white/10 bg-white/5 pl-10 pr-3.5 py-2.5 text-sm text-white placeholder:text-blue-200/30 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3.5 py-2.5 text-sm font-mono text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-800 focus:outline-hidden focus:ring-1 focus:ring-slate-800 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             {price && !isNaN(Number(price)) && Number(price) > 0 && (
-              <p className="mt-1 text-xs text-blue-200/40">{formatRupiah(Number(price))}</p>
+              <p className="mt-1 text-xs font-mono text-slate-600">{formatRupiah(Number(price))}</p>
             )}
           </div>
 
           {error && (
-            <div className="rounded-lg border border-red-400/20 bg-red-400/[0.06] px-3.5 py-2.5 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-              <p className="text-sm text-red-200">{error}</p>
+            <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <p className="text-xs sm:text-sm text-red-700">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading || !!quotaUsed}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 text-sm font-semibold text-white transition-colors"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-full bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed px-7 py-2.5 text-sm font-medium text-white transition-colors cursor-pointer"
           >
             {loading ? (
               <>
@@ -417,33 +417,33 @@ export default function PublicProposalForm({
             ) : (
               <>
                 <FileText className="w-4 h-4" />
-                Buat Proposal Gratis
+                Generate Proposal PDF
               </>
             )}
           </button>
 
-          <p className="text-[11px] text-blue-200/35">
-            Data yang kamu input tidak disimpan. Hanya hitungan pemakaian (anonim) yang dicatat untuk batas kuota.
+          <p className="text-[11px] text-slate-400 font-mono">
+            Data yang Anda masukkan tidak disimpan permanen di server. Hanya kuota pemakaian anonim yang dicatat.
           </p>
         </form>
 
         {/* Result Card */}
         {result && (
-          <div ref={resultRef} className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
-            <div className="border-b border-white/10 bg-blue-600/10 px-5 py-4">
-              <h3 className="text-lg font-bold text-white">{result.title}</h3>
-              <p className="text-sm text-blue-200/60 mt-0.5">Dari: {result.from}</p>
+          <div ref={resultRef} className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shadow-xs">
+            <div className="border-b border-slate-200 bg-white px-5 py-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">{result.title}</h3>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">Dari: {result.from}</p>
             </div>
 
-            <div className="px-5 py-5 space-y-4">
+            <div className="px-5 py-5 space-y-4 text-xs sm:text-sm">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
-                  <p className="text-xs text-blue-200/40 uppercase tracking-wide">Kepada</p>
-                  <p className="text-sm text-white font-medium mt-0.5">{result.to}</p>
+                  <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Kepada</p>
+                  <p className="text-slate-900 font-medium mt-0.5">{result.to}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-blue-200/40 uppercase tracking-wide">Tanggal</p>
-                  <p className="text-sm text-white font-medium mt-0.5">
+                  <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Tanggal</p>
+                  <p className="text-slate-900 font-mono mt-0.5">
                     {new Date(result.createdAt).toLocaleDateString("id-ID", {
                       day: "numeric",
                       month: "short",
@@ -452,33 +452,33 @@ export default function PublicProposalForm({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-blue-200/40 uppercase tracking-wide">Berlaku</p>
-                  <p className="text-sm text-white font-medium mt-0.5">{result.validDays} hari</p>
+                  <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Masa Berlaku</p>
+                  <p className="text-slate-900 font-mono mt-0.5">{result.validDays} hari</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-blue-200/40 uppercase tracking-wide mb-1">Layanan</p>
-                <p className="text-sm text-blue-100/80 whitespace-pre-wrap leading-relaxed">{result.service}</p>
+                <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">Ruang Lingkup</p>
+                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{result.service}</p>
               </div>
 
-              <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.06] px-4 py-3 text-center">
-                <p className="text-xs text-blue-200/50 mb-0.5">Total Investasi</p>
-                <p className="text-xl font-bold text-blue-300">{result.priceFormatted}</p>
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center">
+                <p className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">Total Investasi</p>
+                <p className="text-xl font-bold font-mono text-slate-900">{result.priceFormatted}</p>
               </div>
 
-              <div className="rounded-lg border border-amber-400/15 bg-amber-400/[0.04] px-3.5 py-2.5">
-                <p className="text-xs text-amber-200/70">
-                  PDF gratis menyertakan watermark MFWEB. Daftar untuk versi tanpa watermark dengan logo bisnis Anda.
+              <div className="rounded-lg border border-slate-200 bg-white px-3.5 py-2.5">
+                <p className="text-xs text-slate-600">
+                  PDF gratis ini menyertakan watermark MFWEB. Daftar akun portal untuk mengunduh versi bersih dengan logo bisnis Anda sendiri.
                 </p>
               </div>
             </div>
 
-            <div className="border-t border-white/10 px-5 py-4 grid gap-3 sm:grid-cols-2">
+            <div className="border-t border-slate-200 bg-white px-5 py-4 grid gap-3 sm:grid-cols-2">
               <button
                 onClick={handleDownloadClick}
                 disabled={downloading}
-                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+                className="flex items-center justify-center gap-2 rounded-full bg-slate-900 hover:bg-slate-800 disabled:opacity-60 px-5 py-2.5 text-xs sm:text-sm font-medium text-white transition-colors cursor-pointer"
               >
                 {downloading ? (
                   <>
@@ -488,30 +488,31 @@ export default function PublicProposalForm({
                 ) : (
                   <>
                     <Download className="w-4 h-4" />
-                    Download PDF
+                    Download File PDF
                   </>
                 )}
               </button>
+
               <button
                 onClick={handleWaShare}
-                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors"
+                className="flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs sm:text-sm font-medium text-slate-800 transition-colors cursor-pointer"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4 text-emerald-600" />
                 Kirim via WhatsApp
               </button>
             </div>
 
-            <div className="border-t border-white/10 px-5 py-3 text-center">
+            <div className="border-t border-slate-200 bg-slate-50 px-5 py-3 text-center">
               <a
                 href="/portal/register"
-                className="text-xs text-blue-300 hover:text-blue-200 underline underline-offset-2"
+                className="text-xs text-slate-700 hover:text-slate-900 font-medium underline underline-offset-2"
               >
-                Daftar untuk versi tanpa watermark dan brand kit Anda sendiri →
+                Daftar akun untuk versi tanpa watermark & brand kit bisnis Anda →
               </a>
             </div>
           </div>
         )}
-      </section>
+      </div>
 
       <PaywallGate
         open={paywallOpen}

@@ -36,14 +36,14 @@ export default async function PortalTicketsPage() {
 
   return (
     <div className="space-y-6">
-      <FadeUp>
-        <h1 className="text-2xl font-bold text-white">Bantuan & Panduan</h1>
-        <p className="text-blue-200/50 text-sm mt-1">Panduan penggunaan tools dan tiket bantuan teknis</p>
+      <FadeUp className="pb-2 border-b border-slate-200/80">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Bantuan & Panduan</h1>
+        <p className="text-slate-500 text-sm mt-1">Panduan lengkap fitur tools dan pusat komunikasi langsung dengan tim teknis MFWEB.</p>
       </FadeUp>
       <HelpGuide />
-      <FadeUp>
-        <h2 className="text-xl font-bold text-white mt-8">Tiket Bantuan</h2>
-        <p className="text-blue-200/50 text-sm mt-1">Kirim permintaan revisi atau pertanyaan teknis ke tim kami</p>
+      <FadeUp className="pt-2">
+        <h2 className="text-xl font-black text-slate-900 tracking-tight">Tiket Bantuan & Permintaan Revisi</h2>
+        <p className="text-slate-500 text-xs sm:text-sm mt-0.5">Kirim permintaan revisi, pertanyaan teknis, atau kendala langsung ke tim MFWEB.</p>
       </FadeUp>
       <TicketList tickets={serialized} clientId={user.client.id} userId={user.id} />
     </div>

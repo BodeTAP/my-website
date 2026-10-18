@@ -72,26 +72,30 @@ export default async function PortalCreditsPage({
   ]);
 
   return (
-    <div className="space-y-5">
-      <FadeUp className="rounded-2xl border border-white/10 bg-[#071225] p-4 sm:p-5">
+    <div className="space-y-6">
+      {/* Top balance banner */}
+      <FadeUp className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
-              <Wallet className="h-5 w-5 text-amber-300" />
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-600">
+              <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-200/55">Saldo Aktif</p>
-              <h1 className="text-xl font-bold text-white">Kredit</h1>
-              <p className="mt-1 text-xs text-blue-200/50">
-                Untuk Lead Finder, Proposal Generator, dan Invoice Generator.
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo Kredit</span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">Aktif</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">Kredit Tools</h1>
+              <p className="mt-1 text-xs text-slate-500">
+                Digunakan untuk Lead Finder, Proposal Generator, dan Invoice Generator.
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 sm:min-w-40 sm:block sm:text-right">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-200/55">Tersedia</p>
-            <p className="text-2xl font-black leading-none tracking-tight text-amber-200">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50/60 px-5 py-3 sm:min-w-44 sm:block sm:text-right">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-900/70">Kredit Tersedia</p>
+            <p className="text-3xl font-black leading-none tracking-tight text-amber-950 mt-1">
               {balance}
-              <span className="ml-1 text-xs font-bold text-amber-100/55">kredit</span>
+              <span className="ml-1.5 text-xs font-bold text-amber-800/80">kredit</span>
             </p>
           </div>
         </div>
@@ -99,66 +103,74 @@ export default async function PortalCreditsPage({
 
       {balance < 10 && (
         <FadeUp delay={0.05}>
-          <div className="flex flex-col justify-between gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center shadow-2xs">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-300" />
-              <p className="text-sm font-semibold text-amber-100">Kredit hampir habis. Tambah saldo agar tools tetap lancar dipakai.</p>
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-700" />
+              <p className="text-xs sm:text-sm font-semibold text-amber-950">Kredit hampir habis. Tambah saldo agar aktivitas tools bisnis Anda tetap lancar.</p>
             </div>
-            <Link href="/portal/tools" className="text-sm font-bold text-amber-300 transition-colors hover:text-white">
-              Lihat tools
+            <Link href="/portal/tools" className="text-xs sm:text-sm font-bold text-amber-900 hover:text-amber-950 underline underline-offset-2">
+              Lihat Tools →
             </Link>
           </div>
         </FadeUp>
       )}
 
-      <StaggerChildren stagger={0.08} className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {packages.map((pkg) => {
-          const totalCredits = pkg.credits + pkg.bonusCredit;
-          return (
-            <StaggerItem key={pkg.id}>
-              <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-[#071225] p-4 transition-colors hover:border-amber-500/30">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
-                      <Coins className="h-4 w-4 text-amber-300" />
+      {/* Credit packages grid */}
+      <div>
+        <div className="mb-3">
+          <h2 className="text-slate-900 font-bold text-base tracking-tight">Pilih Paket Top-up Kredit</h2>
+          <p className="text-slate-500 text-xs">Pilih nominal kredit yang sesuai dengan kebutuhan prospek bisnis Anda.</p>
+        </div>
+        <StaggerChildren stagger={0.08} className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {packages.map((pkg) => {
+            const totalCredits = pkg.credits + pkg.bonusCredit;
+            return (
+              <StaggerItem key={pkg.id}>
+                <div className="flex h-full flex-col rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs transition-colors hover:border-slate-300">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-600">
+                        <Coins className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="truncate text-base font-black text-slate-900">{pkg.name}</h3>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {pkg.credits} kredit{pkg.bonusCredit > 0 ? ` + ${pkg.bonusCredit} bonus` : ""}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <h2 className="truncate text-base font-black text-white">{pkg.name}</h2>
-                      <p className="mt-1 text-xs leading-relaxed text-blue-200/50">
-                        {pkg.credits} kredit{pkg.bonusCredit > 0 ? ` + ${pkg.bonusCredit} bonus` : ""}
-                      </p>
+                    <span className="shrink-0 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-900">
+                      {totalCredits} krd
+                    </span>
+                  </div>
+
+                  <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between md:flex-col md:items-stretch lg:flex-row lg:items-center">
+                    <div>
+                      <p className="text-lg font-black text-slate-900">{formatRupiah(pkg.price)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sekali Bayar</p>
+                    </div>
+                    <div className="sm:w-36 md:w-full lg:w-36">
+                      <BuyCreditButton packageId={pkg.id} />
                     </div>
                   </div>
-                  <span className="shrink-0 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-black text-amber-200">
-                    {totalCredits}
-                  </span>
                 </div>
+              </StaggerItem>
+            );
+          })}
+        </StaggerChildren>
+      </div>
 
-                <div className="mt-4 flex flex-col gap-3 border-t border-white/5 pt-4 sm:flex-row sm:items-center sm:justify-between md:flex-col md:items-stretch lg:flex-row lg:items-center">
-                  <div>
-                    <p className="text-lg font-black text-white">{formatRupiah(pkg.price)}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-blue-200/35">Sekali bayar</p>
-                  </div>
-                  <div className="sm:w-32 md:w-full lg:w-32">
-                    <BuyCreditButton packageId={pkg.id} />
-                  </div>
-                </div>
-              </div>
-            </StaggerItem>
-          );
-        })}
-      </StaggerChildren>
-
+      {/* Credit History Table */}
       <FadeUp delay={0.15}>
-        <div className="rounded-2xl border border-white/10 bg-[#071225] overflow-hidden">
-          <div className="flex items-center justify-between gap-4 border-b border-white/5 px-4 py-4 sm:px-5">
+        <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/70 px-5 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-                <ReceiptText className="h-4 w-4 text-blue-300" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs">
+                <ReceiptText className="h-4 w-4" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white">Riwayat Kredit</h2>
-                <p className="text-xs text-blue-200/45">
+                <h2 className="text-sm font-bold text-slate-900">Riwayat Mutasi Kredit</h2>
+                <p className="text-xs text-slate-500">
                   Menampilkan {startIdx}-{endIdx} dari {transactionTotal} transaksi
                 </p>
               </div>
@@ -166,36 +178,36 @@ export default async function PortalCreditsPage({
           </div>
 
           {transactions.length === 0 ? (
-            <div className="p-8 text-center text-sm text-blue-200/35">Belum ada transaksi kredit.</div>
+            <div className="p-10 text-center text-xs sm:text-sm text-slate-400">Belum ada riwayat transaksi kredit.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-white/5 text-left text-blue-200/40">
-                    <th className="px-4 py-2.5 font-bold sm:px-5">Tanggal</th>
-                    <th className="px-4 py-2.5 font-bold sm:px-5">Deskripsi</th>
-                    <th className="px-4 py-2.5 text-right font-bold sm:px-5">Jumlah</th>
+                  <tr className="border-b border-slate-200/80 bg-slate-50 text-left text-slate-500 text-[11px] uppercase tracking-wider">
+                    <th className="px-5 py-3 font-bold">Tanggal</th>
+                    <th className="px-5 py-3 font-bold">Keterangan</th>
+                    <th className="px-5 py-3 text-right font-bold">Jumlah</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {transactions.map((tx) => {
                     const positive = tx.amount > 0;
                     return (
-                      <tr key={tx.id} className="border-b border-white/5 last:border-0">
-                        <td className="whitespace-nowrap px-4 py-3 text-blue-200/55 sm:px-5">{formatDate(tx.createdAt)}</td>
-                        <td className="px-4 py-3 sm:px-5">
+                      <tr key={tx.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="whitespace-nowrap px-5 py-3.5 text-slate-500 text-xs font-medium">{formatDate(tx.createdAt)}</td>
+                        <td className="px-5 py-3.5">
                           <div className="flex items-center gap-3">
-                            <span className={`flex h-7 w-7 items-center justify-center rounded-lg border ${positive ? "border-green-500/20 bg-green-500/10 text-green-300" : "border-red-500/20 bg-red-500/10 text-red-300"}`}>
+                            <span className={`flex h-7 w-7 items-center justify-center rounded-lg border shrink-0 ${positive ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-100 text-slate-700"}`}>
                               {positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownLeft className="h-3.5 w-3.5" />}
                             </span>
                             <div>
-                              <p className="text-white font-medium">{tx.description}</p>
-                              {tx.tool && <p className="text-blue-200/35 text-xs mt-0.5">{tx.tool}</p>}
+                              <p className="text-slate-900 font-semibold text-xs sm:text-sm">{tx.description}</p>
+                              {tx.tool && <p className="text-slate-400 text-[10px] uppercase font-bold tracking-wider mt-0.5">{tx.tool.replace(/_/g, " ")}</p>}
                             </div>
                           </div>
                         </td>
-                        <td className={`px-4 py-3 text-right font-black sm:px-5 ${positive ? "text-green-300" : "text-red-300"}`}>
-                          {positive ? "+" : ""}{tx.amount}
+                        <td className={`px-5 py-3.5 text-right font-black text-sm whitespace-nowrap ${positive ? "text-emerald-700" : "text-slate-800"}`}>
+                          {positive ? "+" : ""}{tx.amount} krd
                         </td>
                       </tr>
                     );
@@ -205,9 +217,9 @@ export default async function PortalCreditsPage({
             </div>
           )}
           {transactionTotal > 0 && (
-            <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 bg-black/20 p-4 sm:flex-row">
-              <p className="text-xs text-blue-200/40 font-medium">
-                Halaman <span className="text-blue-200">{page}</span> dari <span className="text-blue-200">{totalPages}</span>
+            <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 p-4 sm:flex-row">
+              <p className="text-xs text-slate-500 font-medium">
+                Halaman <span className="text-slate-900 font-bold">{page}</span> dari <span className="text-slate-900 font-bold">{totalPages}</span>
               </p>
               <CreditHistoryPagination totalPages={totalPages} />
             </div>

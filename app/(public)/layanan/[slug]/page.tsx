@@ -580,14 +580,12 @@ export default async function ServiceDetailPage({ params }: Params) {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-white">
       <JsonLd id={`json-ld-service-${slug}`} data={jsonLd} />
 
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-600/8 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-
-        <div className="max-w-4xl mx-auto relative">
+      {/* ── Full-Width Deep Slate Hero ────────────────────── */}
+      <section className="w-full bg-[#1E242E] text-white pt-28 pb-16 sm:pt-32 sm:pb-24 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Breadcrumb
             items={[
               { label: "Layanan", href: "/layanan" },
@@ -595,14 +593,14 @@ export default async function ServiceDetailPage({ params }: Params) {
             ]}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center mt-6">
             <div>
               <FadeUp>
-                <div
-                  className={`inline-flex items-center gap-2 ${c.pill}/20 border ${c.border} px-4 py-1.5 rounded-full text-sm ${c.text} mb-6`}
-                >
-                  <service.icon className="w-4 h-4" />
-                  {service.badge}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="h-px w-8 bg-slate-500" />
+                  <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
+                    Spesifikasi Layanan & Deliverables
+                  </span>
                 </div>
               </FadeUp>
               <FadeUp delay={0.1}>
@@ -611,7 +609,7 @@ export default async function ServiceDetailPage({ params }: Params) {
                 </h1>
               </FadeUp>
               <FadeUp delay={0.2}>
-                <p className="text-blue-100/70 text-lg leading-relaxed mb-8">
+                <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-8 max-w-xl">
                   {service.heroSubtitle}
                 </p>
               </FadeUp>
@@ -624,7 +622,7 @@ export default async function ServiceDetailPage({ params }: Params) {
                   >
                     <Button
                       size="lg"
-                      className="btn-shine bg-blue-600 hover:bg-blue-500 text-white h-12 px-8 shadow-lg shadow-blue-500/25 w-full sm:w-auto"
+                      className="rounded-full bg-white text-slate-900 hover:bg-slate-100 font-medium h-12 px-8 w-full sm:w-auto transition-colors"
                     >
                       Konsultasi Gratis <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
@@ -633,33 +631,33 @@ export default async function ServiceDetailPage({ params }: Params) {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="border-white/10 text-white hover:bg-white/5 h-12 px-8 w-full sm:w-auto"
+                      className="rounded-full border border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white h-12 px-8 w-full sm:w-auto transition-colors"
                     >
-                      Kirim Brief
+                      Kirim Brief Proyek
                     </Button>
                   </Link>
                 </div>
               </FadeUp>
             </div>
 
-            {/* Stats card */}
+            {/* Quick summary card in Slate */}
             <FadeUp delay={0.2}>
-              <div className="glass rounded-2xl p-7 border border-white/5">
-                <p className="text-blue-200/40 text-xs mb-1">
-                  Harga mulai dari
+              <div className="rounded-2xl border border-slate-800 bg-[#161B22] p-7 text-white shadow-xs">
+                <p className="text-slate-400 text-xs font-mono uppercase tracking-wider mb-1">
+                  Investasi Mulai Dari
                 </p>
-                <p className={`text-3xl font-bold ${c.text} mb-1`}>
+                <p className="text-3xl font-bold font-mono text-white mb-1">
                   {service.price}
                 </p>
-                <p className="text-blue-200/40 text-xs mb-6">
+                <p className="text-slate-400 text-xs mb-6">
                   {service.priceNote}
                 </p>
 
-                <div className="grid grid-cols-3 gap-4 pt-5 border-t border-white/5">
+                <div className="grid grid-cols-3 gap-4 pt-5 border-t border-slate-800">
                   {service.stats.map((s) => (
                     <div key={s.label} className="text-center">
-                      <p className="text-xl font-bold text-white">{s.num}</p>
-                      <p className="text-blue-200/40 text-xs mt-0.5">
+                      <p className="text-xl font-bold text-white font-mono">{s.num}</p>
+                      <p className="text-slate-400 text-xs mt-0.5">
                         {s.label}
                       </p>
                     </div>
@@ -672,25 +670,33 @@ export default async function ServiceDetailPage({ params }: Params) {
       </section>
 
       {/* ── Features ──────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F9FA] border-b border-slate-200">
+        <div className="max-w-7xl mx-auto">
           <FadeUp className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-3">
-              Apa yang Termasuk dalam{" "}
-              <span className="text-gradient">Layanan Ini</span>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="h-px w-6 bg-slate-400" />
+              <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+                Fitur & Cakupan Kerja
+              </span>
+              <span className="h-px w-6 bg-slate-400" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+              Apa yang Termasuk dalam Layanan Ini
             </h2>
-            <p className="text-blue-200/60 max-w-lg mx-auto">
+            <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
               {service.description}
             </p>
           </FadeUp>
 
-          <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {service.features.map((f) => (
               <StaggerItem key={f.title}>
-                <div className="glass rounded-2xl p-6 hover:border-blue-500/20 transition-colors h-full">
-                  <CheckCircle className={`w-5 h-5 ${c.text} mb-3`} />
-                  <h3 className="text-white font-semibold mb-2">{f.title}</h3>
-                  <p className="text-blue-200/50 text-sm leading-relaxed">
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all h-full flex flex-col">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-800 mb-4 shrink-0">
+                    <CheckCircle className="w-5 h-5 text-slate-700" />
+                  </div>
+                  <h3 className="text-slate-900 font-bold text-base mb-2">{f.title}</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
                     {f.desc}
                   </p>
                 </div>
@@ -701,18 +707,18 @@ export default async function ServiceDetailPage({ params }: Params) {
       </section>
 
       {/* ── For Whom + Deliverables ───────────────────────── */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
           <FadeUp>
-            <div className="glass rounded-2xl p-7 h-full">
-              <h3 className="text-white font-bold text-lg mb-5">
-                Layanan ini cocok untuk...
+            <div className="rounded-2xl border border-slate-200 bg-[#F8F9FA] p-7 sm:p-8 h-full">
+              <h3 className="text-slate-900 font-bold text-lg mb-5">
+                Layanan ini cocok untuk bisnis yang...
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {service.forWhom.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <Star className={`w-4 h-4 ${c.text} shrink-0 mt-0.5`} />
-                    <span className="text-blue-200/70 text-sm leading-relaxed">
+                    <Star className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />
+                    <span className="text-slate-700 text-sm leading-relaxed">
                       {item}
                     </span>
                   </li>
@@ -722,15 +728,15 @@ export default async function ServiceDetailPage({ params }: Params) {
           </FadeUp>
 
           <FadeUp delay={0.1}>
-            <div className="glass rounded-2xl p-7 h-full">
-              <h3 className="text-white font-bold text-lg mb-5">
-                Yang Anda Dapatkan
+            <div className="rounded-2xl border border-slate-200 bg-white p-7 sm:p-8 h-full shadow-xs">
+              <h3 className="text-slate-900 font-bold text-lg mb-5">
+                Yang Anda Dapatkan (Deliverables)
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {service.deliverables.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <CheckCircle className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
-                    <span className="text-blue-200/70 text-sm">{item}</span>
+                    <CheckCircle className="w-4 h-4 text-slate-800 shrink-0 mt-0.5" />
+                    <span className="text-slate-700 text-sm leading-relaxed font-medium">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -743,12 +749,18 @@ export default async function ServiceDetailPage({ params }: Params) {
       {slug === "optimasi-seo" && <SEOPricingSection />}
 
       {/* ── FAQ ───────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F9FA] border-b border-slate-200">
         <div className="max-w-3xl mx-auto">
           <FadeUp className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-white mb-3">
-              Pertanyaan Seputar{" "}
-              <span className="text-gradient">{service.title}</span>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="h-px w-6 bg-slate-400" />
+              <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+                Tanya Jawab
+              </span>
+              <span className="h-px w-6 bg-slate-400" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              Pertanyaan Seputar {service.title}
             </h2>
           </FadeUp>
           <div className="space-y-3">
@@ -759,59 +771,54 @@ export default async function ServiceDetailPage({ params }: Params) {
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────── */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
+      {/* ── Bottom CTA ────────────────────────────────────── */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <div className="max-w-4xl mx-auto">
           <ScaleIn>
-            <div className="glass rounded-3xl p-10 sm:p-12 text-center glow-blue relative overflow-hidden">
-              <div className="absolute inset-0 bg-linear-to-br from-blue-600/10 to-transparent pointer-events-none" />
-              <div className="relative">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                  Siap Mulai Layanan{" "}
-                  <span className="text-gradient">{service.title}?</span>
-                </h2>
-                <p className="text-blue-200/60 mb-8 max-w-lg mx-auto">
-                  Konsultasi gratis, tanpa biaya, tanpa komitmen. Ceritakan
-                  kebutuhan Anda dan kami berikan solusi terbaik.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-3">
-                  <a
-                    href={`https://wa.me/${WA}?text=${encodeURIComponent(waText)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+            <div className="rounded-3xl border border-slate-800 bg-[#1E242E] text-white p-8 sm:p-12 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                Siap Meluncurkan {service.title}?
+              </h2>
+              <p className="text-slate-300 text-sm sm:text-base mb-8 max-w-lg mx-auto leading-relaxed">
+                Konsultasi gratis, tanpa biaya tersembunyi. Ceritakan kebutuhan Anda dan kami akan menyusun solusi paling tepat sasaran.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <a
+                  href={`https://wa.me/${WA}?text=${encodeURIComponent(waText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="lg"
+                    className="rounded-full bg-white text-slate-900 hover:bg-slate-100 font-medium px-8 h-12 w-full sm:w-auto transition-colors"
                   >
-                    <Button
-                      size="lg"
-                      className="btn-shine bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 shadow-lg shadow-blue-500/25"
-                    >
-                      💬 WhatsApp Sekarang
-                    </Button>
-                  </a>
-                  <Link href="/contact">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="border-white/10 text-white hover:bg-white/5 h-12 px-8"
-                    >
-                      Kirim Brief via Form
-                    </Button>
-                  </Link>
-                </div>
-                <div className="flex flex-wrap justify-center gap-5 mt-8">
-                  {[
-                    { icon: Clock, label: "Respon < 1 jam" },
-                    { icon: Shield, label: "Tanpa komitmen" },
-                    { icon: Zap, label: "Estimasi gratis" },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center gap-2 text-blue-200/40 text-sm"
-                    >
-                      <item.icon className="w-4 h-4 text-blue-400" />
-                      {item.label}
-                    </div>
-                  ))}
-                </div>
+                    Chat via WhatsApp
+                  </Button>
+                </a>
+                <Link href="/contact">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full border border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white h-12 px-8 w-full sm:w-auto transition-colors"
+                  >
+                    Kirim Brief via Form
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex flex-wrap justify-center gap-6 mt-8 pt-6 border-t border-slate-800/80">
+                {[
+                  { icon: Clock, label: "Respon < 1 jam" },
+                  { icon: Shield, label: "Transparan & Tanpa Komitmen" },
+                  { icon: Zap, label: "Estimasi Cepat" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2 text-slate-400 text-xs font-mono"
+                  >
+                    <item.icon className="w-3.5 h-3.5 text-slate-400" />
+                    {item.label}
+                  </div>
+                ))}
               </div>
             </div>
           </ScaleIn>
@@ -819,28 +826,25 @@ export default async function ServiceDetailPage({ params }: Params) {
       </section>
 
       {/* Other services */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F9FA]">
+        <div className="max-w-6xl mx-auto">
           <FadeUp className="mb-8">
-            <h3 className="text-white font-semibold text-lg">
-              Layanan Lainnya
+            <h3 className="text-slate-900 font-bold text-lg">
+              Layanan Website Lainnya
             </h3>
           </FadeUp>
-          <StaggerChildren className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StaggerChildren className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.values(services)
               .filter((s) => s.slug !== slug)
               .map((s) => {
-                const sc = colorMap[s.color];
                 return (
                   <StaggerItem key={s.slug}>
-                    <Link href={`/layanan/${s.slug}`}>
-                      <div className="glass rounded-xl p-4 hover:border-blue-500/20 transition-colors group text-center">
-                        <div
-                          className={`w-10 h-10 rounded-xl ${sc.bg} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}
-                        >
-                          <s.icon className={`w-5 h-5 ${sc.text}`} />
+                    <Link href={`/layanan/${s.slug}`} className="block h-full group">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-xs transition-all text-center h-full flex flex-col items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3 group-hover:bg-slate-900 group-hover:text-white transition-colors text-slate-800">
+                          <s.icon className="w-5 h-5" />
                         </div>
-                        <p className="text-white text-sm font-medium group-hover:text-blue-300 transition-colors">
+                        <p className="text-slate-900 text-sm font-semibold group-hover:text-slate-700 transition-colors">
                           {s.title}
                         </p>
                       </div>
@@ -855,101 +859,93 @@ export default async function ServiceDetailPage({ params }: Params) {
   );
 }
 
-// Simple inline FAQ accordion (no client import needed — server component)
+// Simple inline FAQ accordion
 function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
   return (
     <details
-      className="glass rounded-2xl overflow-hidden group"
+      className="rounded-2xl border border-slate-200 bg-white shadow-xs group overflow-hidden"
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      <summary className="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer list-none hover:bg-white/3 transition-colors">
-        <span className="text-white font-medium text-sm sm:text-base leading-snug">
+      <summary className="flex items-center justify-between gap-4 px-6 py-4 cursor-pointer list-none hover:bg-slate-50 transition-colors">
+        <span className="text-slate-900 font-semibold text-sm sm:text-base leading-snug">
           {q}
         </span>
-        <span className="shrink-0 w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-blue-400 text-lg font-light group-open:rotate-45 transition-transform duration-200">
+        <span className="shrink-0 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-base font-mono group-open:rotate-45 transition-transform duration-200">
           +
         </span>
       </summary>
-      <div className="px-6 pb-5 border-t border-white/5">
-        <p className="text-blue-200/70 text-sm leading-relaxed pt-4">{a}</p>
+      <div className="px-6 pb-4 border-t border-slate-100 text-slate-600 text-sm leading-relaxed pt-3">
+        {a}
       </div>
     </details>
   );
 }
 
-// Custom pricing section for Optimasi SEO matching the requested layout
+// Custom pricing section for Optimasi SEO
 function SEOPricingSection() {
   const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "6282221682343";
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
       <div className="max-w-6xl mx-auto space-y-16">
-        {/* SEO Services */}
         <div>
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-white mb-3">
-              Paket Layanan{" "}
-              <span className="text-gradient">SEO Bergaransi</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+              Paket Layanan SEO Bergaransi
             </h2>
-            <p className="text-blue-200/60 max-w-2xl mx-auto mb-4">
-              Pilih paket yang sesuai dengan kebutuhan dan target pasar bisnis
-              Anda.
+            <p className="text-slate-600 text-sm max-w-xl mx-auto mb-4">
+              Pilih paket yang sesuai dengan kebutuhan dan target pasar bisnis Anda.
             </p>
-            <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 text-orange-400 px-4 py-1.5 rounded-full text-sm font-medium">
-              ⚠️ Ketentuan: Minimal masa kontrak 1 tahun
+            <div className="inline-flex items-center gap-2 bg-slate-100 border border-slate-200 text-slate-700 px-4 py-1.5 rounded-full text-xs font-mono">
+              Ketentuan: Minimal masa kontrak 1 tahun
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1 */}
-            <div className="glass rounded-3xl p-8 border border-purple-500/30 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
-              <h3 className="text-xl font-bold text-white mb-6 pb-4 border-b border-white/10">
+            <div className="rounded-2xl p-8 border border-slate-200 bg-white shadow-xs">
+              <h3 className="text-lg font-bold text-slate-900 mb-6 pb-4 border-b border-slate-100">
                 SEO Bergaransi <br />
-                <span className="text-purple-400 text-sm font-normal">
+                <span className="text-slate-500 text-xs font-mono font-normal">
                   Target Halaman 1 Google
                 </span>
               </h3>
 
-              <div className="space-y-4 mb-8">
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                  <p className="text-white font-semibold text-sm mb-1">
+              <div className="space-y-3 mb-6">
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <p className="text-slate-700 font-semibold text-xs mb-1">
                     5 Target Keyword
                   </p>
                   <div className="flex items-end gap-2">
-                    <span className="text-xs text-blue-200/40 line-through">
+                    <span className="text-xs text-slate-400 line-through font-mono">
                       Rp 1.000.000
                     </span>
-                    <span className="text-2xl font-bold text-purple-400">
+                    <span className="text-xl font-bold text-slate-900 font-mono">
                       Rp 500.000
-                      <span className="text-xs text-blue-200/40 font-normal">
-                        /bln
-                      </span>
+                      <span className="text-xs text-slate-500 font-normal">/bln</span>
                     </span>
                   </div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                  <p className="text-white font-semibold text-sm mb-1">
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <p className="text-slate-700 font-semibold text-xs mb-1">
                     10 Target Keyword
                   </p>
                   <div className="flex items-end gap-2">
-                    <span className="text-xs text-blue-200/40 line-through">
+                    <span className="text-xs text-slate-400 line-through font-mono">
                       Rp 2.000.000
                     </span>
-                    <span className="text-2xl font-bold text-purple-400">
+                    <span className="text-xl font-bold text-slate-900 font-mono">
                       Rp 1.000.000
-                      <span className="text-xs text-blue-200/40 font-normal">
-                        /bln
-                      </span>
+                      <span className="text-xs text-slate-500 font-normal">/bln</span>
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mb-8">
-                <p className="text-sm font-semibold text-white mb-4">
+              <div className="mb-6">
+                <p className="text-xs font-mono uppercase tracking-wider text-slate-500 mb-3">
                   Fitur Layanan:
                 </p>
-                <ul className="space-y-3">
+                <ul className="space-y-2.5">
                   {[
                     "Riset Keyword Lengkap",
                     "Optimasi SEO Onpage (Meta, Heading, dll)",
@@ -957,11 +953,8 @@ function SEOPricingSection() {
                     "Optimasi Kecepatan Website",
                     "Laporan Peringkat Bulanan",
                   ].map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-2 text-sm text-blue-200/70"
-                    >
-                      <CheckCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />{" "}
+                    <li key={f} className="flex items-start gap-2 text-xs sm:text-sm text-slate-600">
+                      <CheckCircle className="w-4 h-4 text-slate-800 shrink-0 mt-0.5" />
                       {f}
                     </li>
                   ))}
@@ -973,56 +966,51 @@ function SEOPricingSection() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button className="w-full bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/20">
+                <Button className="w-full rounded-full bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm h-11">
                   Pesan Sekarang
                 </Button>
               </a>
             </div>
 
             {/* Card 2 */}
-            <div className="glass rounded-3xl p-8 border border-blue-500/30 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
-              <h3 className="text-xl font-bold text-white mb-6 pb-4 border-b border-white/10">
+            <div className="rounded-2xl p-8 border border-slate-800 bg-[#1E242E] text-white">
+              <h3 className="text-lg font-bold text-white mb-6 pb-4 border-b border-slate-800">
                 SEO Bahasa Inggris <br />
-                <span className="text-blue-400 text-sm font-normal">
+                <span className="text-slate-400 text-xs font-mono font-normal">
                   Target Visitor & Trafik Stabil
                 </span>
               </h3>
 
-              <div className="space-y-4 mb-8">
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                  <p className="text-white font-semibold text-sm mb-1">
+              <div className="space-y-3 mb-6">
+                <div className="bg-[#161B22] rounded-xl p-4 border border-slate-800">
+                  <p className="text-slate-300 font-semibold text-xs mb-1">
                     5 Target Keyword
                   </p>
                   <div className="flex items-end gap-2">
-                    <span className="text-2xl font-bold text-blue-400">
+                    <span className="text-xl font-bold text-white font-mono">
                       Rp 1.500.000
-                      <span className="text-xs text-blue-200/40 font-normal">
-                        /bln
-                      </span>
+                      <span className="text-xs text-slate-400 font-normal">/bln</span>
                     </span>
                   </div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                  <p className="text-white font-semibold text-sm mb-1">
+                <div className="bg-[#161B22] rounded-xl p-4 border border-slate-800">
+                  <p className="text-slate-300 font-semibold text-xs mb-1">
                     10 Target Keyword
                   </p>
                   <div className="flex items-end gap-2">
-                    <span className="text-2xl font-bold text-blue-400">
+                    <span className="text-xl font-bold text-white font-mono">
                       Rp 3.000.000
-                      <span className="text-xs text-blue-200/40 font-normal">
-                        /bln
-                      </span>
+                      <span className="text-xs text-slate-400 font-normal">/bln</span>
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mb-8">
-                <p className="text-sm font-semibold text-white mb-4">
+              <div className="mb-6">
+                <p className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-3">
                   Fitur Layanan:
                 </p>
-                <ul className="space-y-3">
+                <ul className="space-y-2.5">
                   {[
                     "Semua fitur Optimasi Onpage & Offpage",
                     "Fokus peningkatan jumlah visitor nyata",
@@ -1030,11 +1018,8 @@ function SEOPricingSection() {
                     "Pemeliharaan Server Dasar",
                     "Laporan Trafik & Visitor Bulanan",
                   ].map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-2 text-sm text-blue-200/70"
-                    >
-                      <CheckCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />{" "}
+                    <li key={f} className="flex items-start gap-2 text-xs sm:text-sm text-slate-300">
+                      <CheckCircle className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
                       {f}
                     </li>
                   ))}
@@ -1046,87 +1031,8 @@ function SEOPricingSection() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20">
+                <Button className="w-full rounded-full bg-white hover:bg-slate-100 text-slate-900 font-medium text-sm h-11">
                   Pesan Sekarang
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Articles Section */}
-        <div className="glass rounded-3xl p-8 sm:p-12 border border-white/10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Beli Artikel Original <br />
-                <span className="text-gradient">SEO Friendly</span>
-              </h2>
-              <p className="text-blue-200/60 mb-8">
-                Tingkatkan otoritas website Anda di mata Google dengan artikel
-                original berkualitas tinggi yang ditulis khusus untuk target
-                pasar Anda.
-              </p>
-
-              <div className="space-y-4">
-                <div className="bg-black/30 rounded-2xl p-5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <p className="text-white font-bold">
-                      Artikel Bahasa Indonesia
-                    </p>
-                    <p className="text-xs text-blue-200/50">
-                      Paket 100 Artikel
-                    </p>
-                  </div>
-                  <span className="text-xl font-black text-green-400">
-                    Rp 1.500.000
-                  </span>
-                </div>
-                <div className="bg-black/30 rounded-2xl p-5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <p className="text-white font-bold">
-                      Artikel Bahasa Inggris
-                    </p>
-                    <p className="text-xs text-blue-200/50">
-                      Paket 100 Artikel
-                    </p>
-                  </div>
-                  <span className="text-xl font-black text-green-400">
-                    Rp 2.000.000
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/5 rounded-2xl p-8 border border-white/5 h-full">
-              <p className="text-lg font-bold text-white mb-6">
-                Fitur Penulisan:
-              </p>
-              <ul className="space-y-4">
-                {[
-                  "Ditulis manual oleh penulis manusia (Bukan AI)",
-                  "Dijamin 100% Original & Lolos Uji Plagiat (Copyscape)",
-                  "Panjang 500 - 1000 kata per artikel",
-                  "Riset kata kunci (keyword) mendalam",
-                  "Optimasi struktur Heading (H1, H2, H3)",
-                  "Artikel siap dipublikasikan langsung ke website",
-                ].map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-start gap-3 text-sm text-blue-100/80"
-                  >
-                    <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />{" "}
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href={`https://wa.me/${WA}?text=${encodeURIComponent("Halo MFWEB, saya tertarik memesan Paket Artikel Original SEO Friendly.")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button className="w-full mt-8 bg-white/10 hover:bg-white/20 text-white border border-white/10">
-                  Pesan Artikel Saja
                 </Button>
               </a>
             </div>

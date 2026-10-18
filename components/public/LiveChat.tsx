@@ -57,32 +57,31 @@ export default function LiveChat() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 16 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="w-80 rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10"
-            style={{ background: "rgba(8,18,36,0.95)", backdropFilter: "blur(24px)" }}
+            className="w-80 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-white"
           >
             {/* Header */}
-            <div className="bg-blue-600 px-4 py-3.5 flex items-center justify-between">
+            <div className="bg-[#1E242E] px-4 py-3.5 flex items-center justify-between text-white border-b border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm select-none">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold text-xs select-none">
                     MF
                   </div>
                   <span
-                    className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-blue-600 ${
-                      online ? "bg-green-400" : "bg-slate-400"
+                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#1E242E] ${
+                      online ? "bg-emerald-400" : "bg-slate-500"
                     }`}
                   />
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm leading-tight">Tim MFWEB</p>
-                  <p className="text-blue-100/70 text-xs">
-                    {online ? "● Online sekarang" : "○ Offline · balas segera"}
+                  <p className="text-white font-bold text-xs leading-tight">Konsultasi MFWEB</p>
+                  <p className="text-slate-400 text-[10px]">
+                    {online ? "● Online sekarang" : "○ Offline · dibalas cepat"}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="text-white/60 hover:text-white transition-colors p-1"
+                className="text-slate-400 hover:text-white transition-colors p-1"
                 aria-label="Tutup chat"
               >
                 <X className="w-4 h-4" />
@@ -90,30 +89,30 @@ export default function LiveChat() {
             </div>
 
             {/* Messages */}
-            <div className="px-4 pt-4 pb-2 space-y-3">
+            <div className="px-4 pt-4 pb-2 space-y-3 bg-slate-50">
               <ChatBubble delay={0}>
-                Halo! 👋 Selamat datang di MFWEB.
+                Halo! 👋 Ada rencana membuat atau merombak website bisnis Anda?
               </ChatBubble>
               <ChatBubble delay={0.35}>
-                Ada yang bisa kami bantu? Konsultasi website gratis dan tanpa kewajiban 😊
+                Konsultasikan kebutuhan Anda gratis, kami siap membantu analisis awal 😊
               </ChatBubble>
             </div>
 
             {/* CTA */}
-            <div className="px-4 pb-5 pt-3">
+            <div className="px-4 pb-5 pt-3 bg-white border-t border-slate-100">
               <a
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+                className="flex items-center justify-center gap-2 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-full transition-colors text-xs shadow-xs"
               >
                 {WA_ICON}
-                Chat via WhatsApp
+                Hubungi via WhatsApp
               </a>
-              <p className="text-blue-200/30 text-xs text-center mt-2.5">
+              <p className="text-slate-400 text-[10px] text-center mt-2 font-medium">
                 {online
                   ? "Biasanya kami membalas dalam beberapa menit"
-                  : "Kami akan membalas saat online kembali"}
+                  : "Pesan Anda akan langsung masuk ke WhatsApp tim kami"}
               </p>
             </div>
           </motion.div>
@@ -129,24 +128,21 @@ export default function LiveChat() {
             exit={{ opacity: 0, x: 16, scale: 0.9 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             onClick={openChat}
-            className="flex items-center gap-2.5 glass px-4 py-2.5 rounded-full border border-white/15 shadow-lg hover:border-white/25 transition-colors"
+            className="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-full border border-slate-200 shadow-lg hover:border-slate-300 transition-colors"
           >
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
-            <span className="text-white text-sm whitespace-nowrap font-medium">Butuh bantuan?</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="text-slate-800 text-xs whitespace-nowrap font-semibold">Butuh bantuan konsultasi?</span>
           </motion.button>
         )}
       </AnimatePresence>
 
       {/* Floating button */}
       <div className="relative">
-        {!open && (
-          <span className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-20 pointer-events-none" />
-        )}
         <motion.button
           onClick={() => (open ? setOpen(false) : openChat())}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.94 }}
-          className="relative w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/30 flex items-center justify-center transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative w-12 h-12 rounded-full bg-[#1E242E] hover:bg-slate-900 shadow-xl flex items-center justify-center text-white border border-slate-700/60 transition-colors"
           aria-label={open ? "Tutup chat" : "Buka live chat"}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -158,14 +154,14 @@ export default function LiveChat() {
               transition={{ duration: 0.15 }}
             >
               {open
-                ? <X className="w-5 h-5 text-white" />
-                : <MessageCircle className="w-6 h-6 text-white" />
+                ? <X className="w-4 h-4 text-white" />
+                : <MessageCircle className="w-5 h-5 text-white" />
               }
             </motion.span>
           </AnimatePresence>
 
           {!open && online && (
-            <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-[#0a1628]" />
+            <span className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#1E242E]" />
           )}
         </motion.button>
       </div>
@@ -181,11 +177,11 @@ function ChatBubble({ children, delay }: { children: React.ReactNode; delay: num
       transition={{ delay, duration: 0.3 }}
       className="flex items-start gap-2"
     >
-      <div className="w-7 h-7 rounded-full bg-blue-600/25 flex items-center justify-center text-[11px] font-bold text-blue-300 shrink-0 mt-0.5 select-none">
+      <div className="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5 select-none">
         MF
       </div>
-      <div className="bg-white/5 border border-white/8 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[210px]">
-        <p className="text-white text-sm leading-relaxed">{children}</p>
+      <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-xs px-3 py-2 max-w-[210px] shadow-2xs">
+        <p className="text-slate-800 text-xs leading-relaxed">{children}</p>
       </div>
     </motion.div>
   );

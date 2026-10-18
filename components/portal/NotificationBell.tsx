@@ -118,11 +118,11 @@ export default function NotificationBell() {
         ref={btnRef}
         onClick={handleToggle}
         aria-label="Notifikasi"
-        className="relative p-2 rounded-lg text-blue-200/50 hover:text-white hover:bg-white/5 transition-colors"
+        className="relative p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-4 h-4" />
         {unread > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-blue-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center px-0.5 leading-none">
+          <span className="absolute top-1 right-1 min-w-[15px] h-3.5 bg-rose-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center px-0.5 leading-none shadow-xs">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -132,21 +132,19 @@ export default function NotificationBell() {
       {mounted && open && createPortal(
         <div
           ref={panelRef}
-          className="fixed w-80 rounded-2xl border border-white/10 shadow-2xl shadow-black/60 overflow-hidden"
+          className="fixed w-80 rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 overflow-hidden"
           style={{
             top:       dropPos.top,
             left:      dropPos.left,
             zIndex:    9999,
-            background:"rgba(8,18,36,0.97)",
-            backdropFilter: "blur(24px)",
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
             <div className="flex items-center gap-2">
-              <h3 className="text-white font-semibold text-sm">Notifikasi</h3>
+              <h3 className="text-slate-900 font-bold text-sm">Notifikasi</h3>
               {unread > 0 && (
-                <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded-full font-medium">
+                <span className="text-[10px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded-full font-bold">
                   {unread} baru
                 </span>
               )}
@@ -155,25 +153,25 @@ export default function NotificationBell() {
               {unread > 0 && (
                 <button
                   onClick={markAll}
-                  className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                  className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 font-semibold transition-colors"
                 >
                   <CheckCheck className="w-3.5 h-3.5" /> Baca semua
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="text-blue-200/40 hover:text-white transition-colors p-0.5">
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-md">
                 <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* List */}
-          <div className="max-h-[360px] overflow-y-auto">
+          <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100">
             {loading ? (
-              <div className="py-10 text-center text-blue-200/30 text-sm">Memuat...</div>
+              <div className="py-10 text-center text-slate-400 text-sm">Memuat notifikasi...</div>
             ) : notifs.length === 0 ? (
               <div className="py-10 text-center">
-                <Bell className="w-8 h-8 text-blue-200/15 mx-auto mb-2" />
-                <p className="text-blue-200/30 text-sm">Belum ada notifikasi</p>
+                <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-slate-500 text-sm font-medium">Belum ada notifikasi</p>
               </div>
             ) : (
               notifs.map((n) => {
@@ -182,23 +180,23 @@ export default function NotificationBell() {
                   <button
                     key={n.id}
                     onClick={() => handleClick(n)}
-                    className={`w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 ${
-                      !n.read ? "bg-blue-500/5" : ""
+                    className={`w-full flex items-start gap-3 px-4 py-3.5 text-left transition-colors ${
+                      !n.read ? "bg-slate-50/80 hover:bg-slate-100/70" : "bg-white hover:bg-slate-50/80"
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                      !n.read ? "bg-blue-600/25" : "bg-white/5"
+                      !n.read ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500"
                     }`}>
-                      <Icon className={`w-4 h-4 ${!n.read ? "text-blue-400" : "text-blue-200/35"}`} />
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium leading-snug ${!n.read ? "text-white" : "text-blue-200/65"}`}>
+                      <p className={`text-sm leading-snug font-semibold ${!n.read ? "text-slate-900" : "text-slate-700"}`}>
                         {n.title}
                       </p>
-                      <p className="text-blue-200/45 text-xs leading-snug mt-0.5 line-clamp-2">{n.body}</p>
-                      <p className="text-blue-200/25 text-[11px] mt-1.5">{timeAgo(n.createdAt)}</p>
+                      <p className="text-slate-500 text-xs leading-snug mt-0.5 line-clamp-2">{n.body}</p>
+                      <p className="text-slate-400 text-[11px] mt-1.5 font-medium">{timeAgo(n.createdAt)}</p>
                     </div>
-                    {!n.read && <span className="w-2 h-2 bg-blue-400 rounded-full shrink-0 mt-2 flex-none" />}
+                    {!n.read && <span className="w-2 h-2 bg-rose-500 rounded-full shrink-0 mt-2 flex-none" />}
                   </button>
                 );
               })

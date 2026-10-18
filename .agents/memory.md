@@ -56,8 +56,11 @@ user confirms a lasting preference, project decision, or important current state
 - On 2026-10-15, complete project rebrand to "White & Grey / Monochrome Minimalist"
   was initiated; Concept 02 (The Minimalist Viewport) selected as official MFWEB logo.
 - Logo assets include `components/brand/BrandLogo.tsx`, `public/logo.svg`,
-  `public/logo-dark.svg`, `public/favicon.svg`, and high-res `public/logo.png` &
   `app/icon.png`. Typography styling uses Obsidian Black "MF" + Titanium Grey "WEB".
+- On 2026-10-18/19, complete redesign of client portal (`/portal/*`) to "White & Soft Grey + Slate":
+  - Palette: `#FFFFFF` & `#F8F9FA` canvas with `#1E242E` (Deep Slate) accents and 1px `slate-200` borders.
+  - Eliminated all legacy dark cyberpunk blue backgrounds (`bg-[#071225]`, `bg-[#07111f]`, `text-blue-200`, cyan glows) across all portal components and tools.
+  - Redesigned: `PortalShell`, `NotificationBell`, `AIHelpWidget`, `dashboard`, `projects`, `invoices`, `hosting`, `credits`, `tickets`, `profile`, `tools` hub, `tools/lead-finder`, `tools/proposal-generator`, `tools/invoice-generator`, `reset-password`, and all loading skeletons.
 
 ## Current Focus
 

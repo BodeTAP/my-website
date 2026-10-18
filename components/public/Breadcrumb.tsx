@@ -11,7 +11,7 @@ export default function Breadcrumb({ items }: { items: Crumb[] }) {
         <li className="flex items-center">
           <Link
             href="/"
-            className="text-blue-400/55 hover:text-blue-300 transition-colors flex items-center"
+            className="text-slate-400 hover:text-slate-200 transition-colors flex items-center"
             aria-label="Beranda"
           >
             <Home className="w-3.5 h-3.5" />
@@ -26,10 +26,10 @@ export default function Breadcrumb({ items }: { items: Crumb[] }) {
               key={i}
               className="flex items-center gap-1"
             >
-              <ChevronRight className="w-3.5 h-3.5 text-blue-200/20 shrink-0" />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
               {isLast ? (
                 <span
-                  className="text-blue-200/55 truncate max-w-[240px] sm:max-w-none"
+                  className="text-slate-300 font-medium truncate max-w-[240px] sm:max-w-none"
                   aria-current="page"
                 >
                   {crumb.label}
@@ -37,7 +37,7 @@ export default function Breadcrumb({ items }: { items: Crumb[] }) {
               ) : (
                 <Link
                   href={crumb.href!}
-                  className="text-blue-400/55 hover:text-blue-300 transition-colors"
+                  className="text-slate-400 hover:text-slate-200 transition-colors"
                 >
                   <span>{crumb.label}</span>
                 </Link>

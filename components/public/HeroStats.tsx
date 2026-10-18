@@ -24,7 +24,7 @@ export default function HeroStats({ stats }: { stats: Stat[] }) {
                 <span>{s.num}</span>
               )}
             </div>
-            <div className="text-blue-200/50 text-xs mt-0.5">{s.label}</div>
+            <div className="text-slate-300 text-xs mt-0.5">{s.label}</div>
           </ScaleIn>
         );
       })}

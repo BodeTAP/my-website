@@ -15,10 +15,10 @@ import {
   MessageCircle,
   Headphones,
   LayoutDashboard,
-  Sparkles,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Breadcrumb from "@/components/public/Breadcrumb";
 import {
   FadeUp,
   StaggerChildren,
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     "Layanan lengkap MFWEB: pembuatan landing page, company profile, toko online, dan optimasi SEO. Mulai dari Rp 800K, termasuk domain dan hosting gratis.",
   alternates: { canonical: "/layanan" },
   openGraph: {
-    title: "Jasa Pembuatan Website & Layanan Digital",
+    title: "Jasa Pembuatan Website & Layanan Digital | MFWEB",
     description:
       "Landing page, company profile, toko online, optimasi SEO. Mulai Rp 800K, termasuk domain + hosting.",
   },
@@ -49,141 +49,100 @@ const services = [
     icon: Megaphone,
     title: "Landing Page",
     slug: "landing-page",
-    desc: "Halaman promosi yang dirancang untuk mengubah pengunjung menjadi pelanggan. Cocok untuk iklan, launch produk, dan kampanye marketing.",
+    desc: "Halaman promosi fokus tinggi yang dirancang untuk mengubah pengunjung iklan menjadi leads WhatsApp dan calon pembeli.",
     features: [
-      "Desain 1 halaman persuasif",
-      "Copywriting yang menjual",
-      "Integrasi WhatsApp & CTA",
-      "Mobile-responsive",
-      "Optimasi kecepatan loading",
+      "Desain 1 halaman persuasif & modern",
+      "Bantuan penulisan copywriting fokus closing",
+      "Integrasi tombol WhatsApp & formulir leads",
+      "Tampilan mobile-first ultra responsif",
+      "Optimasi kecepatan loading (PageSpeed A)",
     ],
     price: "800K",
-    color: "blue",
   },
   {
     icon: Building2,
     title: "Company Profile",
     slug: "company-profile",
-    desc: "Website profesional untuk menampilkan profil bisnis Anda secara lengkap. Tingkatkan kredibilitas dan kepercayaan calon pelanggan.",
+    desc: "Website profil bisnis resmi untuk memperkuat reputasi perusahaan, memamerkan portofolio, dan meyakinkan klien korporat.",
     features: [
-      "3-7 halaman (Simple / Pro)",
-      "Desain custom & modern",
-      "SEO dasar untuk Google",
-      "Email bisnis profesional",
-      "Dashboard admin",
+      "3-7 halaman struktur bisnis (Simple / Pro)",
+      "Desain custom & identitas visual terpadu",
+      "Setup SEO dasar agar mudah ditemukan di Google",
+      "Akun email bisnis resmi (@namabisnis.com)",
+      "Dashboard admin untuk update konten mandiri",
     ],
     price: "1,5 Juta",
-    color: "indigo",
   },
   {
     icon: ShoppingCart,
     title: "Toko Online",
     slug: "toko-online",
-    desc: "Website e-commerce lengkap dengan keranjang belanja, integrasi pembayaran, dan manajemen produk. Siap berjualan 24 jam.",
+    desc: "Platform katalog dan e-commerce mandiri tanpa potongan komisi pihak ketiga. Lengkap dengan checkout dan kalkulasi ongkir.",
     features: [
-      "Unlimited halaman produk",
-      "Integrasi metode pembayaran",
-      "Manajemen pesanan & stok",
-      "Multi bahasa",
-      "Dashboard admin lengkap",
+      "Katalog produk tak terbatas",
+      "Integrasi metode pembayaran otomatis & manual",
+      "Manajemen pesanan, stok, dan notifikasi order",
+      "Fitur multi bahasa atau multi mata uang",
+      "Panel kontrol admin penjualan terpadu",
     ],
     price: "5,4 Juta",
-    color: "teal",
   },
   {
     icon: Search,
     title: "Optimasi SEO",
     slug: "optimasi-seo",
-    desc: "Tingkatkan visibilitas website Anda di Google. Kami optimasi dari sisi teknis, konten, hingga strategi keyword agar bisnis Anda mudah ditemukan.",
+    desc: "Strategi optimasi kata kunci pencarian lokal dan nasional agar website Anda menduduki halaman pertama Google secara organik.",
     features: [
-      "Audit SEO menyeluruh",
-      "Optimasi kata kunci lokal",
-      "Structured data (JSON-LD)",
-      "Konten SEO-friendly",
-      "Laporan perkembangan ranking",
+      "Audit teknis dan perbaikan arsitektur on-page",
+      "Riset kata kunci potensial bernilai beli tinggi",
+      "Implementasi structured data (JSON-LD Rich Snippet)",
+      "Panduan struktur konten ramah mesin pencari",
+      "Laporan progres visibilitas & ranking bulanan",
     ],
     price: "Konsultasi",
-    color: "purple",
   },
   {
     icon: LayoutDashboard,
-    title: "Aplikasi Web Bisnis",
+    title: "Aplikasi Web Bisnis Custom",
     slug: "aplikasi-web",
-    desc: "Sistem operasional untuk bisnis skala menengah ke atas, seperti inventori, kasir, portal HR, booking online, atau dashboard analitik sesuai proses kerja Anda.",
+    desc: "Sistem operasional custom sesuai alur bisnis unik Anda: modul inventori, kasir cabang, portal klien, atau dashboard booking terpusat.",
     features: [
-      "Sistem Multi-Role & Manajemen User",
-      "Database Relasional & Pelaporan Kustom",
-      "Panel Admin Eksklusif MFWEB",
-      "Otomatisasi Notifikasi (WA/Email)",
-      "Progressive Web App (PWA) Ready",
+      "Arsitektur database relasional & role manajemen user",
+      "Dashboard analitik performa bisnis real-time",
+      "Integrasi WhatsApp Bot & notifikasi otomatis",
+      "Akses cloud cepat & aman dengan proteksi data",
+      "Progressive Web App (PWA) siap diinstal di HP",
     ],
     price: "15 Juta",
-    color: "violet",
   },
 ];
 
 const process_steps = [
   {
     step: "01",
-    title: "Konsultasi Gratis",
-    desc: "Ceritakan kebutuhan, kondisi bisnis, dan target calon pelanggan Anda. Kami bantu pilih jalur yang paling masuk akal.",
+    title: "Konsultasi & Brief",
+    desc: "Ceritakan kebutuhan spesifik dan target pembeli Anda. Kami bantu pilih ruang lingkup yang tepat tanpa membebani budget.",
     icon: MessageCircle,
   },
   {
     step: "02",
-    title: "Desain & Pengerjaan",
-    desc: "Kami susun struktur halaman, desain antarmuka, lalu masuk ke pengembangan sesuai ruang lingkup yang disepakati.",
+    title: "Desain & Prototyping",
+    desc: "Penyusunan wireframe, pemilihan tipografi, tata letak konten, dan visual antarmuka disesuaikan dengan karakter brand Anda.",
     icon: Palette,
   },
   {
     step: "03",
-    title: "Uji & Revisi",
-    desc: "Anda akan mendapatkan akses pratinjau. Kami lakukan uji responsivitas dan merevisi hingga desain sesuai ekspektasi.",
+    title: "Pengembangan & Uji",
+    desc: "Koding bersih berkecepatan tinggi, integrasi WhatsApp, dan pengujian ketat di berbagai ukuran layar HP serta desktop.",
     icon: BarChart3,
   },
   {
     step: "04",
-    title: "Rilis Publik",
-    desc: "Domain terhubung, optimasi dasar selesai, dan website siap digunakan untuk menerima calon pelanggan.",
+    title: "Peluncuran & Serah Terima",
+    desc: "Domain aktif, SSL terpasang, pendaftaran Google Search Console selesai, dan akses dashboard diserahkan seutuhnya.",
     icon: Globe,
   },
 ];
-
-const colorMap: Record<
-  string,
-  { bg: string; border: string; text: string; badge: string }
-> = {
-  blue: {
-    bg: "bg-blue-600/15",
-    border: "border-blue-500/30",
-    text: "text-blue-400",
-    badge: "bg-blue-500",
-  },
-  indigo: {
-    bg: "bg-indigo-600/15",
-    border: "border-indigo-500/30",
-    text: "text-indigo-400",
-    badge: "bg-indigo-500",
-  },
-  teal: {
-    bg: "bg-teal-600/15",
-    border: "border-teal-500/30",
-    text: "text-teal-400",
-    badge: "bg-teal-500",
-  },
-  purple: {
-    bg: "bg-purple-600/15",
-    border: "border-purple-500/30",
-    text: "text-purple-400",
-    badge: "bg-purple-500",
-  },
-  violet: {
-    bg: "bg-violet-600/15",
-    border: "border-violet-500/30",
-    text: "text-violet-400",
-    badge: "bg-violet-500",
-  },
-};
 
 export default function LayananPage() {
   const breadcrumbJsonLd = {
@@ -232,94 +191,94 @@ export default function LayananPage() {
   };
 
   return (
-    <div>
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <FadeUp>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#071225] px-5 py-2 text-xs font-bold uppercase tracking-widest text-blue-200/70 mb-8">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              Layanan MFWEB
-            </div>
-          </FadeUp>
+    <div className="bg-white text-slate-900 selection:bg-slate-200">
+      {/* ── Hero Header: Full Width Deep Slate ────────────────── */}
+      <section className="relative w-full bg-[#1E242E] text-white pt-28 pb-16 sm:pt-32 sm:pb-24 border-b border-slate-800 overflow-hidden">
+        <div className="absolute inset-0 bg-radial-[at_top_right] from-slate-800/40 via-transparent to-transparent pointer-events-none" />
 
-          <FadeUp delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
-              Website dan sistem sederhana yang siap dipakai bisnis Anda
-            </h1>
-          </FadeUp>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb items={[{ label: "Layanan" }]} />
 
-          <FadeUp delay={0.2}>
-            <p className="text-blue-200/70 text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-              Pilih layanan sesuai tahap bisnis: landing page untuk validasi,
-              company profile untuk kredibilitas, toko online untuk penjualan,
-              atau aplikasi web untuk operasional yang lebih rapi.
-            </p>
-          </FadeUp>
+          <div className="max-w-3xl mt-4">
+            <FadeUp>
+              <div className="mb-4 flex items-center gap-3">
+                <span className="h-px w-8 bg-slate-500" />
+                <span className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-[0.22em] text-slate-300">
+                  Katalog Layanan Digital & Website
+                </span>
+              </div>
+            </FadeUp>
 
-          <FadeUp delay={0.3}>
-            <div className="flex flex-col sm:flex-row justify-center gap-5">
-              <Link href="/contact">
-                <Button
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold transition-colors rounded-xl group"
-                >
-                  Konsultasi Proyek{" "}
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link href="/kalkulasi-harga">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/10 bg-white/5 text-white hover:bg-white/10 h-14 px-10 text-base font-bold rounded-xl hover:border-white/20 transition-colors"
-                >
-                  Lihat Estimasi Harga
-                </Button>
-              </Link>
-            </div>
-          </FadeUp>
+            <FadeUp delay={0.1}>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.08] tracking-tight mb-6">
+                Website dan sistem digital yang siap menopang bisnis Anda.
+              </h1>
+            </FadeUp>
+
+            <FadeUp delay={0.2}>
+              <p className="text-slate-300 text-base sm:text-lg leading-relaxed font-normal mb-8">
+                Pilih paket sesuai tahap pertumbuhan usaha Anda: mulai dari landing page untuk kampanye cepat, company profile untuk kredibilitas, toko online 24 jam, hingga sistem aplikasi custom.
+              </p>
+            </FadeUp>
+
+            <FadeUp delay={0.3}>
+              <div className="flex flex-col sm:flex-row gap-3.5">
+                <Link href="/contact">
+                  <Button
+                    size="lg"
+                    className="h-12 rounded-full bg-white px-7 text-slate-950 font-bold hover:bg-slate-100 shadow-sm text-sm"
+                  >
+                    Konsultasi Kebutuhan
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/kalkulasi-harga">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 rounded-full border-slate-600 bg-transparent px-6 text-white hover:bg-slate-800 font-semibold text-sm"
+                  >
+                    Simulasi Estimasi Biaya
+                  </Button>
+                </Link>
+              </div>
+            </FadeUp>
+          </div>
         </div>
       </section>
 
-      {/* ── Services ──────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <FadeUp className="text-center mb-20">
-            <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-              Pilihan layanan
+      {/* ── Services Grid ──────────────────────────────────── */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#F8F9FA] border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto">
+          <FadeUp className="mb-14 max-w-2xl">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+              Pilihan Paket
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+              Solusi terukur dengan ruang lingkup yang jelas.
             </h2>
-            <p className="text-blue-200/60 max-w-2xl mx-auto text-lg leading-relaxed">
-              Mulai dari kebutuhan paling praktis sampai sistem yang lebih
-              khusus. Semua paket tetap dibahas dulu supaya ruang lingkupnya jelas.
+            <p className="mt-4 text-slate-600 leading-relaxed text-base">
+              Setiap paket sudah mencakup domain .com, cloud hosting, sertifikat keamanan SSL, dan garansi revisi sampai sesuai brief awal.
             </p>
           </FadeUp>
 
-          <StaggerChildren className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <StaggerChildren className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
             {services.slice(0, 4).map((service) => {
-              const c = colorMap[service.color];
               const waText = `Halo MFWEB, saya tertarik dengan layanan ${service.title}. Boleh konsultasi lebih lanjut?`;
               return (
-                <StaggerItem key={service.slug}>
+                <StaggerItem key={service.slug} className="h-full">
                   <HoverCard className="h-full">
-                    <div className="glass rounded-3xl p-8 sm:p-10 h-full flex flex-col border border-white/5 hover:border-white/20 transition-all duration-500 group relative overflow-hidden bg-black/10">
-                      {/* Glow Behind */}
-                      <div
-                        className={`absolute -right-20 -top-20 w-64 h-64 ${c.bg} blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700`}
-                      />
-
-                      {/* Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8 relative z-10">
-                        <ScaleIn
-                          className={`w-16 h-16 rounded-2xl ${c.bg} border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-lg`}
-                        >
-                          <service.icon className={`w-8 h-8 ${c.text}`} />
-                        </ScaleIn>
-                        <div className="sm:text-right bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-xl border border-white/5 self-start h-fit">
-                          <span className="text-blue-200/40 text-[10px] uppercase tracking-widest font-bold block mb-0.5">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-7 sm:p-9 h-full flex flex-col shadow-xs hover:border-slate-300 hover:shadow-md transition-all">
+                      {/* Card Header */}
+                      <div className="flex items-start justify-between gap-4 mb-6">
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center shrink-0 text-slate-900">
+                          <service.icon className="w-6 h-6" />
+                        </div>
+                        <div className="text-right">
+                          <span className="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block mb-0.5">
                             Mulai Dari
                           </span>
-                          <span className={`font-black text-xl ${c.text}`}>
+                          <span className="font-extrabold text-xl text-slate-900">
                             {service.price === "Konsultasi"
                               ? "Konsultasi"
                               : `Rp ${service.price}`}
@@ -328,25 +287,23 @@ export default function LayananPage() {
                       </div>
 
                       {/* Content */}
-                      <div className="relative z-10 flex-1">
-                        <h3 className="text-white font-black text-2xl mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2">
                           {service.title}
                         </h3>
-                        <p className="text-blue-200/60 text-base leading-relaxed mb-8">
+                        <p className="text-slate-600 text-sm leading-relaxed mb-6">
                           {service.desc}
                         </p>
 
-                        <div className="bg-black/40 p-6 rounded-2xl border border-white/5 mb-8">
-                          <p className="text-white/80 text-[11px] uppercase tracking-widest font-bold mb-4">
-                            Fitur Utama:
+                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-200/70 mb-6">
+                          <p className="text-slate-400 text-[11px] uppercase tracking-wider font-bold mb-3">
+                            Ruang Lingkup Fitur:
                           </p>
-                          <ul className="space-y-3.5">
+                          <ul className="space-y-2.5">
                             {service.features.map((f) => (
-                              <li key={f} className="flex items-start gap-3">
-                                <CheckCircle
-                                  className={`w-4 h-4 shrink-0 mt-0.5 ${c.text}`}
-                                />
-                                <span className="text-blue-100/70 text-sm font-medium">
+                              <li key={f} className="flex items-start gap-2.5">
+                                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-slate-900" />
+                                <span className="text-slate-700 text-xs sm:text-sm leading-snug">
                                   {f}
                                 </span>
                               </li>
@@ -355,29 +312,24 @@ export default function LayananPage() {
                         </div>
                       </div>
 
-                      {/* CTA */}
-                      <div className="flex flex-col sm:flex-row gap-4 relative z-10 mt-auto">
+                      {/* CTA Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-2">
                         <a
                           href={`https://wa.me/${WA}?text=${encodeURIComponent(waText)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex-1"
                         >
-                          <Button
-                            className={`w-full h-12 font-bold text-sm bg-white text-black hover:bg-gray-200 shadow-xl transition-all`}
-                          >
+                          <Button className="w-full h-11 font-bold text-xs rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-2xs">
                             Konsultasi via WA
                           </Button>
                         </a>
-                        <Link
-                          href={`/layanan/${service.slug}`}
-                          className="flex-1"
-                        >
+                        <Link href={`/layanan/${service.slug}`} className="flex-1">
                           <Button
-                            variant="ghost"
-                            className="w-full h-12 text-white bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold"
+                            variant="outline"
+                            className="w-full h-11 font-semibold text-xs rounded-full border-slate-200 text-slate-700 hover:bg-slate-100"
                           >
-                            Pelajari Detail
+                            Detail Lengkap
                           </Button>
                         </Link>
                       </div>
@@ -387,59 +339,48 @@ export default function LayananPage() {
               );
             })}
 
-            {/* Premium 5th Item Spanning 2 Columns */}
+            {/* Enterprise Service Card Spanning 2 Columns */}
             {services[4] &&
               (() => {
                 const service = services[4];
-                const c = colorMap[service.color];
                 const waText = `Halo MFWEB, saya tertarik dengan layanan Enterprise: ${service.title}. Boleh atur waktu meeting?`;
                 return (
                   <StaggerItem className="lg:col-span-2">
                     <HoverCard className="h-full">
-                      <div className="glass rounded-3xl p-8 sm:p-12 h-full flex flex-col lg:flex-row gap-8 lg:gap-16 border border-white/10 hover:border-violet-500/30 transition-all duration-700 group relative overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.05)] bg-gradient-to-br from-[#050b14] to-[#0a0514]">
-                        <div
-                          className={`absolute left-0 bottom-0 w-[500px] h-[500px] ${c.bg} blur-[120px] rounded-full pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-1000`}
-                        />
+                      <div className="relative rounded-3xl bg-[#1E242E] text-white p-8 sm:p-12 border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col lg:flex-row gap-8 lg:gap-14 items-center">
+                        <div className="absolute inset-0 bg-radial-[at_top_right] from-slate-800/40 via-transparent to-transparent pointer-events-none" />
 
-                        <div className="flex-1 relative z-10 flex flex-col justify-center">
-                          <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-violet-400 mb-6 w-fit shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-                            <Zap className="w-4 h-4" /> Solusi Enterprise
+                        <div className="flex-1 relative z-10">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-slate-600 bg-slate-800 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-slate-200 mb-5 shadow-xs">
+                            <Zap className="w-3.5 h-3.5 text-amber-400" /> Sistem Custom
                           </div>
-                          <h3 className="text-white font-black text-3xl sm:text-4xl mb-4 leading-tight">
+                          <h3 className="text-2xl sm:text-4xl font-extrabold text-white mb-3 tracking-tight">
                             {service.title}
                           </h3>
-                          <p className="text-blue-200/70 text-lg leading-relaxed mb-6 max-w-xl">
+                          <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6 max-w-xl font-normal">
                             {service.desc}
                           </p>
 
-                          <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md w-fit px-6 py-4 rounded-2xl border border-white/5 mb-8 lg:mb-0">
-                            <div>
-                              <span className="text-blue-200/40 text-[10px] uppercase tracking-widest font-bold block mb-1">
-                                Mulai Dari
-                              </span>
-                              <span className={`font-black text-2xl ${c.text}`}>
-                                Rp {service.price}
-                              </span>
-                            </div>
+                          <div className="bg-slate-800/80 border border-slate-700/80 px-5 py-3 rounded-2xl w-fit">
+                            <span className="text-slate-400 text-[10px] uppercase tracking-wider font-semibold block mb-0.5">
+                              Estimasi Investasi
+                            </span>
+                            <span className="font-black text-2xl text-white">
+                              Rp {service.price}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="flex-1 relative z-10 flex flex-col">
-                          <div className="bg-black/30 p-6 sm:p-8 rounded-3xl border border-white/10 flex-1 mb-8">
-                            <p className="text-white/90 text-sm font-bold uppercase tracking-widest mb-6">
-                              Spesifikasi Sistem Utama:
+                        <div className="flex-1 w-full relative z-10">
+                          <div className="bg-slate-900/80 p-6 sm:p-7 rounded-2xl border border-slate-700/80 mb-6">
+                            <p className="text-slate-300 text-xs font-bold uppercase tracking-wider mb-4">
+                              Spesifikasi Sistem:
                             </p>
-                            <ul className="space-y-4">
+                            <ul className="space-y-3">
                               {service.features.map((f) => (
-                                <li key={f} className="flex items-center gap-4">
-                                  <div
-                                    className={`w-8 h-8 rounded-full ${c.bg} border border-violet-500/30 flex items-center justify-center shrink-0`}
-                                  >
-                                    <CheckCircle
-                                      className={`w-4 h-4 ${c.text}`}
-                                    />
-                                  </div>
-                                  <span className="text-blue-50/80 text-base font-medium">
+                                <li key={f} className="flex items-start gap-3">
+                                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                                  <span className="text-slate-200 text-xs sm:text-sm font-medium">
                                     {f}
                                   </span>
                                 </li>
@@ -447,26 +388,21 @@ export default function LayananPage() {
                             </ul>
                           </div>
 
-                          <div className="flex flex-col sm:flex-row gap-4">
+                          <div className="flex flex-col sm:flex-row gap-3">
                             <a
                               href={`https://wa.me/${WA}?text=${encodeURIComponent(waText)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex-1"
                             >
-                              <Button
-                                className={`w-full h-14 font-black text-base bg-violet-600 hover:bg-violet-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all rounded-xl`}
-                              >
-                                Jadwalkan Meeting Spesifikasi
+                              <Button className="w-full h-12 font-bold text-xs rounded-full bg-white text-slate-950 hover:bg-slate-100 shadow-sm">
+                                Jadwalkan Diskusi Teknis
                               </Button>
                             </a>
-                            <Link
-                              href={`/layanan/${service.slug}`}
-                              className="flex-1 sm:flex-none sm:w-1/3"
-                            >
+                            <Link href={`/layanan/${service.slug}`} className="flex-1">
                               <Button
-                                variant="ghost"
-                                className="w-full h-14 text-white bg-white/5 hover:bg-white/10 border border-white/10 text-base font-bold rounded-xl"
+                                variant="outline"
+                                className="w-full h-12 font-semibold text-xs rounded-full border-slate-600 text-white hover:bg-slate-800"
                               >
                                 Pelajari Detail
                               </Button>
@@ -482,92 +418,77 @@ export default function LayananPage() {
         </div>
       </section>
 
-      {/* ── Process (Connected Journey) ───────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <FadeUp className="text-center mb-24">
-            <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
-              Cara kami bekerja
+      {/* ── Process Steps: Pure White ──────────────────────── */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto">
+          <FadeUp className="text-center mb-16 max-w-2xl mx-auto">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+              Workflow Pengerjaan
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+              Transparan dari awal sampai rilis.
             </h2>
-            <p className="text-blue-200/60 max-w-2xl mx-auto text-lg leading-relaxed">
-              Proses dibuat sederhana: kebutuhan dipahami dulu, ruang lingkup
-              disepakati, lalu Anda mendapat pratinjau sebelum website live.
+            <p className="text-slate-600 text-base leading-relaxed">
+              Alur pengerjaan terstruktur rapi agar Anda selalu mengetahui perkembangan proyek dan website siap dipakai tepat waktu.
             </p>
           </FadeUp>
 
-          <div className="relative">
-            {/* Connecting Line (Desktop) */}
-            <div className="hidden lg:block absolute top-[44px] left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-6 relative z-10">
-              {process_steps.map((step, i) => (
-                <FadeUp key={step.step} delay={i * 0.1}>
-                  <div className="relative flex flex-col items-center text-center group">
-                    <div className="w-24 h-24 rounded-full bg-[#050b14] border-[6px] border-[#030914] ring-2 ring-blue-500/20 flex items-center justify-center mb-8 relative z-10 group-hover:ring-blue-400 group-hover:scale-110 transition-all duration-500 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full group-hover:opacity-100 transition-opacity" />
-                      <step.icon className="w-8 h-8 text-blue-400 relative z-10 group-hover:text-blue-300 transition-colors" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {process_steps.map((step, i) => (
+              <FadeUp key={step.step} delay={i * 0.1}>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-7 h-full flex flex-col shadow-xs">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 shadow-2xs">
+                      <step.icon className="w-5 h-5" />
                     </div>
-                    <div className="absolute top-0 -right-4 lg:-right-8 text-8xl font-black text-blue-500/[0.03] select-none pointer-events-none group-hover:text-blue-500/10 transition-colors duration-500">
-                      {step.step}
-                    </div>
-
-                    <h3 className="text-white font-bold text-xl mb-3 relative z-10">
-                      {step.title}
-                    </h3>
-                    <p className="text-blue-200/60 text-sm leading-relaxed max-w-[260px] mx-auto relative z-10">
-                      {step.desc}
-                    </p>
+                    <span className="font-mono text-xs font-bold text-slate-400">
+                      STEP {step.step}
+                    </span>
                   </div>
-                </FadeUp>
-              ))}
-            </div>
+
+                  <h3 className="text-slate-900 font-bold text-base mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    {step.desc}
+                  </p>
+                </div>
+              </FadeUp>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Guarantee ─────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
+      {/* ── Guarantee & Quality Standards ─────────────────── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F9FA] border-b border-slate-200/80">
         <div className="max-w-5xl mx-auto">
           <ScaleIn>
-            <div className="glass rounded-[40px] p-10 sm:p-16 text-center border border-emerald-500/20 relative overflow-hidden shadow-[0_0_60px_rgba(16,185,129,0.05)] bg-[#040d1a]">
-              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 sm:p-12 text-center shadow-xs">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-100 text-slate-900 border border-slate-200 mb-6">
+                <CheckCircle className="w-7 h-7 text-emerald-600" />
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                Standar Kualitas & Komitmen Kami
+              </h2>
+              <p className="text-slate-600 max-w-2xl mx-auto mb-10 text-sm sm:text-base leading-relaxed">
+                Kami memastikan setiap baris kode dan elemen visual memberikan dampak nyata bagi kredibilitas serta konversi bisnis Anda.
+              </p>
 
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 mb-8 ring-1 ring-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.2)]">
-                  <CheckCircle className="w-12 h-12 text-emerald-400" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <Clock className="w-5 h-5 text-slate-800 mb-3" />
+                  <p className="text-slate-900 font-bold text-sm mb-1">Timeline Terjadwal</p>
+                  <p className="text-slate-500 text-xs leading-relaxed">Jadwal pengerjaan disepakati di awal dengan target delivery yang pasti.</p>
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-6 tracking-tight">
-                  Kepuasan Anda,{" "}
-                  <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                    Komitmen Utama Kami
-                  </span>
-                </h2>
-                <p className="text-blue-100/80 max-w-3xl mx-auto mb-12 text-lg leading-relaxed font-medium">
-                  Kami tidak berhenti bekerja sampai Anda benar-benar puas
-                  dengan hasilnya. Semua layanan transparan, tepat waktu, dan
-                  berorientasi pada penciptaan nilai tambah untuk bisnis Anda.
-                </p>
-
-                <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-                  <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/5 shadow-lg hover:border-emerald-500/30 transition-colors">
-                    <Clock className="w-6 h-6 text-emerald-400" />
-                    <span className="text-white font-bold text-sm">
-                      Target Pengerjaan Tepat Waktu
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/5 shadow-lg hover:border-emerald-500/30 transition-colors">
-                    <Smartphone className="w-6 h-6 text-emerald-400" />
-                    <span className="text-white font-bold text-sm">
-                      Jaminan 100% Responsif
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/5 shadow-lg hover:border-emerald-500/30 transition-colors">
-                    <Headphones className="w-6 h-6 text-emerald-400" />
-                    <span className="text-white font-bold text-sm">
-                      Tim Support Siaga Kapanpun
-                    </span>
-                  </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <Smartphone className="w-5 h-5 text-slate-800 mb-3" />
+                  <p className="text-slate-900 font-bold text-sm mb-1">100% Mobile Ready</p>
+                  <p className="text-slate-500 text-xs leading-relaxed">Tampilan nyaman dan responsif saat diakses dari HP, tablet, maupun laptop.</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <Headphones className="w-5 h-5 text-slate-800 mb-3" />
+                  <p className="text-slate-900 font-bold text-sm mb-1">Dukungan Teknis</p>
+                  <p className="text-slate-500 text-xs leading-relaxed">Bantuan teknis dan panduan pengelolaan konten setelah website resmi live.</p>
                 </div>
               </div>
             </div>
@@ -575,41 +496,47 @@ export default function LayananPage() {
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────── */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+      {/* ── Final CTA: Deep Slate Hero Block ──────────────── */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-5xl mx-auto">
           <FadeUp>
-            <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 tracking-tight">
-              Mau mulai dari layanan yang mana?
-            </h2>
-            <p className="text-blue-200/60 mb-10 text-xl max-w-2xl mx-auto leading-relaxed">
-              Kirim gambaran singkat bisnis Anda. Kami bantu pilih paket yang
-              cukup, bukan yang paling mahal.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-5">
-              <Link href="/contact">
-                <Button
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 h-14 text-base font-bold transition-colors rounded-xl group"
-                >
-                  Mulai Diskusi via Email{" "}
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <a
-                href={`https://wa.me/${WA}?text=Halo%20MFWEB%2C%20saya%20ingin%20konsultasi%20layanan%20website`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/10 bg-white/5 text-white hover:bg-white/10 h-14 px-10 text-base font-bold rounded-xl hover:border-white/20 transition-colors"
-                >
-                  💬 Konsultasi via WhatsApp
-                </Button>
-              </a>
+            <div className="relative rounded-3xl bg-[#1E242E] text-white p-8 sm:p-14 border border-slate-700/60 shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-radial-[at_top_right] from-slate-800/40 via-transparent to-transparent pointer-events-none" />
+
+              <div className="relative z-10 max-w-2xl">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight mb-4">
+                  Siap membangun aset website bisnis Anda?
+                </h2>
+                <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-8">
+                  Konsultasikan gambaran bisnis Anda bersama kami. Kami berikan rekomendasi solusi yang proporsional sesuai target pasar Anda.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3.5">
+                  <Link href="/contact">
+                    <Button
+                      size="lg"
+                      className="h-12 rounded-full bg-white px-7 text-slate-950 font-bold hover:bg-slate-100 shadow-sm text-sm"
+                    >
+                      Mulai Konsultasi Gratis
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
+                  <a
+                    href={`https://wa.me/${WA}?text=Halo%20MFWEB%2C%20saya%20ingin%20konsultasi%20layanan%20website`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="h-12 rounded-full border-slate-600 bg-transparent px-6 text-slate-200 hover:bg-slate-800 font-semibold text-sm"
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Chat WhatsApp
+                    </Button>
+                  </a>
+                </div>
+              </div>
             </div>
           </FadeUp>
         </div>

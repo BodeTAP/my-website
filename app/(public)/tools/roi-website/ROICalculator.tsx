@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { TrendingUp, ArrowRight, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PACKAGES = [
   { label: "Landing Page",          price: 800_000 },
@@ -52,196 +53,221 @@ export default function ROICalculator() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Input */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Input Form */}
       <div className="space-y-5">
         {/* Industri */}
-        <div className="glass rounded-2xl p-5">
-          <label className="text-white font-semibold text-sm block mb-3">
-            <span className="text-blue-400 mr-2">01</span> Jenis Bisnis
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Parameter 1</span>
+          </div>
+          <label className="text-slate-900 font-bold text-sm block mb-3">
+            Kategori Usaha
           </label>
           <select
             value={industryIdx}
             onChange={e => handleIndustryChange(parseInt(e.target.value))}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 font-medium cursor-pointer transition-all"
           >
             {INDUSTRIES.map((ind, i) => (
-              <option key={i} value={i} className="bg-[#0a1628]">{ind.label}</option>
+              <option key={i} value={i}>{ind.label}</option>
             ))}
           </select>
         </div>
 
         {/* Estimasi pengunjung */}
-        <div className="glass rounded-2xl p-5">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Parameter 2</span>
+          </div>
           <div className="flex justify-between items-center mb-3">
-            <label className="text-white font-semibold text-sm">
-              <span className="text-blue-400 mr-2">02</span> Estimasi Pengunjung/Bulan
+            <label className="text-slate-900 font-bold text-sm">
+              Proyeksi Pengunjung / Bulan
             </label>
-            <span className="text-blue-400 font-bold">{visitors.toLocaleString()}</span>
+            <span className="text-slate-900 font-mono font-bold">{visitors.toLocaleString()}</span>
           </div>
           <input
             type="range" min={50} max={10000} step={50}
             value={visitors}
             onChange={e => setVisitors(parseInt(e.target.value))}
-            className="w-full accent-blue-500"
+            className="w-full accent-slate-900 cursor-pointer"
           />
-          <div className="flex justify-between text-blue-200/30 text-xs mt-1">
+          <div className="flex justify-between text-slate-400 font-mono text-xs mt-1">
             <span>50</span><span>10.000</span>
           </div>
         </div>
 
         {/* Conversion rate */}
-        <div className="glass rounded-2xl p-5">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Parameter 3</span>
+          </div>
           <div className="flex justify-between items-center mb-3">
-            <label className="text-white font-semibold text-sm">
-              <span className="text-blue-400 mr-2">03</span> Conversion Rate
+            <label className="text-slate-900 font-bold text-sm">
+              Tingkat Konversi (Conversion Rate)
             </label>
-            <span className="text-blue-400 font-bold">{convRate}%</span>
+            <span className="text-slate-900 font-mono font-bold">{convRate}%</span>
           </div>
           <input
             type="range" min={0.5} max={10} step={0.5}
             value={convRate}
             onChange={e => setConvRate(parseFloat(e.target.value))}
-            className="w-full accent-blue-500"
+            className="w-full accent-slate-900 cursor-pointer"
           />
-          <div className="flex justify-between text-blue-200/30 text-xs mt-1">
+          <div className="flex justify-between text-slate-400 font-mono text-xs mt-1">
             <span>0.5%</span><span>10%</span>
           </div>
-          <p className="text-blue-200/35 text-xs mt-2 flex items-start gap-1">
-            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-            Rata-rata website bisnis lokal: 1–3%
+          <p className="text-slate-500 text-xs mt-2.5 flex items-start gap-1.5 font-mono">
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" />
+            Rata-rata standar industri website UMKM & jasa: 1–3%
           </p>
         </div>
 
         {/* Nilai order */}
-        <div className="glass rounded-2xl p-5">
-          <label className="text-white font-semibold text-sm block mb-3">
-            <span className="text-blue-400 mr-2">04</span> Rata-rata Nilai Order
-          </label>
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-blue-200/50 text-sm">
-              Default industri: <strong className="text-white">{formatRp(industry.avg)}</strong> {industry.label2}
-            </span>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Parameter 4</span>
           </div>
-          <div className="flex items-center gap-2">
+          <label className="text-slate-900 font-bold text-sm block mb-2">
+            Nilai Rata-rata Penjualan (Average Ticket)
+          </label>
+          <p className="text-slate-500 text-xs font-mono mb-3">
+            Rata-rata kategori ini: <span className="font-bold text-slate-900">{formatRp(industry.avg)}</span> {industry.label2}
+          </p>
+          <label className="flex items-center gap-2.5 cursor-pointer">
             <input
               type="checkbox"
               checked={customOrder}
               onChange={e => setCustomOrder(e.target.checked)}
-              className="accent-blue-500 w-4 h-4"
+              className="accent-slate-900 w-4 h-4 rounded"
             />
-            <label className="text-blue-200/60 text-sm">Ubah nilai order</label>
-          </div>
+            <span className="text-slate-700 text-sm font-medium">Kustomisasi nilai nominal sendiri</span>
+          </label>
           {customOrder && (
             <div className="mt-3 relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-200/40 text-sm">Rp</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs">Rp</span>
               <input
                 type="number"
                 value={avgOrder}
                 onChange={e => setAvgOrder(parseInt(e.target.value) || 0)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-slate-900 font-mono text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
               />
             </div>
           )}
         </div>
 
         {/* Paket website */}
-        <div className="glass rounded-2xl p-5">
-          <label className="text-white font-semibold text-sm block mb-3">
-            <span className="text-blue-400 mr-2">05</span> Paket Website MFWEB
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-px w-6 bg-slate-400" />
+            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">Parameter 5</span>
+          </div>
+          <label className="text-slate-900 font-bold text-sm block mb-3">
+            Pilihan Paket Pembuatan Website
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {PACKAGES.map((p, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setPackageIdx(i)}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-xl border text-left transition-all ${
                   packageIdx === i
-                    ? "bg-blue-600/15 border-blue-500/40"
-                    : "glass border-white/8 hover:border-white/20"
+                    ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-white"
                 }`}
               >
-                <p className="text-white text-xs font-medium line-clamp-1">{p.label}</p>
-                <p className="text-blue-400 text-xs font-bold mt-0.5">{formatRp(p.price)}</p>
+                <p className={`text-xs font-medium line-clamp-1 ${packageIdx === i ? "text-white" : "text-slate-900"}`}>
+                  {p.label}
+                </p>
+                <p className={`text-xs font-mono font-bold mt-1 ${packageIdx === i ? "text-slate-300" : "text-slate-600"}`}>
+                  {formatRp(p.price)}
+                </p>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Output */}
-      <div className="space-y-4">
-        {/* Main results */}
-        <div className="glass rounded-2xl p-6 border border-blue-500/20">
-          <div className="flex items-center gap-2 mb-5">
-            <TrendingUp className="w-5 h-5 text-blue-400" />
-            <h3 className="text-white font-bold">Estimasi Hasil</h3>
+      {/* Output Projection */}
+      <div className="space-y-5">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="w-5 h-5 text-slate-800" />
+            <h3 className="text-lg font-bold text-slate-900">Proyeksi Hasil Investasi</h3>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-white/5">
+          <div className="divide-y divide-slate-100">
+            <div className="flex justify-between items-center py-4">
               <div>
-                <p className="text-blue-200/60 text-sm">Leads / Bulan</p>
-                <p className="text-blue-200/35 text-xs">dari {visitors.toLocaleString()} pengunjung × {convRate}%</p>
+                <p className="text-slate-700 text-sm font-semibold">Prospek Masuk / Bulan</p>
+                <p className="text-slate-400 font-mono text-xs">{visitors.toLocaleString()} pengunjung × {convRate}%</p>
               </div>
-              <span className="text-white font-black text-2xl">{leadsPerMonth}</span>
+              <span className="text-slate-900 font-mono font-bold text-2xl">{leadsPerMonth}</span>
             </div>
 
-            <div className="flex justify-between items-center py-3 border-b border-white/5">
+            <div className="flex justify-between items-center py-4">
               <div>
-                <p className="text-blue-200/60 text-sm">Potensi Revenue / Bulan</p>
-                <p className="text-blue-200/35 text-xs">{leadsPerMonth} leads × {formatRp(customOrder ? avgOrder : industry.avg)}</p>
+                <p className="text-slate-700 text-sm font-semibold">Potensi Omzet / Bulan</p>
+                <p className="text-slate-400 font-mono text-xs">{leadsPerMonth} leads × {formatRp(customOrder ? avgOrder : industry.avg)}</p>
               </div>
-              <span className="text-teal-400 font-black text-2xl">{formatRp(revenuePerMonth)}</span>
+              <span className="text-slate-900 font-mono font-bold text-2xl">{formatRp(revenuePerMonth)}</span>
             </div>
 
-            <div className="flex justify-between items-center py-3 border-b border-white/5">
+            <div className="flex justify-between items-center py-4">
               <div>
-                <p className="text-blue-200/60 text-sm">Potensi Revenue / Tahun</p>
+                <p className="text-slate-700 text-sm font-semibold">Potensi Omzet / Tahun</p>
+                <p className="text-slate-400 font-mono text-xs">Akumulasi 12 bulan operasional</p>
               </div>
-              <span className="text-teal-400 font-black text-2xl">{formatRp(revenuePerYear)}</span>
+              <span className="text-slate-900 font-mono font-bold text-2xl">{formatRp(revenuePerYear)}</span>
             </div>
 
-            <div className="flex justify-between items-center py-3 border-b border-white/5">
+            <div className="flex justify-between items-center py-4">
               <div>
-                <p className="text-blue-200/60 text-sm">Biaya Website</p>
-                <p className="text-blue-200/35 text-xs">{pkg.label}</p>
+                <p className="text-slate-700 text-sm font-semibold">Investasi Website (Awal)</p>
+                <p className="text-slate-400 font-mono text-xs">{pkg.label}</p>
               </div>
-              <span className="text-white font-bold">{formatRp(pkg.price)}</span>
+              <span className="text-slate-600 font-mono font-bold text-lg">{formatRp(pkg.price)}</span>
             </div>
+          </div>
 
-            <div className="bg-blue-600/10 border border-blue-500/20 rounded-xl p-4 mt-2">
-              <div className="flex justify-between items-center mb-1">
-                <p className="text-blue-200/70 text-sm font-medium">ROI Website (per tahun)</p>
-                <span className="text-white font-black text-3xl">{roi.toLocaleString()}%</span>
-              </div>
-              {paybackMonths !== null && (
-                <p className="text-blue-200/40 text-xs">
-                  Modal kembali dalam ≈ <strong className="text-blue-300">{paybackMonths} bulan</strong>
-                </p>
-              )}
+          <div className="rounded-2xl border border-slate-800 bg-[#1E242E] text-white p-6 mt-6">
+            <div className="flex justify-between items-baseline mb-2">
+              <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Proyeksi ROI Tahunan</p>
+              <span className="text-3xl font-mono font-bold text-white">{roi.toLocaleString()}%</span>
             </div>
+            {paybackMonths !== null && (
+              <p className="text-slate-300 text-xs font-mono">
+                Estimasi modal investasi kembali dalam kurun waktu ≈ <strong className="text-white underline">{paybackMonths} bulan</strong>.
+              </p>
+            )}
           </div>
         </div>
 
         {/* Disclaimer */}
-        <div className="glass rounded-xl p-4 border border-amber-500/10">
-          <p className="text-amber-400/60 text-xs leading-relaxed">
-            <Info className="w-3.5 h-3.5 inline mr-1" />
-            Ini adalah estimasi berdasarkan input yang diisi. Hasil aktual bergantung pada kualitas website, strategi marketing, dan kondisi bisnis masing-masing.
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-slate-500 text-xs leading-relaxed font-mono">
+            <Info className="w-3.5 h-3.5 inline mr-1 text-slate-400" />
+            Kalkulasi ini merupakan simulasi matematis berdasarkan parameter yang dimasukkan. Angka riil bergantung pada strategi pemasaran digital dan daya saing penawaran Anda.
           </p>
         </div>
 
         {/* CTA */}
-        <Link href="/contact" className="block">
-          <div className="glass rounded-2xl p-5 border border-blue-500/10 text-center hover:border-blue-500/30 transition-colors">
-            <p className="text-white font-semibold mb-1">ROI {roi.toLocaleString()}% terdengar menarik?</p>
-            <p className="text-blue-200/50 text-sm mb-4">Konsultasi gratis — kami bantu rancang strategi website yang tepat untuk bisnis Anda.</p>
-            <span className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors">
-              Mulai Konsultasi <ArrowRight className="w-4 h-4" />
-            </span>
-          </div>
-        </Link>
+        <div className="rounded-3xl border border-slate-800 bg-[#1E242E] text-white p-6 sm:p-8 text-center">
+          <h4 className="text-lg font-bold text-white mb-2">Tertarik Mewujudkan Target Ini?</h4>
+          <p className="text-slate-300 text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed">
+            Konsultasikan struktur website berorientasi konversi bersama tim spesialis kami hari ini secara gratis.
+          </p>
+          <Link href="/contact">
+            <Button className="rounded-full bg-white text-slate-900 hover:bg-slate-100 font-medium px-8 h-11 transition-colors">
+              Mulai Konsultasi Strategi <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
