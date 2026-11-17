@@ -89,6 +89,9 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       apple: logo,
     },
+    verification: {
+      google: "cnXkkj358EqJiqYi8b5BlrPhj0_ka2kWcYVaYxGo0S0",
+    },
     robots: { index: true, follow: true },
   };
 }
