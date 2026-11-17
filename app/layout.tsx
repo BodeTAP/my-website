@@ -90,7 +90,7 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: logo,
     },
     verification: {
-      google: "cnXkkj358EqJiqYi8b5BlrPhj0_ka2kWcYVaYxGo0S0",
+      google: "cUbe9634EI3TzXJ9vKTg4-eSL64A9urCFkILytgE3a4",
     },
     robots: { index: true, follow: true },
   };
